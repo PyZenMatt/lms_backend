@@ -16,7 +16,12 @@ const PendingTeachersCard = () => {
       const res = await fetchPendingTeachers();
       setTeachers(res.data.slice(0, 5)); // Limit to 5 for dashboard card
     } catch (err) {
-      setError('Errore nel caricamento dei teacher in attesa');
+      // If the error is a 404 (no teachers), treat as empty, not error
+      if (err?.response?.status === 404) {
+        setTeachers([]);
+      } else {
+        setError('Errore nel caricamento dei teacher in attesa');
+      }
     } finally {
       setLoading(false);
     }

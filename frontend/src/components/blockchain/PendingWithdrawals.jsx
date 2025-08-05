@@ -25,8 +25,12 @@ const PendingWithdrawals = ({ onTransactionComplete = null }) => {
 
       const data = await response.json();
 
-      if (response.ok && data.success) {
-        setPendingWithdrawals(data.pending_withdrawals || []);
+      if (response.ok && Array.isArray(data.pending_withdrawals)) {
+        setPendingWithdrawals(data.pending_withdrawals);
+        setError('');
+      } else if (response.ok && data.success === false && Array.isArray(data.pending_withdrawals) && data.pending_withdrawals.length === 0) {
+        setPendingWithdrawals([]);
+        setError('');
       } else {
         setError(data.error || 'Error loading pending withdrawals');
       }

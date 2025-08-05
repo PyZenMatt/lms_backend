@@ -1,6 +1,10 @@
+import TeoCoinBalanceWidget from '../../components/TeoCoinBalanceWidget';
 import React, { useState, useEffect } from 'react';
 import { Card, Badge, Spinner, Alert, Table } from 'react-bootstrap';
+import PendingWithdrawals from './PendingWithdrawals';
+import BurnDepositInterface from './BurnDepositInterface';
 import { useAuth } from '../../contexts/AuthContext';
+
 
 const DBAdminTeoCoinDashboard = () => {
   const { user } = useAuth();
@@ -12,10 +16,8 @@ const DBAdminTeoCoinDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  useEffect(() => {
+useEffect(() => {
     loadDashboardData();
-    const interval = setInterval(loadDashboardData, 15000);
-    return () => clearInterval(interval);
   }, []);
 
   const loadDashboardData = async () => {
@@ -75,45 +77,12 @@ const DBAdminTeoCoinDashboard = () => {
           {error}
         </Alert>
       )}
-      {dashboardData.pendingWithdrawals && dashboardData.pendingWithdrawals.length > 0 && (
-        <Card className="withdrawals-card mb-3">
-          <Card.Header>
-            <h5>📤 Prelievi in Attesa</h5>
-            <Badge bg="warning">{dashboardData.pendingWithdrawals.length}</Badge>
-          </Card.Header>
-          <Card.Body>
-            <Table responsive striped>
-              <thead>
-                <tr>
-                  <th>Utente</th>
-                  <th>Importo</th>
-                  <th>Indirizzo</th>
-                  <th>Data Richiesta</th>
-                  <th>Stato</th>
-                </tr>
-              </thead>
-              <tbody>
-                {dashboardData.pendingWithdrawals.map((withdrawal, index) => (
-                  <tr key={withdrawal.id || index}>
-                    <td>{withdrawal.user_email || withdrawal.user_id}</td>
-                    <td>{formatTeoCoin(withdrawal.amount)} TEO</td>
-                    <td>
-                      <code>{withdrawal.wallet_address ? 
-                        `${withdrawal.wallet_address.slice(0, 8)}...${withdrawal.wallet_address.slice(-6)}` : 
-                        'N/A'
-                      }</code>
-                    </td>
-                    <td>{formatDate(withdrawal.created_at)}</td>
-                    <td>
-                      <Badge bg="warning">{withdrawal.status}</Badge>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </Table>
-          </Card.Body>
-        </Card>
-      )}
+      <button className="btn btn-primary mb-3" onClick={loadDashboardData} disabled={loading}>
+        {loading ? 'Aggiornamento...' : 'Aggiorna'}
+      </button>
+      <PendingWithdrawals />
+      <BurnDepositInterface />
+      <TeoCoinBalanceWidget />
     </div>
   );
 };
