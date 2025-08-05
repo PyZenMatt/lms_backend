@@ -119,6 +119,31 @@ const routes = [
         path: '/esercizi-docente/:exerciseId',
         element: lazy(() => import('./views/courses/TeacherExerciseDetail'))
       },
+      // --- ROUTE DOCENTE per bottoni ---
+      {
+        path: '/teacher/corsi/:courseId/edit',
+        element: lazy(() => import('./views/courses/TeacherCourseDetail'))
+      },
+      {
+        path: '/teacher/corsi/:courseId/preview',
+        element: lazy(() => import('./views/courses/TeacherCourseDetail'))
+      },
+      {
+        path: '/teacher/corsi/:courseId/lezioni/nuova',
+        element: lazy(() => import('./views/courses/TeacherLessonDetail'))
+      },
+      {
+        path: '/teacher/lezioni/:lessonId/edit',
+        element: lazy(() => import('./views/courses/TeacherLessonDetail'))
+      },
+      {
+        path: '/teacher/lezioni/:lessonId/esercizi/nuovo',
+        element: lazy(() => import('./views/courses/TeacherExerciseDetail'))
+      },
+      {
+        path: '/teacher/esercizi/:exerciseId/edit',
+        element: lazy(() => import('./views/courses/TeacherExerciseDetail'))
+      },
       {
         exact: 'true',
         path: '/profile',

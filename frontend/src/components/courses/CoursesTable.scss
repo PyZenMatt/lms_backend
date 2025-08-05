@@ -4,6 +4,20 @@
     border-radius: 16px;
     transition: all 0.3s ease;
     overflow: hidden;
+    min-width: 340px;
+    max-width: 420px;
+    margin-left: auto;
+    margin-right: auto;
+    &:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12) !important;
+    }
+    // ...resto delle regole .course-card...
+  }
+  .row {
+    --bs-gutter-x: 2.5rem;
+    --bs-gutter-y: 2.5rem;
+  }
 
     &:hover {
       transform: translateY(-4px);
@@ -100,8 +114,11 @@
 
     .course-actions {
       .btn {
-        font-size: 0.85rem;
+        font-size: 0.78rem;
         font-weight: 500;
+        padding: 0.25rem 0.6rem;
+        min-width: 32px;
+        min-height: 32px;
       }
     }
 
@@ -307,7 +324,6 @@
       transform: translateY(0);
     }
   }
-}
 
 // Utility class for cursor pointer
 .cursor-pointer {

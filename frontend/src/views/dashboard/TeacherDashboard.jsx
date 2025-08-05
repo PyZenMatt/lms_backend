@@ -350,242 +350,49 @@ const TeacherDashboard = () => {
         ))}
       </Row>
 
-      {/* Teacher Analytics & Insights */}
-      <Row className="mb-4">
-        <Col lg={8}>
-          <Card className="border-0 shadow-sm h-100">
-            <Card.Header className="border-0 bg-transparent">
-              <Card.Title as="h5" className="mb-0">
-                <i className="feather icon-bar-chart-2 text-primary me-2"></i>
-                Performance dei Corsi
-              </Card.Title>
-              <small className="text-muted">Analisi delle vendite e engagement</small>
-            </Card.Header>
-            <Card.Body>
-              {courses.length > 0 ? (
-                <div className="course-performance">
-                  {courses.slice(0, 3).map((course, index) => {
-                    const enrollmentRate = Math.random() * 100; // Mock data - replace with real metrics
-                    const completionRate = Math.random() * 100;
-                    
-                    return (
-                      <div key={course.id} className="performance-item d-flex align-items-center mb-4">
-                        <div className="performance-indicator me-3">
-                          <div className={`rounded-circle d-flex align-items-center justify-content-center ${
-                            index === 0 ? 'bg-primary' : index === 1 ? 'bg-success' : 'bg-warning'
-                          }`} style={{ width: '45px', height: '45px' }}>
-                            <i className="feather icon-book-open text-white"></i>
-                          </div>
-                        </div>
-                        <div className="flex-grow-1">
-                          <h6 className="mb-2 fw-semibold">{course.title}</h6>
-                          <div className="performance-metrics row g-2">
-                            <div className="col-6">
-                              <small className="text-muted d-block">Iscrizioni</small>
-                              <div className="progress mb-1" style={{ height: '4px' }}>
-                                <div className="progress-bar bg-primary" style={{ width: `${enrollmentRate}%` }}></div>
-                              </div>
-                              <small className="fw-bold text-primary">{Math.round(enrollmentRate)}%</small>
-                            </div>
-                            <div className="col-6">
-                              <small className="text-muted d-block">Completamento</small>
-                              <div className="progress mb-1" style={{ height: '4px' }}>
-                                <div className="progress-bar bg-success" style={{ width: `${completionRate}%` }}></div>
-                              </div>
-                              <small className="fw-bold text-success">{Math.round(completionRate)}%</small>
-                            </div>
-                          </div>
-                        </div>
-                        <div className="text-end">
-                          <div className="performance-actions">
-                            <Button 
-                              variant="outline-primary" 
-                              size="sm"
-                              onClick={() => handleViewCourse(course.id)}
-                            >
-                              <i className="feather icon-eye"></i>
-                            </Button>
-                          </div>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              ) : (
-                <div className="text-center py-4">
-                  <i className="feather icon-bar-chart text-muted" style={{ fontSize: '3rem' }}></i>
-                  <p className="text-muted mt-3">Crea il tuo primo corso per vedere le analytics</p>
-                </div>
-              )}
-            </Card.Body>
-          </Card>
-        </Col>
-        
-        <Col lg={4}>
-          <Card className="border-0 shadow-sm h-100">
-            <Card.Header className="border-0 bg-transparent">
-              <Card.Title as="h6" className="mb-0">
-                <i className="feather icon-target text-success me-2"></i>
-                Obiettivi Mensili
-              </Card.Title>
-            </Card.Header>
-            <Card.Body>
-              <div className="teacher-goals mb-4">
-                <div className="d-flex justify-content-between align-items-center mb-2">
-                  <span className="small fw-semibold">Nuovi studenti</span>
-                  <span className="small text-primary fw-bold">8/15</span>
-                </div>
-                <div className="progress mb-3" style={{ height: '8px' }}>
-                  <div className="progress-bar bg-primary" style={{ width: '53%' }}></div>
-                </div>
-                
-                <div className="d-flex justify-content-between align-items-center mb-2">
-                  <span className="small fw-semibold">Corsi pubblicati</span>
-                  <span className="small text-success fw-bold">{courses.length}/3</span>
-                </div>
-                <div className="progress mb-3" style={{ height: '8px' }}>
-                  <div className="progress-bar bg-success" style={{ width: `${Math.min((courses.length/3)*100, 100)}%` }}></div>
-                </div>
-                
-                <div className="d-flex justify-content-between align-items-center mb-2">
-                  <span className="small fw-semibold">Revenue target</span>
-                  <span className="small text-warning fw-bold">€{sales.monthly}/€1000</span>
-                </div>
-                <div className="progress" style={{ height: '8px' }}>
-                  <div className="progress-bar bg-warning" style={{ width: `${Math.min((sales.monthly/1000)*100, 100)}%` }}></div>
-                </div>
-              </div>
-              
-              <div className="text-center">
-                <small className="text-muted">
-                  <i className="feather icon-calendar me-1"></i>
-                  Aggiornato al {new Date().toLocaleDateString('it-IT')}
-                </small>
-              </div>
-            </Card.Body>
-          </Card>
-        </Col>
-      </Row>
 
-      {/* Error Alert */}
-      {error && (
-        <Row>
-          <Col md={12}>
-            <Card className="bg-danger text-white">
-              <Card.Body>
-                <i className="feather icon-alert-triangle me-2"></i>
-                {error}
-              </Card.Body>
-            </Card>
-          </Col>
-        </Row>
-      )}
 
-      {/* Main Content Row */}
+      {/* Sezione credito, burn e deposit */}
       <Row>
-        {/* Full Width Column - following StudentDashboard layout */}
-        <Col lg={12} className="mb-4">
-          {/* 💰 SEPARATED TEOCOIN SYSTEMS */}
-          <div className="mb-4">
-            <h4 className="mb-3">
-              <i className="feather icon-layers me-2 text-primary"></i>
-              TeoCoin Management
-              <Badge bg="info" className="ms-2">Teacher Features</Badge>
-            </h4>
-            <div className="alert alert-info">
-              <i className="feather icon-info me-2"></i>
-              <strong>Teacher Benefits:</strong> 
-              Stake your TEO to reduce platform commission rates and increase your earnings. 
-              Deposits/withdrawals handle MetaMask ↔ Platform transfers.
-            </div>
-          </div>
-
-          {/* Separated TeoCoin Components - Database Staking & MetaMask Operations */}
-          <Row className="mb-4">
-            {/* Database Staking - Virtual staking system */}
-            <Col lg={6} className="mb-4">
-              <DatabaseStaking 
-                onBalanceUpdate={handleComponentUpdate}
-              />
-            </Col>
-            
-            {/* MetaMask Deposit - MetaMask to Platform */}
-            <Col lg={6} className="mb-4">
-              <MetaMaskDeposit 
-                onDepositComplete={handleComponentUpdate}
-              />
-            </Col>
-          </Row>
-
-          {/* TeoCoin Balance Widget */}
-          <Row className="mb-4">
-            <Col lg={12}>
-              <TeoCoinBalanceWidget />
-            </Col>
-          </Row>
-
-          {/* Removed TeacherDiscountDashboard and TeacherDiscountAbsorptionDashboard as they are not relevant for teachers */}
-
-          {/* Courses Management Section */}
-          <Card>
-            <Card.Header className="d-flex justify-content-between align-items-center">
-              <Card.Title as="h5">
-                <i className="feather icon-book me-2"></i>
-                I Miei Corsi
-              </Card.Title>
-              <Button 
-                variant="primary" 
-                size="sm"
-                onClick={() => setShowCreateModal(true)}
-              >
-                <i className="feather icon-plus me-1"></i>
-                Nuovo Corso
-              </Button>
-            </Card.Header>
-            <Card.Body>
-              {courses.length === 0 ? (
-                <div className="text-center py-4">
-                  <i className="feather icon-book" style={{ fontSize: '3rem', color: '#999', marginBottom: '1rem' }}></i>
-                  <h4 className="mb-3">Nessun corso creato</h4>
-                  <p className="text-muted mb-4">Inizia creando il tuo primo corso</p>
-                  <Button 
-                    variant="primary"
-                    onClick={() => setShowCreateModal(true)}
-                  >
-                    <i className="feather icon-plus me-2"></i>
-                    Crea Primo Corso
-                  </Button>
-                </div>
-              ) : (
-                <CoursesTable
-                  courses={courses}
-                  showActions={true}
-                  onCreateLesson={handleShowLessonModal}
-                  expandedCourse={expandedCourse}
-                  onExpandCourse={handleExpandCourse}
-                  courseLessons={courseLessons}
-                  loadingLessons={loadingLessons}
-                  onCreateExercise={handleShowExerciseModal}
-                  lessonExercises={lessonExercises}
-                  loadingExercises={loadingExercises}
-                  onLoadExercises={loadExercisesForLesson}
-                  onViewCourse={handleViewCourse}
-                  onViewLesson={handleViewLesson}
-                  onEditCourse={handleEditCourse}
-                  onEditLesson={handleEditLesson}
-                  onViewExercise={handleViewExercise}
-                  onEditExercise={handleEditExercise}
-                />
-              )}
-            </Card.Body>
-          </Card>
+        <Col lg={4} md={6} sm={12}>
+          <TeoCoinBalanceWidget userProfile={userProfile} />
+        </Col>
+        <Col lg={4} md={6} sm={12}>
+          <MetaMaskDeposit userProfile={userProfile} />
+        </Col>
+        <Col lg={4} md={6} sm={12}>
+          <DatabaseStaking userProfile={userProfile} />
         </Col>
       </Row>
 
-      {/* 🔥 PHASE 4: Advanced Analytics */}
+      {/* Tabella corsi docente */}
       <Row className="mb-4">
-        <Col lg={12}>
-          <AdvancedAnalyticsDashboard />
+        <Col md={12}>
+          <Card className="border-0 shadow-sm">
+            <Card.Header className="bg-transparent border-0 pb-0">
+              <h5 className="card-title mb-0">I tuoi corsi</h5>
+            </Card.Header>
+            <Card.Body>
+              <CoursesTable
+                courses={courses}
+                onExpandCourse={handleExpandCourse}
+                expandedCourse={expandedCourse}
+                courseLessons={courseLessons}
+                loadingLessons={loadingLessons}
+                onCreateLesson={handleShowLessonModal}
+                onCreateExercise={handleShowExerciseModal}
+                lessonExercises={lessonExercises}
+                loadingExercises={loadingExercises}
+                onLoadExercises={loadExercisesForLesson}
+                onViewCourse={handleViewCourse}
+                onViewLesson={handleViewLesson}
+                onEditCourse={handleEditCourse}
+                onEditLesson={handleEditLesson}
+                onViewExercise={handleViewExercise}
+                onEditExercise={handleEditExercise}
+              />
+            </Card.Body>
+          </Card>
         </Col>
       </Row>
 

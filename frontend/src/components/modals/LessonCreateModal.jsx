@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Modal, Button, Form, Alert, Spinner, Card, Row, Col, Badge } from 'react-bootstrap';
+import { Modal, Button, Form, Alert, Spinner, Card, Row, Col, Badge, InputGroup } from 'react-bootstrap';
 import { createLesson } from '../../services/api/courses';
 import CustomToast from '../ui/Toast';
 import '../../assets/css/components/LessonCreateModal.css';

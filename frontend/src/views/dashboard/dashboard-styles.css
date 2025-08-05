@@ -1,3 +1,15 @@
+/* Migliora padding e allineamento delle card coin/burn/deposit */
+.dashboard-coin-section .card {
+  height: 100%;
+  min-height: 220px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: stretch;
+  box-shadow: 0 2px 12px rgba(4,169,245,0.07);
+  border-radius: 1rem;
+  margin-bottom: 0;
+}
 /* =========================
    ENHANCED DASHBOARD STYLES
    ========================= */

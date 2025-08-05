@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { Card, Badge, Button, Row, Col, Collapse, ProgressBar } from 'react-bootstrap';
-import { Link } from 'react-router-dom';
+import { Card, Badge, Button, Row, Col, Collapse, ProgressBar, InputGroup } from 'react-bootstrap';
+import { Link, useNavigate } from 'react-router-dom';
 import './CoursesTable.scss';
 
 const CoursesTable = ({ 
@@ -23,6 +23,44 @@ const CoursesTable = ({
   onViewExercise,
   onEditExercise
 }) => {
+  const navigate = useNavigate();
+
+  // Fallbacks per azioni se non passate
+  const handleEditCourse = (courseId) => {
+    if (onEditCourse) {
+      onEditCourse(courseId);
+    } else {
+      navigate(`/teacher/corsi/${courseId}/edit`);
+    }
+  };
+  const handleCreateLesson = (courseId) => {
+    if (onCreateLesson) {
+      onCreateLesson(courseId);
+    } else {
+      navigate(`/teacher/corsi/${courseId}/lezioni/nuova`);
+    }
+  };
+  const handleEditLesson = (lesson) => {
+    if (onEditLesson) {
+      onEditLesson(lesson);
+    } else {
+      navigate(`/teacher/lezioni/${lesson.id}/edit`);
+    }
+  };
+  const handleCreateExercise = (lesson) => {
+    if (onCreateExercise) {
+      onCreateExercise(lesson);
+    } else {
+      navigate(`/teacher/lezioni/${lesson.id}/esercizi/nuovo`);
+    }
+  };
+  const handleEditExercise = (exerciseId) => {
+    if (onEditExercise) {
+      onEditExercise(exerciseId);
+    } else {
+      navigate(`/teacher/esercizi/${exerciseId}/edit`);
+    }
+  };
   const [expandedLessons, setExpandedLessons] = useState({});
   
   const handleToggleLesson = (lessonId) => {
@@ -256,14 +294,6 @@ const CoursesTable = ({
                       </Col>
                       <Col>
                         <div className="stat-item p-2 bg-light rounded">
-                          <div className="stat-value text-warning fw-bold">
-                            {course.total_exercises || 0}
-                          </div>
-                          <small className="stat-label text-muted d-block">Esercizi</small>
-                        </div>
-                      </Col>
-                      <Col>
-                        <div className="stat-item p-2 bg-light rounded">
                           <div className="stat-value text-success fw-bold">
                             {course.students_count || 0}
                           </div>
@@ -276,20 +306,10 @@ const CoursesTable = ({
                   {/* Quick Actions */}
                   <div className="course-actions d-flex gap-2">
                     <Button
-                      variant="outline-primary"
-                      size="sm"
-                      className="flex-fill"
-                      onClick={() => navigate(`/teacher/corsi/${course.id}/preview`)}
-                      style={{ borderRadius: '12px' }}
-                    >
-                      <i className="feather icon-eye me-1"></i>
-                      Anteprima
-                    </Button>
-                    <Button
                       variant="outline-secondary"
                       size="sm"
                       className="flex-fill"
-                      onClick={() => onEditCourse && onEditCourse(course.id)}
+                      onClick={() => handleEditCourse(course.id)}
                       style={{ borderRadius: '12px' }}
                     >
                       <i className="feather icon-edit me-1"></i>
@@ -299,7 +319,8 @@ const CoursesTable = ({
                       <Button
                         variant="success"
                         size="sm"
-                        onClick={() => onCreateLesson(course.id)}
+                        onClick={() => handleCreateLesson(course.id)}
+                        title="Crea nuova lezione"
                       >
                         <i className="feather icon-plus"></i>
                       </Button>
@@ -320,7 +341,7 @@ const CoursesTable = ({
                           <Button
                             variant="primary"
                             size="sm"
-                            onClick={() => onCreateLesson(course.id)}
+                        onClick={() => handleCreateLesson(course.id)}
                             style={{
                               background: 'linear-gradient(135deg, #04a9f5, #1de9b6)',
                               border: 'none',
@@ -392,7 +413,7 @@ const CoursesTable = ({
                                             size="sm"
                                             onClick={(e) => {
                                               e.stopPropagation();
-                                              onEditLesson && onEditLesson(lesson);
+                                              handleEditLesson(lesson);
                                             }}
                                           >
                                             <i className="feather icon-edit"></i>
@@ -414,21 +435,19 @@ const CoursesTable = ({
                                         <i className="feather icon-target me-2 text-warning"></i>
                                         Esercizi della Lezione
                                       </h6>
-                                      {onCreateExercise && (
-                                        <Button
-                                          variant="warning"
-                                          size="sm"
-                                          onClick={() => onCreateExercise({
-                                            ...lesson,
-                                            course_id: course.id,
-                                            course: course.id
-                                          })}
-                                          style={{ borderRadius: '15px' }}
-                                        >
-                                          <i className="feather icon-plus me-1"></i>
-                                          {lesson.exercises?.length === 0 ? 'Primo Esercizio' : 'Aggiungi'}
-                                        </Button>
-                                      )}
+                                      <Button
+                                        variant="warning"
+                                        size="sm"
+                                        onClick={() => handleCreateExercise({
+                                          ...lesson,
+                                          course_id: course.id,
+                                          course: course.id
+                                        })}
+                                        style={{ borderRadius: '15px' }}
+                                      >
+                                        <i className="feather icon-plus me-1"></i>
+                                        {lesson.exercises?.length === 0 ? 'Primo Esercizio' : 'Aggiungi'}
+                                      </Button>
                                     </div>
                                     
                                     {lesson.exercises && lesson.exercises.length > 0 ? (
@@ -482,7 +501,7 @@ const CoursesTable = ({
                                                 <Button
                                                   variant="outline-secondary"
                                                   size="sm"
-                                                  onClick={() => onEditExercise && onEditExercise(exercise.id)}
+                                                  onClick={() => handleEditExercise(exercise.id)}
                                                 >
                                                   <i className="feather icon-edit"></i>
                                                 </Button>
