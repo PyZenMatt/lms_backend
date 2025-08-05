@@ -35,7 +35,7 @@ const DBAdminTeoCoinDashboard = () => {
       setLoading(true);
       setError(null);
 
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('accessToken') || localStorage.getItem('token') || localStorage.getItem('access');
       if (!token) {
         throw new Error('No authentication token found');
       }

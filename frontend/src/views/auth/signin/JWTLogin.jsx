@@ -1,15 +1,35 @@
-import React from 'react';
+
+import React, { useEffect } from 'react';
 import { Row, Col, Alert, Button } from 'react-bootstrap';
 import * as Yup from 'yup';
 import { Formik } from 'formik';
-import { login } from '../../../services/api/auth'; // Importa la funzione API per il login
+import { login } from '../../../services/api/auth';
 import { fetchUserProfile } from '../../../services/api/dashboard';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../../contexts/AuthContext';
 
 const JWTLogin = () => {
   const navigate = useNavigate();
-  const { refreshUser } = useAuth();
+  const { refreshUser, isAuthenticated, loading } = useAuth();
+
+  // Redirect automatico solo quando login completato
+  useEffect(() => {
+    if (!loading && isAuthenticated) {
+      // Recupera il ruolo utente dal profilo
+      fetchUserProfile().then(profileRes => {
+        const { role } = profileRes.data;
+        if (role === 'student' || role === 'user') {
+          navigate('/dashboard/student');
+        } else if (role === 'teacher') {
+          navigate('/dashboard/teacher');
+        } else if (role === 'admin' || role === 'staff') {
+          navigate('/dashboard/admin');
+        } else {
+          navigate('/');
+        }
+      });
+    }
+  }, [isAuthenticated, loading, navigate]);
 
   return (
     <Formik
@@ -35,20 +55,7 @@ const JWTLogin = () => {
           // Aggiorna l'AuthContext dopo il login
           await refreshUser();
 
-          // Recupera il ruolo utente dal context aggiornato
-          const profileRes = await fetchUserProfile();
-          const { role } = profileRes.data;
-
-          if (role === 'student' || role === 'user') {
-            navigate('/dashboard/student');
-          } else if (role === 'teacher') {
-            navigate('/dashboard/teacher');
-          } else if (role === 'admin' || role === 'staff') {
-            navigate('/dashboard/admin');
-          } else {
-            // fallback
-            navigate('/');
-          }
+          // Il redirect ora è gestito dal useEffect sopra
         } catch (error) {
           setErrors({ submit: 'Email o password non validi' });
           setSubmitting(false);
@@ -97,8 +104,8 @@ const JWTLogin = () => {
 
           <Row>
             <Col mt={2}>
-              <Button className="btn-block mb-4" color="primary" disabled={isSubmitting} size="large" type="submit" variant="primary">
-                {isSubmitting ? 'Accesso in corso...' : 'Accedi'}
+              <Button className="btn-block mb-4" color="primary" disabled={isSubmitting || loading} size="large" type="submit" variant="primary">
+                {(isSubmitting || loading) ? 'Accesso in corso...' : 'Accedi'}
               </Button>
             </Col>
           </Row>

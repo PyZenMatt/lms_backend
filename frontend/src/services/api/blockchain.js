@@ -5,9 +5,6 @@ import api from '../core/axiosClient';
  * 
  * @returns {Promise} Promise that resolves with reward pool data
  */
-export const getRewardPoolInfo = async () => {
-  return api.get('blockchain/reward-pool-info/');
-};
 
 /**
  * Refills the reward pool with MATIC from the admin wallet
@@ -15,9 +12,6 @@ export const getRewardPoolInfo = async () => {
  * @param {string} amount - Amount of MATIC to transfer
  * @returns {Promise} Promise that resolves with transaction data
  */
-export const refillRewardPool = async (amount) => {
-  return api.post('blockchain/refill-reward-pool/', { amount });
-};
 
 /**
  * Fetches blockchain transaction history with pagination and filters

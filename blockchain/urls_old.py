@@ -20,16 +20,12 @@ from .views import (
     get_transaction_history, 
     get_token_info, 
     check_transaction_status,
-    get_reward_pool_info,
-    refill_reward_pool_matic,
-    transfer_with_reward_pool_gas,
     simulate_user_payment_via_pool,
     process_course_payment,
     check_course_payment_prerequisites,
     execute_course_payment,
     process_course_payment_direct,
     confirm_course_payment,
-    get_reward_pool_address,
     check_student_approval,
     # Phase 5.3: Staking Management APIs
     get_teacher_staking_info,
@@ -73,12 +69,10 @@ urlpatterns = [
     path('reward/', reward_user, name='reward-user'),
     path('transactions/', get_transaction_history, name='transaction-history'),
     path('check-status/', check_transaction_status, name='check-transaction-status'),
-    path('transfer-with-pool-gas/', transfer_with_reward_pool_gas, name='transfer-with-pool-gas'),
     path('simulate-payment/', simulate_user_payment_via_pool, name='simulate-user-payment'),
     
     # Course payment endpoints - NEW APPROVE+SPLIT PROCESS
     path('process-course-payment-direct/', process_course_payment_direct, name='process-course-payment-direct'),
-    path('reward-pool-address/', get_reward_pool_address, name='get-reward-pool-address'),
     path('check-student-approval/', check_student_approval, name='check-student-approval'),
     
     # Course payment endpoints - LEGACY (DEPRECATED)
@@ -99,6 +93,4 @@ urlpatterns = [
     path('token-info/', get_token_info, name='token-info'),
     
     # Reward pool management (admin only)
-    path('reward-pool-info/', get_reward_pool_info, name='reward-pool-info'),
-    path('refill-reward-pool/', refill_reward_pool_matic, name='refill-reward-pool'),
 ]

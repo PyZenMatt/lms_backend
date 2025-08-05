@@ -149,10 +149,6 @@ const AdminDashboard = () => {
               
               {/* Quick Admin Actions */}
               <div className="d-flex gap-3 justify-content-center flex-wrap mt-4">
-                <Link to="/admin/reward-pool" className="btn btn-primary rounded-pill px-4 py-2">
-                  <i className="feather icon-database me-2"></i>
-                  Reward Pool
-                </Link>
                 <Link to="/admin/pending-courses" className="btn btn-outline-primary rounded-pill px-4 py-2">
                   <i className="feather icon-book-open me-2"></i>
                   Approva Corsi
@@ -214,41 +210,6 @@ const AdminDashboard = () => {
         <Alert variant="warning" className="mb-4 border-0 shadow-sm">
           <i className="feather icon-alert-circle me-2"></i>
           {error}
-        </Alert>
-      )}
-      
-      {/* Reward Pool Status Alert */}
-      {rewardPoolStatus && rewardPoolStatus.status === 'critical' && (
-        <Alert variant="danger" className="mb-4 border-0 shadow-sm">
-          <Row className="align-items-center">
-            <Col>
-              <i className="feather icon-alert-triangle me-2"></i>
-              <strong>Critical:</strong> Reward Pool MATIC balance is critically low ({rewardPoolStatus.matic_balance} MATIC). 
-              Transactions may fail!
-            </Col>
-            <Col xs="auto">
-              <Link to="/admin/reward-pool" className="btn btn-light btn-sm">
-                Manage Reward Pool
-              </Link>
-            </Col>
-          </Row>
-        </Alert>
-      )}
-      
-      {rewardPoolStatus && rewardPoolStatus.status === 'warning' && (
-        <Alert variant="warning" className="mb-4 border-0 shadow-sm">
-          <Row className="align-items-center">
-            <Col>
-              <i className="feather icon-alert-circle me-2"></i>
-              <strong>Warning:</strong> Reward Pool MATIC balance is low ({rewardPoolStatus.matic_balance} MATIC). 
-              Consider refilling soon.
-            </Col>
-            <Col xs="auto">
-              <Link to="/admin/reward-pool" className="btn btn-light btn-sm">
-                Manage Reward Pool
-              </Link>
-            </Col>
-          </Row>
         </Alert>
       )}
 
@@ -381,13 +342,6 @@ const AdminDashboard = () => {
             </Card.Header>
             <Card.Body>
               <Row className="g-3">
-                <Col md={3} sm={6}>
-                  <Link to="/admin/reward-pool" className="btn btn-outline-primary w-100 py-3 border-0 shadow-sm admin-action-btn">
-                    <i className="feather icon-database d-block mb-2" style={{ fontSize: '1.8rem' }}></i>
-                    <strong>Reward Pool</strong>
-                    <small className="d-block text-muted mt-1">Gestisci MATIC</small>
-                  </Link>
-                </Col>
                 <Col md={3} sm={6}>
                   <Button 
                     variant="outline-success" 

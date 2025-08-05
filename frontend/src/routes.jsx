@@ -23,13 +23,6 @@ export const renderRoutes = (routes = []) => (
                 <Layout>{route.routes ? renderRoutes(route.routes) : <Element props={true} />}</Layout>
               </Guard>
             }
-          />
-        );
-      })}
-    </Routes>
-  </Suspense>
-);
-
 const routes = [
   {
     exact: 'true',
