@@ -1,7 +1,7 @@
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 import React, { useState, useEffect } from 'react';
 import { Card, Button, Alert, Spinner, Badge } from 'react-bootstrap';
-import TeoCoinWithdrawal from '../TeoCoinWithdrawal';
+import TeoCoinManager from '../TeoCoinManager';
 import stakingService from '../../services/stakingService';
 import { useAuth } from '../../contexts/AuthContext';
 import './TeoCoinBalanceWidget.scss';
@@ -303,7 +303,7 @@ const TeoCoinBalanceWidget = ({ variant = 'default' }) => {
             </div>
           )}
 
-          {/* Withdrawal Button */}
+          {/* TeoCoin Manager Button */}
           <div className="d-grid mb-3">
             <Button
               variant="success"
@@ -312,7 +312,7 @@ const TeoCoinBalanceWidget = ({ variant = 'default' }) => {
               disabled={loading || !stakingInfo?.current_balance || stakingInfo.current_balance <= 0}
             >
               <i className="feather icon-send me-2"></i>
-              Withdraw to MetaMask
+              Manage TeoCoin
             </Button>
           </div>
 
@@ -321,15 +321,15 @@ const TeoCoinBalanceWidget = ({ variant = 'default' }) => {
             <i className="feather icon-info me-2"></i>
             <small>
               {isTeacher 
-                ? "Withdraw your TeoCoin earnings to your MetaMask wallet on Polygon Amoy network"
-                : "Withdraw your TeoCoin balance to your MetaMask wallet or use for course discounts"
+                ? "Manage your TeoCoin: withdraw to MetaMask, stake for higher commissions, or deposit from MetaMask"
+                : "Manage your TeoCoin: withdraw to MetaMask, use for course discounts, or deposit from MetaMask"
               }
             </small>
           </div>
         </Card.Body>
       </Card>
 
-      <TeoCoinWithdrawal
+      <TeoCoinManager
         open={withdrawalOpen}
         onClose={handleWithdrawalClose}
         userBalance={stakingInfo?.current_balance || 0}

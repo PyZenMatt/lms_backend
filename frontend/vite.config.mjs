@@ -96,13 +96,9 @@ export default defineConfig({
           ],
           'courses': [
             './src/views/courses/AllCourses.jsx',
-            './src/views/courses/StudentCourseDetail.jsx',
-            './src/views/courses/StudentLessonDetail.jsx'
           ],
           'components': [
-            './src/components/cards/CourseCard.jsx',
             './src/components/ui/StatWidget.jsx',
-            './src/components/ui/LazyImage.jsx'
           ]
         },
         // Optimize chunk file names

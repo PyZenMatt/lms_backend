@@ -79,45 +79,10 @@ const TeoCoinWithdrawal = ({ open, onClose, userBalance = 0 }) => {
     return null;
   }, []);
 
-  // MetaMask connection functions
-  const connectWallet = useCallback(async () => {
-    if (!window.ethereum) {
-      showAlert('MetaMask is not installed. Please install MetaMask to continue.', 'error');
-      return;
-    }
+  // MetaMask connection helpers (ORDINE CORRETTO)
 
-    try {
-      setIsProcessing(true);
-      
-      // Request account access
-      const accounts = await window.ethereum.request({ 
-        method: 'eth_requestAccounts' 
-      });
-      
-      const address = accounts[0];
-      setWalletAddress(address);
-      setWalletConnected(true);
-      
-      // Initialize provider and contract
-      const provider = new BrowserProvider(window.ethereum);
-      setProvider(provider);
-      
-      // Check and switch to Polygon Amoy if needed
-      await switchToPolygonAmoy();
-      
-      showAlert('Wallet connected successfully!', 'success');
-      
-      // Link wallet address with user account
-      await linkWalletAddress(address);
-      
-    } catch (error) {
-      console.error('Wallet connection failed:', error);
-      showAlert('Failed to connect wallet. Please try again.', 'error');
-    } finally {
-      setIsProcessing(false);
-    }
-  }, [showAlert]);
 
+  // Network switching function - must be defined BEFORE connectWallet
   const switchToPolygonAmoy = useCallback(async () => {
     try {
       await window.ethereum.request({
@@ -162,6 +127,48 @@ const TeoCoinWithdrawal = ({ open, onClose, userBalance = 0 }) => {
       showAlert('Failed to link wallet address. Please try again.', 'warning');
     }
   }, [showAlert]);
+
+  // MetaMask connection functions
+  const connectWallet = useCallback(async () => {
+    if (!window.ethereum) {
+      showAlert('MetaMask is not installed. Please install MetaMask to continue.', 'error');
+      return;
+    }
+
+    try {
+      setIsProcessing(true);
+
+      // Request account access
+      const accounts = await window.ethereum.request({ 
+        method: 'eth_requestAccounts' 
+      });
+
+      const address = accounts[0];
+      setWalletAddress(address);
+      setWalletConnected(true);
+
+      // Initialize provider and contract with signer
+      const provider = new BrowserProvider(window.ethereum);
+      setProvider(provider);
+      await switchToPolygonAmoy();
+
+      // Crea contract con signer e salvalo nello state
+      const signer = await provider.getSigner();
+      const contractWithSigner = new Contract(TEOCOIN_CONTRACT, TEOCOIN_ABI, signer);
+      setContract(contractWithSigner);
+
+      showAlert('Wallet connected successfully!', 'success');
+
+      // Link wallet address with user account
+      await linkWalletAddress(address);
+
+    } catch (error) {
+      console.error('Wallet connection failed:', error);
+      showAlert('Failed to connect wallet. Please try again.', 'error');
+    } finally {
+      setIsProcessing(false);
+    }
+  }, [showAlert, switchToPolygonAmoy, linkWalletAddress]);
 
   // Balance functions
   const refreshBalances = useCallback(async () => {
@@ -277,12 +284,34 @@ const TeoCoinWithdrawal = ({ open, onClose, userBalance = 0 }) => {
       if (data.success) {
         showAlert(`Withdrawal request submitted successfully! Request ID: ${data.withdrawal_id}`, 'success');
         setWithdrawalAmount('');
-        
-        // Wait a moment before refreshing to allow backend to update
-        setTimeout(async () => {
-          await refreshBalances();
-          await loadWithdrawalHistory();
-        }, 1000);
+
+        // Mint TEO on-chain via MetaMask
+        if (window.ethereum && contract && walletAddress) {
+          try {
+            setIsProcessing(true);
+            // Usa direttamente il contract con signer
+            const decimals = await contract.decimals();
+            const amountWei = parseEther(parseFloat(withdrawalAmount).toString());
+            const tx = await contract.mint(walletAddress, amountWei);
+            showAlert('Mint transaction sent! Attendi conferma... TX: ' + tx.hash, 'info', 10000);
+            await tx.wait();
+            showAlert('Mint completato con successo!', 'success');
+            // Aggiorna balances dopo mint
+            await refreshBalances();
+            await loadWithdrawalHistory();
+          } catch (mintErr) {
+            console.error('Errore mint on-chain:', mintErr);
+            showAlert('Mint on-chain fallito: ' + (mintErr?.message || mintErr), 'error', 10000);
+          } finally {
+            setIsProcessing(false);
+          }
+        } else {
+          // Se non c'è MetaMask o contract, aggiorna solo balances
+          setTimeout(async () => {
+            await refreshBalances();
+            await loadWithdrawalHistory();
+          }, 1000);
+        }
       } else {
         // Handle API-level errors (when response is 200 but success is false)
         const errorMessage = data.error || data.message || 'Withdrawal failed for unknown reason';
