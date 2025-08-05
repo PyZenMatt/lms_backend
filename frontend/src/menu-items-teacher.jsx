@@ -183,9 +183,39 @@ const teacherMenuItems = {
           type: 'item',
           icon: 'feather icon-log-out',
           classes: 'nav-item text-danger',
-          action: () => {
+          action: async () => {
             if (window.confirm('Sei sicuro di voler uscire?')) {
-              localStorage.removeItem('token');
+              if (window.__reactLogout) {
+                await window.__reactLogout();
+                console.log('🔓 Teacher logout via AuthContext completed');
+              } else {
+                // Fallback: logout API call + cleanup manuale
+                console.log('🔓 Teacher fallback logout');
+                try {
+                  const refreshToken = localStorage.getItem('refreshToken') || localStorage.getItem('refresh');
+                  await fetch('/api/v1/logout/', {
+                    method: 'POST',
+                    headers: {
+                      'Content-Type': 'application/json',
+                      Authorization: `Bearer ${localStorage.getItem('accessToken') || localStorage.getItem('access')}`
+                    },
+                    credentials: 'include',
+                    body: JSON.stringify({ refresh: refreshToken })
+                  });
+                } catch (error) {
+                  console.error('🔓 Teacher logout API error:', error);
+                } finally {
+                  // Cleanup completo - stesso array dell'AuthContext
+                  const tokensToRemove = [
+                    'access', 'accessToken', 'refreshToken', 'refresh', 
+                    'token', 'jwt', 'authToken', 'userToken'
+                  ];
+                  tokensToRemove.forEach(tokenKey => localStorage.removeItem(tokenKey));
+                  console.log('🔓 Teacher localStorage cleaned');
+                }
+              }
+              
+              // Redirect dopo cleanup
               window.location.href = '/auth/signin-1';
             }
           }

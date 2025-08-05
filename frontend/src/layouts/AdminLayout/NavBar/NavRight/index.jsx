@@ -15,7 +15,7 @@ import avatar4 from '../../../../assets/images/user/avatar-4.jpg';
 
 const NavRight = () => {
   const [listOpen, setListOpen] = useState(false);
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
 
   // Check if user is a teacher
   const isTeacher = user?.user_type === 'teacher' || user?.role === 'teacher';
@@ -145,7 +145,7 @@ const NavRight = () => {
               <div className="pro-head">
                 <img src={avatar1} className="img-radius" alt="User Profile" />
                 <span>John Doe</span>
-                <Link to="#" className="dud-logout" title="Logout">
+                <Link to="#" className="dud-logout" title="Logout" onClick={e => { e.preventDefault(); logout(); }}>
                   <i className="feather icon-log-out" />
                 </Link>
               </div>

@@ -36,6 +36,33 @@ class AutoJWTFromSessionMiddleware(MiddlewareMixin):
         Returns:
             Modified response with JWT tokens set in session and cookies
         """
+        # NON rigenerare token se è in corso un logout
+        if hasattr(request, '_logout_in_progress') and request._logout_in_progress:
+            auth_logger.debug("Skipping JWT token generation - logout in progress")
+            return response
+            
+        # NON rigenerare token se siamo in logout
+        if (hasattr(request, 'resolver_match') and 
+            request.resolver_match and 
+            request.resolver_match.url_name and
+            'logout' in request.resolver_match.url_name):
+            auth_logger.debug("Skipping JWT token generation during logout")
+            return response
+            
+        # NON rigenerare token se la response ha eliminato i cookie di sessione (indica logout)
+        if ('sessionid' in response.cookies and 
+            hasattr(response.cookies['sessionid'], 'get') and
+            response.cookies['sessionid'].get('expires')):
+            auth_logger.debug("Skipping JWT token generation - session cookie deleted")
+            return response
+            
+        # NON rigenerare token se la response contiene "Logout successful"
+        if (hasattr(response, 'data') and 
+            isinstance(response.data, dict) and 
+            'Logout successful' in str(response.data.get('detail', ''))):
+            auth_logger.debug("Skipping JWT token generation - logout response detected")
+            return response
+        
         if request.user.is_authenticated:
             try:
                 # Generate JWT token for the authenticated user

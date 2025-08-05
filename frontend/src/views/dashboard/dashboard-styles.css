@@ -1,3 +1,4 @@
+@import url('./global-contrast-fix.css');
 /* Migliora padding e allineamento delle card coin/burn/deposit */
 .dashboard-coin-section .card {
   height: 100%;

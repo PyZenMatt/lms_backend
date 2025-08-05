@@ -45,7 +45,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'core.middleware.AutoJWTFromSessionMiddleware',
+    # 'core.middleware.AutoJWTFromSessionMiddleware',  # RIMOSSO: causava problemi con logout e duplicava funzionalità JWT
     'core.middleware.APITimingMiddleware',
     'core.middleware.GlobalErrorHandlingMiddleware',
     'core.middleware.APITimingMiddleware',

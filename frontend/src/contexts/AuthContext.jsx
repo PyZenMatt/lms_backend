@@ -67,19 +67,52 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  // Logout robusto
+  // Logout robusto - cleanup completo localStorage
   const logout = async () => {
+    console.log('🔓 Starting complete logout process...');
     setLoading(true);
+    
     try {
-      await apiLogout();
-    } catch {}
-    localStorage.removeItem('accessToken');
+      const refreshToken = localStorage.getItem('refreshToken') || localStorage.getItem('refresh');
+      await apiLogout(refreshToken);
+      console.log('🔓 API logout completed');
+    } catch (error) {
+      console.error('🔓 API logout error:', error);
+    }
+    
+    // Cleanup completo del localStorage - elimina TUTTI i possibili token
+    const tokensToRemove = [
+      'access',           // Il token che hai trovato nel localStorage
+      'accessToken', 
+      'refreshToken',
+      'refresh',
+      'token',
+      'jwt',
+      'authToken',
+      'userToken'
+    ];
+    
+    tokensToRemove.forEach(tokenKey => {
+      if (localStorage.getItem(tokenKey)) {
+        console.log(`🔓 Removing ${tokenKey} from localStorage`);
+        localStorage.removeItem(tokenKey);
+      }
+    });
+    
+    // Reset stato React
     setUser(null);
     setIsAuthenticated(false);
     setLoading(false);
+    
+    console.log('🔓 Complete logout finished - localStorage cleaned');
+    // Non facciamo redirect qui - lasciamo che lo gestisca il chiamante
   };
 
   useEffect(() => {
+    // Espone la funzione di logout su window per i menu statici
+    if (typeof window !== 'undefined') {
+      window.__reactLogout = logout;
+    }
     // Persist login su mount
     const token = localStorage.getItem('accessToken') || 
                   localStorage.getItem('token') || 

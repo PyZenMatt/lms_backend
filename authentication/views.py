@@ -191,34 +191,72 @@ class LoginTemplateView(TemplateView):
                 'error': 'Credenziali non valide.'  # Invalid credentials
             })
 
+
+from django.contrib.auth import logout as django_logout
+import logging
+
+logger = logging.getLogger('authentication')
+
 class LogoutView(views.APIView):
     """
     API view for user logout.
-    
-    Blacklists the provided refresh token to prevent further use.
-    Requires user to be authenticated to access this endpoint.
+    Invalida sia la sessione Django che il refresh token JWT (se presente).
+    Forza l'eliminazione di tutte le sessioni dell'utente.
     """
     permission_classes = (permissions.IsAuthenticated,)
 
     def post(self, request):
-        """
-        Logout user by blacklisting their refresh token.
+        logger.info(f"🔓 Logout started for user: {request.user.username}")
+        logger.info(f"🔓 Request headers: {dict(request.headers)}")
+        logger.info(f"🔓 Request data: {request.data}")
+        logger.info(f"🔓 Session key before logout: {request.session.session_key}")
         
-        Args:
-            request: HTTP request containing refresh token
-            
-        Returns:
-            Empty response with 204 status on success, 400 on error
-        """
-        serializer = LogoutSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
+        # Forza eliminazione di tutte le sessioni dell'utente
+        from django.contrib.sessions.models import Session
+        from django.contrib.auth import get_user_model
         
-        try:
-            # Blacklist the refresh token to prevent further use
-            token = RefreshToken(serializer.validated_data['refresh']) # type: ignore
-            token.blacklist()
-        except Exception:
-            return Response(status=status.HTTP_400_BAD_REQUEST)
-
-        return Response(status=status.HTTP_204_NO_CONTENT)
+        user = request.user
+        user_sessions = []
+        
+        # Trova tutte le sessioni dell'utente
+        for session in Session.objects.all():
+            try:
+                session_data = session.get_decoded()
+                if session_data.get('_auth_user_id') == str(user.id):
+                    user_sessions.append(session.session_key)
+            except:
+                continue
+        
+        logger.info(f"🔓 Found {len(user_sessions)} sessions for user: {user_sessions}")
+        
+        # Elimina tutte le sessioni dell'utente
+        Session.objects.filter(session_key__in=user_sessions).delete()
+        logger.info(f"🔓 Deleted {len(user_sessions)} sessions for user")
+        
+        # Logout sessione Django corrente
+        django_logout(request)
+        logger.info("🔓 Django session logout completed")
+        logger.info(f"🔓 Session key after logout: {request.session.session_key}")
+        
+        # Blacklist refresh token se presente
+        refresh = request.data.get('refresh') or request.data.get('refreshToken')
+        if refresh:
+            from rest_framework_simplejwt.tokens import RefreshToken
+            try:
+                token = RefreshToken(refresh)
+                token.blacklist()
+                logger.info("🔓 JWT refresh token blacklisted successfully")
+            except Exception as e:
+                logger.error(f"🔓 Failed to blacklist JWT token: {e}")
+        else:
+            logger.warning("🔓 No refresh token provided in request")
+        
+        response = Response({'detail': 'Logout successful'}, status=status.HTTP_200_OK)
+        
+        # Cancellazione cookie di autenticazione
+        response.delete_cookie('sessionid', path='/', domain=None)
+        response.delete_cookie('csrftoken', path='/', domain=None)
+        
+        logger.info("🔓 Logout completed successfully")
+        return response
 

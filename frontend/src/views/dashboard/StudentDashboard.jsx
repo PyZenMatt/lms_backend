@@ -1,20 +1,14 @@
 import React, { useEffect, useState } from 'react';
-import { Row, Col, Card, Table, Tabs, Tab, ProgressBar } from 'react-bootstrap';
+import { Row, Col, Card } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 
-import WalletBalanceDisplay from '../../components/blockchain/WalletBalanceDisplay';
-import ProfileWalletDisplay from '../../components/blockchain/ProfileWalletDisplay';
 import StudentTeoCoinDashboard from '../../components/blockchain/DBStudentTeoCoinDashboard';
-import RewardNotifications from '../../components/blockchain/RewardNotifications';
 import TeoCoinBalanceWidget from '../../components/TeoCoinBalanceWidget';
 import { fetchStudentDashboard, fetchUserProfile } from '../../services/api/dashboard';
 import StudentSubmissions from './StudentSubmissions';
 
 // Import dashboard styles
 import './dashboard-styles.css';
-
-// Placeholder avatar - you may want to use actual user avatar
-import avatar1 from '../../assets/images/user/avatar-1.jpg';
 
 // Helper functions for course cards
 const getLevelBadgeClass = (level) => {
@@ -40,13 +34,7 @@ const StudentDashboard = () => {
   const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [transactions, setTransactions] = useState([]);
   const [userProfile, setUserProfile] = useState(null);
-  const [stats, setStats] = useState({
-    totalCourses: 0,
-    completedLessons: 0,
-    activeBadges: 0
-  });
 
   useEffect(() => {
     const loadDashboard = async () => {
@@ -61,15 +49,6 @@ const StudentDashboard = () => {
         setCourses(res.data.courses || []);
         
         console.log('Corsi caricati:', res.data.courses);
-        
-        setTransactions(res.data.recent_transactions || []);
-        
-        // Calculate stats
-        setStats({
-          totalCourses: res.data.courses?.length || 0,
-          completedLessons: res.data.completed_lessons || 0,
-          activeBadges: res.data.badges?.length || 0
-        });
       } catch (err) {
         console.error('Errore API dashboard:', err, err.response?.data);
         setError('Errore nel caricamento della dashboard');
@@ -79,40 +58,6 @@ const StudentDashboard = () => {
     };
     loadDashboard();
   }, []);
-
-  // Enhanced Dashboard stats data with better icons and calculations
-  const dashStatsData = [
-    { 
-      title: 'Corsi Attivi', 
-      amount: stats.totalCourses.toString(), 
-      icon: 'book-open',
-      iconColor: 'text-primary',
-      value: Math.min(stats.totalCourses * 25, 100), // More realistic progress calculation
-      class: 'progress-c-theme',
-      description: 'Corsi acquistati e disponibili',
-      bgGradient: 'linear-gradient(135deg, rgba(4, 169, 245, 0.1) 0%, rgba(4, 169, 245, 0.05) 100%)'
-    },
-    { 
-      title: 'Progresso Totale', 
-      amount: stats.completedLessons.toString(), 
-      icon: 'trending-up',
-      iconColor: 'text-success',
-      value: courses.length > 0 ? Math.round((stats.completedLessons / courses.reduce((total, course) => total + (course.lessons_count || 0), 0)) * 100) : 0, 
-      class: 'progress-c-theme2',
-      description: 'Lezioni completate',
-      bgGradient: 'linear-gradient(135deg, rgba(29, 233, 182, 0.1) 0%, rgba(29, 233, 182, 0.05) 100%)'
-    },
-    { 
-      title: 'Obiettivi Raggiunti', 
-      amount: stats.activeBadges.toString(), 
-      icon: 'award',
-      iconColor: 'text-warning',
-      value: Math.min(stats.activeBadges * 20, 100), // Badge progress
-      class: 'progress-c-theme3',
-      description: 'Badge e achievement',
-      bgGradient: 'linear-gradient(135deg, rgba(244, 194, 43, 0.1) 0%, rgba(244, 194, 43, 0.05) 100%)'
-    }
-  ];
 
   if (loading) {
     return (
@@ -186,139 +131,6 @@ const StudentDashboard = () => {
         </Col>
       </Row>
 
-      {/* Enhanced Stats Cards */}
-      <Row>
-        {dashStatsData.map((data, index) => {
-          return (
-            <Col key={index} md={6} xl={4}>
-              <Card className="dashboard-stat-card border-0 shadow-sm h-100">
-                <Card.Body style={{ background: data.bgGradient }}>
-                  <div className="d-flex align-items-center justify-content-between mb-3">
-                    <div className="stat-icon">
-                      <i className={`feather icon-${data.icon} ${data.iconColor}`} style={{ fontSize: '2.5rem' }} />
-                    </div>
-                    <div className="text-end">
-                      <h3 className="mb-0 fw-bold text-dark">{data.amount}</h3>
-                      <small className="text-muted">{data.value}% completo</small>
-                    </div>
-                  </div>
-                  <h6 className="mb-2 fw-semibold text-dark">{data.title}</h6>
-                  <p className="text-muted mb-3 small">{data.description}</p>
-                  <div className="progress mb-0" style={{ height: '6px' }}>
-                    <div
-                      className={`progress-bar ${data.class}`}
-                      role="progressbar"
-                      style={{ width: data.value + '%' }}
-                      aria-valuenow={data.value}
-                      aria-valuemin="0"
-                      aria-valuemax="100"
-                    />
-                  </div>
-                </Card.Body>
-              </Card>
-            </Col>
-          );
-        })}
-      </Row>
-
-      {/* Recent Activities & Learning Insights */}
-      <Row className="mb-4">
-        <Col lg={8}>
-          <Card className="border-0 shadow-sm h-100">
-            <Card.Header className="border-0 bg-transparent">
-              <Card.Title as="h5" className="mb-0">
-                <i className="feather icon-activity text-primary me-2"></i>
-                Attività Recenti
-              </Card.Title>
-              <small className="text-muted">Le tue ultime interazioni con i corsi</small>
-            </Card.Header>
-            <Card.Body>
-              {courses.length > 0 ? (
-                <div className="activity-timeline">
-                  {courses.slice(0, 3).map((course, index) => (
-                    <div key={course.id} className="d-flex align-items-center mb-3">
-                      <div className="activity-indicator me-3">
-                        <div className={`rounded-circle d-flex align-items-center justify-content-center ${
-                          index === 0 ? 'bg-primary' : index === 1 ? 'bg-success' : 'bg-warning'
-                        }`} style={{ width: '40px', height: '40px' }}>
-                          <i className={`feather ${
-                            calculateCourseProgress(course) > 0 ? 'icon-play-circle' : 'icon-book-open'
-                          } text-white`}></i>
-                        </div>
-                      </div>
-                      <div className="flex-grow-1">
-                        <h6 className="mb-1 fw-semibold">{course.title}</h6>
-                        <p className="text-muted mb-0 small">
-                          {calculateCourseProgress(course) > 0 ? 
-                            `Progresso: ${calculateCourseProgress(course)}%` : 
-                            'Pronto per iniziare'
-                          }
-                        </p>
-                      </div>
-                      <div className="text-end">
-                        <Link to={`/corsi/${course.id}`} className="btn btn-sm btn-outline-primary">
-                          <i className="feather icon-arrow-right"></i>
-                        </Link>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="text-center py-4">
-                  <i className="feather icon-activity text-muted" style={{ fontSize: '3rem' }}></i>
-                  <p className="text-muted mt-3">Inizia il tuo primo corso per vedere le attività qui</p>
-                </div>
-              )}
-            </Card.Body>
-          </Card>
-        </Col>
-        
-        <Col lg={4}>
-          <Card className="border-0 shadow-sm h-100">
-            <Card.Header className="border-0 bg-transparent">
-              <Card.Title as="h6" className="mb-0">
-                <i className="feather icon-target text-success me-2"></i>
-                Obiettivi Settimanali
-              </Card.Title>
-            </Card.Header>
-            <Card.Body>
-              <div className="goal-progress mb-4">
-                <div className="d-flex justify-content-between align-items-center mb-2">
-                  <span className="small fw-semibold">Lezioni da completare</span>
-                  <span className="small text-primary fw-bold">3/5</span>
-                </div>
-                <div className="progress mb-3" style={{ height: '8px' }}>
-                  <div className="progress-bar bg-primary" style={{ width: '60%' }}></div>
-                </div>
-                
-                <div className="d-flex justify-content-between align-items-center mb-2">
-                  <span className="small fw-semibold">Esercizi da completare</span>
-                  <span className="small text-success fw-bold">2/3</span>
-                </div>
-                <div className="progress mb-3" style={{ height: '8px' }}>
-                  <div className="progress-bar bg-success" style={{ width: '67%' }}></div>
-                </div>
-                
-                <div className="d-flex justify-content-between align-items-center mb-2">
-                  <span className="small fw-semibold">Minuti di studio</span>
-                  <span className="small text-warning fw-bold">45/60</span>
-                </div>
-                <div className="progress" style={{ height: '8px' }}>
-                  <div className="progress-bar bg-warning" style={{ width: '75%' }}></div>
-                </div>
-              </div>
-              
-              <div className="text-center">
-                <small className="text-muted">
-                  <i className="feather icon-calendar me-1"></i>
-                  Resetta ogni lunedì
-                </small>
-              </div>
-            </Card.Body>
-          </Card>
-        </Col>
-      </Row>
-
       {/* Error Alert */}
       {error && (
         <Row>
@@ -333,27 +145,22 @@ const StudentDashboard = () => {
         </Row>
       )}
 
-      {/* Reward Notifications */}
-      <RewardNotifications />
-
-      {/* TeoCoin Components - Enhanced Layout */}
+      {/* TeoCoin Components - Layout in Colonna */}
       <Row className="mb-4">
-        <Col lg={8} className="mb-4">
-          {/* Enhanced TeoCoin Dashboard - Main */}
+        <Col xs={12} className="mb-4">
+          {/* TeoCoin Dashboard with Blockchain Components */}
           <StudentTeoCoinDashboard />
         </Col>
-        <Col lg={4} className="mb-4">
-          {/* TeoCoin Withdrawal Widget - Sidebar */}
+        <Col xs={12} className="mb-4">
+          {/* TeoCoin Withdrawal Widget */}
           <TeoCoinBalanceWidget />
         </Col>
       </Row>
 
       {/* Main Content Row */}
       <Row>
-        {/* Full Width Column */}
+        {/* Courses Section */}
         <Col lg={12} className="mb-4">
-
-          {/* Enhanced Courses Section */}
           <Card className="border-0 shadow-sm mb-4">
             <Card.Header className="border-0 bg-light">
               <div className="d-flex justify-content-between align-items-center">
@@ -505,7 +312,7 @@ const StudentDashboard = () => {
             </Card.Body>
           </Card>
 
-          {/* Enhanced Student Submissions */}
+          {/* Student Submissions */}
           <Card className="border-0 shadow-sm">
             <Card.Header className="border-0 bg-light">
               <Card.Title as="h5" className="mb-1">

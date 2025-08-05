@@ -25,12 +25,28 @@ const NavItem = ({ item }) => {
     itemTarget = '_blank';
   }
 
-  // Gestione della navigazione
-  const handleClick = () => {
+  // Gestione della navigazione e delle azioni custom
+  const handleClick = async (e) => {
+    let handled = false;
+    if (typeof item.action === 'function') {
+      // Se l'azione è definita, eseguila (può essere async)
+      e.preventDefault();
+      handled = true;
+      try {
+        await item.action();
+      } catch (err) {
+        // eslint-disable-next-line no-console
+        console.error("Errore nell'azione custom del menu:", err);
+      }
+    }
     if (windowSize.width < 992) {
       dispatch({ type: actionType.COLLAPSE_MENU });
     }
-    console.log(`Navigando a: ${item.url}`);
+    if (!handled) {
+      // Navigazione normale
+      // eslint-disable-next-line no-console
+      console.log(`Navigando a: ${item.url}`);
+    }
   };
 
   let subContent;
@@ -44,7 +60,7 @@ const NavItem = ({ item }) => {
     );
   } else {
     subContent = (
-      <NavLink to={item.url} className="nav-link" target={itemTarget} onClick={handleClick}>
+      <NavLink to={item.url || '#'} className="nav-link" target={itemTarget} onClick={handleClick}>
         <NavIcon items={item} />
         {itemTitle}
         <NavBadge items={item} />

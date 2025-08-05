@@ -354,13 +354,13 @@ const TeacherDashboard = () => {
 
       {/* Sezione credito, burn e deposit */}
       <Row>
-        <Col lg={4} md={6} sm={12}>
+        <Col xs={12} className="mb-4">
           <TeoCoinBalanceWidget userProfile={userProfile} />
         </Col>
-        <Col lg={4} md={6} sm={12}>
+        <Col xs={12} className="mb-4">
           <MetaMaskDeposit userProfile={userProfile} />
         </Col>
-        <Col lg={4} md={6} sm={12}>
+        <Col xs={12} className="mb-4">
           <DatabaseStaking userProfile={userProfile} />
         </Col>
       </Row>

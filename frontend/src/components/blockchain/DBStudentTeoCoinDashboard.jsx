@@ -1,10 +1,12 @@
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 import React, { useState, useEffect } from 'react';
 import { Card, Badge, Spinner, Alert, Button, Row, Col } from 'react-bootstrap';
 import { useAuth } from '../../contexts/AuthContext';
 import PendingWithdrawals from './PendingWithdrawals';
 import BurnDepositInterface from './BurnDepositInterface';
 import './StudentTeoCoinDashboard.scss';
+import './blockchain-responsive.css';
+
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 /**
  * StudentTeoCoinDashboard - DB-based TeoCoin dashboard for students
@@ -282,21 +284,91 @@ const DBStudentTeoCoinDashboard = () => {
         </Col>
       </Row>
 
-      {/* Deposit and Withdrawal Components - Same Level */}
-      <Row className="mb-3">
-        <Col lg={6}>
-          <BurnDepositInterface 
-            onTransactionComplete={(data) => {
-              loadDashboardData();
-            }}
-          />
+      {/* Blockchain Components - Responsive Layout */}
+      <Row className="blockchain-components-row mb-3">
+        {/* Burn & Deposit Component */}
+        <Col xl={4} lg={6} md={12} className="blockchain-component-col mb-3">
+          <div className="blockchain-responsive-card h-100">
+            <BurnDepositInterface 
+              onTransactionComplete={(data) => {
+                loadDashboardData();
+              }}
+            />
+          </div>
         </Col>
-        <Col lg={6}>
-          <PendingWithdrawals 
-            onTransactionComplete={(data) => {
-              loadDashboardData();
-            }}
-          />
+        
+        {/* Pending Withdrawals Component */}
+        <Col xl={4} lg={6} md={12} className="blockchain-component-col mb-3">
+          <div className="blockchain-responsive-card h-100">
+            <PendingWithdrawals 
+              onTransactionComplete={(data) => {
+                loadDashboardData();
+              }}
+            />
+          </div>
+        </Col>
+        
+        {/* Balance Overview Component */}
+        <Col xl={4} lg={12} md={12} className="blockchain-component-col mb-3">
+          <Card className="balance-overview-card blockchain-responsive-card h-100">
+            <Card.Header>
+              <h6 className="mb-0">
+                <i className="feather icon-pie-chart text-info me-2"></i>
+                Saldo Panoramica
+              </h6>
+            </Card.Header>
+            <Card.Body className="d-flex flex-column justify-content-center">
+              <div className="text-center">
+                <div className="mb-3">
+                  <h4 className="balance-amount mb-1">
+                    {dashboardData.balance.total_balance} TEO
+                  </h4>
+                  <small className="text-muted">Saldo Totale</small>
+                </div>
+                <Row className="text-center">
+                  <Col>
+                    <div className="mb-2">
+                      <div className="h6 text-success mb-0">
+                        {dashboardData.balance.available_balance}
+                      </div>
+                      <small className="text-muted">Disponibile</small>
+                    </div>
+                  </Col>
+                  {parseFloat(dashboardData.balance.pending_withdrawal) > 0 && (
+                    <Col>
+                      <div className="mb-2">
+                        <div className="h6 text-warning mb-0">
+                          {dashboardData.balance.pending_withdrawal}
+                        </div>
+                        <small className="text-muted">In Elaborazione</small>
+                      </div>
+                    </Col>
+                  )}
+                </Row>
+                <div className="mt-3">
+                  <Button 
+                    variant="outline-primary" 
+                    size="sm"
+                    onClick={loadDashboardData}
+                    disabled={loading}
+                    className="w-100"
+                  >
+                    {loading ? (
+                      <>
+                        <Spinner animation="border" size="sm" className="me-2" />
+                        Aggiornamento...
+                      </>
+                    ) : (
+                      <>
+                        <i className="feather icon-refresh-cw me-2"></i>
+                        Aggiorna Saldo
+                      </>
+                    )}
+                  </Button>
+                </div>
+              </div>
+            </Card.Body>
+          </Card>
         </Col>
       </Row>
 

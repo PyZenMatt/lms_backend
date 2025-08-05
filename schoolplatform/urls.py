@@ -4,8 +4,10 @@ from django.views.generic import TemplateView
 from django.conf.urls.static import static
 from django.conf import settings
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView, SpectacularRedocView
+from core.admin_views import custom_admin_logout
 
 urlpatterns = [
+    path('admin/logout/', custom_admin_logout, name='admin_logout'),
     path('admin/', admin.site.urls),
     path('api/v1/', include('core.urls')),
     path('api/v1/', include ('courses.urls')),    
