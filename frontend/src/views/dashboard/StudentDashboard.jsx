@@ -4,6 +4,7 @@ import { Row, Col, Card } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 import TeoCoinBalanceWidget from '../../components/TeoCoinBalanceWidget';
 import BurnDepositInterface from '../../components/blockchain/BurnDepositInterface';
+import TeoCoinWithdrawal from '../../components/TeoCoinWithdrawal';
 import StudentSubmissions from './StudentSubmissions';
 import { fetchStudentDashboard, fetchUserProfile } from '../../services/api/dashboard';
 
@@ -13,6 +14,7 @@ const StudentDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [userProfile, setUserProfile] = useState(null);
+  const [withdrawalOpen, setWithdrawalOpen] = useState(false);
 
   useEffect(() => {
     const loadDashboard = async () => {
@@ -61,13 +63,16 @@ const StudentDashboard = () => {
       </Row>
 
 
-      {/* Widget Burn & Withdrawal affiancati */}
+      {/* Widget TeoCoin: Balance, Burn/Deposit, Withdrawal */}
       <Row className="mb-4">
-        <Col md={6}>
-          <TeoCoinBalanceWidget />
+        <Col md={4}>
+          <TeoCoinBalanceWidget onWithdrawalClick={() => setWithdrawalOpen(true)} />
         </Col>
-        <Col md={6}>
+        <Col md={4}>
           <BurnDepositInterface />
+        </Col>
+        <Col md={4}>
+          <TeoCoinWithdrawal isOpen={withdrawalOpen} onClose={() => setWithdrawalOpen(false)} />
         </Col>
       </Row>
 
@@ -116,6 +121,13 @@ const StudentDashboard = () => {
           </Card>
         </Col>
       </Row>
+      
+      {/* TeoCoin Withdrawal Modal */}
+      <TeoCoinWithdrawal
+        open={withdrawalOpen}
+        onClose={() => setWithdrawalOpen(false)}
+        userBalance={userProfile?.teocoin_balance || 0}
+      />
     </>
   );
 };

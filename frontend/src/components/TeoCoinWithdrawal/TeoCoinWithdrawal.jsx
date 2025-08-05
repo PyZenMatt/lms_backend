@@ -46,6 +46,16 @@ const TEOCOIN_ABI = [
     "outputs": [{"internalType": "uint8", "name": "", "type": "uint8"}],
     "stateMutability": "view",
     "type": "function"
+  },
+  {
+    "inputs": [
+      {"internalType": "address", "name": "to", "type": "address"},
+      {"internalType": "uint256", "name": "amount", "type": "uint256"}
+    ],
+    "name": "mintTo",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
   }
 ];
 
@@ -59,6 +69,7 @@ const TeoCoinWithdrawal = ({ open, onClose, userBalance = 0 }) => {
   const [dbBalance, setDbBalance] = useState(userBalance);
   const [metamaskBalance, setMetamaskBalance] = useState(0);
   const [withdrawalHistory, setWithdrawalHistory] = useState([]);
+  const [pendingWithdrawals, setPendingWithdrawals] = useState(0);
   const [provider, setProvider] = useState(null);
   const [contract, setContract] = useState(null);
 
@@ -292,7 +303,7 @@ const TeoCoinWithdrawal = ({ open, onClose, userBalance = 0 }) => {
             // Usa direttamente il contract con signer
             const decimals = await contract.decimals();
             const amountWei = parseEther(parseFloat(withdrawalAmount).toString());
-            const tx = await contract.mint(walletAddress, amountWei);
+            const tx = await contract.mintTo(walletAddress, amountWei);
             showAlert('Mint transaction sent! Attendi conferma... TX: ' + tx.hash, 'info', 10000);
             await tx.wait();
             showAlert('Mint completato con successo!', 'success');
@@ -328,6 +339,8 @@ const TeoCoinWithdrawal = ({ open, onClose, userBalance = 0 }) => {
         showAlert('Authentication failed. Please log in again.', 'error');
       } else if (error.message.includes('Insufficient balance')) {
         showAlert('Insufficient balance for this withdrawal.', 'error');
+      } else if (error.message.includes('too many pending withdrawals')) {
+        showAlert('You have too many pending withdrawals. Please wait for current withdrawals to complete before making new requests.', 'warning');
       } else {
         showAlert(`Withdrawal failed: ${error.message}`, 'error');
       }
@@ -353,7 +366,12 @@ const TeoCoinWithdrawal = ({ open, onClose, userBalance = 0 }) => {
       
       const data = await response.json();
       if (data.success) {
-        setWithdrawalHistory(data.withdrawals || []);
+        const withdrawals = data.withdrawals || [];
+        setWithdrawalHistory(withdrawals);
+        
+        // Count pending withdrawals
+        const pending = withdrawals.filter(w => w.status === 'pending' || w.status === 'processing').length;
+        setPendingWithdrawals(pending);
       }
     } catch (error) {
       console.error('Failed to load withdrawal history:', error);
@@ -371,6 +389,40 @@ const TeoCoinWithdrawal = ({ open, onClose, userBalance = 0 }) => {
   useEffect(() => {
     setDbBalance(userBalance);
   }, [userBalance]);
+
+  // Cancel withdrawal function
+  const cancelWithdrawal = useCallback(async (withdrawalId) => {
+    try {
+      setLoading(true);
+      const token = localStorage.getItem('accessToken');
+      
+      const response = await fetch(`${API_BASE_URL}/api/v1/teocoin/withdrawals/${withdrawalId}/cancel/`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+          'X-CSRFToken': getCsrfToken() || '',
+        },
+      });
+
+      const data = await response.json();
+      
+      if (data.success) {
+        showAlert(`Withdrawal cancelled successfully! ${data.amount_returned} TEO returned to your balance.`, 'success');
+        await loadWithdrawalHistory();
+        if (refreshBalances) {
+          refreshBalances();
+        }
+      } else {
+        showAlert(data.error || 'Failed to cancel withdrawal', 'error');
+      }
+    } catch (error) {
+      console.error('Error cancelling withdrawal:', error);
+      showAlert('Failed to cancel withdrawal. Please try again.', 'error');
+    } finally {
+      setLoading(false);
+    }
+  }, [showAlert, getCsrfToken, loadWithdrawalHistory, refreshBalances]);
 
   // Event handlers
   const handleClose = () => {
@@ -500,6 +552,16 @@ const TeoCoinWithdrawal = ({ open, onClose, userBalance = 0 }) => {
                 Request Withdrawal
               </Typography>
               
+              {/* Pending Withdrawals Warning */}
+              {pendingWithdrawals > 0 && (
+                <Alert severity="warning" sx={{ mb: 2 }}>
+                  <Typography variant="body2">
+                    You have {pendingWithdrawals} pending withdrawal{pendingWithdrawals > 1 ? 's' : ''}. 
+                    {pendingWithdrawals >= 3 ? ' Please wait for current withdrawals to complete before making new requests.' : ' New requests may be delayed.'}
+                  </Typography>
+                </Alert>
+              )}
+              
               <TextField
                 fullWidth
                 label="Withdrawal Amount (TEO)"
@@ -519,7 +581,12 @@ const TeoCoinWithdrawal = ({ open, onClose, userBalance = 0 }) => {
                 <Button
                   variant="contained"
                   onClick={handleWithdrawal}
-                  disabled={isProcessing || !withdrawalAmount || parseFloat(withdrawalAmount) <= 0}
+                  disabled={
+                    isProcessing || 
+                    !withdrawalAmount || 
+                    parseFloat(withdrawalAmount) <= 0 || 
+                    pendingWithdrawals >= 3
+                  }
                   startIcon={isProcessing ? <CircularProgress size={20} /> : <Send />}
                   fullWidth
                 >
@@ -539,9 +606,31 @@ const TeoCoinWithdrawal = ({ open, onClose, userBalance = 0 }) => {
             {/* Withdrawal History */}
             {withdrawalHistory.length > 0 && (
               <Card variant="outlined" sx={{ p: 2 }}>
-                <Typography variant="h6" sx={{ mb: 2 }}>
-                  Recent Withdrawals
-                </Typography>
+                <Box display="flex" justifyContent="space-between" alignItems="center" sx={{ mb: 2 }}>
+                  <Typography variant="h6">
+                    Recent Withdrawals
+                  </Typography>
+                  {pendingWithdrawals > 0 && (
+                    <Button
+                      size="small"
+                      variant="outlined"
+                      color="error"
+                      onClick={() => {
+                        const pendingIds = withdrawalHistory
+                          .filter(w => w.status === 'pending' || w.status === 'processing')
+                          .map(w => w.id);
+                        
+                        if (window.confirm(`Cancel all ${pendingWithdrawals} pending withdrawals?`)) {
+                          pendingIds.forEach(id => cancelWithdrawal(id));
+                        }
+                      }}
+                      disabled={loading}
+                      sx={{ fontSize: '0.75rem' }}
+                    >
+                      Clear All Pending
+                    </Button>
+                  )}
+                </Box>
                 {withdrawalHistory.slice(0, 3).map((withdrawal, index) => (
                   <Box 
                     key={index}
@@ -558,14 +647,28 @@ const TeoCoinWithdrawal = ({ open, onClose, userBalance = 0 }) => {
                         {new Date(withdrawal.created_at).toLocaleDateString()}
                       </Typography>
                     </Box>
-                    <Chip 
-                      label={withdrawal.status}
-                      color={
-                        withdrawal.status === 'completed' ? 'success' :
-                        withdrawal.status === 'pending' ? 'warning' : 'default'
-                      }
-                      size="small"
-                    />
+                    <Box display="flex" alignItems="center" gap={1}>
+                      <Chip 
+                        label={withdrawal.status}
+                        color={
+                          withdrawal.status === 'completed' ? 'success' :
+                          withdrawal.status === 'pending' ? 'warning' : 'default'
+                        }
+                        size="small"
+                      />
+                      {(withdrawal.status === 'pending' || withdrawal.status === 'processing') && (
+                        <Button
+                          size="small"
+                          variant="outlined"
+                          color="error"
+                          onClick={() => cancelWithdrawal(withdrawal.id)}
+                          disabled={loading}
+                          sx={{ minWidth: '70px', fontSize: '0.7rem' }}
+                        >
+                          Cancel
+                        </Button>
+                      )}
+                    </Box>
                   </Box>
                 ))}
               </Card>

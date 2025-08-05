@@ -6,6 +6,7 @@ import './TeacherDashboard.css';
 import DatabaseStaking from '../../components/staking/DatabaseStaking';
 import MetaMaskDeposit from '../../components/deposit/MetaMaskDeposit';
 import TeoCoinBalanceWidget from '../../components/TeoCoinBalanceWidget';
+import TeoCoinWithdrawal from '../../components/TeoCoinWithdrawal';
 import StatCard from '../../components/common/StatCard';
 import CoursesTable from '../../components/courses/CoursesTable';
 import { fetchTeacherDashboard, fetchUserProfile } from '../../services/api/dashboard';
@@ -31,6 +32,7 @@ const TeacherDashboard = () => {
   const [transactions, setTransactions] = useState([]);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [userProfile, setUserProfile] = useState(null);
+  const [withdrawalOpen, setWithdrawalOpen] = useState(false);
   
   // Course expansion and lesson management
   const [expandedCourse, setExpandedCourse] = useState(null);
@@ -352,16 +354,39 @@ const TeacherDashboard = () => {
 
 
 
-      {/* Sezione credito, burn e deposit */}
+      {/* Sezione credito, burn, deposit e withdrawal */}
       <Row>
-        <Col xs={12} className="mb-4">
+        <Col xs={12} md={6} lg={3} className="mb-4">
           <TeoCoinBalanceWidget userProfile={userProfile} />
         </Col>
-        <Col xs={12} className="mb-4">
+        <Col xs={12} md={6} lg={3} className="mb-4">
           <MetaMaskDeposit userProfile={userProfile} />
         </Col>
-        <Col xs={12} className="mb-4">
+        <Col xs={12} md={6} lg={3} className="mb-4">
           <DatabaseStaking userProfile={userProfile} />
+        </Col>
+        <Col xs={12} md={6} lg={3} className="mb-4">
+          <Card className="border-0 shadow-sm h-100">
+            <Card.Header className="bg-warning text-white">
+              <Card.Title as="h6" className="mb-0">
+                💰 TeoCoin Withdrawal
+              </Card.Title>
+            </Card.Header>
+            <Card.Body className="text-center">
+              <p className="text-muted mb-3 small">
+                Withdraw TeoCoin from your platform balance to MetaMask wallet
+              </p>
+              <Button
+                variant="warning"
+                size="sm"
+                onClick={() => setWithdrawalOpen(true)}
+                disabled={loading || !userProfile?.teocoin_balance || userProfile.teocoin_balance <= 0}
+              >
+                <i className="feather icon-send me-1"></i>
+                Open Withdrawal
+              </Button>
+            </Card.Body>
+          </Card>
         </Col>
       </Row>
 
@@ -425,6 +450,13 @@ const TeacherDashboard = () => {
           onCreated={() => handleExerciseCreated(lessonId, selectedLesson?.course_id || selectedLesson?.course)}
         />
       ))}
+      
+      {/* TeoCoin Withdrawal Modal */}
+      <TeoCoinWithdrawal
+        open={withdrawalOpen}
+        onClose={() => setWithdrawalOpen(false)}
+        userBalance={userProfile?.teocoin_balance || 0}
+      />
     </React.Fragment>
   );
 };
