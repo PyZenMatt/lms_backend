@@ -1,0 +1,89 @@
+# === PYTHON & DJANGO ===
+venv/
+.env
+*.pyc
+__pycache__/
+*.sqlite3
+db.sqlite3
+*.log
+*.pot
+*.py[cod]
+*$py.class
+
+# Django generated
+/media/
+staticfiles/
+**/__pycache__/
+.mypy_cache/
+*.db
+
+# === BLOCKCHAIN & SECURITY ===
+# Private keys and sensitive blockchain data
+**/private_keys/
+**/wallet_keys/
+**/*private_key*
+**/*_keys.py
+**/*_secrets.py
+blockchain/scripts/wallet_exports/
+blockchain/scripts/private_keys/
+# Development test scripts with sensitive data
+scripts/blockchain/show_all_private_keys.py
+scripts/blockchain/assign_wallets.py
+scripts/blockchain/wallet_backup.py
+# Test files with real blockchain data
+blockchain/tests/debug_*
+blockchain/tests/test_admin_wallet_*
+blockchain/tests/real_*
+blockchain/tests/production_*
+
+# === NODE / REACT ===
+node_modules/
+.next/
+dist/
+build/
+coverage/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# React env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+.env.example
+.env.production
+.env.production.template
+.env.production.unified.template
+
+# === VS CODE / IDE ===
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# === OS-SPECIFIC ===
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Icon?
+Desktop.ini
+
+# === AWS / IPFS config (eventuali in futuro) ===
+*.pem
+aws-config.json
+ipfs-config.json
+
+# === Template escludibili ===
+datta-able-free-react-admin-template/
+docs-site/
+
+# === Windows metadata ===
+*:Zone.Identifier
+
+# === File MD == #
+*AI_Role.md
+
+db.sqlite3-shm
+db.sqlite3-wal

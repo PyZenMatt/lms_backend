@@ -1,0 +1,161 @@
+.reward-notifications {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 1060;
+  
+  .reward-toast {
+    min-width: 320px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+    border: none;
+    border-radius: 10px;
+    animation: slideInRight 0.4s ease-out;
+    
+    &:hover {
+      transform: translateX(-2px);
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+      transition: all 0.3s ease;
+    }
+    
+    .reward-toast-header {
+      background: linear-gradient(135deg, #28a745, #20c997);
+      color: white;
+      border-bottom: none;
+      border-radius: 10px 10px 0 0;
+      
+      .reward-icon {
+        font-size: 1.2rem;
+      }
+      
+      strong {
+        color: white;
+      }
+      
+      small {
+        color: rgba(255, 255, 255, 0.8);
+      }
+      
+      .btn-close {
+        filter: invert(1);
+        opacity: 0.8;
+        
+        &:hover {
+          opacity: 1;
+        }
+      }
+    }
+    
+    .reward-toast-body {
+      background-color: #f8f9fa;
+      border-radius: 0 0 10px 10px;
+      
+      .reward-content {
+        .reward-message {
+          font-size: 0.95rem;
+          color: #495057;
+          margin-bottom: 0.5rem;
+          
+          strong {
+            color: #28a745;
+            font-weight: 600;
+          }
+        }
+        
+        .reward-details {
+          small {
+            color: #6c757d;
+            
+            i {
+              color: #28a745;
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+// Animation keyframes
+@keyframes slideInRight {
+  from {
+    transform: translate3d(100%, 0, 0);
+    visibility: visible;
+  }
+  
+  to {
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+// Success variant styling
+.reward-notifications {
+  .reward-toast {
+    &.bg-success {
+      .reward-toast-header {
+        background: linear-gradient(135deg, #28a745, #20c997);
+      }
+    }
+    
+    &.bg-warning {
+      .reward-toast-header {
+        background: linear-gradient(135deg, #ffc107, #fd7e14);
+      }
+    }
+    
+    &.bg-info {
+      .reward-toast-header {
+        background: linear-gradient(135deg, #17a2b8, #007bff);
+      }
+    }
+  }
+}
+
+// Mobile responsive
+@media (max-width: 768px) {
+  .reward-notifications {
+    top: 10px;
+    right: 10px;
+    left: 10px;
+    
+    .reward-toast {
+      min-width: auto;
+      width: 100%;
+    }
+  }
+}
+
+// Dark theme support
+@media (prefers-color-scheme: dark) {
+  .reward-notifications {
+    .reward-toast {
+      .reward-toast-body {
+        background-color: #2c3e50;
+        color: #ecf0f1;
+        
+        .reward-content {
+          .reward-message {
+            color: #ecf0f1;
+          }
+          
+          .reward-details {
+            small {
+              color: #95a5a6;
+            }
+          }
+        }
+      }
+    }
+  }
+}

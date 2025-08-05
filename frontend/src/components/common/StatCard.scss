@@ -1,0 +1,69 @@
+// StatCard Component Styles
+.stat-card {
+  .card-body {
+    h6 {
+      font-weight: 600;
+      color: #6c757d;
+    }
+
+    h3 {
+      font-weight: 300;
+      margin-bottom: 0;
+      
+      i {
+        font-size: 30px;
+        margin-right: 5px;
+      }
+    }
+
+    .progress {
+      margin-top: 30px;
+      height: 7px;
+      border-radius: 10px;
+      background-color: #e9ecef;
+
+      .progress-bar {
+        border-radius: 10px;
+        transition: width 0.6s ease;
+      }
+    }
+
+    .text-end {
+      p {
+        margin-bottom: 0;
+        font-weight: 500;
+        color: #6c757d;
+      }
+    }
+  }
+}
+
+// Progress bar theme colors
+.progress-c-theme {
+  background: linear-gradient(45deg, #4099ff, #73b4ff);
+}
+
+.progress-c-theme2 {
+  background: linear-gradient(45deg, #2ed8b6, #59e0c5);
+}
+
+.progress-c-theme3 {
+  background: linear-gradient(45deg, #FFB64D, #ffcb80);
+}
+
+// Icon colors
+.text-c-green {
+  color: #2ed8b6 !important;
+}
+
+.text-c-blue {
+  color: #4099ff !important;
+}
+
+.text-c-orange {
+  color: #FFB64D !important;
+}
+
+.text-c-red {
+  color: #FF5370 !important;
+}

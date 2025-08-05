@@ -1,0 +1,17 @@
+.lesson-row {
+  cursor: pointer;
+}
+
+.lesson-row:hover {
+  background-color: #f8f9fa;
+}
+
+.teacher-profile-img img {
+  width: 80px;
+  height: 80px;
+  object-fit: cover;
+}
+
+.courses-table tr:hover {
+  background-color: #f8f9fa;
+}

@@ -1,0 +1,655 @@
+/* Profile Page - Skillshare Inspired Design */
+/* Modern, clean design matching the authentication pages */
+
+/* Import Skillshare Variables */
+:root {
+  --skillshare-primary: #00ad5b;
+  --skillshare-primary-dark: #008845;
+  --skillshare-secondary: #002333;
+  --skillshare-accent: #ff6b35;
+  --skillshare-gray-50: #f8fafc;
+  --skillshare-gray-100: #f1f5f9;
+  --skillshare-gray-200: #e2e8f0;
+  --skillshare-gray-300: #cbd5e1;
+  --skillshare-gray-400: #94a3b8;
+  --skillshare-gray-500: #64748b;
+  --skillshare-gray-600: #475569;
+  --skillshare-gray-700: #334155;
+  --skillshare-gray-800: #1e293b;
+  --skillshare-gray-900: #0f172a;
+  --skillshare-white: #ffffff;
+  --skillshare-error: #ef4444;
+  --skillshare-border-radius: 8px;
+  --skillshare-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --skillshare-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+/* Profile Wrapper */
+.skillshare-profile-wrapper {
+  min-height: 100vh;
+  background: linear-gradient(135deg, var(--skillshare-gray-50) 0%, var(--skillshare-gray-100) 100%);
+  padding: 20px 0;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Background Elements */
+.skillshare-bg-elements {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  overflow: hidden;
+  z-index: 1;
+}
+
+.skillshare-bg-circle {
+  position: absolute;
+  border-radius: 50%;
+  background: linear-gradient(45deg, rgba(0, 173, 91, 0.1), rgba(255, 107, 53, 0.1));
+  animation: float 6s ease-in-out infinite;
+}
+
+.skillshare-bg-circle-1 {
+  width: 300px;
+  height: 300px;
+  top: -150px;
+  right: -150px;
+  animation-delay: 0s;
+}
+
+.skillshare-bg-circle-2 {
+  width: 200px;
+  height: 200px;
+  bottom: -100px;
+  left: -100px;
+  animation-delay: 2s;
+}
+
+.skillshare-bg-circle-3 {
+  width: 150px;
+  height: 150px;
+  top: 50%;
+  left: -75px;
+  animation-delay: 4s;
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-20px) rotate(180deg);
+  }
+}
+
+/* Container positioning */
+.skillshare-profile-wrapper .container {
+  position: relative;
+  z-index: 10;
+}
+
+/* Loading State */
+.skillshare-loading-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  min-height: 400px;
+  text-align: center;
+  position: relative;
+  z-index: 10;
+}
+
+.skillshare-loading-spinner {
+  width: 60px;
+  height: 60px;
+  border: 4px solid var(--skillshare-gray-200);
+  border-top: 4px solid var(--skillshare-primary);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 20px;
+}
+
+.skillshare-loading-text {
+  color: var(--skillshare-gray-600);
+  font-size: 1.1rem;
+  font-weight: 500;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Profile Header */
+.skillshare-profile-header {
+  margin-bottom: 2rem;
+}
+
+.skillshare-auth-card {
+  background: var(--skillshare-white);
+  border: 1px solid var(--skillshare-gray-200);
+  border-radius: var(--skillshare-border-radius);
+  box-shadow: var(--skillshare-shadow-lg);
+  overflow: hidden;
+}
+
+.skillshare-profile-hero {
+  padding: 2.5rem;
+  text-align: center;
+  background: linear-gradient(135deg, var(--skillshare-primary) 0%, var(--skillshare-primary-dark) 100%);
+  color: white;
+}
+
+/* Avatar Section - Fixed sizing issues */
+.skillshare-avatar-section {
+  margin-bottom: 1.5rem;
+}
+
+.skillshare-avatar-container {
+  display: inline-block;
+  position: relative;
+}
+
+.skillshare-avatar-image {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  object-fit: cover; /* This fixes the image sizing issues */
+  border: 4px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  display: block;
+}
+
+.skillshare-avatar-image:hover {
+  transform: scale(1.05);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.2);
+}
+
+.skillshare-avatar-placeholder {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.2);
+  border: 4px solid rgba(255, 255, 255, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 3rem;
+  font-weight: 700;
+  color: white;
+  backdrop-filter: blur(10px);
+  transition: all 0.3s ease;
+}
+
+.skillshare-avatar-placeholder:hover {
+  transform: scale(1.05);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.2);
+}
+
+/* Profile Info */
+.skillshare-profile-info {
+  color: white;
+}
+
+.skillshare-profile-name {
+  font-size: 2.2rem;
+  font-weight: 700;
+  margin: 0 0 1rem 0;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.skillshare-profile-meta {
+  display: flex;
+  justify-content: center;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.skillshare-profile-role,
+.skillshare-profile-profession {
+  background: rgba(255, 255, 255, 0.2);
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 500;
+}
+
+/* Stats Cards - Redesigned to be more compact and side by side */
+.skillshare-profile-stats {
+  display: flex;
+  gap: 1rem;
+  margin: 0 0 2rem 0;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.skillshare-stat-card {
+  background: var(--skillshare-white);
+  border: 1px solid var(--skillshare-gray-200);
+  border-radius: var(--skillshare-border-radius);
+  padding: 1rem 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  box-shadow: var(--skillshare-shadow);
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+  min-width: 200px;
+  max-width: 250px;
+}
+
+.skillshare-stat-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--skillshare-shadow-lg);
+}
+
+.skillshare-stat-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--skillshare-primary), var(--skillshare-primary-dark));
+}
+
+.skillshare-stat-special::before {
+  background: linear-gradient(90deg, var(--skillshare-accent), #ff8c5a);
+}
+
+.skillshare-stat-icon {
+  width: 40px;
+  height: 40px;
+  background: linear-gradient(135deg, var(--skillshare-primary), var(--skillshare-primary-dark));
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  transition: all 0.3s ease;
+  flex-shrink: 0;
+}
+
+.skillshare-stat-special .skillshare-stat-icon {
+  background: linear-gradient(135deg, var(--skillshare-accent), #ff8c5a);
+}
+
+.skillshare-stat-card:hover .skillshare-stat-icon {
+  transform: scale(1.1);
+  box-shadow: 0 6px 20px rgba(0, 173, 91, 0.3);
+}
+
+.skillshare-stat-content {
+  flex: 1;
+  text-align: left;
+}
+
+.skillshare-stat-value {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--skillshare-gray-900);
+  margin-bottom: 0.25rem;
+  line-height: 1;
+}
+
+.skillshare-stat-label {
+  color: var(--skillshare-gray-600);
+  font-size: 0.75rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  line-height: 1;
+}
+
+/* Profile Content */
+.skillshare-profile-content {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.skillshare-auth-body {
+  padding: 2.5rem;
+}
+
+.skillshare-auth-header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.skillshare-auth-title {
+  font-size: 1.875rem;
+  font-weight: 700;
+  color: var(--skillshare-gray-900);
+  margin: 0 0 0.5rem 0;
+  line-height: 1.2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.skillshare-auth-subtitle {
+  color: var(--skillshare-gray-600);
+  font-size: 1rem;
+  margin: 0;
+  line-height: 1.5;
+}
+
+/* Read-only Section */
+.skillshare-readonly-section {
+  background: var(--skillshare-gray-50);
+  border: 1px solid var(--skillshare-gray-200);
+  border-radius: var(--skillshare-border-radius);
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.skillshare-info-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid var(--skillshare-gray-200);
+}
+
+.skillshare-info-item:last-child {
+  border-bottom: none;
+}
+
+.skillshare-info-label {
+  font-weight: 600;
+  color: var(--skillshare-gray-700);
+}
+
+.skillshare-info-value {
+  color: var(--skillshare-gray-900);
+  font-weight: 500;
+}
+
+/* Form Styles */
+.skillshare-auth-form {
+  width: 100%;
+}
+
+.skillshare-input-group {
+  margin-bottom: 1.5rem;
+}
+
+.skillshare-input-label {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--skillshare-gray-700);
+  margin-bottom: 0.5rem;
+}
+
+.skillshare-input {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  font-size: 1rem;
+  border: 1px solid var(--skillshare-gray-300);
+  border-radius: var(--skillshare-border-radius);
+  background-color: var(--skillshare-white);
+  transition: all 0.2s ease-in-out;
+  font-family: inherit;
+}
+
+.skillshare-input:focus {
+  outline: none;
+  border-color: var(--skillshare-primary);
+  box-shadow: 0 0 0 3px rgba(0, 173, 91, 0.1);
+  background-color: var(--skillshare-white);
+}
+
+.skillshare-input::placeholder {
+  color: var(--skillshare-gray-400);
+}
+
+/* Textarea Styling */
+.skillshare-textarea {
+  resize: vertical;
+  min-height: 100px;
+}
+
+/* File Upload Styling - Fixed for better UX */
+.skillshare-file-upload-container {
+  position: relative;
+  margin-bottom: 1rem;
+}
+
+.skillshare-file-input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.skillshare-file-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  background: var(--skillshare-gray-100);
+  border: 2px dashed var(--skillshare-gray-300);
+  border-radius: var(--skillshare-border-radius);
+  color: var(--skillshare-gray-700);
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.skillshare-file-label:hover {
+  background: var(--skillshare-gray-50);
+  border-color: var(--skillshare-primary);
+  color: var(--skillshare-primary);
+}
+
+/* Avatar Preview - Fixed sizing */
+.skillshare-avatar-preview-container {
+  margin-top: 1rem;
+  text-align: center;
+}
+
+.skillshare-avatar-preview {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  object-fit: cover; /* Fixed sizing issue */
+  border: 3px solid var(--skillshare-primary);
+  box-shadow: var(--skillshare-shadow);
+}
+
+/* Auth Button */
+.skillshare-auth-button {
+  width: 100%;
+  padding: 0.875rem 1.5rem;
+  background: linear-gradient(135deg, var(--skillshare-primary) 0%, var(--skillshare-primary-dark) 100%);
+  color: var(--skillshare-white);
+  border: none;
+  border-radius: var(--skillshare-border-radius);
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.skillshare-auth-button:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(0, 173, 91, 0.3);
+}
+
+.skillshare-auth-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.skillshare-auth-button i {
+  font-size: 1rem;
+}
+
+/* Success Message */
+.skillshare-success-message {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 1rem;
+  background: rgba(34, 197, 94, 0.1);
+  border: 1px solid rgba(34, 197, 94, 0.3);
+  border-radius: var(--skillshare-border-radius);
+  color: #059669;
+  font-weight: 500;
+  margin-top: 1rem;
+}
+
+/* Error Message */
+.skillshare-auth-error {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 1rem;
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  border-radius: var(--skillshare-border-radius);
+  color: var(--skillshare-error);
+  font-weight: 500;
+  margin-top: 1rem;
+  text-align: center;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .skillshare-profile-hero {
+    padding: 2rem 1.5rem;
+  }
+  
+  .skillshare-profile-name {
+    font-size: 1.875rem;
+  }
+  
+  .skillshare-profile-meta {
+    gap: 1rem;
+  }
+  
+  .skillshare-profile-stats {
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .skillshare-stat-card {
+    max-width: 100%;
+    min-width: 280px;
+  }
+  
+  .skillshare-auth-body {
+    padding: 2rem 1.5rem;
+  }
+  
+  .skillshare-avatar-image,
+  .skillshare-avatar-placeholder {
+    width: 100px;
+    height: 100px;
+  }
+  
+  .skillshare-avatar-placeholder {
+    font-size: 2.5rem;
+  }
+}
+
+@media (max-width: 576px) {
+  .skillshare-profile-wrapper {
+    padding: 10px 0;
+  }
+  
+  .skillshare-profile-hero {
+    padding: 1.5rem 1rem;
+  }
+  
+  .skillshare-profile-name {
+    font-size: 1.5rem;
+  }
+  
+  .skillshare-profile-meta {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  
+  .skillshare-stat-card {
+    min-width: 100%;
+    padding: 0.875rem 1.25rem;
+  }
+  
+  .skillshare-auth-body {
+    padding: 1.5rem 1rem;
+  }
+  
+  .skillshare-avatar-image,
+  .skillshare-avatar-placeholder {
+    width: 80px;
+    height: 80px;
+  }
+  
+  .skillshare-avatar-placeholder {
+    font-size: 2rem;
+  }
+}
+
+/* Animation Enhancements */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.skillshare-stat-card {
+  animation: fadeInUp 0.6s ease-out forwards;
+  opacity: 0;
+}
+
+.skillshare-stat-card:nth-child(1) { animation-delay: 0.1s; }
+.skillshare-stat-card:nth-child(2) { animation-delay: 0.2s; }
+.skillshare-stat-card:nth-child(3) { animation-delay: 0.3s; }
+
+/* Enhanced Focus States for Accessibility */
+.skillshare-input:focus,
+.skillshare-file-label:focus-within {
+  outline: 2px solid var(--skillshare-primary);
+  outline-offset: 2px;
+}
+
+/* Print Styles */
+@media print {
+  .skillshare-bg-elements,
+  .skillshare-auth-button {
+    display: none;
+  }
+  
+  .skillshare-profile-wrapper {
+    background: white;
+    box-shadow: none;
+  }
+  
+  .skillshare-auth-card {
+    box-shadow: none;
+    border: 1px solid #ccc;
+  }
+}

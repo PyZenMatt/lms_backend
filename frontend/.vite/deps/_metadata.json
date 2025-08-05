@@ -1,0 +1,76 @@
+{
+  "hash": "02697230",
+  "configHash": "962e3688",
+  "lockfileHash": "e3277a06",
+  "browserHash": "b88ea6c4",
+  "optimized": {
+    "react": {
+      "src": "../../node_modules/react/index.js",
+      "file": "react.js",
+      "fileHash": "d597473e",
+      "needsInterop": true
+    },
+    "react-dom/client": {
+      "src": "../../node_modules/react-dom/client.js",
+      "file": "react-dom_client.js",
+      "fileHash": "4cc609c9",
+      "needsInterop": true
+    },
+    "prop-types": {
+      "src": "../../node_modules/prop-types/index.js",
+      "file": "prop-types.js",
+      "fileHash": "6ad02f86",
+      "needsInterop": true
+    },
+    "react-router-dom": {
+      "src": "../../node_modules/react-router-dom/dist/index.js",
+      "file": "react-router-dom.js",
+      "fileHash": "7773ca68",
+      "needsInterop": false
+    },
+    "web-vitals": {
+      "src": "../../node_modules/web-vitals/dist/web-vitals.js",
+      "file": "web-vitals.js",
+      "fileHash": "9359e147",
+      "needsInterop": false
+    },
+    "react-bootstrap": {
+      "src": "../../node_modules/react-bootstrap/esm/index.js",
+      "file": "react-bootstrap.js",
+      "fileHash": "28e034cf",
+      "needsInterop": false
+    },
+    "@tanem/react-nprogress": {
+      "src": "../../node_modules/@tanem/react-nprogress/dist/react-nprogress.esm.js",
+      "file": "@tanem_react-nprogress.js",
+      "fileHash": "227eec0d",
+      "needsInterop": false
+    },
+    "react-perfect-scrollbar": {
+      "src": "../../node_modules/react-perfect-scrollbar/lib/index.js",
+      "file": "react-perfect-scrollbar.js",
+      "fileHash": "6ba0e05b",
+      "needsInterop": true
+    }
+  },
+  "chunks": {
+    "chunk-ZIYUGMGG": {
+      "file": "chunk-ZIYUGMGG.js"
+    },
+    "chunk-H3QGJKSP": {
+      "file": "chunk-H3QGJKSP.js"
+    },
+    "chunk-MQBRFNOA": {
+      "file": "chunk-MQBRFNOA.js"
+    },
+    "chunk-K7E3GE6C": {
+      "file": "chunk-K7E3GE6C.js"
+    },
+    "chunk-65KY755N": {
+      "file": "chunk-65KY755N.js"
+    },
+    "chunk-V4OQ3NZ2": {
+      "file": "chunk-V4OQ3NZ2.js"
+    }
+  }
+}

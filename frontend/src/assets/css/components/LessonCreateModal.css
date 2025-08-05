@@ -1,0 +1,340 @@
+/* LessonCreateModal styles - Enhanced for Phase 2 */
+
+/* =========================
+   LESSON TYPE SELECTION
+   ========================= */
+
+.lesson-type-card,
+.lesson-modal-type-card {
+  transition: all 0.3s ease;
+  border-radius: 12px;
+  border: 2px solid #e9ecef;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(248, 249, 250, 0.9) 100%);
+}
+
+.lesson-type-card:hover,
+.lesson-modal-type-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
+  border-color: #04a9f5;
+}
+
+.lesson-type-card.selected,
+.lesson-modal-type-card.selected {
+  border-color: #04a9f5;
+  background: linear-gradient(135deg, rgba(4, 169, 245, 0.1) 0%, rgba(29, 233, 182, 0.1) 100%);
+  transform: translateY(-3px);
+  box-shadow: 0 8px 25px rgba(4, 169, 245, 0.3);
+}
+
+.lesson-type-card.selected::before,
+.lesson-modal-type-card.selected::before {
+  content: '✓';
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: #04a9f5;
+  color: white;
+  border-radius: 50%;
+  width: 25px;
+  height: 25px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.8rem;
+  font-weight: bold;
+}
+
+/* =========================
+   VIDEO UPLOAD ENHANCEMENTS
+   ========================= */
+
+.video-upload-area,
+.lesson-modal-upload-area {
+  border: 3px dashed #e9ecef;
+  border-radius: 15px;
+  padding: 3rem 2rem;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  background: linear-gradient(135deg, rgba(244, 194, 43, 0.02) 0%, rgba(255, 193, 7, 0.02) 100%);
+  min-height: 200px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.video-upload-area:hover,
+.lesson-modal-upload-area:hover {
+  border-color: #f4c22b;
+  background: linear-gradient(135deg, rgba(244, 194, 43, 0.05) 0%, rgba(255, 193, 7, 0.05) 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(244, 194, 43, 0.15);
+}
+
+.video-upload-area.drag-over,
+.lesson-modal-upload-area.drag-active {
+  border-color: #f4c22b;
+  background: linear-gradient(135deg, rgba(244, 194, 43, 0.1) 0%, rgba(255, 193, 7, 0.1) 100%);
+  transform: scale(1.02);
+}
+
+/* Video preview styling */
+.video-preview,
+.lesson-modal-video-preview {
+  position: relative;
+  border-radius: 15px;
+  overflow: hidden;
+  background: #000;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
+  max-width: 100%;
+  height: auto;
+}
+
+.video-preview video,
+.lesson-modal-video-preview {
+  width: 100%;
+  height: auto;
+  max-height: 300px;
+  border-radius: 15px;
+}
+
+.video-overlay {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.video-preview:hover .video-overlay {
+  opacity: 1;
+}
+
+.remove-video-btn {
+  background: rgba(220, 53, 69, 0.9);
+  border: none;
+  border-radius: 50%;
+  width: 35px;
+  height: 35px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(10px);
+  color: white;
+  font-size: 0.9rem;
+}
+
+.remove-video-btn:hover {
+  background: rgba(220, 53, 69, 1);
+  transform: scale(1.1);
+}
+
+/* =========================
+   FORM ENHANCEMENTS
+   ========================= */
+
+.form-control-enhanced {
+  border-radius: 8px;
+  border: 2px solid #e9ecef;
+  transition: all 0.3s ease;
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(10px);
+}
+
+.form-control-enhanced:focus {
+  border-color: #04a9f5;
+  box-shadow: 0 0 0 0.2rem rgba(4, 169, 245, 0.15);
+  transform: translateY(-1px);
+  background: white;
+}
+
+.form-control-enhanced.is-invalid {
+  border-color: #dc3545;
+  box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.15);
+}
+
+/* Duration input with icon */
+.duration-input-group .input-group-text {
+  background: linear-gradient(135deg, rgba(4, 169, 245, 0.1) 0%, rgba(29, 233, 182, 0.1) 100%);
+  border: 2px solid #e9ecef;
+  border-right: none;
+  color: #6c757d;
+  font-weight: 500;
+}
+
+.duration-input-group .form-control:focus + .input-group-text {
+  border-color: #04a9f5;
+}
+
+/* =========================
+   LEGACY CLASSES COMPATIBILITY
+   ========================= */
+
+/* File input and interaction styles */
+.lesson-modal-clickable {
+  cursor: pointer;
+}
+
+.lesson-modal-badge {
+  font-size: 1rem;
+}
+
+.lesson-modal-remove-icon {
+  font-size: 1rem;
+}
+
+.lesson-modal-hidden-input {
+  display: none;
+}
+
+/* Form section styles */
+.lesson-modal-form-section {
+  margin-bottom: 1.5rem;
+}
+
+.lesson-modal-form-section h6 {
+  color: #6c757d;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  border-bottom: 1px solid #e9ecef;
+  padding-bottom: 0.5rem;
+}
+
+/* =========================
+   ENHANCED ANIMATIONS
+   ========================= */
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.modal-body .card {
+  animation: fadeInUp 0.5s ease-out;
+}
+
+.lesson-type-card,
+.lesson-modal-type-card {
+  animation: fadeInUp 0.3s ease-out;
+}
+
+.lesson-type-card:nth-child(2),
+.lesson-modal-type-card:nth-child(2) {
+  animation-delay: 0.1s;
+}
+
+.lesson-type-card:nth-child(3),
+.lesson-modal-type-card:nth-child(3) {
+  animation-delay: 0.2s;
+}
+
+.lesson-type-card:nth-child(4),
+.lesson-modal-type-card:nth-child(4) {
+  animation-delay: 0.3s;
+}
+
+/* =========================
+   RESPONSIVE DESIGN
+   ========================= */
+
+@media (max-width: 768px) {
+  .lesson-type-card,
+  .lesson-modal-type-card {
+    margin-bottom: 1rem;
+  }
+  
+  .video-upload-area,
+  .lesson-modal-upload-area {
+    padding: 2rem 1rem;
+    min-height: 150px;
+  }
+  
+  .video-upload-area h5 {
+    font-size: 1.1rem;
+  }
+  
+  .video-preview video,
+  .lesson-modal-video-preview {
+    max-height: 200px;
+  }
+}
+
+@media (max-width: 576px) {
+  .modal-dialog {
+    margin: 0.5rem;
+  }
+  
+  .lesson-type-card .card-body,
+  .lesson-modal-type-card .card-body {
+    padding: 1rem;
+  }
+  
+  .video-upload-area,
+  .lesson-modal-upload-area {
+    padding: 1.5rem 0.5rem;
+  }
+}
+
+/* =========================
+   BUTTON ENHANCEMENTS
+   ========================= */
+
+.btn-enhanced {
+  transition: all 0.3s ease;
+  border-radius: 8px;
+  font-weight: 500;
+  padding: 0.6rem 1.5rem;
+}
+
+.btn-enhanced:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+}
+
+.btn-primary.btn-enhanced {
+  background: linear-gradient(135deg, #04a9f5, #1de9b6);
+  border: none;
+  box-shadow: 0 4px 12px rgba(4, 169, 245, 0.3);
+}
+
+.btn-primary.btn-enhanced:hover {
+  background: linear-gradient(135deg, #0390d3, #1ac4a0);
+  box-shadow: 0 6px 20px rgba(4, 169, 245, 0.4);
+}
+
+/* Modal header styling */
+.modal-header {
+  border-bottom: 2px solid #f8f9fa;
+  background: linear-gradient(135deg, rgba(4, 169, 245, 0.05) 0%, rgba(29, 233, 182, 0.05) 100%);
+}
+
+.modal-title {
+  color: #2c3e50;
+  font-weight: 600;
+}
+
+/* Content textarea styling */
+.content-textarea {
+  min-height: 120px;
+  resize: vertical;
+}
+
+/* Badge styling for lesson types */
+.lesson-type-badge,
+.lesson-modal-badge {
+  font-size: 0.9rem;
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  font-weight: 500;
+  border: none;
+}

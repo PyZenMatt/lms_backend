@@ -1,0 +1,64 @@
+/* Loader Components Styles */
+
+/* Spinner Loader */
+.loader-spinner {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 2rem;
+}
+
+.loader-spinner-icon {
+  width: 2rem;
+  height: 2rem;
+  border: 0.25em solid rgba(0, 123, 255, 0.25);
+  border-top-color: #007bff;
+  border-radius: 50%;
+  animation: spinner-spin 1s linear infinite;
+}
+
+@keyframes spinner-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Bar Loader */
+.loader-bar {
+  width: 100%;
+  height: 4px;
+  background-color: #e9ecef;
+  border-radius: 2px;
+  overflow: hidden;
+  margin: 1rem 0;
+}
+
+.loader-bar-progress {
+  height: 100%;
+  background: linear-gradient(90deg, #007bff, #0056b3);
+  border-radius: 2px;
+  animation: bar-progress 2s ease-in-out infinite;
+}
+
+@keyframes bar-progress {
+  0% {
+    width: 0%;
+    margin-left: 0%;
+  }
+  50% {
+    width: 75%;
+    margin-left: 12.5%;
+  }
+  100% {
+    width: 0%;
+    margin-left: 100%;
+  }
+}
+
+/* Loading text styles */
+.loader-text {
+  text-align: center;
+  color: #6c757d;
+  font-size: 0.875rem;
+  margin-top: 0.5rem;
+}

@@ -1,0 +1,279 @@
+/* Authentication Pages - Skillshare Inspired Theme
+   Modern, clean design for login and signup forms
+   ================================================= */
+
+/* Main Auth Wrapper */
+.authWrapper {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Auth Container */
+.authContainer {
+  width: 100%;
+  max-width: 400px;
+  position: relative;
+  z-index: 10;
+}
+
+/* Header with Logo */
+.authHeader {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.logo {
+  margin-bottom: 1rem;
+}
+
+.brand {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: #00ad5b;
+  margin: 0;
+  letter-spacing: -0.025em;
+  background: linear-gradient(135deg, #00ad5b 0%, #008845 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Main Auth Card */
+.authCard {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  border: 1px solid #e2e8f0;
+  overflow: hidden;
+}
+
+.authBody {
+  padding: 2.5rem;
+}
+
+.authContent {
+  text-align: center;
+}
+
+.authTitle {
+  font-size: 1.875rem;
+  font-weight: 600;
+  color: #1e293b;
+  margin-bottom: 0.5rem;
+}
+
+.authSubtitle {
+  font-size: 1rem;
+  color: #64748b;
+  margin-bottom: 2rem;
+}
+
+/* Form Styles */
+.authForm {
+  text-align: left;
+}
+
+.formGroup {
+  margin-bottom: 1.5rem;
+}
+
+.formLabel {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #374151;
+  margin-bottom: 0.5rem;
+}
+
+.formInput {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 1rem;
+  transition: all 0.15s ease-in-out;
+  background-color: white;
+}
+
+.formInput:focus {
+  outline: none;
+  border-color: #00ad5b;
+  box-shadow: 0 0 0 3px rgba(0, 173, 91, 0.1);
+}
+
+.formSelect {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 1rem;
+  background-color: white;
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
+  background-position: right 0.5rem center;
+  background-repeat: no-repeat;
+  background-size: 1.5em 1.5em;
+  padding-right: 2.5rem;
+  transition: all 0.15s ease-in-out;
+}
+
+.formSelect:focus {
+  outline: none;
+  border-color: #00ad5b;
+  box-shadow: 0 0 0 3px rgba(0, 173, 91, 0.1);
+}
+
+/* Submit Button */
+.submitButton {
+  width: 100%;
+  background: linear-gradient(135deg, #00ad5b 0%, #008845 100%);
+  color: white;
+  border: none;
+  padding: 0.875rem 1.5rem;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease-in-out;
+  margin-bottom: 1.5rem;
+}
+
+.submitButton:hover {
+  background: linear-gradient(135deg, #008845 0%, #006633 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 173, 91, 0.4);
+}
+
+.submitButton:active {
+  transform: translateY(0);
+}
+
+/* Links and Footer */
+.authFooter {
+  text-align: center;
+  margin-top: 1.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid #e2e8f0;
+}
+
+.authLink {
+  color: #00ad5b;
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.15s ease-in-out;
+}
+
+.authLink:hover {
+  color: #008845;
+  text-decoration: underline;
+}
+
+/* Messages */
+.successMessage {
+  background-color: #dcfce7;
+  border: 1px solid #bbf7d0;
+  color: #166534;
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+  font-size: 0.875rem;
+}
+
+.errorMessage {
+  background-color: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #dc2626;
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+  font-size: 0.875rem;
+}
+
+/* Role Selection */
+.roleSelection {
+  margin-bottom: 1.5rem;
+}
+
+.roleOption {
+  display: flex;
+  align-items: center;
+  padding: 0.75rem;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  margin-bottom: 0.5rem;
+  cursor: pointer;
+  transition: all 0.15s ease-in-out;
+}
+
+.roleOption:hover {
+  border-color: #00ad5b;
+  background-color: #f0fdf4;
+}
+
+.roleOption input[type="radio"] {
+  margin-right: 0.75rem;
+}
+
+.roleLabel {
+  font-weight: 500;
+  color: #374151;
+}
+
+.roleDescription {
+  font-size: 0.875rem;
+  color: #6b7280;
+  margin-top: 0.25rem;
+}
+
+/* Responsive Design */
+@media (max-width: 480px) {
+  .authWrapper {
+    padding: 10px;
+  }
+  
+  .authBody {
+    padding: 1.5rem;
+  }
+  
+  .authTitle {
+    font-size: 1.5rem;
+  }
+  
+  .brand {
+    font-size: 2rem;
+  }
+}
+
+/* Animation for form appearance */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.authContainer {
+  animation: fadeInUp 0.5s ease-out;
+}
+
+/* Loading state */
+.submitButton:disabled {
+  background: #94a3b8;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.submitButton:disabled:hover {
+  background: #94a3b8;
+  transform: none;
+  box-shadow: none;
+}

@@ -1,0 +1,68 @@
+/* 
+ * Main Styles Entry Point
+ * Import order is important for CSS cascade
+ */
+
+/* 1. CSS Variables and Themes */
+@import './themes/variables.css';
+@import './themes/skillshare-theme.css';
+@import './themes/responsive.css';
+
+/* 2. Global Reset and Base */
+@import './global/reset.css';
+@import './global/typography.css';
+@import './global/utilities.css';
+
+/* 3. Layout Styles */
+@import './layouts/auth-components.css';
+
+/* 4. Component Styles (imported automatically by React components) */
+/* Components will import their own .module.css files */
+
+/* 5. View-specific Styles (imported automatically by React views) */
+/* Views will import their own .module.css files */
+
+/* Global overwrites and fixes can be added here if absolutely necessary */
+
+/* Bootstrap overwrites if needed */
+.btn {
+  border-radius: var(--radius-md);
+  transition: all var(--transition-fast);
+}
+
+.card {
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-color);
+  box-shadow: var(--shadow-sm);
+}
+
+.modal-content {
+  border-radius: var(--radius-lg);
+  border: none;
+  box-shadow: var(--shadow-xl);
+}
+
+/* Form controls */
+.form-control {
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-color);
+  transition: all var(--transition-fast);
+}
+
+.form-control:focus {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+/* Navbar customizations */
+.navbar {
+  box-shadow: var(--shadow-sm);
+  border-bottom: 1px solid var(--border-light);
+}
+
+/* Toast customizations */
+.toast {
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  border: none;
+}

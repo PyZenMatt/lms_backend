@@ -1,0 +1,251 @@
+/* Staking Interface Styles */
+
+.staking-interface {
+  .tier-progress {
+    background: linear-gradient(90deg, 
+      var(--nextui-colors-primary100) 0%, 
+      var(--nextui-colors-primary500) 100%);
+    border-radius: 8px;
+    padding: 1px;
+    
+    .progress-inner {
+      background: var(--nextui-colors-background);
+      border-radius: 7px;
+      padding: 8px;
+    }
+  }
+
+  .tier-badge {
+    transition: all 0.3s ease;
+    
+    &.active {
+      transform: scale(1.1);
+      box-shadow: 0 4px 20px rgba(var(--nextui-colors-primary), 0.4);
+    }
+  }
+
+  .staking-card {
+    transition: all 0.3s ease;
+    
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+    }
+  }
+
+  .tier-comparison {
+    .tier-item {
+      padding: 16px;
+      border-radius: 12px;
+      border: 2px solid transparent;
+      transition: all 0.3s ease;
+      
+      &.current-tier {
+        border-color: var(--nextui-colors-primary);
+        background: linear-gradient(135deg, 
+          rgba(var(--nextui-colors-primary100), 0.5),
+          rgba(var(--nextui-colors-primary50), 0.3));
+      }
+      
+      &.available-tier:hover {
+        border-color: var(--nextui-colors-success);
+        cursor: pointer;
+      }
+      
+      &.locked-tier {
+        opacity: 0.6;
+        filter: grayscale(0.3);
+      }
+    }
+  }
+
+  .platform-stats {
+    .stat-item {
+      text-align: center;
+      padding: 20px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, 
+        rgba(var(--nextui-colors-default50), 0.8),
+        rgba(var(--nextui-colors-default100), 0.4));
+      transition: transform 0.3s ease;
+      
+      &:hover {
+        transform: scale(1.05);
+      }
+      
+      .stat-value {
+        font-size: 2rem;
+        font-weight: 700;
+        margin-bottom: 4px;
+      }
+      
+      .stat-label {
+        font-size: 0.875rem;
+        opacity: 0.7;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+    }
+  }
+
+  .action-buttons {
+    .stake-button {
+      background: linear-gradient(135deg, 
+        var(--nextui-colors-primary), 
+        var(--nextui-colors-primary600));
+      border: none;
+      transition: all 0.3s ease;
+      
+      &:hover:not(:disabled) {
+        transform: translateY(-1px);
+        box-shadow: 0 6px 20px rgba(var(--nextui-colors-primary), 0.4);
+      }
+      
+      &:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+    }
+    
+    .unstake-button {
+      background: linear-gradient(135deg, 
+        var(--nextui-colors-secondary), 
+        var(--nextui-colors-secondary600));
+      border: none;
+      transition: all 0.3s ease;
+      
+      &:hover:not(:disabled) {
+        transform: translateY(-1px);
+        box-shadow: 0 6px 20px rgba(var(--nextui-colors-secondary), 0.4);
+      }
+    }
+  }
+
+  .progress-ring {
+    position: relative;
+    display: inline-block;
+    
+    .progress-circle {
+      transform: rotate(-90deg);
+      
+      .progress-background {
+        fill: none;
+        stroke: var(--nextui-colors-default200);
+        stroke-width: 8;
+      }
+      
+      .progress-fill {
+        fill: none;
+        stroke: var(--nextui-colors-primary);
+        stroke-width: 8;
+        stroke-linecap: round;
+        transition: stroke-dasharray 1s ease;
+      }
+    }
+    
+    .progress-text {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      text-align: center;
+      font-weight: 600;
+    }
+  }
+
+  .tier-benefits {
+    .benefit-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 0;
+      
+      .benefit-icon {
+        color: var(--nextui-colors-success);
+        font-size: 1.2em;
+      }
+      
+      .benefit-text {
+        font-size: 0.9em;
+        opacity: 0.8;
+      }
+    }
+  }
+
+  .loading-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255, 255, 255, 0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 12px;
+    backdrop-filter: blur(4px);
+  }
+
+  .alert-success {
+    background: linear-gradient(135deg, 
+      rgba(var(--nextui-colors-success100), 0.9),
+      rgba(var(--nextui-colors-success50), 0.7));
+    border: 1px solid var(--nextui-colors-success200);
+    color: var(--nextui-colors-success800);
+  }
+
+  .alert-error {
+    background: linear-gradient(135deg, 
+      rgba(var(--nextui-colors-danger100), 0.9),
+      rgba(var(--nextui-colors-danger50), 0.7));
+    border: 1px solid var(--nextui-colors-danger200);
+    color: var(--nextui-colors-danger800);
+  }
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+  .staking-interface {
+    padding: 16px;
+    
+    .platform-stats {
+      .stat-item {
+        padding: 16px 12px;
+        
+        .stat-value {
+          font-size: 1.5rem;
+        }
+      }
+    }
+    
+    .tier-comparison {
+      .tier-item {
+        padding: 12px;
+        margin-bottom: 12px;
+      }
+    }
+  }
+}
+
+/* Dark mode adjustments */
+@media (prefers-color-scheme: dark) {
+  .staking-interface {
+    .tier-progress {
+      background: linear-gradient(90deg, 
+        var(--nextui-colors-primary200) 0%, 
+        var(--nextui-colors-primary400) 100%);
+    }
+    
+    .platform-stats {
+      .stat-item {
+        background: linear-gradient(135deg, 
+          rgba(var(--nextui-colors-default100), 0.1),
+          rgba(var(--nextui-colors-default200), 0.05));
+      }
+    }
+    
+    .loading-overlay {
+      background: rgba(0, 0, 0, 0.8);
+    }
+  }
+}

@@ -1,0 +1,245 @@
+/* Advanced Animations for Modal Components */
+
+/* Modal entrance animations */
+.modal.show .modal-dialog {
+  animation: modalSlideIn 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+@keyframes modalSlideIn {
+  from {
+    transform: translateY(-100px) scale(0.9);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+}
+
+/* Category selection animations */
+.category-option {
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  transform: translateY(0);
+}
+
+.category-option:hover {
+  transform: translateY(-3px) scale(1.02);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+.category-option.selected {
+  animation: categoryPulse 0.6s ease-out;
+}
+
+@keyframes categoryPulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+  100% { transform: scale(1); }
+}
+
+/* Upload area animations */
+.image-upload-area {
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.image-upload-area::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+  transition: left 0.5s;
+}
+
+.image-upload-area:hover::before {
+  left: 100%;
+}
+
+.image-upload-area:hover {
+  transform: scale(1.02);
+  border-color: #007bff;
+  box-shadow: 0 10px 30px rgba(0, 123, 255, 0.2);
+}
+
+/* Button animations */
+.btn {
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.btn::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  transition: width 0.6s, height 0.6s;
+}
+
+.btn:hover::before {
+  width: 300px;
+  height: 300px;
+}
+
+/* Form field focus animations */
+.form-control {
+  transition: all 0.3s ease;
+  border: 2px solid #e9ecef;
+}
+
+.form-control:focus {
+  border-color: #007bff;
+  box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+  transform: translateY(-2px);
+}
+
+/* Loading spinner enhancement */
+.spinner-border {
+  animation: spin 1s linear infinite, pulse 2s ease-in-out infinite alternate;
+}
+
+@keyframes pulse {
+  from { opacity: 1; }
+  to { opacity: 0.5; }
+}
+
+/* Card hover effects */
+.card {
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+  border-color: rgba(0, 123, 255, 0.3);
+}
+
+/* Type selection cards */
+.lesson-type-card, .exercise-type-card, .difficulty-card {
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: 2px solid transparent;
+}
+
+.lesson-type-card:hover, .exercise-type-card:hover, .difficulty-card:hover {
+  transform: translateY(-3px) scale(1.02);
+  border-color: #007bff;
+}
+
+.lesson-type-card.selected, .exercise-type-card.selected, .difficulty-card.selected {
+  background: linear-gradient(135deg, #007bff, #0056b3);
+  color: white;
+  animation: selectedGlow 0.5s ease-out;
+}
+
+@keyframes selectedGlow {
+  0% { box-shadow: 0 0 0 rgba(0, 123, 255, 0.7); }
+  100% { box-shadow: 0 0 20px rgba(0, 123, 255, 0.7); }
+}
+
+/* Progress indicators */
+.progress-bar {
+  background: linear-gradient(90deg, #007bff, #0056b3);
+  animation: progressShine 2s infinite;
+}
+
+@keyframes progressShine {
+  0% { background-position: -200px 0; }
+  100% { background-position: calc(200px + 100%) 0; }
+}
+
+/* Success animation for toast */
+.toast-success {
+  animation: toastSuccess 0.5s ease-out;
+}
+
+@keyframes toastSuccess {
+  0% {
+    transform: translateX(100%) rotate(10deg);
+    opacity: 0;
+  }
+  50% {
+    transform: translateX(-10px) rotate(-2deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(0) rotate(0deg);
+    opacity: 1;
+  }
+}
+
+/* Error shake animation */
+.shake {
+  animation: shake 0.5s ease-in-out;
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-5px); }
+  75% { transform: translateX(5px); }
+}
+
+/* Floating labels animation */
+.form-floating label {
+  transition: all 0.3s ease;
+}
+
+.form-floating .form-control:focus ~ label,
+.form-floating .form-control:not(:placeholder-shown) ~ label {
+  transform: scale(0.85) translateY(-0.5rem) translateX(0.15rem);
+  color: #007bff;
+}
+
+/* Image preview zoom effect */
+.preview-image {
+  transition: transform 0.3s ease;
+}
+
+.image-preview:hover .preview-image {
+  transform: scale(1.05);
+}
+
+/* Responsive animations */
+@media (max-width: 768px) {
+  .modal-dialog {
+    margin: 0.5rem;
+  }
+  
+  .card:hover {
+    transform: translateY(-2px);
+  }
+  
+  .category-option:hover {
+    transform: translateY(-1px) scale(1.01);
+  }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .card {
+    background: #2d3748;
+    border-color: #4a5568;
+  }
+  
+  .form-control {
+    background-color: #2d3748;
+    border-color: #4a5568;
+    color: #f7fafc;
+  }
+  
+  .form-control:focus {
+    background-color: #2d3748;
+    border-color: #3182ce;
+    color: #f7fafc;
+  }
+}

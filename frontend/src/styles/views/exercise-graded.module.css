@@ -1,0 +1,125 @@
+/* ExerciseGradedDetail.css */
+
+.exercise-graded-container {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 2rem 0;
+}
+
+.graded-loading-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  min-height: 60vh;
+  text-align: center;
+}
+
+.graded-header {
+  background: white;
+  padding: 2rem;
+  border-radius: 12px;
+  margin-bottom: 2rem;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.graded-title {
+  color: #2c3e50;
+  margin: 0;
+  font-size: 1.8rem;
+  font-weight: 600;
+}
+
+.solution-content pre {
+  max-height: 400px;
+  overflow-y: auto;
+  border: 1px solid #dee2e6;
+  font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+
+.review-card {
+  border: 1px solid #e9ecef;
+  transition: all 0.3s ease;
+}
+
+.review-card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  transform: translateY(-2px);
+}
+
+.score-display {
+  padding: 1.5rem 0;
+}
+
+.score-number {
+  font-size: 3rem;
+  font-weight: bold;
+  margin: 0;
+}
+
+.score-label {
+  color: #6c757d;
+  font-size: 0.9rem;
+  margin: 0;
+}
+
+.result-display h4 {
+  font-weight: bold;
+  margin-bottom: 0.5rem;
+}
+
+.reward-display {
+  padding: 1rem 0;
+}
+
+.pending-review {
+  padding: 2rem 0;
+}
+
+.review-progress {
+  margin-top: 1rem;
+  padding: 1rem;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+}
+
+.card {
+  border: none;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+  border-radius: 12px;
+}
+
+.card-header {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border-radius: 12px 12px 0 0 !important;
+  font-weight: 600;
+}
+
+.card-header h5,
+.card-header h6 {
+  margin: 0;
+  color: white;
+}
+
+@media (max-width: 768px) {
+  .graded-header {
+    flex-direction: column;
+    text-align: center;
+  }
+  
+  .graded-title {
+    font-size: 1.4rem;
+  }
+  
+  .score-number {
+    font-size: 2rem;
+  }
+}

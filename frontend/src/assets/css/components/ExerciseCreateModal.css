@@ -1,0 +1,364 @@
+/* ExerciseCreateModal styles - Enhanced for Phase 2 */
+
+/* =========================
+   EXERCISE TYPE & DIFFICULTY SELECTION
+   ========================= */
+
+.exercise-type-card {
+  transition: all 0.3s ease;
+  border-radius: 12px;
+  border: 2px solid #e9ecef;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(248, 249, 250, 0.9) 100%);
+}
+
+.exercise-type-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
+  border-color: #04a9f5;
+}
+
+.exercise-type-card.selected {
+  border-color: #04a9f5;
+  background: linear-gradient(135deg, rgba(4, 169, 245, 0.1) 0%, rgba(29, 233, 182, 0.1) 100%);
+  transform: translateY(-3px);
+  box-shadow: 0 8px 25px rgba(4, 169, 245, 0.3);
+}
+
+.exercise-type-card.selected::before {
+  content: '✓';
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: #04a9f5;
+  color: white;
+  border-radius: 50%;
+  width: 25px;
+  height: 25px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.8rem;
+  font-weight: bold;
+}
+
+/* Difficulty level cards */
+.difficulty-card {
+  transition: all 0.3s ease;
+  border-radius: 10px;
+  border: 2px solid #e9ecef;
+  cursor: pointer;
+  padding: 1rem;
+  text-align: center;
+  background: white;
+}
+
+.difficulty-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+}
+
+.difficulty-card.selected {
+  border-color: #1de9b6;
+  background: linear-gradient(135deg, rgba(29, 233, 182, 0.1) 0%, rgba(4, 169, 245, 0.1) 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(29, 233, 182, 0.3);
+}
+
+/* =========================
+   IMAGE UPLOAD ENHANCEMENTS
+   ========================= */
+
+.image-upload-area {
+  border: 3px dashed #e9ecef;
+  border-radius: 15px;
+  padding: 3rem 2rem;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  background: linear-gradient(135deg, rgba(29, 233, 182, 0.02) 0%, rgba(4, 169, 245, 0.02) 100%);
+  min-height: 200px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.image-upload-area:hover {
+  border-color: #1de9b6;
+  background: linear-gradient(135deg, rgba(29, 233, 182, 0.05) 0%, rgba(4, 169, 245, 0.05) 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(29, 233, 182, 0.15);
+}
+
+.image-upload-area.drag-over {
+  border-color: #1de9b6;
+  background: linear-gradient(135deg, rgba(29, 233, 182, 0.1) 0%, rgba(4, 169, 245, 0.1) 100%);
+  transform: scale(1.02);
+}
+
+.upload-content {
+  width: 100%;
+}
+
+.upload-content h5 {
+  margin-bottom: 0.5rem;
+  color: #495057;
+  font-weight: 600;
+}
+
+/* Image preview styling */
+.image-preview,
+.reference-preview {
+  position: relative;
+  border-radius: 15px;
+  overflow: hidden;
+  background: white;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+  padding: 0.5rem;
+  border: 2px solid #f8f9fa;
+}
+
+.preview-image,
+.reference-image {
+  width: 100%;
+  max-width: 100%;
+  height: auto;
+  max-height: 300px;
+  object-fit: cover;
+  border-radius: 13px;
+  transition: transform 0.3s ease;
+}
+
+.image-preview:hover .preview-image,
+.reference-preview:hover .reference-image {
+  transform: scale(1.02);
+}
+
+.image-overlay {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  z-index: 10;
+}
+
+.image-preview:hover .image-overlay,
+.reference-preview:hover .image-overlay {
+  opacity: 1;
+}
+
+.remove-image-btn {
+  background: rgba(220, 53, 69, 0.9);
+  border: none;
+  border-radius: 50%;
+  width: 35px;
+  height: 35px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(10px);
+  color: white;
+  font-size: 0.9rem;
+}
+
+.remove-image-btn:hover {
+  background: rgba(220, 53, 69, 1);
+  transform: scale(1.1);
+}
+
+/* =========================
+   FORM ENHANCEMENTS
+   ========================= */
+
+.form-control-enhanced {
+  border-radius: 8px;
+  border: 2px solid #e9ecef;
+  transition: all 0.3s ease;
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(10px);
+}
+
+.form-control-enhanced:focus {
+  border-color: #04a9f5;
+  box-shadow: 0 0 0 0.2rem rgba(4, 169, 245, 0.15);
+  transform: translateY(-1px);
+  background: white;
+}
+
+.form-control-enhanced.is-invalid {
+  border-color: #dc3545;
+  box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.15);
+}
+
+/* Time estimate input */
+.time-input-group .input-group-text {
+  background: linear-gradient(135deg, rgba(4, 169, 245, 0.1) 0%, rgba(29, 233, 182, 0.1) 100%);
+  border: 2px solid #e9ecef;
+  border-right: none;
+  color: #6c757d;
+  font-weight: 500;
+}
+
+.time-input-group .form-control:focus + .input-group-text {
+  border-color: #04a9f5;
+}
+
+/* Instructions textarea */
+.instructions-textarea {
+  min-height: 120px;
+  resize: vertical;
+}
+
+/* Materials textarea */
+.materials-textarea {
+  min-height: 100px;
+  resize: vertical;
+}
+
+/* =========================
+   LEGACY CLASSES COMPATIBILITY
+   ========================= */
+
+.exercise-modal-clickable {
+  cursor: pointer;
+}
+
+.exercise-modal-hidden-input {
+  display: none;
+}
+
+.exercise-modal-badge {
+  font-size: 0.9rem;
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  font-weight: 500;
+  border: none;
+}
+
+/* =========================
+   ENHANCED ANIMATIONS
+   ========================= */
+
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.modal-body .card {
+  animation: slideInUp 0.5s ease-out;
+}
+
+.exercise-type-card {
+  animation: slideInUp 0.3s ease-out;
+}
+
+.exercise-type-card:nth-child(2) {
+  animation-delay: 0.1s;
+}
+
+.exercise-type-card:nth-child(3) {
+  animation-delay: 0.2s;
+}
+
+.exercise-type-card:nth-child(4) {
+  animation-delay: 0.3s;
+}
+
+.difficulty-card {
+  animation: slideInUp 0.3s ease-out;
+}
+
+.difficulty-card:nth-child(2) {
+  animation-delay: 0.1s;
+}
+
+.difficulty-card:nth-child(3) {
+  animation-delay: 0.2s;
+}
+
+/* =========================
+   RESPONSIVE DESIGN
+   ========================= */
+
+@media (max-width: 768px) {
+  .exercise-type-card,
+  .difficulty-card {
+    margin-bottom: 1rem;
+  }
+  
+  .image-upload-area {
+    padding: 2rem 1rem;
+    min-height: 150px;
+  }
+  
+  .upload-content h5 {
+    font-size: 1.1rem;
+  }
+  
+  .preview-image,
+  .reference-image {
+    max-height: 200px;
+  }
+}
+
+@media (max-width: 576px) {
+  .modal-dialog {
+    margin: 0.5rem;
+  }
+  
+  .exercise-type-card .card-body,
+  .difficulty-card {
+    padding: 1rem;
+  }
+  
+  .image-upload-area {
+    padding: 1.5rem 0.5rem;
+  }
+}
+
+/* =========================
+   BUTTON ENHANCEMENTS
+   ========================= */
+
+.btn-enhanced {
+  transition: all 0.3s ease;
+  border-radius: 8px;
+  font-weight: 500;
+  padding: 0.6rem 1.5rem;
+}
+
+.btn-enhanced:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+}
+
+.btn-primary.btn-enhanced {
+  background: linear-gradient(135deg, #04a9f5, #1de9b6);
+  border: none;
+  box-shadow: 0 4px 12px rgba(4, 169, 245, 0.3);
+}
+
+.btn-primary.btn-enhanced:hover {
+  background: linear-gradient(135deg, #0390d3, #1ac4a0);
+  box-shadow: 0 6px 20px rgba(4, 169, 245, 0.4);
+}
+
+/* Modal header styling */
+.modal-header {
+  border-bottom: 2px solid #f8f9fa;
+  background: linear-gradient(135deg, rgba(4, 169, 245, 0.05) 0%, rgba(29, 233, 182, 0.05) 100%);
+}
+
+.modal-title {
+  color: #2c3e50;
+  font-weight: 600;
+}

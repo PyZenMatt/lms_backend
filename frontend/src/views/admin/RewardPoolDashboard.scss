@@ -1,0 +1,70 @@
+.reward-pool-dashboard {
+  .header-card {
+    background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+    color: white;
+    
+    h2 {
+      color: white;
+      font-weight: 600;
+    }
+    
+    p {
+      color: rgba(255, 255, 255, 0.8);
+    }
+  }
+  
+  .transactions-statistics {
+    .stat-item {
+      padding: 15px;
+      background-color: rgba(0, 0, 0, 0.02);
+      border-radius: 5px;
+      margin-bottom: 15px;
+      
+      h3 {
+        font-size: 1.8rem;
+        font-weight: 600;
+      }
+      
+      h5 {
+        font-size: 1rem;
+        color: #666;
+      }
+      
+      .value {
+        font-size: 1.1rem;
+        font-weight: 500;
+        margin-bottom: 0;
+      }
+      
+      .transaction-types {
+        margin-top: 10px;
+        
+        li {
+          display: flex;
+          justify-content: space-between;
+          padding: 5px 0;
+          border-bottom: 1px dashed #eee;
+          
+          &:last-child {
+            border-bottom: none;
+          }
+          
+          .type {
+            text-transform: capitalize;
+          }
+          
+          .count {
+            font-weight: 500;
+          }
+        }
+      }
+    }
+  }
+  
+  .loading-state {
+    min-height: 400px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+}

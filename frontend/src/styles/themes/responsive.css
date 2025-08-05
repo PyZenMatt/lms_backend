@@ -1,0 +1,242 @@
+/* Mobile Responsive Optimizations */
+
+/* Mobile-first approach for modals */
+@media (max-width: 576px) {
+  .modal-dialog {
+    margin: 0.5rem;
+    max-width: calc(100vw - 1rem);
+  }
+  
+  .modal-dialog.modal-lg,
+  .modal-dialog.modal-xl {
+    max-width: calc(100vw - 1rem);
+  }
+  
+  .modal-content {
+    border-radius: 15px;
+  }
+  
+  .modal-header {
+    padding: 1rem;
+    border-radius: 15px 15px 0 0;
+  }
+  
+  .modal-title {
+    font-size: 1.1rem;
+  }
+  
+  .modal-body {
+    padding: 1rem;
+  }
+  
+  .modal-footer {
+    padding: 1rem;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  
+  .modal-footer .btn {
+    width: 100%;
+    margin: 0;
+  }
+}
+
+/* Form elements mobile optimization */
+@media (max-width: 576px) {
+  .form-control,
+  .form-select {
+    font-size: 16px; /* Prevents zoom on iOS */
+    padding: 0.75rem;
+  }
+  
+  .form-label {
+    font-size: 0.9rem;
+    margin-bottom: 0.5rem;
+  }
+  
+  .input-group-text {
+    padding: 0.75rem;
+  }
+  
+  textarea.form-control {
+    min-height: 100px;
+  }
+}
+
+/* Card layouts mobile optimization */
+@media (max-width: 576px) {
+  .card {
+    margin-bottom: 1rem;
+  }
+  
+  .card-body {
+    padding: 1rem;
+  }
+  
+  .card-title {
+    font-size: 1.1rem;
+  }
+  
+  .row > .col-md-6,
+  .row > .col-lg-4,
+  .row > .col-lg-8 {
+    margin-bottom: 1rem;
+  }
+}
+
+/* Upload areas mobile optimization */
+@media (max-width: 576px) {
+  .image-upload-area,
+  .video-upload-area,
+  .reference-upload-area {
+    padding: 20px 15px;
+    min-height: 120px;
+  }
+  
+  .upload-content h5 {
+    font-size: 1rem;
+  }
+  
+  .upload-content p {
+    font-size: 0.85rem;
+  }
+  
+  .preview-image,
+  .preview-video {
+    max-width: 100%;
+    height: auto;
+  }
+}
+
+/* Button optimizations for mobile */
+@media (max-width: 576px) {
+  .btn {
+    padding: 0.75rem 1rem;
+    font-size: 0.9rem;
+  }
+  
+  .btn-sm {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.8rem;
+  }
+  
+  .btn-lg {
+    padding: 1rem 1.5rem;
+    font-size: 1rem;
+  }
+}
+
+/* Category and type selection mobile */
+@media (max-width: 576px) {
+  .category-option,
+  .lesson-type-option,
+  .exercise-type-option,
+  .difficulty-option {
+    margin-bottom: 0.75rem;
+  }
+  
+  .category-badge,
+  .type-card {
+    font-size: 0.85rem;
+    padding: 0.6rem;
+  }
+  
+  .type-card .card-body {
+    padding: 0.75rem;
+  }
+}
+
+/* Progress indicator mobile */
+@media (max-width: 576px) {
+  .progress-indicator {
+    padding: 10px;
+    margin-bottom: 1rem;
+  }
+  
+  .custom-progress {
+    height: 6px;
+  }
+}
+
+/* Toast notifications mobile */
+@media (max-width: 576px) {
+  .toast-container {
+    position: fixed !important;
+    top: 1rem !important;
+    right: 1rem !important;
+    left: 1rem !important;
+    z-index: 1080;
+  }
+  
+  .toast {
+    max-width: 100% !important;
+    margin: 0 !important;
+  }
+}
+
+/* Accessibility improvements for mobile */
+@media (max-width: 576px) {
+  /* Increase touch targets */
+  .btn,
+  .form-control,
+  .form-select,
+  .category-option,
+  .upload-area {
+    min-height: 44px; /* Apple's recommended minimum touch target */
+  }
+  
+  /* Improve text readability */
+  body {
+    font-size: 16px;
+    line-height: 1.5;
+  }
+  
+  /* Better spacing for small screens */
+  .container,
+  .container-fluid {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+}
+
+/* Landscape orientation on mobile */
+@media (max-width: 768px) and (orientation: landscape) {
+  .modal-dialog {
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+  
+  .modal-body {
+    max-height: 60vh;
+    overflow-y: auto;
+  }
+}
+
+/* High DPI displays */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+  .preview-image,
+  .preview-video {
+    image-rendering: -webkit-optimize-contrast;
+    image-rendering: crisp-edges;
+  }
+}
+
+/* Dark mode mobile optimizations */
+@media (max-width: 576px) and (prefers-color-scheme: dark) {
+  .modal-content {
+    background-color: #2d3748;
+    color: #f7fafc;
+  }
+  
+  .form-control,
+  .form-select {
+    background-color: #4a5568;
+    border-color: #718096;
+    color: #f7fafc;
+  }
+  
+  .card {
+    background-color: #4a5568;
+    border-color: #718096;
+  }
+}

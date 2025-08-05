@@ -1,0 +1,395 @@
+/**
+ * 🌙 Enhanced Dark Theme Styles
+ * 
+ * Comprehensive dark theme implementation for SchoolPlatform
+ * Extends existing Bootstrap variables with modern dark UI patterns
+ */
+
+/* Dark Mode Root Variables */
+:root.dark-mode,
+.dark-mode {
+  /* Core Colors */
+  --bs-body-bg: #0f172a;
+  --bs-body-color: #cbd5e1;
+  --bs-secondary-bg: #1e293b;
+  --bs-tertiary-bg: #334155;
+  
+  /* Text Colors */
+  --bs-text-primary: #f1f5f9;
+  --bs-text-secondary: #cbd5e1;
+  --bs-text-muted: #94a3b8;
+  --bs-text-disabled: #64748b;
+  
+  /* Surface Colors */
+  --bs-surface-primary: #1e293b;
+  --bs-surface-secondary: #334155;
+  --bs-surface-tertiary: #475569;
+  --bs-surface-overlay: rgba(30, 41, 59, 0.95);
+  
+  /* Border Colors */
+  --bs-border-color: rgba(148, 163, 184, 0.2);
+  --bs-border-color-translucent: rgba(148, 163, 184, 0.1);
+  --bs-border-subtle: rgba(148, 163, 184, 0.15);
+  
+  /* Component Colors */
+  --bs-primary: #3b82f6;
+  --bs-primary-hover: #2563eb;
+  --bs-primary-rgb: 59, 130, 246;
+  
+  --bs-secondary: #64748b;
+  --bs-secondary-hover: #475569;
+  --bs-secondary-rgb: 100, 116, 139;
+  
+  --bs-success: #10b981;
+  --bs-success-hover: #059669;
+  --bs-success-rgb: 16, 185, 129;
+  
+  --bs-warning: #f59e0b;
+  --bs-warning-hover: #d97706;
+  --bs-warning-rgb: 245, 158, 11;
+  
+  --bs-danger: #ef4444;
+  --bs-danger-hover: #dc2626;
+  --bs-danger-rgb: 239, 68, 68;
+  
+  --bs-info: #06b6d4;
+  --bs-info-hover: #0891b2;
+  --bs-info-rgb: 6, 182, 212;
+  
+  --bs-light: #475569;
+  --bs-light-hover: #64748b;
+  --bs-light-rgb: 71, 85, 105;
+  
+  --bs-dark: #f1f5f9;
+  --bs-dark-hover: #e2e8f0;
+  --bs-dark-rgb: 241, 245, 249;
+  
+  /* Navigation */
+  --bs-navbar-bg: rgba(15, 23, 42, 0.95);
+  --bs-navbar-border: rgba(148, 163, 184, 0.1);
+  --bs-sidebar-bg: #1e293b;
+  --bs-sidebar-border: rgba(148, 163, 184, 0.1);
+  
+  /* Cards & Modals */
+  --bs-card-bg: #1e293b;
+  --bs-card-border: rgba(148, 163, 184, 0.15);
+  --bs-modal-bg: #1e293b;
+  --bs-modal-backdrop: rgba(0, 0, 0, 0.8);
+  
+  /* Form Controls */
+  --bs-input-bg: #334155;
+  --bs-input-border: rgba(148, 163, 184, 0.3);
+  --bs-input-focus-border: var(--bs-primary);
+  --bs-input-placeholder: #94a3b8;
+  
+  /* Dropdowns */
+  --bs-dropdown-bg: #1e293b;
+  --bs-dropdown-border: rgba(148, 163, 184, 0.2);
+  --bs-dropdown-link-hover-bg: #334155;
+  
+  /* Tables */
+  --bs-table-bg: transparent;
+  --bs-table-striped-bg: rgba(148, 163, 184, 0.05);
+  --bs-table-hover-bg: rgba(148, 163, 184, 0.1);
+  --bs-table-border-color: rgba(148, 163, 184, 0.2);
+  
+  /* Shadows */
+  --bs-box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.3);
+  --bs-box-shadow-sm: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.2);
+  --bs-box-shadow-lg: 0 1rem 3rem rgba(0, 0, 0, 0.4);
+  
+  /* Scrollbars */
+  --scrollbar-thumb: #475569;
+  --scrollbar-track: #1e293b;
+  --scrollbar-thumb-hover: #64748b;
+}
+
+/* Dark Mode Global Styles */
+.dark-mode {
+  color-scheme: dark;
+}
+
+.dark-mode body {
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+  color: var(--bs-text-secondary);
+}
+
+/* Enhanced Component Styles */
+
+/* Navigation */
+.dark-mode .navbar {
+  background: var(--bs-navbar-bg) !important;
+  border-bottom: 1px solid var(--bs-navbar-border);
+  backdrop-filter: blur(10px);
+}
+
+.dark-mode .sidebar {
+  background: var(--bs-sidebar-bg);
+  border-right: 1px solid var(--bs-sidebar-border);
+}
+
+.dark-mode .nav-link {
+  color: var(--bs-text-secondary);
+  transition: all 0.3s ease;
+}
+
+.dark-mode .nav-link:hover,
+.dark-mode .nav-link.active {
+  color: var(--bs-primary);
+  background: rgba(59, 130, 246, 0.1);
+}
+
+/* Cards */
+.dark-mode .card {
+  background: var(--bs-card-bg);
+  border: 1px solid var(--bs-card-border);
+  box-shadow: var(--bs-box-shadow-sm);
+}
+
+.dark-mode .card-header {
+  background: rgba(51, 65, 85, 0.5);
+  border-bottom: 1px solid var(--bs-border-subtle);
+}
+
+.dark-mode .card-footer {
+  background: rgba(51, 65, 85, 0.5);
+  border-top: 1px solid var(--bs-border-subtle);
+}
+
+/* Modals */
+.dark-mode .modal-content {
+  background: var(--bs-modal-bg);
+  border: 1px solid var(--bs-border-color);
+  box-shadow: var(--bs-box-shadow-lg);
+}
+
+.dark-mode .modal-header {
+  border-bottom: 1px solid var(--bs-border-subtle);
+}
+
+.dark-mode .modal-footer {
+  border-top: 1px solid var(--bs-border-subtle);
+}
+
+.dark-mode .modal-backdrop {
+  background: var(--bs-modal-backdrop);
+}
+
+/* Forms */
+.dark-mode .form-control {
+  background: var(--bs-input-bg);
+  border: 1px solid var(--bs-input-border);
+  color: var(--bs-text-primary);
+}
+
+.dark-mode .form-control::placeholder {
+  color: var(--bs-input-placeholder);
+}
+
+.dark-mode .form-control:focus {
+  background: var(--bs-input-bg);
+  border-color: var(--bs-input-focus-border);
+  box-shadow: 0 0 0 0.2rem rgba(59, 130, 246, 0.25);
+}
+
+.dark-mode .form-select {
+  background: var(--bs-input-bg);
+  border: 1px solid var(--bs-input-border);
+  color: var(--bs-text-primary);
+}
+
+.dark-mode .form-check-input {
+  background: var(--bs-input-bg);
+  border: 1px solid var(--bs-input-border);
+}
+
+.dark-mode .form-check-input:checked {
+  background: var(--bs-primary);
+  border-color: var(--bs-primary);
+}
+
+/* Buttons */
+.dark-mode .btn-outline-primary {
+  color: var(--bs-primary);
+  border-color: var(--bs-primary);
+}
+
+.dark-mode .btn-outline-primary:hover {
+  background: var(--bs-primary);
+  color: white;
+}
+
+.dark-mode .btn-outline-secondary {
+  color: var(--bs-secondary);
+  border-color: var(--bs-secondary);
+}
+
+.dark-mode .btn-outline-secondary:hover {
+  background: var(--bs-secondary);
+  color: white;
+}
+
+/* Dropdowns */
+.dark-mode .dropdown-menu {
+  background: var(--bs-dropdown-bg);
+  border: 1px solid var(--bs-dropdown-border);
+  box-shadow: var(--bs-box-shadow);
+}
+
+.dark-mode .dropdown-item {
+  color: var(--bs-text-secondary);
+}
+
+.dark-mode .dropdown-item:hover {
+  background: var(--bs-dropdown-link-hover-bg);
+  color: var(--bs-text-primary);
+}
+
+.dark-mode .dropdown-divider {
+  border-color: var(--bs-border-subtle);
+}
+
+/* Tables */
+.dark-mode .table {
+  color: var(--bs-text-secondary);
+}
+
+.dark-mode .table-striped tbody tr:nth-of-type(odd) {
+  background: var(--bs-table-striped-bg);
+}
+
+.dark-mode .table-hover tbody tr:hover {
+  background: var(--bs-table-hover-bg);
+}
+
+.dark-mode .table th,
+.dark-mode .table td {
+  border-color: var(--bs-table-border-color);
+}
+
+/* Alerts */
+.dark-mode .alert-primary {
+  background: rgba(59, 130, 246, 0.15);
+  border-color: rgba(59, 130, 246, 0.3);
+  color: #93c5fd;
+}
+
+.dark-mode .alert-success {
+  background: rgba(16, 185, 129, 0.15);
+  border-color: rgba(16, 185, 129, 0.3);
+  color: #6ee7b7;
+}
+
+.dark-mode .alert-warning {
+  background: rgba(245, 158, 11, 0.15);
+  border-color: rgba(245, 158, 11, 0.3);
+  color: #fcd34d;
+}
+
+.dark-mode .alert-danger {
+  background: rgba(239, 68, 68, 0.15);
+  border-color: rgba(239, 68, 68, 0.3);
+  color: #fca5a5;
+}
+
+.dark-mode .alert-info {
+  background: rgba(6, 182, 212, 0.15);
+  border-color: rgba(6, 182, 212, 0.3);
+  color: #67e8f9;
+}
+
+/* Progress Bars */
+.dark-mode .progress {
+  background: var(--bs-secondary-bg);
+}
+
+/* Badges */
+.dark-mode .badge {
+  background: var(--bs-surface-secondary);
+  color: var(--bs-text-primary);
+}
+
+/* Toasts */
+.dark-mode .toast {
+  background: var(--bs-surface-primary);
+  border: 1px solid var(--bs-border-color);
+  color: var(--bs-text-secondary);
+}
+
+.dark-mode .toast-header {
+  background: rgba(51, 65, 85, 0.5);
+  border-bottom: 1px solid var(--bs-border-subtle);
+}
+
+/* Scrollbars */
+.dark-mode ::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.dark-mode ::-webkit-scrollbar-track {
+  background: var(--scrollbar-track);
+  border-radius: 4px;
+}
+
+.dark-mode ::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-thumb);
+  border-radius: 4px;
+}
+
+.dark-mode ::-webkit-scrollbar-thumb:hover {
+  background: var(--scrollbar-thumb-hover);
+}
+
+/* Custom Dark Mode Components */
+.dark-mode .glassmorphism {
+  background: rgba(30, 41, 59, 0.7);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(148, 163, 184, 0.1);
+}
+
+.dark-mode .gradient-bg {
+  background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+}
+
+.dark-mode .text-gradient {
+  background: linear-gradient(135deg, var(--bs-primary) 0%, var(--bs-info) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Animation adjustments for dark mode */
+.dark-mode .fade-in {
+  animation: darkFadeIn 0.3s ease-in-out;
+}
+
+@keyframes darkFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Focus and accessibility in dark mode */
+.dark-mode *:focus {
+  outline: 2px solid var(--bs-primary);
+  outline-offset: 2px;
+}
+
+/* Print styles for dark mode */
+@media print {
+  .dark-mode {
+    background: white !important;
+    color: black !important;
+  }
+  
+  .dark-mode * {
+    background: transparent !important;
+    color: black !important;
+  }
+}

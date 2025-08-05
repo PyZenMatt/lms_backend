@@ -1,0 +1,79 @@
+/* Datta Able Activity Feed Styles */
+
+.activity-list-container {
+  border-radius: 0.375rem;
+}
+
+.activity-list-container::-webkit-scrollbar {
+  width: 6px;
+}
+
+.activity-list-container::-webkit-scrollbar-track {
+  background: #f8f9fa;
+  border-radius: 3px;
+}
+
+.activity-list-container::-webkit-scrollbar-thumb {
+  background: #dee2e6;
+  border-radius: 3px;
+}
+
+.activity-list-container::-webkit-scrollbar-thumb:hover {
+  background: #adb5bd;
+}
+
+.media {
+  border-bottom: 1px solid #f1f3f4;
+  padding-bottom: 0.75rem;
+}
+
+.media:last-child {
+  border-bottom: none;
+  margin-bottom: 0 !important;
+}
+
+.badge-light-primary {
+  background-color: rgba(var(--bs-primary-rgb), 0.1);
+  color: var(--bs-primary);
+}
+
+.badge-light-success {
+  background-color: rgba(var(--bs-success-rgb), 0.1);
+  color: var(--bs-success);
+}
+
+.badge-light-info {
+  background-color: rgba(var(--bs-info-rgb), 0.1);
+  color: var(--bs-info);
+}
+
+.badge-light-warning {
+  background-color: rgba(var(--bs-warning-rgb), 0.1);
+  color: var(--bs-warning);
+}
+
+.badge-light-secondary {
+  background-color: rgba(var(--bs-secondary-rgb), 0.1);
+  color: var(--bs-secondary);
+}
+
+.badge-light-light {
+  background-color: rgba(108, 117, 125, 0.1);
+  color: #6c757d;
+}
+
+.f-12 {
+  font-size: 0.75rem;
+}
+
+.f-w-400 {
+  font-weight: 400;
+}
+
+.f-w-500 {
+  font-weight: 500;
+}
+
+.m-r-10 {
+  margin-right: 10px;
+}

@@ -1,0 +1,117 @@
+/* CSS Custom Properties - Design System Variables */
+
+:root {
+  /* Colors - Primary Palette */
+  --primary-color: #007bff;
+  --primary-light: #66b3ff;
+  --primary-dark: #0056b3;
+  
+  /* Colors - Secondary Palette */
+  --secondary-color: #6c757d;
+  --secondary-light: #a6b3bd;
+  --secondary-dark: #4a5055;
+  
+  /* Colors - Status */
+  --success: #28a745;
+  --success-light: #d4edda;
+  --success-dark: #155724;
+  
+  --warning: #ffc107;
+  --warning-light: #fff3cd;
+  --warning-dark: #856404;
+  
+  --danger: #dc3545;
+  --danger-light: #f8d7da;
+  --danger-dark: #721c24;
+  
+  --info: #17a2b8;
+  --info-light: #d1ecf1;
+  --info-dark: #0c525d;
+  
+  /* Colors - Text */
+  --text-primary: #2c3e50;
+  --text-secondary: #6c757d;
+  --text-muted: #9ca3af;
+  --text-inverse: #ffffff;
+  
+  /* Colors - Background */
+  --bg-primary: #ffffff;
+  --bg-secondary: #f8f9fa;
+  --bg-tertiary: #e9ecef;
+  --bg-dark: #343a40;
+  
+  /* Colors - Borders */
+  --border-color: #e1e5e9;
+  --border-light: #f1f3f4;
+  --border-dark: #adb5bd;
+  
+  /* Gradients */
+  --gradient-primary: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+  --gradient-success: linear-gradient(135deg, var(--success) 0%, var(--success-dark) 100%);
+  --gradient-warning: linear-gradient(135deg, var(--warning) 0%, var(--warning-dark) 100%);
+  --gradient-danger: linear-gradient(135deg, var(--danger) 0%, var(--danger-dark) 100%);
+  --gradient-info: linear-gradient(135deg, var(--info) 0%, var(--info-dark) 100%);
+  
+  /* Spacing */
+  --spacing-xs: 0.25rem;    /* 4px */
+  --spacing-sm: 0.5rem;     /* 8px */
+  --spacing-md: 1rem;       /* 16px */
+  --spacing-lg: 1.5rem;     /* 24px */
+  --spacing-xl: 2rem;       /* 32px */
+  --spacing-xxl: 3rem;      /* 48px */
+  
+  /* Border Radius */
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  --radius-full: 50%;
+  
+  /* Shadows */
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1);
+  --shadow-md: 0 2px 6px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 4px 12px rgba(0, 0, 0, 0.15);
+  --shadow-xl: 0 8px 24px rgba(0, 0, 0, 0.2);
+  
+  /* Typography */
+  --font-family-base: 'Inter', 'Segoe UI', system-ui, sans-serif;
+  --font-family-heading: 'Poppins', var(--font-family-base);
+  --font-family-mono: 'Fira Code', 'Monaco', monospace;
+  
+  --font-size-xs: 0.75rem;   /* 12px */
+  --font-size-sm: 0.875rem;  /* 14px */
+  --font-size-md: 1rem;      /* 16px */
+  --font-size-lg: 1.125rem;  /* 18px */
+  --font-size-xl: 1.25rem;   /* 20px */
+  --font-size-2xl: 1.5rem;   /* 24px */
+  --font-size-3xl: 2rem;     /* 32px */
+  
+  --font-weight-light: 300;
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+  
+  --line-height-tight: 1.25;
+  --line-height-normal: 1.5;
+  --line-height-relaxed: 1.75;
+  
+  /* Transitions */
+  --transition-fast: 150ms ease-in-out;
+  --transition-normal: 250ms ease-in-out;
+  --transition-slow: 350ms ease-in-out;
+  
+  /* Z-index */
+  --z-dropdown: 1000;
+  --z-modal: 1050;
+  --z-popover: 1060;
+  --z-tooltip: 1070;
+  --z-toast: 1080;
+  
+  /* Breakpoints (for reference in media queries) */
+  --breakpoint-sm: 576px;
+  --breakpoint-md: 768px;
+  --breakpoint-lg: 992px;
+  --breakpoint-xl: 1200px;
+  --breakpoint-xxl: 1400px;
+}

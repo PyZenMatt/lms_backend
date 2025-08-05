@@ -1,0 +1,222 @@
+/**
+ * 🌙 Theme Toggle Styles
+ * 
+ * Beautiful animated theme switcher with smooth transitions
+ */
+
+.theme-toggle-container {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.theme-toggle {
+  position: relative;
+  background: none;
+  border: 2px solid var(--bs-border-color);
+  border-radius: 50px;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  padding: 4px;
+  outline: none;
+  overflow: hidden;
+}
+
+.theme-toggle:hover {
+  border-color: var(--bs-primary);
+  box-shadow: 0 0 0 4px rgba(var(--bs-primary-rgb), 0.1);
+}
+
+.theme-toggle:focus {
+  border-color: var(--bs-primary);
+  box-shadow: 0 0 0 4px rgba(var(--bs-primary-rgb), 0.2);
+}
+
+.theme-toggle:active {
+  transform: scale(0.95);
+}
+
+/* Size variants */
+.theme-toggle-sm {
+  width: 48px;
+  height: 28px;
+}
+
+.theme-toggle-md {
+  width: 56px;
+  height: 32px;
+}
+
+.theme-toggle-lg {
+  width: 64px;
+  height: 36px;
+}
+
+.theme-toggle-track {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  border-radius: 50px;
+  background: linear-gradient(135deg, #87ceeb 0%, #98fb98 100%);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.theme-toggle.dark .theme-toggle-track {
+  background: linear-gradient(135deg, #2c5aa0 0%, #1a202c 100%);
+}
+
+.theme-toggle-thumb {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  background: var(--bs-body-bg);
+  border-radius: 50%;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Size-specific thumb dimensions */
+.theme-toggle-sm .theme-toggle-thumb {
+  width: 20px;
+  height: 20px;
+}
+
+.theme-toggle-md .theme-toggle-thumb {
+  width: 24px;
+  height: 24px;
+}
+
+.theme-toggle-lg .theme-toggle-thumb {
+  width: 28px;
+  height: 28px;
+}
+
+/* Thumb position for dark mode */
+.theme-toggle.dark.theme-toggle-sm .theme-toggle-thumb {
+  transform: translateX(16px);
+}
+
+.theme-toggle.dark.theme-toggle-md .theme-toggle-thumb {
+  transform: translateX(20px);
+}
+
+.theme-toggle.dark.theme-toggle-lg .theme-toggle-thumb {
+  transform: translateX(24px);
+}
+
+.theme-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  color: var(--bs-warning);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.theme-toggle.dark .theme-icon {
+  color: #ffd700;
+}
+
+.theme-icon-svg {
+  width: 60%;
+  height: 60%;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Icon animations */
+.sun-icon {
+  transform: rotate(0deg) scale(1);
+}
+
+.theme-toggle.dark .sun-icon {
+  transform: rotate(180deg) scale(0);
+}
+
+.moon-icon {
+  transform: rotate(-180deg) scale(0);
+}
+
+.theme-toggle.dark .moon-icon {
+  transform: rotate(0deg) scale(1);
+}
+
+/* Label styles */
+.theme-toggle-label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+}
+
+.theme-toggle-text {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--bs-body-color);
+  line-height: 1.2;
+}
+
+.theme-toggle-auto {
+  font-size: 0.75rem;
+  color: var(--bs-text-muted);
+  line-height: 1.2;
+}
+
+/* Dark mode specific styles */
+.dark-mode .theme-toggle {
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.dark-mode .theme-toggle:hover {
+  border-color: var(--bs-primary);
+  box-shadow: 0 0 0 4px rgba(103, 126, 234, 0.1);
+}
+
+.dark-mode .theme-toggle:focus {
+  box-shadow: 0 0 0 4px rgba(103, 126, 234, 0.2);
+}
+
+.dark-mode .theme-toggle-thumb {
+  background: #1a1d21;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+/* Accessibility improvements */
+@media (prefers-reduced-motion: reduce) {
+  .theme-toggle,
+  .theme-toggle-track,
+  .theme-toggle-thumb,
+  .theme-icon,
+  .theme-icon-svg {
+    transition: none;
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .theme-toggle {
+    border-width: 3px;
+  }
+  
+  .theme-toggle:focus {
+    box-shadow: 0 0 0 6px rgba(var(--bs-primary-rgb), 0.3);
+  }
+}
+
+/* Mobile touch improvements */
+@media (hover: none) and (pointer: coarse) {
+  .theme-toggle {
+    min-height: 44px;
+    min-width: 64px;
+  }
+  
+  .theme-toggle:hover {
+    box-shadow: none;
+  }
+  
+  .theme-toggle:active {
+    box-shadow: 0 0 0 4px rgba(var(--bs-primary-rgb), 0.2);
+  }
+}

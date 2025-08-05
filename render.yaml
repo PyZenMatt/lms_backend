@@ -1,0 +1,59 @@
+# Render deploy configuration for Django backend and React frontend
+# See: https://render.com/docs/infrastructure-as-code-yaml
+
+services:
+  - type: web
+    name: schoolplatform-backend
+    env: python
+    plan: free
+    buildCommand: "pip install -r requirements.txt"
+    startCommand: "gunicorn schoolplatform.wsgi:application --bind 0.0.0.0:$PORT"
+    envVars:
+      - key: DJANGO_SETTINGS_MODULE
+        value: schoolplatform.settings
+      - key: DATABASE_URL
+        sync: false
+      - key: SECRET_KEY
+        sync: false
+      - key: ALLOWED_HOSTS
+        sync: false
+      - key: STRIPE_PUBLISHABLE_KEY
+        sync: false
+      - key: STRIPE_SECRET_KEY
+        sync: false
+      - key: PLATFORM_WALLET_ADDRESS
+        sync: false
+      - key: REDIS_URL
+        sync: false
+      - key: EMAIL_HOST
+        sync: false
+      - key: EMAIL_PORT
+        sync: false
+      - key: EMAIL_HOST_USER
+        sync: false
+      - key: EMAIL_HOST_PASSWORD
+        sync: false
+      - key: DEFAULT_FROM_EMAIL
+        sync: false
+      - key: SECURE_SSL_REDIRECT
+        sync: false
+      - key: SECURE_PROXY_SSL_HEADER
+        sync: false
+    autoDeploy: true
+    healthCheckPath: /admin/login/
+    
+  - type: static
+    name: schoolplatform-frontend
+    env: static
+    buildCommand: "cd schoolplatform/frontend && npm install && npm run build"
+    staticPublishPath: "schoolplatform/frontend/dist"
+    envVars:
+      - key: VITE_API_BASE_URL
+        sync: false
+      - key: VITE_STRIPE_PUBLISHABLE_KEY
+        sync: false
+      - key: VITE_TEOCOIN_CONTRACT_ADDRESS
+        sync: false
+      - key: VITE_POLYGON_RPC_URL
+        sync: false
+    autoDeploy: true

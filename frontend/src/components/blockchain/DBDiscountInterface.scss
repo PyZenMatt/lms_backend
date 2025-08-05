@@ -1,0 +1,359 @@
+// DBDiscountInterface styles
+@import '../../assets/scss/partials/_variables';
+
+.db-discount-interface {
+  .discount-card {
+    border: none;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 10px;
+    background: $theme-color2;
+    color: white;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+    }
+    
+    .card-header {
+      background: rgba(255, 255, 255, 0.1);
+      border: none;
+      color: white;
+      padding: 1rem 1.5rem;
+      
+      h5 {
+        margin-bottom: 0;
+        font-weight: 600;
+        
+        i {
+          margin-right: 0.5rem;
+          color: #ffc107;
+        }
+      }
+      
+      small {
+        color: rgba(255, 255, 255, 0.8);
+      }
+    }
+    
+    .card-body {
+      padding: 1.5rem;
+    }
+  }
+  
+  .discount-form {
+    .form-group {
+      margin-bottom: 1rem;
+      
+      label {
+        color: white;
+        font-weight: 500;
+        margin-bottom: 0.5rem;
+        display: block;
+        
+        i {
+          margin-right: 0.5rem;
+          color: #ffc107;
+        }
+      }
+      
+      .form-control,
+      .form-select {
+        background: rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        color: white;
+        border-radius: 6px;
+        
+        &::placeholder {
+          color: rgba(255, 255, 255, 0.6);
+        }
+        
+        &:focus {
+          background: rgba(255, 255, 255, 0.15);
+          border-color: rgba(255, 255, 255, 0.5);
+          color: white;
+          box-shadow: 0 0 0 0.2rem rgba(255, 255, 255, 0.25);
+        }
+        
+        option {
+          background: #343a40;
+          color: white;
+        }
+      }
+      
+      .input-group {
+        .input-group-text {
+          background: rgba(255, 255, 255, 0.1);
+          border: 1px solid rgba(255, 255, 255, 0.3);
+          color: white;
+          
+          i {
+            color: #ffc107;
+          }
+        }
+      }
+    }
+  }
+  
+  .discount-summary {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    padding: 1rem;
+    margin: 1rem 0;
+    
+    .summary-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.5rem;
+      
+      &:last-child {
+        margin-bottom: 0;
+      }
+      
+      .label {
+        color: rgba(255, 255, 255, 0.9);
+        font-size: 0.9rem;
+      }
+      
+      .value {
+        font-weight: 600;
+        color: white;
+        
+        &.total {
+          font-size: 1.1rem;
+          color: #ffc107;
+        }
+        
+        &.discount {
+          color: #28a745;
+        }
+      }
+    }
+    
+    .summary-divider {
+      border-top: 1px solid rgba(255, 255, 255, 0.2);
+      margin: 0.75rem 0;
+    }
+  }
+  
+  .balance-info {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    
+    .balance-header {
+      display: flex;
+      align-items: center;
+      margin-bottom: 0.5rem;
+      
+      i {
+        color: #ffc107;
+        margin-right: 0.5rem;
+      }
+      
+      h6 {
+        margin: 0;
+        color: white;
+        font-weight: 600;
+      }
+    }
+    
+    .balance-amount {
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: #ffc107;
+      margin-bottom: 0.25rem;
+    }
+    
+    .balance-status {
+      font-size: 0.85rem;
+      
+      &.sufficient {
+        color: #28a745;
+      }
+      
+      &.insufficient {
+        color: #dc3545;
+      }
+    }
+  }
+  
+  .btn {
+    background: rgba(255, 255, 255, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: white;
+    border-radius: 8px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    
+    &:hover {
+      background: rgba(255, 255, 255, 0.25);
+      border-color: rgba(255, 255, 255, 0.5);
+      color: white;
+      transform: translateY(-1px);
+    }
+    
+    &.btn-primary {
+      background: rgba(40, 167, 69, 0.2);
+      border-color: rgba(40, 167, 69, 0.4);
+      
+      &:hover {
+        background: rgba(40, 167, 69, 0.3);
+        border-color: rgba(40, 167, 69, 0.6);
+      }
+    }
+    
+    &.btn-outline-secondary {
+      background: rgba(108, 117, 125, 0.2);
+      border-color: rgba(108, 117, 125, 0.4);
+      
+      &:hover {
+        background: rgba(108, 117, 125, 0.3);
+        border-color: rgba(108, 117, 125, 0.6);
+      }
+    }
+    
+    &:disabled {
+      opacity: 0.6;
+      transform: none !important;
+    }
+  }
+  
+  .text-muted {
+    color: rgba(255, 255, 255, 0.8) !important;
+  }
+  
+  // Alert styles
+  .alert {
+    border: none;
+    border-radius: 8px;
+    
+    &.alert-success {
+      background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+      color: white;
+    }
+    
+    &.alert-danger {
+      background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+      color: white;
+    }
+    
+    &.alert-warning {
+      background: linear-gradient(135deg, #ffc107 0%, #fd7e14 100%);
+      color: #212529;
+    }
+    
+    &.alert-info {
+      background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
+      color: white;
+    }
+  }
+  
+  // Loading state
+  .loading-overlay {
+    position: relative;
+    
+    &::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 8px;
+      z-index: 1;
+    }
+  }
+  
+  .spinner-border {
+    border-color: rgba(255, 255, 255, 0.3);
+    border-right-color: white;
+  }
+  
+  // Course selection
+  .course-selector {
+    .course-option {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.75rem;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 6px;
+      margin-bottom: 0.5rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      
+      &:hover {
+        background: rgba(255, 255, 255, 0.1);
+        border-color: rgba(255, 255, 255, 0.3);
+      }
+      
+      &.selected {
+        background: rgba(40, 167, 69, 0.2);
+        border-color: rgba(40, 167, 69, 0.4);
+      }
+      
+      .course-info {
+        .course-title {
+          color: white;
+          font-weight: 500;
+          margin-bottom: 0.25rem;
+        }
+        
+        .course-details {
+          font-size: 0.85rem;
+          color: rgba(255, 255, 255, 0.8);
+        }
+      }
+      
+      .course-price {
+        text-align: right;
+        
+        .original-price {
+          font-size: 0.9rem;
+          color: rgba(255, 255, 255, 0.7);
+          text-decoration: line-through;
+        }
+        
+        .final-price {
+          font-weight: 700;
+          color: #ffc107;
+          font-size: 1.1rem;
+        }
+      }
+    }
+  }
+  
+  // Responsive design
+  @media (max-width: 768px) {
+    .discount-card {
+      margin-bottom: 1rem;
+    }
+    
+    .summary-row {
+      flex-direction: column;
+      align-items: flex-start !important;
+      
+      .value {
+        margin-top: 0.25rem;
+      }
+    }
+    
+    .course-option {
+      .course-info,
+      .course-price {
+        flex: 1;
+      }
+      
+      .course-price {
+        margin-top: 0.5rem;
+        text-align: left;
+      }
+    }
+  }
+}

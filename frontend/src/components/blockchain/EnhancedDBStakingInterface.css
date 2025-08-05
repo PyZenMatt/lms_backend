@@ -1,0 +1,575 @@
+/* Enhanced DB Staking Interface - Phase 3 Styles */
+
+.enhanced-staking-interface {
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  border-radius: 20px;
+  padding: 2rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.enhanced-staking-interface::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: radial-gradient(circle at top right, rgba(0, 123, 255, 0.05) 0%, transparent 50%);
+  pointer-events: none;
+}
+
+/* Header */
+.staking-header {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border-radius: 15px;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  position: relative;
+  z-index: 2;
+}
+
+.staking-title {
+  background: linear-gradient(135deg, #007bff, #6f42c1);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  font-weight: 700;
+  font-size: 1.5rem;
+}
+
+/* Modern Alerts */
+.modern-alert {
+  border-radius: 15px;
+  border: none;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  position: relative;
+  z-index: 2;
+}
+
+.modern-alert.alert-danger {
+  background: linear-gradient(135deg, rgba(220, 53, 69, 0.1), rgba(220, 53, 69, 0.05));
+  border-left: 4px solid #dc3545;
+}
+
+.modern-alert.alert-success {
+  background: linear-gradient(135deg, rgba(40, 167, 69, 0.1), rgba(40, 167, 69, 0.05));
+  border-left: 4px solid #28a745;
+}
+
+/* Status Cards */
+.staking-status-card {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border-radius: 20px;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.staking-status-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(135deg, #007bff, #6f42c1);
+}
+
+.staking-status-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.15);
+}
+
+.status-metric {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 0;
+}
+
+.metric-icon {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 1.5rem;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  position: relative;
+  overflow: hidden;
+}
+
+.metric-icon::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+  animation: shimmer 2s infinite;
+}
+
+@keyframes shimmer {
+  0% { left: -100%; }
+  100% { left: 100%; }
+}
+
+.metric-icon.bg-primary {
+  background: linear-gradient(135deg, #007bff, #0056b3);
+}
+
+.metric-icon.bg-success {
+  background: linear-gradient(135deg, #28a745, #1e7e34);
+}
+
+.metric-icon.bg-warning {
+  background: linear-gradient(135deg, #ffc107, #e0a800);
+}
+
+.metric-content {
+  flex: 1;
+}
+
+.metric-value {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #495057;
+  margin: 0;
+  line-height: 1;
+}
+
+.metric-label {
+  font-size: 0.9rem;
+  color: #6c757d;
+  margin: 0.25rem 0 0 0;
+  font-weight: 500;
+}
+
+/* Tier Progress Card */
+.tier-progress-card {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border-radius: 20px;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+}
+
+.tier-progress-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
+}
+
+.tier-progress-bar {
+  border-radius: 10px;
+  overflow: hidden;
+  background-color: rgba(0, 123, 255, 0.1);
+}
+
+.tier-progress-bar .progress-bar {
+  background: linear-gradient(135deg, #007bff, #6f42c1);
+  border-radius: 10px;
+  transition: width 0.6s ease;
+}
+
+.benefits-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.benefits-list li {
+  padding: 0.25rem 0;
+  display: flex;
+  align-items: center;
+}
+
+/* Actions Card */
+.actions-card {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border-radius: 20px;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+}
+
+.staking-action-btn {
+  font-weight: 600;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.staking-action-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2) !important;
+}
+
+.staking-action-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.5s;
+}
+
+.staking-action-btn:hover::before {
+  left: 100%;
+}
+
+/* Sidebar Cards */
+.earnings-card {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border-radius: 20px;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+}
+
+.earnings-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.15);
+}
+
+.earnings-card .card-header {
+  background: linear-gradient(135deg, #28a745, #20c997);
+  border-radius: 20px 20px 0 0;
+  border: none;
+  padding: 1rem 1.5rem;
+}
+
+.earnings-metric {
+  padding: 0.5rem 0;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.earnings-metric:last-child {
+  border-bottom: none;
+}
+
+.chart-card {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border-radius: 20px;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+}
+
+.chart-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.15);
+}
+
+.chart-card .card-header {
+  background: transparent;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  padding: 1.5rem 1.5rem 1rem 1.5rem;
+  border-radius: 20px 20px 0 0;
+}
+
+/* Modal Styling */
+.staking-modal .modal-content {
+  border-radius: 20px;
+  border: none;
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+  backdrop-filter: blur(10px);
+}
+
+.staking-modal .modal-header {
+  background: linear-gradient(135deg, #007bff, #6f42c1);
+  color: white;
+  border-radius: 20px 20px 0 0;
+  padding: 1.5rem;
+}
+
+.staking-modal .modal-title {
+  font-weight: 600;
+  margin: 0;
+}
+
+.staking-modal .btn-close {
+  filter: invert(1);
+}
+
+/* Tabs Styling */
+.staking-tabs {
+  border-bottom: none;
+}
+
+.staking-tabs .nav-link {
+  border: none;
+  color: #6c757d;
+  font-weight: 500;
+  padding: 1rem 1.5rem;
+  border-radius: 15px 15px 0 0;
+  background: transparent;
+  transition: all 0.3s ease;
+  margin-right: 0.5rem;
+}
+
+.staking-tabs .nav-link:hover {
+  color: #007bff;
+  background: rgba(0, 123, 255, 0.05);
+}
+
+.staking-tabs .nav-link.active {
+  color: #007bff;
+  background: rgba(0, 123, 255, 0.1);
+  border-bottom: 3px solid #007bff;
+}
+
+/* Form Elements */
+.input-group-modern {
+  display: flex;
+  border-radius: 15px;
+  overflow: hidden;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+}
+
+.modern-input {
+  border: 2px solid #e9ecef;
+  border-radius: 15px 0 0 15px;
+  padding: 0.75rem 1rem;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+  background: rgba(255, 255, 255, 0.9);
+}
+
+.modern-input:focus {
+  border-color: #007bff;
+  box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+  background: white;
+}
+
+.max-button {
+  border-radius: 0 15px 15px 0;
+  border: 2px solid #007bff;
+  border-left: none;
+  padding: 0.75rem 1rem;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.max-button:hover {
+  background: #007bff;
+  color: white;
+  transform: translateY(-1px);
+}
+
+/* Preview Sections */
+.stake-preview,
+.unstake-preview {
+  background: linear-gradient(135deg, rgba(0, 123, 255, 0.05), rgba(0, 123, 255, 0.02));
+  border: 2px solid rgba(0, 123, 255, 0.1);
+  border-radius: 15px;
+  transition: all 0.3s ease;
+}
+
+.stake-preview:hover,
+.unstake-preview:hover {
+  border-color: rgba(0, 123, 255, 0.2);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(0, 123, 255, 0.1);
+}
+
+.modern-button {
+  border-radius: 15px;
+  font-weight: 600;
+  padding: 0.75rem 1.5rem;
+  border: none;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.modern-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+}
+
+.modern-button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.5s;
+}
+
+.modern-button:hover::before {
+  left: 100%;
+}
+
+/* Responsive Design */
+@media (max-width: 991px) {
+  .enhanced-staking-interface {
+    padding: 1.5rem;
+  }
+  
+  .staking-header {
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+  }
+  
+  .staking-title {
+    font-size: 1.3rem;
+  }
+  
+  .status-metric {
+    flex-direction: column;
+    text-align: center;
+    gap: 0.5rem;
+  }
+  
+  .metric-icon {
+    width: 50px;
+    height: 50px;
+    font-size: 1.2rem;
+  }
+  
+  .metric-value {
+    font-size: 1.5rem;
+  }
+}
+
+@media (max-width: 767px) {
+  .enhanced-staking-interface {
+    padding: 1rem;
+  }
+  
+  .staking-header {
+    padding: 1rem;
+  }
+  
+  .staking-header .row {
+    flex-direction: column;
+    gap: 1rem;
+  }
+  
+  .staking-action-btn {
+    width: 100%;
+    margin-bottom: 0.5rem;
+  }
+  
+  .actions-card .d-flex {
+    flex-direction: column;
+  }
+  
+  .staking-modal .modal-body {
+    padding: 1.5rem;
+  }
+  
+  .staking-tabs .nav-link {
+    padding: 0.75rem 1rem;
+    margin-right: 0.25rem;
+    font-size: 0.9rem;
+  }
+}
+
+@media (max-width: 575px) {
+  .metric-value {
+    font-size: 1.3rem;
+  }
+  
+  .metric-icon {
+    width: 45px;
+    height: 45px;
+    font-size: 1rem;
+  }
+  
+  .benefits-list li {
+    font-size: 0.8rem;
+  }
+  
+  .modern-input,
+  .max-button {
+    font-size: 0.9rem;
+  }
+}
+
+/* Animation */
+.enhanced-staking-interface {
+  animation: fadeInUp 0.6s ease-out;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Custom Scrollbar */
+.staking-modal .modal-body::-webkit-scrollbar {
+  width: 4px;
+}
+
+.staking-modal .modal-body::-webkit-scrollbar-track {
+  background: #f1f3f4;
+  border-radius: 2px;
+}
+
+.staking-modal .modal-body::-webkit-scrollbar-thumb {
+  background: #007bff;
+  border-radius: 2px;
+}
+
+/* Badge Enhancements */
+.badge {
+  font-weight: 500;
+  letter-spacing: 0.5px;
+  transition: all 0.3s ease;
+}
+
+.badge:hover {
+  transform: scale(1.05);
+}
+
+/* Loading State */
+.enhanced-staking-interface .spinner-border {
+  box-shadow: 0 4px 15px rgba(0, 123, 255, 0.3);
+}
+
+/* Success/Error States */
+.staking-status-card.success {
+  border-left: 4px solid #28a745;
+}
+
+.staking-status-card.error {
+  border-left: 4px solid #dc3545;
+}
+
+/* Tier Badge Glow Effect */
+.staking-header .badge {
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  }
+  50% {
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+  }
+  100% {
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  }
+}

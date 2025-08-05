@@ -1,0 +1,576 @@
+/* Enhanced Student TeoCoin Dashboard - Phase 3 Styles */
+
+.enhanced-student-teocoin-dashboard {
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  border-radius: 20px;
+  padding: 2rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.enhanced-student-teocoin-dashboard::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: radial-gradient(circle at top left, rgba(40, 167, 69, 0.05) 0%, transparent 50%);
+  pointer-events: none;
+}
+
+/* Dashboard Header */
+.dashboard-header {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border-radius: 15px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  position: relative;
+  z-index: 2;
+}
+
+.dashboard-title {
+  background: linear-gradient(135deg, #28a745, #20c997);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  font-weight: 700;
+  font-size: 1.5rem;
+}
+
+/* Modern Alert */
+.modern-alert {
+  border-radius: 15px;
+  border: none;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  position: relative;
+  z-index: 2;
+}
+
+.modern-alert.alert-danger {
+  background: linear-gradient(135deg, rgba(220, 53, 69, 0.1), rgba(220, 53, 69, 0.05));
+  border-left: 4px solid #dc3545;
+}
+
+/* Balance Cards */
+.balance-card {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border-radius: 20px;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.balance-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(135deg, #28a745, #20c997);
+}
+
+.balance-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+}
+
+.balance-icon {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 1.5rem;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  position: relative;
+  overflow: hidden;
+}
+
+.balance-icon::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+  animation: shimmer 2s infinite;
+}
+
+@keyframes shimmer {
+  0% { left: -100%; }
+  100% { left: 100%; }
+}
+
+.balance-icon.bg-primary {
+  background: linear-gradient(135deg, #007bff, #0056b3);
+}
+
+.balance-icon.bg-info {
+  background: linear-gradient(135deg, #17a2b8, #117a8b);
+}
+
+.balance-icon.bg-warning {
+  background: linear-gradient(135deg, #ffc107, #e0a800);
+}
+
+.balance-value {
+  font-size: 2.2rem;
+  font-weight: 700;
+  color: #495057;
+  margin: 0;
+  line-height: 1;
+}
+
+.balance-label {
+  font-size: 0.9rem;
+  font-weight: 500;
+  margin: 0;
+}
+
+.balance-actions {
+  margin-top: 1rem;
+}
+
+/* Achievements Preview Card */
+.achievements-preview-card {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border-radius: 20px;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.achievements-preview-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(135deg, #ffc107, #fd7e14);
+}
+
+.achievements-preview-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.12);
+}
+
+.achievement-item {
+  padding: 0.5rem 0;
+}
+
+.achievement-icon {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.9rem;
+  transition: all 0.3s ease;
+}
+
+.achievement-icon.completed {
+  background: rgba(40, 167, 69, 0.1);
+  border: 2px solid #28a745;
+}
+
+.achievement-icon.incomplete {
+  background: rgba(108, 117, 125, 0.1);
+  border: 2px solid #6c757d;
+  opacity: 0.7;
+}
+
+.achievement-title {
+  font-weight: 600;
+  font-size: 0.85rem;
+}
+
+/* Transactions Card */
+.transactions-card {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border-radius: 20px;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+}
+
+.transactions-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
+}
+
+.transactions-list {
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.transactions-list::-webkit-scrollbar {
+  width: 4px;
+}
+
+.transactions-list::-webkit-scrollbar-track {
+  background: #f1f3f4;
+  border-radius: 2px;
+}
+
+.transactions-list::-webkit-scrollbar-thumb {
+  background: #28a745;
+  border-radius: 2px;
+}
+
+.transaction-item {
+  display: flex;
+  align-items: center;
+  padding: 1rem 0;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  transition: all 0.3s ease;
+}
+
+.transaction-item:hover {
+  background: rgba(40, 167, 69, 0.05);
+  border-radius: 10px;
+  margin: 0 -1rem;
+  padding: 1rem;
+}
+
+.transaction-item:last-child {
+  border-bottom: none;
+}
+
+.transaction-icon {
+  font-size: 1.5rem;
+  margin-right: 1rem;
+  width: 40px;
+  text-align: center;
+}
+
+.transaction-details {
+  flex: 1;
+}
+
+.transaction-header {
+  display: flex;
+  justify-content: between;
+  align-items: center;
+  margin-bottom: 0.25rem;
+}
+
+.transaction-type {
+  font-size: 0.75rem;
+  font-weight: 600;
+  border-radius: 10px;
+  padding: 0.25rem 0.5rem;
+}
+
+.transaction-amount {
+  font-weight: 700;
+  color: #28a745;
+  margin-left: auto;
+}
+
+.transaction-description {
+  color: #495057;
+  font-weight: 500;
+  margin-bottom: 0.25rem;
+}
+
+.transaction-date {
+  font-size: 0.8rem;
+}
+
+/* Analytics Modal */
+.analytics-modal .modal-content {
+  border-radius: 20px;
+  border: none;
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+  backdrop-filter: blur(10px);
+}
+
+.analytics-modal .modal-header {
+  background: linear-gradient(135deg, #28a745, #20c997);
+  color: white;
+  border-radius: 20px 20px 0 0;
+  padding: 1.5rem;
+  border: none;
+}
+
+.analytics-modal .modal-title {
+  font-weight: 600;
+  margin: 0;
+}
+
+.analytics-modal .btn-close {
+  filter: invert(1);
+}
+
+/* Analytics Tabs */
+.analytics-tabs {
+  border-bottom: none;
+}
+
+.analytics-tabs .nav-link {
+  border: none;
+  color: #6c757d;
+  font-weight: 500;
+  padding: 1rem 1.5rem;
+  border-radius: 15px 15px 0 0;
+  background: transparent;
+  transition: all 0.3s ease;
+  margin-right: 0.5rem;
+}
+
+.analytics-tabs .nav-link:hover {
+  color: #28a745;
+  background: rgba(40, 167, 69, 0.05);
+}
+
+.analytics-tabs .nav-link.active {
+  color: #28a745;
+  background: rgba(40, 167, 69, 0.1);
+  border-bottom: 3px solid #28a745;
+}
+
+/* Achievement Cards in Modal */
+.achievement-card {
+  background: rgba(255, 255, 255, 0.7);
+  border: 1px solid rgba(0, 0, 0, 0.05) !important;
+  transition: all 0.3s ease;
+}
+
+.achievement-card:hover {
+  background: rgba(255, 255, 255, 0.9);
+  border-color: rgba(40, 167, 69, 0.2) !important;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(40, 167, 69, 0.1);
+}
+
+.achievement-icon-large {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.3rem;
+  transition: all 0.3s ease;
+}
+
+.achievement-icon-large.completed {
+  background: rgba(40, 167, 69, 0.1);
+  border: 3px solid #28a745;
+}
+
+.achievement-icon-large.incomplete {
+  background: rgba(108, 117, 125, 0.1);
+  border: 3px solid #6c757d;
+  opacity: 0.7;
+}
+
+/* Analytics Stats */
+.stat-item {
+  border-radius: 15px;
+  transition: all 0.3s ease;
+}
+
+.stat-item:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+/* Progress Bar Enhancements */
+.progress {
+  background-color: rgba(40, 167, 69, 0.1);
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.progress-bar {
+  background: linear-gradient(135deg, #28a745, #20c997);
+  border-radius: 10px;
+  transition: width 0.6s ease;
+}
+
+/* Badge Enhancements */
+.badge {
+  font-weight: 500;
+  letter-spacing: 0.5px;
+  transition: all 0.3s ease;
+  border-radius: 12px;
+  padding: 0.5rem 0.75rem;
+}
+
+.badge:hover {
+  transform: scale(1.05);
+}
+
+/* Button Enhancements */
+.btn {
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.btn-outline-primary:hover {
+  box-shadow: 0 4px 15px rgba(0, 123, 255, 0.3);
+}
+
+/* Responsive Design */
+@media (max-width: 991px) {
+  .enhanced-student-teocoin-dashboard {
+    padding: 1.5rem;
+  }
+  
+  .dashboard-header {
+    padding: 1rem;
+  }
+  
+  .dashboard-title {
+    font-size: 1.3rem;
+  }
+  
+  .balance-value {
+    font-size: 1.8rem;
+  }
+  
+  .balance-icon {
+    width: 50px;
+    height: 50px;
+    font-size: 1.2rem;
+  }
+}
+
+@media (max-width: 767px) {
+  .enhanced-student-teocoin-dashboard {
+    padding: 1rem;
+  }
+  
+  .dashboard-header {
+    padding: 1rem;
+  }
+  
+  .dashboard-header .row {
+    flex-direction: column;
+    gap: 1rem;
+  }
+  
+  .balance-value {
+    font-size: 1.6rem;
+  }
+  
+  .balance-icon {
+    width: 45px;
+    height: 45px;
+    font-size: 1rem;
+  }
+  
+  .transaction-item {
+    padding: 0.75rem 0;
+  }
+  
+  .transaction-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.25rem;
+  }
+  
+  .transaction-amount {
+    margin-left: 0;
+  }
+  
+  .analytics-modal .modal-body {
+    padding: 1.5rem;
+  }
+  
+  .analytics-tabs .nav-link {
+    padding: 0.75rem 1rem;
+    margin-right: 0.25rem;
+    font-size: 0.9rem;
+  }
+}
+
+@media (max-width: 575px) {
+  .balance-card .card-body {
+    padding: 1.5rem;
+  }
+  
+  .balance-value {
+    font-size: 1.4rem;
+  }
+  
+  .achievement-item {
+    padding: 0.25rem 0;
+  }
+  
+  .achievement-title {
+    font-size: 0.8rem;
+  }
+  
+  .transaction-description {
+    font-size: 0.9rem;
+  }
+  
+  .achievement-icon-large {
+    width: 40px;
+    height: 40px;
+    font-size: 1rem;
+  }
+}
+
+/* Animation */
+.enhanced-student-teocoin-dashboard {
+  animation: fadeInUp 0.6s ease-out;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Loading State */
+.enhanced-teocoin-dashboard .spinner-border {
+  box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
+}
+
+/* Card Hover Effects */
+.card {
+  position: relative;
+  overflow: hidden;
+}
+
+.card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border-radius: 20px;
+  padding: 1px;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.3), transparent);
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask-composite: exclude;
+  pointer-events: none;
+}

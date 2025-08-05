@@ -1,0 +1,372 @@
+/* Course Preview Styles - Phase 3 Enhancement */
+
+.course-preview {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+}
+
+.course-hero {
+  position: relative;
+  overflow: hidden;
+  border-radius: 0 0 30px 30px;
+  margin-bottom: 2rem;
+}
+
+.course-hero::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: radial-gradient(circle at top right, rgba(255,255,255,0.1) 0%, transparent 50%);
+  pointer-events: none;
+}
+
+.course-stats-card {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border-radius: 20px !important;
+  transform: translateY(-20px);
+  transition: all 0.3s ease;
+}
+
+.course-stats-card:hover {
+  transform: translateY(-25px);
+  box-shadow: 0 20px 40px rgba(0,0,0,0.1) !important;
+}
+
+.course-placeholder-large {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 15px;
+  position: relative;
+  overflow: hidden;
+}
+
+.course-placeholder-large::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+  animation: shimmer 2s infinite;
+}
+
+@keyframes shimmer {
+  0% { left: -100%; }
+  100% { left: 100%; }
+}
+
+.course-preview-image {
+  border-radius: 15px;
+  transition: transform 0.3s ease;
+}
+
+.course-preview-image:hover {
+  transform: scale(1.05);
+}
+
+.custom-tabs {
+  background: white;
+  border-radius: 20px 20px 0 0;
+  overflow: hidden;
+}
+
+.custom-tabs .nav-link {
+  border: none;
+  color: #6c757d;
+  font-weight: 500;
+  padding: 1rem 1.5rem;
+  border-radius: 0;
+  background: transparent;
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+.custom-tabs .nav-link:hover {
+  color: #007bff;
+  background: rgba(0, 123, 255, 0.05);
+}
+
+.custom-tabs .nav-link.active {
+  color: #007bff;
+  background: rgba(0, 123, 255, 0.1);
+  border-bottom: 3px solid #007bff;
+}
+
+.custom-tabs .nav-link.active::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 50px;
+  height: 3px;
+  background: linear-gradient(135deg, #007bff, #00d4ff);
+  border-radius: 2px 2px 0 0;
+}
+
+.course-meta {
+  font-size: 0.9rem;
+}
+
+.course-meta .border-bottom:last-child {
+  border-bottom: none !important;
+}
+
+.learning-objectives {
+  list-style: none;
+  padding: 0;
+}
+
+.learning-objectives li {
+  position: relative;
+  padding-left: 0;
+  margin-bottom: 0.75rem;
+  display: flex;
+  align-items: flex-start;
+}
+
+.learning-objectives li i {
+  margin-top: 0.25rem;
+  font-size: 1.1rem;
+}
+
+.stats-grid .stat-item {
+  border-bottom: 1px solid #e9ecef;
+}
+
+.stats-grid .stat-item:last-child {
+  border-bottom: none;
+}
+
+.lessons-accordion {
+  border-radius: 15px;
+  overflow: hidden;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+}
+
+.lessons-accordion .accordion-item {
+  border: none;
+  border-bottom: 1px solid #e9ecef;
+  background: white;
+}
+
+.lessons-accordion .accordion-item:first-child {
+  border-top-left-radius: 15px;
+  border-top-right-radius: 15px;
+}
+
+.lessons-accordion .accordion-item:last-child {
+  border-bottom-left-radius: 15px;
+  border-bottom-right-radius: 15px;
+  border-bottom: none;
+}
+
+.lessons-accordion .accordion-header {
+  background: transparent;
+}
+
+.lessons-accordion .accordion-button {
+  background: white;
+  border: none;
+  padding: 1.5rem;
+  color: #495057;
+  font-weight: 500;
+  box-shadow: none;
+  transition: all 0.3s ease;
+}
+
+.lessons-accordion .accordion-button:hover {
+  background: rgba(0, 123, 255, 0.05);
+  color: #007bff;
+}
+
+.lessons-accordion .accordion-button:not(.collapsed) {
+  background: rgba(0, 123, 255, 0.1);
+  color: #007bff;
+  box-shadow: none;
+}
+
+.lessons-accordion .accordion-button::after {
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%23007bff'%3e%3cpath fill-rule='evenodd' d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/%3e%3c/svg%3e");
+  transition: transform 0.3s ease;
+}
+
+.lessons-accordion .accordion-button:not(.collapsed)::after {
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%23007bff'%3e%3cpath fill-rule='evenodd' d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/%3e%3c/svg%3e");
+  transform: rotate(-180deg);
+}
+
+.lessons-accordion .accordion-body {
+  padding: 0 1.5rem 1.5rem 1.5rem;
+  background: #f8f9fa;
+}
+
+.lesson-content {
+  background: white;
+  border-radius: 10px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+}
+
+.exercises-section {
+  background: rgba(255, 193, 7, 0.05);
+  border: 1px solid rgba(255, 193, 7, 0.2);
+  border-radius: 10px;
+  padding: 1rem;
+  margin-top: 1rem;
+}
+
+.exercise-item {
+  background: white;
+  border: 1px solid #e9ecef !important;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
+.exercise-item:hover {
+  border-color: #007bff !important;
+  box-shadow: 0 4px 15px rgba(0, 123, 255, 0.1);
+  transform: translateY(-2px);
+}
+
+.lesson-actions {
+  background: rgba(0, 123, 255, 0.05);
+  border-radius: 8px;
+  padding: 1rem;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .course-hero {
+    border-radius: 0 0 20px 20px;
+  }
+  
+  .course-stats-card {
+    transform: none;
+    margin-top: 2rem;
+  }
+  
+  .custom-tabs .nav-link {
+    padding: 0.75rem 1rem;
+    font-size: 0.9rem;
+  }
+  
+  .lessons-accordion .accordion-button {
+    padding: 1rem;
+  }
+  
+  .lesson-content {
+    padding: 1rem;
+  }
+}
+
+@media (max-width: 576px) {
+  .course-hero .display-5 {
+    font-size: 1.8rem !important;
+  }
+  
+  .course-hero .lead {
+    font-size: 1rem;
+  }
+  
+  .course-hero .d-flex.gap-4 {
+    flex-wrap: wrap;
+    gap: 1rem !important;
+  }
+  
+  .course-hero .d-flex.gap-3 {
+    flex-direction: column;
+    gap: 0.75rem !important;
+  }
+  
+  .custom-tabs .nav-link {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.8rem;
+  }
+  
+  .exercise-item .d-flex {
+    flex-direction: column;
+    align-items: flex-start !important;
+    gap: 1rem;
+  }
+  
+  .lesson-actions .d-flex {
+    flex-direction: column;
+    gap: 0.5rem !important;
+  }
+}
+
+/* Animation for page load */
+.course-preview {
+  animation: fadeInUp 0.6s ease-out;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Progress bar enhancements */
+.progress {
+  background-color: rgba(0, 123, 255, 0.1);
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.progress-bar {
+  background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+  border-radius: 10px;
+  transition: width 0.6s ease;
+}
+
+/* Badge enhancements */
+.badge {
+  font-weight: 500;
+  letter-spacing: 0.5px;
+}
+
+/* Card enhancements */
+.card {
+  transition: all 0.3s ease;
+}
+
+.card:hover {
+  transform: translateY(-2px);
+}
+
+/* Button enhancements */
+.btn {
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+}
+
+/* Content section spacing */
+.content-section {
+  line-height: 1.7;
+}
+
+.content-section h5 {
+  color: #495057;
+  font-weight: 600;
+  margin-bottom: 1rem;
+}
+
+.content-section p {
+  color: #6c757d;
+  margin-bottom: 1.5rem;
+}

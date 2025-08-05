@@ -1,0 +1,71 @@
+/* Error Display Component Styling */
+
+.errorDisplay {
+  border: none;
+  border-left: 4px solid #dc3545;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #fff5f5 0%, #ffe6e6 100%);
+  box-shadow: 0 4px 12px rgba(220, 53, 69, 0.15);
+  animation: errorSlideIn 0.3s ease-out;
+}
+
+@keyframes errorSlideIn {
+  from {
+    transform: translateY(-10px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.errorDisplay .alert-heading {
+  color: #721c24;
+  margin-bottom: 0.5rem;
+}
+
+.errorDisplay ul {
+  list-style-type: none;
+  position: relative;
+}
+
+.errorDisplay ul li {
+  position: relative;
+  padding-left: 1rem;
+  color: #721c24;
+}
+
+.errorDisplay ul li::before {
+  content: '•';
+  color: #dc3545;
+  font-weight: bold;
+  position: absolute;
+  left: 0;
+}
+
+.errorDisplay ul li strong {
+  color: #a71e2a;
+}
+
+/* Shake animation for critical errors */
+.error-display.shake {
+  animation: shake 0.5s ease-in-out;
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-5px); }
+  75% { transform: translateX(5px); }
+}
+
+/* Mobile responsive */
+@media (max-width: 576px) {
+  .error-display {
+    font-size: 0.9rem;
+  }
+  
+  .error-display ul li {
+    padding-left: 0.8rem;
+  }
+}

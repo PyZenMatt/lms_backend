@@ -1,0 +1,263 @@
+// StudentTeoCoinDashboard styles
+@import '../../assets/scss/partials/_variables';
+
+.student-teocoin-dashboard {
+  .dashboard-header {
+    margin-bottom: 1.5rem;
+    
+    h4 {
+      color: $theme-color2;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+      
+      i {
+        margin-right: 0.5rem;
+        color: #ffc107;
+      }
+    }
+    
+    .badge {
+      font-size: 0.75rem;
+    }
+    
+    small {
+      display: block;
+      color: #6c757d;
+      font-size: 0.85rem;
+    }
+  }
+  
+  .balance-card,
+  .total-balance-card,
+  .stats-card,
+  .MuiCardContent-root,
+  .transactions-card {
+    border: none;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 10px;
+    background: $theme-color2;
+    color: white;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+    }
+    
+    .card-header {
+      background: rgba(255, 255, 255, 0.1);
+      border: none;
+      color: white;
+      padding: 1rem 1.5rem;
+      
+      h5 {
+        margin-bottom: 0;
+        font-weight: 600;
+        
+        i {
+          margin-right: 0.5rem;
+        }
+      }
+      
+      small {
+        color: rgba(255, 255, 255, 0.8);
+      }
+    }
+    
+    .card-body {
+      padding: 1.5rem;
+    }
+  }
+  
+  .balance-header {
+    display: flex;
+    justify-content: between;
+    align-items: center;
+    margin-bottom: 1rem;
+    
+    h5 {
+      margin: 0;
+      font-weight: 600;
+      color: white;
+    }
+    
+    .badge {
+      font-size: 0.7rem;
+    }
+  }
+  
+  .balance-amount {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: #ffc107;
+    margin-bottom: 0.5rem;
+  }
+  
+  .balance-details {
+    small {
+      color: rgba(255, 255, 255, 0.8);
+    }
+  }
+  
+  .total-balance {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #ffc107;
+  }
+  
+  .conversion-rate {
+    small {
+      color: rgba(255, 255, 255, 0.7);
+    }
+  }
+  
+  .eur-equivalent {
+    font-size: 1.2rem;
+    color: rgba(255, 255, 255, 0.9);
+    font-weight: 500;
+  }
+  
+  .stats-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    
+    .stat-item {
+      text-align: center;
+      
+      .stat-value {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #ffc107;
+      }
+      
+      .stat-label {
+        font-size: 0.8rem;
+        color: rgba(255, 255, 255, 0.8);
+        margin-top: 0.25rem;
+      }
+    }
+  }
+  
+  .transactions-list {
+    .transaction-item {
+      display: flex;
+      align-items: center;
+      padding: 1rem 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      
+      &:last-child {
+        border-bottom: none;
+      }
+      
+      .transaction-icon {
+        font-size: 1.5rem;
+        margin-right: 1rem;
+        width: 40px;
+        text-align: center;
+      }
+      
+      .transaction-details {
+        flex: 1;
+        
+        .transaction-type {
+          margin-bottom: 0.25rem;
+          
+          .badge {
+            font-size: 0.7rem;
+          }
+        }
+        
+        .transaction-description {
+          color: white;
+          font-weight: 500;
+          margin-bottom: 0.25rem;
+        }
+        
+        .transaction-date {
+          font-size: 0.8rem;
+          color: rgba(255, 255, 255, 0.7);
+        }
+      }
+      
+      .transaction-amount {
+        text-align: right;
+        
+        .amount {
+          font-weight: 700;
+          font-size: 1.1rem;
+          
+          &.positive {
+            color: #28a745;
+          }
+          
+          &.negative {
+            color: #dc3545;
+          }
+        }
+      }
+    }
+  }
+  
+  .btn {
+    background: rgba(255, 255, 255, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: white;
+    border-radius: 8px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    
+    &:hover {
+      background: rgba(255, 255, 255, 0.25);
+      border-color: rgba(255, 255, 255, 0.5);
+      color: white;
+      transform: translateY(-1px);
+    }
+    
+    &:active,
+    &:focus {
+      background: rgba(255, 255, 255, 0.3);
+      border-color: rgba(255, 255, 255, 0.6);
+      color: white;
+      box-shadow: 0 0 0 0.2rem rgba(255, 255, 255, 0.25);
+    }
+    
+    &:disabled {
+      opacity: 0.6;
+      transform: none !important;
+    }
+  }
+  
+  .text-muted {
+    color: rgba(255, 255, 255, 0.8) !important;
+  }
+  
+  // Alert styles
+  .alert-danger {
+    background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+    border: none;
+    color: white;
+    border-radius: 8px;
+  }
+  
+  // Spinner
+  .spinner-border {
+    border-color: rgba(255, 255, 255, 0.3);
+    border-right-color: white;
+  }
+  
+  // Responsive design
+  @media (max-width: 768px) {
+    .balance-amount {
+      font-size: 1.5rem;
+    }
+    
+    .total-balance {
+      font-size: 1.7rem;
+    }
+    
+    .stats-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+}

@@ -1,0 +1,262 @@
+/* Gas-Free Discount Interface Styles */
+.gas-free-discount-interface {
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  border: none;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.gas-free-discount-interface:hover {
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  transform: translateY(-2px);
+}
+
+.gas-free-discount-interface .card-header {
+  background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+  border: none;
+  padding: 1rem 1.5rem;
+}
+
+.gas-free-discount-interface .card-header h5 {
+  font-weight: 600;
+  font-size: 1.1rem;
+}
+
+.gas-free-discount-interface .card-body {
+  padding: 1.5rem;
+}
+
+/* Course Info Section */
+.gas-free-discount-interface .course-info {
+  background: #f8f9fa;
+  padding: 1rem;
+  border-radius: 8px;
+  border-left: 4px solid #007bff;
+}
+
+.gas-free-discount-interface .course-info h6 {
+  font-weight: 600;
+  color: #495057;
+  margin-bottom: 0.5rem;
+}
+
+/* TEO Amount Input */
+.gas-free-discount-interface .input-group {
+  border-radius: 8px;
+  overflow: hidden;
+  border: 2px solid #e9ecef;
+  transition: border-color 0.3s ease;
+}
+
+.gas-free-discount-interface .input-group:focus-within {
+  border-color: #007bff;
+  box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+.gas-free-discount-interface .form-control {
+  border: none;
+  padding: 0.75rem 1rem;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.gas-free-discount-interface .form-control:focus {
+  box-shadow: none;
+}
+
+.gas-free-discount-interface .input-group-text {
+  background: #007bff;
+  color: white;
+  border: none;
+  font-weight: 600;
+  padding: 0.75rem 1rem;
+}
+
+/* Alert Styles */
+.gas-free-discount-interface .alert {
+  border-radius: 8px;
+  border: none;
+  font-size: 0.95rem;
+}
+
+.gas-free-discount-interface .alert-info {
+  background: linear-gradient(135deg, #d1ecf1 0%, #bee5eb 100%);
+  color: #0c5460;
+}
+
+.gas-free-discount-interface .alert-warning {
+  background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
+  color: #856404;
+}
+
+.gas-free-discount-interface .alert-success {
+  background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+  color: #155724;
+}
+
+.gas-free-discount-interface .alert-danger {
+  background: linear-gradient(135deg, #f8d7da 0%, #f5c6cb 100%);
+  color: #721c24;
+}
+
+/* Gas-Free Button */
+.gas-free-discount-interface .gas-free-btn {
+  background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+  border: none;
+  border-radius: 8px;
+  padding: 0.875rem 2rem;
+  font-weight: 600;
+  font-size: 1.1rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.gas-free-discount-interface .gas-free-btn:hover {
+  background: linear-gradient(135deg, #218838 0%, #1ea086 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+}
+
+.gas-free-discount-interface .gas-free-btn:active {
+  transform: translateY(0);
+}
+
+.gas-free-discount-interface .gas-free-btn:disabled {
+  background: #6c757d;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.gas-free-discount-interface .gas-free-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.5s;
+}
+
+.gas-free-discount-interface .gas-free-btn:hover::before {
+  left: 100%;
+}
+
+/* Process Steps */
+.gas-free-discount-interface .process-steps {
+  background: #f8f9fa;
+  padding: 1rem;
+  border-radius: 8px;
+  border: 1px solid #e9ecef;
+}
+
+.gas-free-discount-interface .process-steps ol {
+  margin-bottom: 0;
+}
+
+.gas-free-discount-interface .process-steps li {
+  margin-bottom: 0.25rem;
+  color: #6c757d;
+}
+
+/* Badge Styles */
+.gas-free-discount-interface .badge {
+  font-size: 0.8rem;
+  padding: 0.5rem 0.75rem;
+  border-radius: 6px;
+  font-weight: 600;
+}
+
+/* Loading Animation */
+.gas-free-discount-interface .spinner-border {
+  width: 1rem;
+  height: 1rem;
+}
+
+/* External Link Styling */
+.gas-free-discount-interface a {
+  color: #007bff;
+  font-weight: 500;
+  transition: color 0.3s ease;
+}
+
+.gas-free-discount-interface a:hover {
+  color: #0056b3;
+  text-decoration: underline !important;
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 576px) {
+  .gas-free-discount-interface .card-header {
+    padding: 0.875rem 1rem;
+  }
+  
+  .gas-free-discount-interface .card-header h5 {
+    font-size: 1rem;
+  }
+  
+  .gas-free-discount-interface .card-body {
+    padding: 1rem;
+  }
+  
+  .gas-free-discount-interface .gas-free-btn {
+    padding: 0.75rem 1.5rem;
+    font-size: 1rem;
+  }
+  
+  .gas-free-discount-interface .course-info,
+  .gas-free-discount-interface .process-steps {
+    padding: 0.75rem;
+  }
+}
+
+/* Animation for success state */
+@keyframes successPulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.02); }
+  100% { transform: scale(1); }
+}
+
+.gas-free-discount-interface .alert-success {
+  animation: successPulse 0.5s ease-in-out;
+}
+
+/* Gas-Free Badge Animation */
+@keyframes gasFreeGlow {
+  0%, 100% { box-shadow: 0 0 5px rgba(40, 167, 69, 0.5); }
+  50% { box-shadow: 0 0 15px rgba(40, 167, 69, 0.8); }
+}
+
+.gas-free-discount-interface .badge.bg-success {
+  animation: gasFreeGlow 2s infinite;
+}
+
+/* Focus states for accessibility */
+.gas-free-discount-interface .btn:focus,
+.gas-free-discount-interface .form-control:focus {
+  outline: 2px solid #007bff;
+  outline-offset: 2px;
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .gas-free-discount-interface {
+    border: 2px solid #000;
+  }
+  
+  .gas-free-discount-interface .card-header {
+    background: #000;
+    color: #fff;
+  }
+  
+  .gas-free-discount-interface .gas-free-btn {
+    background: #000;
+    color: #fff;
+    border: 2px solid #fff;
+  }
+}

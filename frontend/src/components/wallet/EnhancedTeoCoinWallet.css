@@ -1,0 +1,276 @@
+/**
+ * Enhanced TeoCoin Wallet Styles
+ * Matches Datta Able theme with professional wallet design
+ */
+
+.enhanced-teocoin-wallet {
+  box-shadow: 0 2px 6px 0 rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  border: 1px solid #e3ebf0;
+}
+
+.enhanced-teocoin-wallet .card-header {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border-radius: 8px 8px 0 0;
+  border-bottom: none;
+}
+
+.enhanced-teocoin-wallet .card-header h5 {
+  color: white;
+  font-weight: 600;
+}
+
+.enhanced-teocoin-wallet .card-header .text-muted {
+  color: rgba(255, 255, 255, 0.8) !important;
+}
+
+/* Balance Cards */
+.balance-card {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  border: none;
+}
+
+.balance-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.balance-card h3 {
+  font-weight: 700;
+  font-size: 1.5rem;
+}
+
+.balance-card .opacity-75 {
+  opacity: 0.85;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+/* Quick Actions */
+.quick-actions .btn {
+  font-weight: 500;
+  padding: 0.75rem 1rem;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+}
+
+.quick-actions .btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.quick-actions .btn i {
+  font-size: 1rem;
+}
+
+/* Navigation Pills */
+.enhanced-teocoin-wallet .nav-pills .nav-link {
+  color: #495057;
+  border-radius: 6px;
+  padding: 0.75rem 1.25rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.enhanced-teocoin-wallet .nav-pills .nav-link:hover {
+  background-color: #f8f9fa;
+  color: #495057;
+}
+
+.enhanced-teocoin-wallet .nav-pills .nav-link.active {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  box-shadow: 0 3px 8px rgba(102, 126, 234, 0.3);
+}
+
+/* Staking Tiers */
+.tier-card {
+  transition: all 0.2s ease;
+  background: #fff;
+}
+
+.tier-card:hover {
+  border-color: #667eea !important;
+  box-shadow: 0 3px 12px rgba(102, 126, 234, 0.15);
+}
+
+.tier-card h6 {
+  color: #495057;
+  font-weight: 600;
+}
+
+.tier-card .badge {
+  font-size: 0.75rem;
+  padding: 0.35em 0.65em;
+}
+
+/* Table Styles */
+.enhanced-teocoin-wallet .table {
+  margin-bottom: 0;
+}
+
+.enhanced-teocoin-wallet .table th {
+  border-top: none;
+  color: #6c757d;
+  font-weight: 600;
+  font-size: 0.875rem;
+  padding: 1rem 0.75rem;
+}
+
+.enhanced-teocoin-wallet .table td {
+  padding: 1rem 0.75rem;
+  vertical-align: middle;
+}
+
+.enhanced-teocoin-wallet .table tbody tr:hover {
+  background-color: #f8f9fa;
+}
+
+/* Burn Info Section */
+.burn-info {
+  border-left: 4px solid #ffc107;
+}
+
+.burn-info h6 {
+  color: #495057;
+  font-weight: 600;
+}
+
+.burn-info ol {
+  color: #6c757d;
+}
+
+.burn-info ol li {
+  margin-bottom: 0.5rem;
+}
+
+/* Modal Styles */
+.modal-header {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border-bottom: none;
+}
+
+.modal-header .modal-title {
+  color: white;
+  font-weight: 600;
+}
+
+.modal-header .btn-close {
+  filter: invert(1);
+}
+
+.modal-body {
+  padding: 2rem;
+}
+
+.modal-footer {
+  border-top: 1px solid #e9ecef;
+  padding: 1.5rem 2rem;
+}
+
+/* Form Controls */
+.enhanced-teocoin-wallet .form-control {
+  border-radius: 6px;
+  border: 1px solid #e3ebf0;
+  padding: 0.75rem 1rem;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.enhanced-teocoin-wallet .form-control:focus {
+  border-color: #667eea;
+  box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+}
+
+.enhanced-teocoin-wallet .form-select {
+  border-radius: 6px;
+  border: 1px solid #e3ebf0;
+  padding: 0.75rem 1rem;
+}
+
+.enhanced-teocoin-wallet .form-label {
+  font-weight: 500;
+  color: #495057;
+  margin-bottom: 0.5rem;
+}
+
+/* Alert Styles */
+.enhanced-teocoin-wallet .alert {
+  border-radius: 6px;
+  border: none;
+  font-weight: 500;
+}
+
+.enhanced-teocoin-wallet .alert-success {
+  background-color: #d1edff;
+  color: #0c5460;
+}
+
+.enhanced-teocoin-wallet .alert-danger {
+  background-color: #f8d7da;
+  color: #721c24;
+}
+
+/* Badge Variants */
+.enhanced-teocoin-wallet .badge {
+  font-weight: 500;
+  padding: 0.4em 0.8em;
+  border-radius: 4px;
+}
+
+/* Loading States */
+.enhanced-teocoin-wallet .spinner-border-sm {
+  width: 1rem;
+  height: 1rem;
+}
+
+/* Empty State */
+.enhanced-teocoin-wallet .text-center i.feather {
+  opacity: 0.5;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .balance-card h3 {
+    font-size: 1.25rem;
+  }
+  
+  .enhanced-teocoin-wallet .nav-pills .nav-link {
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+  }
+  
+  .quick-actions .btn {
+    padding: 0.625rem 0.75rem;
+    font-size: 0.875rem;
+  }
+  
+  .modal-body {
+    padding: 1.5rem;
+  }
+  
+  .modal-footer {
+    padding: 1rem 1.5rem;
+  }
+}
+
+/* Animation for loading */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.enhanced-teocoin-wallet .tab-content {
+  animation: fadeIn 0.3s ease;
+}
+
+/* Progress indicators */
+.enhanced-teocoin-wallet .progress {
+  height: 6px;
+  border-radius: 3px;
+}
+
+.enhanced-teocoin-wallet .progress-bar {
+  border-radius: 3px;
+}

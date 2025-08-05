@@ -1,0 +1,413 @@
+/* Gas-Free System Styles */
+
+.gas-free-system-status {
+  margin-bottom: 1rem;
+}
+
+.gas-free-status .card-header {
+  background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+  color: white;
+  border-bottom: none;
+}
+
+.gas-free-status .card-header h5 {
+  margin: 0;
+  font-weight: 600;
+}
+
+.status-item {
+  padding: 0.75rem;
+  background: #f8f9fa;
+  border-radius: 0.5rem;
+  border-left: 4px solid #28a745;
+}
+
+.status-item h6 {
+  margin-bottom: 0.5rem;
+  color: #495057;
+  font-weight: 600;
+}
+
+.operation-stats div {
+  margin-bottom: 0.25rem;
+  font-size: 0.9rem;
+}
+
+.contract-info {
+  background: #f8f9fa;
+  padding: 1rem;
+  border-radius: 0.5rem;
+  margin-top: 1rem;
+}
+
+.contract-list div {
+  margin-bottom: 0.5rem;
+}
+
+.contract-list small {
+  display: block;
+  color: #6c757d;
+  font-weight: 500;
+}
+
+.contract-list code {
+  font-size: 0.8rem;
+  color: #495057;
+  background: #e9ecef;
+  padding: 0.2rem 0.4rem;
+  border-radius: 0.25rem;
+  word-break: break-all;
+}
+
+.wallet-info {
+  background: #e7f3ff;
+  padding: 1rem;
+  border-radius: 0.5rem;
+  border-left: 4px solid #007bff;
+}
+
+.allowance-info {
+  background: #f0f9ff;
+  padding: 1rem;
+  border-radius: 0.5rem;
+  margin-top: 1rem;
+}
+
+.allowance-stat {
+  text-align: center;
+  padding: 1rem;
+  background: white;
+  border-radius: 0.5rem;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.allowance-stat .stat-value {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #28a745;
+}
+
+.allowance-stat .stat-label {
+  font-size: 0.8rem;
+  color: #6c757d;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.teacher-benefits {
+  background: #f0f9ff;
+  padding: 1rem;
+  border-radius: 0.5rem;
+  margin-top: 1rem;
+}
+
+.teacher-benefits ul {
+  margin-bottom: 0;
+  padding-left: 1.2rem;
+}
+
+.teacher-benefits li {
+  margin-bottom: 0.5rem;
+}
+
+.metric {
+  text-align: center;
+  padding: 1rem;
+  background: white;
+  border-radius: 0.5rem;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  margin-bottom: 1rem;
+}
+
+.metric-value {
+  font-size: 1.8rem;
+  font-weight: bold;
+  color: #007bff;
+  margin-bottom: 0.25rem;
+}
+
+.metric-label {
+  font-size: 0.8rem;
+  color: #6c757d;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Zero-MATIC Discount Interface Styles */
+.zero-matic-discount {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border-radius: 1rem;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+}
+
+.zero-matic-discount .card-header {
+  background: rgba(255,255,255,0.1);
+  border: none;
+  border-radius: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.zero-matic-discount h4 {
+  margin: 0;
+  font-weight: 600;
+}
+
+.discount-info {
+  background: rgba(255,255,255,0.1);
+  padding: 1rem;
+  border-radius: 0.5rem;
+  margin: 1rem 0;
+}
+
+.discount-info .row > div {
+  text-align: center;
+  padding: 0.5rem;
+}
+
+.discount-info .discount-value {
+  font-size: 1.2rem;
+  font-weight: bold;
+  margin-bottom: 0.25rem;
+}
+
+.discount-info .discount-label {
+  font-size: 0.8rem;
+  opacity: 0.8;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.allowance-status {
+  background: rgba(255,255,255,0.1);
+  padding: 1rem;
+  border-radius: 0.5rem;
+  margin: 1rem 0;
+  text-align: center;
+}
+
+.allowance-amount {
+  font-size: 1.5rem;
+  font-weight: bold;
+  margin: 0.5rem 0;
+}
+
+.gas-free-badge {
+  background: #28a745;
+  color: white;
+  padding: 0.25rem 0.75rem;
+  border-radius: 1rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  display: inline-block;
+  margin: 0.25rem;
+}
+
+.discount-controls {
+  margin: 1rem 0;
+}
+
+.discount-controls .btn {
+  margin: 0.25rem;
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.5rem;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.discount-controls .btn-primary {
+  background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+  border: none;
+}
+
+.discount-controls .btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+}
+
+.success-message {
+  background: rgba(40, 167, 69, 0.1);
+  border: 1px solid rgba(40, 167, 69, 0.3);
+  color: #155724;
+  padding: 1rem;
+  border-radius: 0.5rem;
+  margin: 1rem 0;
+}
+
+.error-message {
+  background: rgba(220, 53, 69, 0.1);
+  border: 1px solid rgba(220, 53, 69, 0.3);
+  color: #721c24;
+  padding: 1rem;
+  border-radius: 0.5rem;
+  margin: 1rem 0;
+}
+
+/* Zero-MATIC Staking Interface Styles */
+.zero-matic-staking {
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  color: white;
+  border-radius: 1rem;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+}
+
+.tier-info {
+  background: rgba(255,255,255,0.1);
+  padding: 1rem;
+  border-radius: 0.5rem;
+  margin: 1rem 0;
+}
+
+.current-tier {
+  text-align: center;
+  margin-bottom: 1rem;
+}
+
+.tier-badge {
+  padding: 0.5rem 1rem;
+  border-radius: 1rem;
+  font-weight: bold;
+  font-size: 1.1rem;
+  display: inline-block;
+  margin: 0.5rem;
+}
+
+.tier-bronze { background: #CD7F32; }
+.tier-silver { background: #C0C0C0; color: #333; }
+.tier-gold { background: #FFD700; color: #333; }
+.tier-platinum { background: #E5E4E2; color: #333; }
+.tier-diamond { background: #B9F2FF; color: #333; }
+
+.staking-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 1rem;
+  margin: 1rem 0;
+}
+
+.stat-item {
+  background: rgba(255,255,255,0.1);
+  padding: 1rem;
+  border-radius: 0.5rem;
+  text-align: center;
+}
+
+.stat-value {
+  font-size: 1.3rem;
+  font-weight: bold;
+  margin-bottom: 0.25rem;
+}
+
+.stat-label {
+  font-size: 0.8rem;
+  opacity: 0.8;
+}
+
+.staking-form {
+  background: rgba(255,255,255,0.1);
+  padding: 1rem;
+  border-radius: 0.5rem;
+  margin: 1rem 0;
+}
+
+.staking-form .form-control {
+  background: rgba(255,255,255,0.2);
+  border: 1px solid rgba(255,255,255,0.3);
+  color: white;
+  margin-bottom: 1rem;
+}
+
+.staking-form .form-control::placeholder {
+  color: rgba(255,255,255,0.7);
+}
+
+.staking-form .form-control:focus {
+  background: rgba(255,255,255,0.3);
+  border-color: rgba(255,255,255,0.5);
+  color: white;
+  box-shadow: 0 0 0 0.2rem rgba(255,255,255,0.25);
+}
+
+.tier-progress {
+  margin: 1rem 0;
+}
+
+.tier-progress .progress {
+  height: 8px;
+  background: rgba(255,255,255,0.2);
+}
+
+.tier-progress .progress-bar {
+  background: linear-gradient(90deg, #28a745 0%, #20c997 100%);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .zero-matic-discount,
+  .zero-matic-staking {
+    margin: 1rem -15px;
+    border-radius: 0;
+  }
+  
+  .staking-stats {
+    grid-template-columns: 1fr;
+  }
+  
+  .allowance-stat,
+  .metric {
+    margin-bottom: 0.5rem;
+  }
+  
+  .contract-list code {
+    font-size: 0.7rem;
+  }
+}
+
+/* Animation for loading states */
+.processing {
+  opacity: 0.7;
+  pointer-events: none;
+}
+
+.processing .btn {
+  position: relative;
+}
+
+.processing .btn::after {
+  content: '';
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  margin: auto;
+  border: 2px solid transparent;
+  border-top-color: #ffffff;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Hover effects */
+.status-item:hover {
+  transform: translateY(-2px);
+  transition: transform 0.2s ease;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.allowance-stat:hover,
+.metric:hover {
+  transform: translateY(-2px);
+  transition: transform 0.2s ease;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+}

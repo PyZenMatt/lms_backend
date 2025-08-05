@@ -1,0 +1,170 @@
+/* Stili ottimizzati per la landing page - Performance migliorata */
+
+/* Elementi fluttuanti semplificati */
+.auth-bg-simple {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.auth-bg-simple .r {
+  position: absolute;
+  width: 250px;
+  height: 250px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #4099ff 0%, #73b4ff 100%);
+  opacity: 0.15;
+  will-change: transform;
+}
+
+.auth-bg-simple .r:nth-child(1) {
+  top: -125px;
+  right: -125px;
+  animation: floatingSimple 12s infinite ease-in-out;
+}
+
+.auth-bg-simple .r:nth-child(2) {
+  bottom: -75px;
+  left: -75px;
+  animation: floatingSimple 15s infinite ease-in-out reverse;
+}
+
+.auth-bg-simple .r.s {
+  width: 150px;
+  height: 150px;
+}
+
+/* Animazione ottimizzata */
+@keyframes floatingSimple {
+  0%, 100% {
+    transform: translateY(0px) scale(1);
+  }
+  50% {
+    transform: translateY(-15px) scale(1.05);
+  }
+}
+
+/* Stili per elementi circolari */
+.avatar-circle {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+}
+
+.avatar-initial {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+}
+
+.step-circle {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: #4099ff;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  font-weight: bold;
+}
+
+/* Stili per le card hover - Ottimizzato */
+.card-hover-shadow {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  will-change: transform, box-shadow;
+}
+
+.card-hover-shadow:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.08) !important;
+}
+
+/* Hero section ottimizzata */
+.hero-section {
+  position: relative;
+  overflow: hidden;
+  padding: 80px 0;
+  min-height: 90vh;
+  display: flex;
+  align-items: center;
+}
+
+.hero-cards {
+  position: relative;
+  height: 450px;
+}
+
+/* Card floating ottimizzate */
+.card-nft, .card-course, .card-dao {
+  will-change: transform;
+  backface-visibility: hidden;
+  perspective: 1000px;
+}
+
+/* Responsive fixes ottimizzati */
+@media (max-width: 768px) {
+  .hero-section {
+    padding: 60px 0;
+    min-height: 85vh;
+  }
+  
+  .hero-cards {
+    height: 400px;
+    margin-top: 30px;
+  }
+  
+  .card-nft, .card-course, .card-dao {
+    width: 85% !important;
+    transform: none !important; /* Rimuove rotazioni su mobile */
+    position: relative !important;
+    margin: 20px auto !important;
+    top: auto !important;
+    left: auto !important;
+    right: auto !important;
+    bottom: auto !important;
+  }
+  
+  /* Disable floating background on mobile for performance */
+  .auth-bg-simple .r {
+    display: none;
+  }
+}
+
+/* Utility classes per performance */
+.border-top-3 {
+  border-top-width: 3px !important;
+}
+
+/* Preload hint per fonts */
+.hero-content h1 {
+  font-display: swap;
+}
+
+/* Reduce motion for users who prefer it */
+@media (prefers-reduced-motion: reduce) {
+  .auth-bg-simple .r {
+    animation: none;
+  }
+  
+  .card-hover-shadow {
+    transition: none;
+  }
+  
+  .card-hover-shadow:hover {
+    transform: none;
+  }
+}

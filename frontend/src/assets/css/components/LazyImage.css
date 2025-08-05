@@ -1,0 +1,88 @@
+/* LazyImage Component Styles */
+
+.lazy-image-container {
+  position: relative;
+  overflow: hidden;
+  background-color: #f8f9fa;
+}
+
+.lazy-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: opacity 0.3s ease;
+}
+
+.lazy-image.loading {
+  opacity: 0;
+}
+
+.lazy-image.loaded {
+  opacity: 1;
+}
+
+/* Skeleton loader */
+.lazy-image-skeleton {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: skeleton-loading 1.5s infinite;
+}
+
+@keyframes skeleton-loading {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+/* Loading state */
+.lazy-image-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  background-color: #f8f9fa;
+}
+
+.lazy-image-loading-icon {
+  font-size: 2rem;
+  opacity: 0.5;
+}
+
+/* Error state */
+.lazy-image-error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  background-color: #f8f9fa;
+  color: #6c757d;
+  text-align: center;
+  padding: 1rem;
+}
+
+.lazy-image-error-icon {
+  font-size: 2rem;
+  margin-bottom: 0.5rem;
+  color: #dc3545;
+}
+
+.lazy-image-error-text {
+  font-size: 0.875rem;
+  margin-bottom: 0.5rem;
+}
+
+.lazy-image-retry-btn {
+  font-size: 0.75rem;
+  padding: 0.25rem 0.5rem;
+}
