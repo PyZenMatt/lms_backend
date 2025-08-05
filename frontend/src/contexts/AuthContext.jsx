@@ -36,9 +36,11 @@ export const AuthProvider = ({ children }) => {
       setIsAuthenticated(true);
     } catch (err) {
       console.error('Error fetching user profile:', err);
-      setError('Errore nel caricamento del profilo utente');
+      setError('Sessione scaduta o token non valido. Effettua di nuovo il login.');
       setUser(null);
       setIsAuthenticated(false);
+      // Logout automatico se il token non è valido
+      localStorage.removeItem('accessToken');
     } finally {
       setLoading(false);
     }
@@ -102,9 +104,22 @@ export const AuthProvider = ({ children }) => {
     setUser
   };
 
+  // Blocca rendering figli finché loading è true
   return (
     <AuthContext.Provider value={value}>
-      {children}
+      {loading ? (
+        <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div className="text-center">
+            <div className="spinner-border text-primary" role="status">
+              <span className="visually-hidden">Caricamento...</span>
+            </div>
+            <div className="mt-2 text-muted">Verifica autenticazione...</div>
+            {error && <div className="alert alert-warning mt-3">{error}</div>}
+          </div>
+        </div>
+      ) : (
+        children
+      )}
     </AuthContext.Provider>
   );
 };

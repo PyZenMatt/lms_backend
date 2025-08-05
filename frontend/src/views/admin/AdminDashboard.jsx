@@ -34,7 +34,7 @@ const AdminDashboard = () => {
   const adminStatsData = [
     {
       title: 'Utenti Totali',
-      value: dashboardData.totalUsers.toString(),
+      value: (dashboardData.totalUsers ?? 0).toString(),
       icon: 'users',
       iconColor: 'text-primary',
       percentage: Math.min((dashboardData.totalUsers / 1000) * 100, 100),
@@ -43,7 +43,7 @@ const AdminDashboard = () => {
     },
     {
       title: 'Corsi Attivi',
-      value: dashboardData.totalCourses.toString(),
+      value: (dashboardData.totalCourses ?? 0).toString(),
       icon: 'book-open',
       iconColor: 'text-success',
       percentage: Math.min((dashboardData.totalCourses / 100) * 100, 100),
@@ -61,7 +61,7 @@ const AdminDashboard = () => {
     },
     {
       title: 'Approvazioni',
-      value: dashboardData.pendingApprovals.toString(),
+      value: (dashboardData.pendingApprovals ?? 0).toString(),
       icon: 'check-circle',
       iconColor: 'text-info',
       percentage: dashboardData.pendingApprovals > 0 ? 100 : 0,

@@ -20,7 +20,14 @@ class UserAdmin(BaseUserAdmin):
         ("Ruolo & Blockchain", {"fields": ("role", "wallet_address")}),
         ('Date importanti', {'fields': ('last_login', 'date_joined')}),
     )
-    list_display = ('username', 'email', 'role', 'wallet_address', 'is_staff', 'is_approved', 'is_active')
+    def email_link(self, obj):
+        from django.utils.html import format_html
+        url = f"/admin/users/user/{obj.pk}/change/"
+        return format_html('<a href="{}">{}</a>', url, obj.email)
+
+    email_link.short_description = 'Email'
+
+    list_display = ('username', 'email_link', 'role', 'wallet_address', 'is_staff', 'is_approved', 'is_active')
     list_filter = ('role', 'is_approved', 'is_staff', 'is_superuser', 'is_active')
     search_fields = ('username', 'email', 'first_name', 'last_name')
     actions = [make_teachers_approved]

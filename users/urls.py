@@ -1,6 +1,8 @@
 from django.urls import path
 from .views import PendingTeachersView, ApproveTeacherView, RejectTeacherView, UserProfileView, UserSettingsView, UserProgressView
+
 from .views.wallet_views import ConnectWalletView, DisconnectWalletView
+from .views.self_verify import SelfVerifyView
 
 urlpatterns = [
     path('pending-teachers/', PendingTeachersView.as_view(), name='pending-teachers'),
@@ -12,4 +14,5 @@ urlpatterns = [
     # Wallet management
     path('wallet/connect/', ConnectWalletView.as_view(), name='connect-wallet'),
     path('wallet/disconnect/', DisconnectWalletView.as_view(), name='disconnect-wallet'),
+    path('self-verify/', SelfVerifyView.as_view(), name='self-verify'),
 ]

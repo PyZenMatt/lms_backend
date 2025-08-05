@@ -255,8 +255,22 @@ class AdminDashboardAPI(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
+        from users.models import User
+        from courses.models import Course
+        from courses.models import CourseApprovalRequest
+        from rewards.models import BlockchainTransaction
+        from django.db.models import Sum
         user = request.user
-        
+
+        # Statistiche admin
+        total_users = User.objects.count()
+        total_courses = Course.objects.count()
+        pending_approvals = CourseApprovalRequest.objects.filter(status='pending').count() if hasattr(CourseApprovalRequest, 'status') else 0
+        monthly_revenue = BlockchainTransaction.objects.filter(
+            created_at__month=timezone.now().month,
+            created_at__year=timezone.now().year
+        ).aggregate(total=Sum('amount_eur'))['total'] or 0
+
         # Get blockchain balance
         blockchain_balance = "0"
         if user.wallet_address:
@@ -290,12 +304,15 @@ class AdminDashboardAPI(APIView):
                 'total': '0.00',
                 'can_withdraw': False
             }
-        
-        # Mostra saldo blockchain e info admin
+
         return Response({
+            "totalUsers": total_users,
+            "totalCourses": total_courses,
+            "pendingApprovals": pending_approvals,
+            "monthlyRevenue": float(monthly_revenue),
             "username": user.username,
             "blockchain_balance": blockchain_balance,
-            "teocoin_balance": teocoin_balance,  # 🎯 NEW: DB balance for withdrawal
+            "teocoin_balance": teocoin_balance,
             "wallet_address": user.wallet_address,
             "is_staff": user.is_staff,
             "is_superuser": user.is_superuser,
