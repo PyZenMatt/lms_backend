@@ -6,7 +6,8 @@ import sys
 
 def main():
     """Run administrative tasks."""
-    os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'schoolplatform.settings')
+    # Use DJANGO_SETTINGS_MODULE from env, fallback to dev
+    os.environ.setdefault('DJANGO_SETTINGS_MODULE', os.getenv('DJANGO_SETTINGS_MODULE', 'schoolplatform.settings.dev'))
     try:
         from django.core.management import execute_from_command_line
     except ImportError as exc:

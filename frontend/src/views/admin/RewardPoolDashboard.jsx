@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Row, Col, Card, Alert, Button, Spinner } from 'react-bootstrap';
 import { getRewardPoolInfo, getBlockchainTransactions } from '../../services/api/blockchain';
-import RewardPoolSummary from '../../components/blockchain/RewardPoolSummary';
+
 import RewardPoolRefill from '../../components/blockchain/RewardPoolRefill';
 import ManualTeoCoinTransfer from '../../components/blockchain/ManualTeoCoinTransfer';
 import BlockchainTransactions from '../../components/blockchain/BlockchainTransactions';
@@ -19,17 +19,16 @@ const RewardPoolDashboard = () => {
     setError('');
     
     try {
-      const response = await getRewardPoolInfo();
-      setPoolInfo(response.data);
-      
-      // Load recent transactions for the chart
-      const txResponse = await getBlockchainTransactions({
-        pageSize: 100, // Get more transactions for chart data
-      });
-      setTransactions(txResponse.data.results || []);
+      // Reward pool logic removed
+      // const response = await getRewardPoolInfo();
+      // setPoolInfo(response.data);
+      // const txResponse = await getBlockchainTransactions({
+      //   pageSize: 100,
+      // });
+      // setTransactions(txResponse.data.results || []);
     } catch (err) {
-      console.error('Error loading reward pool info:', err);
-      setError('Error loading reward pool information. Please try again.');
+      // console.error('Error loading reward pool info:', err);
+      // setError('Error loading reward pool information. Please try again.');
     } finally {
       setLoading(false);
     }

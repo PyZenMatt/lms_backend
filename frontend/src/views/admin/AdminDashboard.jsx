@@ -10,7 +10,6 @@ import TeoCoinBalanceWidget from '../../components/TeoCoinBalanceWidget';
 import RevenueAnalytics from '../../components/admin/RevenueAnalytics';
 import { fetchAdminDashboard } from '../../services/api/admin';
 import { fetchUserProfile } from '../../services/api/dashboard';
-import { getRewardPoolInfo } from '../../services/api/blockchain';
 
 // Import dashboard styles
 import '../dashboard/dashboard-styles.css';

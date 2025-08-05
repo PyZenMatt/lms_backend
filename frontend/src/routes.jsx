@@ -13,7 +13,6 @@ export const renderRoutes = (routes = []) => (
         const Guard = route.guard || Fragment;
         const Layout = route.layout || Fragment;
         const Element = route.element;
-
         return (
           <Route
             key={i}
@@ -23,6 +22,14 @@ export const renderRoutes = (routes = []) => (
                 <Layout>{route.routes ? renderRoutes(route.routes) : <Element props={true} />}</Layout>
               </Guard>
             }
+          />
+        );
+      })}
+    </Routes>
+  </Suspense>
+);
+
+// Route configuration array
 const routes = [
   {
     exact: 'true',
@@ -151,11 +158,6 @@ const routes = [
         exact: 'true',
         path: '/dashboard/admin',
         element: lazy(() => import('./views/admin/AdminDashboard'))
-      },
-      {
-        exact: 'true',
-        path: '/admin/reward-pool',
-        element: lazy(() => import('./views/admin/RewardPoolDashboard'))
       },
       {
         exact: 'true',

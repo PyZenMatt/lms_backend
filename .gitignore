@@ -48,14 +48,10 @@ yarn-error.log*
 .pnpm-debug.log*
 
 # React env
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
-.env.example
+frontend/.env.local
+frontend/.env.production
+.env
 .env.production
-.env.production.template
-.env.production.unified.template
 
 # === VS CODE / IDE ===
 .vscode/
