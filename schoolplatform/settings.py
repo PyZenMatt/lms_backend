@@ -287,9 +287,6 @@ if not DEBUG:
 # Database connection optimizations
 if 'sqlite' not in DATABASES['default']['ENGINE']:
     DATABASES['default']['CONN_MAX_AGE'] = 600
-    DATABASES['default']['OPTIONS'] = {
-        'MAX_CONNS': 20,
-    }
 
 # API Response Time Logging
 LOGGING = {
