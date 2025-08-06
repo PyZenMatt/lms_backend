@@ -29,10 +29,12 @@ export const getTeoCoinDiscount = async (courseId) => {
 /**
  * Apply TeoCoin discount to course purchase
  */
-export const applyTeoCoinDiscount = async (courseId, discountAmount) => {
+export const applyTeoCoinDiscount = async (courseId, teoAmount, discountPercentage) => {
   try {
-    const response = await api.post(`/courses/${courseId}/apply-teocoin-discount/`, {
-      discount_amount: discountAmount
+    const response = await api.post('/teocoin/apply-discount/', {
+      course_id: courseId,
+      teo_amount: teoAmount,
+      discount_percentage: discountPercentage
     });
     return response.data;
   } catch (error) {

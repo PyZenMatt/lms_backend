@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Modal, Button, Alert, Spinner, Nav, Tab, Card, Badge } from 'react-bootstrap';
 import { useAuth } from '../../contexts/AuthContext';
-import { getTeoCoinBalance } from '../../services/api/teocoin';
+import { getTeoCoinBalance, applyTeoCoinDiscount } from '../../services/api/teocoin';
 import { loadStripe } from '@stripe/stripe-js';
 import {
     Elements,
@@ -155,20 +155,7 @@ const DBCourseCheckoutModal = ({ course, show, handleClose, onPurchaseComplete }
     setError('');
     
     try {
-      const response = await fetch('/api/v1/teocoin/apply-discount/', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('accessToken')}`,
-        },
-        body: JSON.stringify({
-          course_id: course.id,
-          teo_amount: teoNeeded,
-          discount_percentage: teoDiscount
-        })
-      });
-      
-      const data = await response.json();
+      const data = await applyTeoCoinDiscount(course.id, teoNeeded, selectedDiscount);
       console.log('📨 DB Discount response:', data);
       
       if (data.success) {
