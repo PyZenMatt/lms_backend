@@ -17,9 +17,27 @@ class CourseLessonsView(APIView):
     def get(self, request, course_id):
         course = get_object_or_404(Course, id=course_id)
         user = request.user
-        # Allow access if user is staff, superuser, course teacher, or course is approved
-        if not (user.is_staff or user.is_superuser or course.teacher == user) and not course.is_approved:
-            raise PermissionDenied("Corso non approvato")
+        
+        # Check if user has access to course lessons
+        has_access = False
+        
+        if user.is_authenticated:
+            # Staff, superuser, and course teacher always have access
+            if user.is_staff or user.is_superuser or course.teacher == user:
+                has_access = True
+            # Students need to be enrolled in the course
+            elif course.is_approved and CourseEnrollment.objects.filter(student=user, course=course).exists():
+                has_access = True
+        else:
+            # Unauthenticated users can see lessons only if course is approved (for preview)
+            has_access = course.is_approved
+        
+        if not has_access:
+            if not course.is_approved:
+                raise PermissionDenied("Corso non approvato")
+            else:
+                raise PermissionDenied("Devi essere iscritto al corso per vedere le lezioni")
+        
         lessons = Lesson.objects.filter(course_id=course_id).order_by('order')
         serializer = LessonListSerializer(lessons, many=True)
         return Response(serializer.data)

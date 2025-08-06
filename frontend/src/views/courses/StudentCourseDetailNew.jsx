@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { Row, Col, Card, Button, Spinner, Alert } from 'react-bootstrap';
 import { fetchUserRole } from '../../services/api/auth';
+import api from '../../services/core/axiosClient';
 import MainCard from '../../components/Card/MainCard';
 
 const StudentCourseDetailNew = () => {
@@ -16,21 +17,28 @@ const StudentCourseDetailNew = () => {
 
   useEffect(() => {
     const fetchCourse = async () => {
-      const token = localStorage.getItem('token') || localStorage.getItem('access');
-      const res = await fetch(`${API_BASE_URL}/api/v1/courses/${courseId}/`, {
-        headers: token ? { 'Authorization': `Bearer ${token}` } : {}
-      });
-      const data = await res.json();
-      setCourse(data);
+      try {
+        console.log('🔍 Fetching course:', courseId);
+        const response = await api.get(`/courses/${courseId}/`);
+        console.log('📚 Course data:', response.data);
+        setCourse(response.data);
+      } catch (error) {
+        console.error('❌ Error fetching course:', error);
+      }
     };
+    
     const fetchLessons = async () => {
-      const token = localStorage.getItem('token') || localStorage.getItem('access');
-      const res = await fetch(`${API_BASE_URL}/api/v1/courses/${courseId}/lessons/`, {
-        headers: token ? { 'Authorization': `Bearer ${token}` } : {}
-      });
-      const data = await res.json();
-      setLessons(Array.isArray(data) ? data : []);
+      try {
+        console.log('🔍 Fetching lessons for course:', courseId);
+        const response = await api.get(`/courses/${courseId}/lessons/`);
+        console.log('📋 Lessons data:', response.data);
+        setLessons(Array.isArray(response.data) ? response.data : []);
+      } catch (error) {
+        console.error('❌ Error fetching lessons:', error);
+        setLessons([]);
+      }
     };
+    
     const fetchRole = async () => {
       try {
         const role = await fetchUserRole();
@@ -39,6 +47,7 @@ const StudentCourseDetailNew = () => {
         setUserRole('');
       }
     };
+    
     fetchCourse();
     fetchLessons();
     fetchRole();

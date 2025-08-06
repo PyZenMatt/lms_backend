@@ -323,12 +323,30 @@ const CoursesTable = ({
                   <div className="course-stats mb-3">
                     <Row className="text-center g-2">
                       <Col>
-                        <div className="stat-item p-2 bg-light rounded">
+                        <button
+                          type="button"
+                          className="stat-item p-2 bg-light rounded border-0 w-100 h-100 d-flex flex-column align-items-center justify-content-center"
+                          onClick={() => handleViewLessons(course.id)}
+                          style={{
+                            cursor: 'pointer',
+                            transition: 'all 0.2s ease',
+                            backgroundColor: '#f8f9fa'
+                          }}
+                          onMouseEnter={(e) => {
+                            e.target.style.backgroundColor = '#e3f2fd';
+                            e.target.style.transform = 'scale(1.02)';
+                          }}
+                          onMouseLeave={(e) => {
+                            e.target.style.backgroundColor = '#f8f9fa';
+                            e.target.style.transform = 'scale(1)';
+                          }}
+                          title={`Clicca per vedere le ${course.lessons?.length || 0} lezioni`}
+                        >
                           <div className="stat-value text-primary fw-bold">
                             {course.lessons?.length || 0}
                           </div>
                           <small className="stat-label text-muted d-block">Lezioni</small>
-                        </div>
+                        </button>
                       </Col>
                       <Col>
                         <div className="stat-item p-2 bg-light rounded">
