@@ -27,6 +27,7 @@ import {
   CheckCircle
 } from '@mui/icons-material';
 import { BrowserProvider, Contract, formatEther, parseEther } from 'ethers';
+import api from '../../services/core/axiosClient';
 import './TeoCoinWithdrawal.scss';
 
 // TeoCoin contract configuration
@@ -185,19 +186,9 @@ const TeoCoinWithdrawal = ({ open, onClose, userBalance = 0 }) => {
   const refreshBalances = useCallback(async () => {
     try {
       // Refresh DB balance using the withdrawal API balance endpoint
-      const token = localStorage.getItem('accessToken');
-      const dbResponse = await fetch('/api/v1/teocoin/withdrawals/balance/', {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      });
+      const dbResponse = await api.get('/teocoin/withdrawals/balance/');
+      const dbData = dbResponse.data;
       
-      if (!dbResponse.ok) {
-        throw new Error(`Balance API error! status: ${dbResponse.status}`);
-      }
-      
-      const dbData = await dbResponse.json();
       if (dbData.success && dbData.balance) {
         // Use the correct field names from the API response
         setDbBalance(parseFloat(dbData.balance.available || 0));
@@ -259,38 +250,10 @@ const TeoCoinWithdrawal = ({ open, onClose, userBalance = 0 }) => {
 
       console.log('Sending withdrawal request:', requestData);
 
-      const response = await fetch('/api/v1/teocoin/withdrawals/create/', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-          'X-CSRFToken': getCsrfToken()
-        },
-        body: JSON.stringify(requestData)
-      });
-
-      const data = await response.json();
+      const response = await api.post('/teocoin/withdrawals/create/', requestData);
+      const data = response.data;
+      
       console.log('Withdrawal response:', data);
-
-      if (!response.ok) {
-        // Handle different types of HTTP errors
-        if (response.status === 400) {
-          const errorMessage = data.error || data.message || 'Invalid request data. Please check your inputs.';
-          throw new Error(errorMessage);
-        } else if (response.status === 401) {
-          throw new Error('Authentication failed. Please log in again.');
-        } else if (response.status === 403) {
-          throw new Error('You do not have permission to perform this action.');
-        } else if (response.status === 404) {
-          throw new Error('Withdrawal service not found. Please contact support.');
-        } else if (response.status === 429) {
-          throw new Error('Too many requests. Please wait and try again.');
-        } else if (response.status >= 500) {
-          throw new Error('Server error. Please try again later or contact support.');
-        } else {
-          throw new Error(`Request failed with status ${response.status}. Please try again.`);
-        }
-      }
       
       if (data.success) {
         showAlert(
@@ -335,18 +298,9 @@ const TeoCoinWithdrawal = ({ open, onClose, userBalance = 0 }) => {
   const handleProcessPendingWithdrawals = useCallback(async () => {
     try {
       setIsProcessing(true);
-      const token = localStorage.getItem('accessToken');
       
-      const response = await fetch('/api/v1/teocoin/withdrawals/admin/process-pending/', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-          'X-CSRFToken': getCsrfToken()
-        }
-      });
-
-      const data = await response.json();
+      const response = await api.post('/teocoin/withdrawals/admin/process-pending/');
+      const data = response.data;
       
       if (data.success) {
         showAlert(
@@ -366,24 +320,13 @@ const TeoCoinWithdrawal = ({ open, onClose, userBalance = 0 }) => {
     } finally {
       setIsProcessing(false);
     }
-  }, [getCsrfToken, showAlert, refreshBalances]);
+  }, [showAlert, refreshBalances]);
 
   const loadWithdrawalHistory = useCallback(async () => {
     try {
-      const token = localStorage.getItem('accessToken');
-      const response = await fetch('/api/v1/teocoin/withdrawals/history/', {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      });
+      const response = await api.get('/teocoin/withdrawals/history/');
+      const data = response.data;
       
-      if (!response.ok) {
-        console.warn(`Withdrawal history API error: ${response.status}`);
-        return; // Don't throw error, just return
-      }
-      
-      const data = await response.json();
       if (data.success) {
         const withdrawals = data.withdrawals || [];
         setWithdrawalHistory(withdrawals);
@@ -413,18 +356,9 @@ const TeoCoinWithdrawal = ({ open, onClose, userBalance = 0 }) => {
   const cancelWithdrawal = useCallback(async (withdrawalId) => {
     try {
       setLoading(true);
-      const token = localStorage.getItem('accessToken');
       
-      const response = await fetch(`${API_BASE_URL}/api/v1/teocoin/withdrawals/${withdrawalId}/cancel/`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-          'X-CSRFToken': getCsrfToken() || '',
-        },
-      });
-
-      const data = await response.json();
+      const response = await api.post(`/teocoin/withdrawals/${withdrawalId}/cancel/`);
+      const data = response.data;
       
       if (data.success) {
         showAlert(`Withdrawal cancelled successfully! ${data.amount_returned} TEO returned to your balance.`, 'success');
@@ -441,7 +375,7 @@ const TeoCoinWithdrawal = ({ open, onClose, userBalance = 0 }) => {
     } finally {
       setLoading(false);
     }
-  }, [showAlert, getCsrfToken, loadWithdrawalHistory, refreshBalances]);
+  }, [showAlert, loadWithdrawalHistory, refreshBalances]);
 
   // Event handlers
   const handleClose = () => {
