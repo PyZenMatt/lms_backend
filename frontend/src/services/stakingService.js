@@ -14,6 +14,15 @@ class StakingService {
       const response = await api.get('/services/staking/info/');
       return response.data;
     } catch (error) {
+      console.error('❌ StakingService.getStakingInfo error:', error);
+      console.error('Response status:', error.response?.status);
+      console.error('Response data:', error.response?.data);
+      
+      // Handle 403 Forbidden specifically
+      if (error.response?.status === 403) {
+        throw new Error('Staking is only available for teachers');
+      }
+      
       throw new Error(error.response?.data?.error || 'Failed to fetch staking info');
     }
   }

@@ -148,6 +148,12 @@ const DatabaseStaking = ({ onBalanceUpdate }) => {
     }).format(amount || 0);
   };
 
+  // Return null if user is not a teacher - don't render staking component
+  if (!isTeacher) {
+    console.log('ℹ️  DatabaseStaking: User is not a teacher, not rendering staking component');
+    return null;
+  }
+
   // Show loading state
   if (loading) {
     return (
