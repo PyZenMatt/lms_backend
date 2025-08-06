@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Modal, Button, Alert, Spinner, Nav, Tab, Card, Badge } from 'react-bootstrap';
 import { useAuth } from '../../contexts/AuthContext';
+import { getTeoCoinBalance } from '../../services/api/teocoin';
 import { loadStripe } from '@stripe/stripe-js';
 import {
     Elements,
@@ -69,14 +70,7 @@ const DBCourseCheckoutModal = ({ course, show, handleClose, onPurchaseComplete }
       try {
         console.log('💰 Loading DB balance for user:', user.id);
         
-        // Use withdrawal API for consistency
-        const response = await fetch('/api/v1/teocoin/withdrawals/balance/', {
-          headers: {
-            'Authorization': `Bearer ${localStorage.getItem('accessToken')}`,
-          },
-        });
-        
-        const data = await response.json();
+        const data = await getTeoCoinBalance();
         console.log('🔍 Checkout Balance API Response:', data);
         
         if (data.success && data.balance) {

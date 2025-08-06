@@ -252,8 +252,15 @@ const CoursesTable = ({
                       </div>
                     </div>
                     <div className="text-end">
-                      <div className="price-tag text-primary fw-bold">
-                        {formatPrice(course.price)} TEO
+                      <div className="price-info">
+                        <div className="price-tag text-primary fw-bold">
+                          €{formatPrice(course.price_eur || course.price)} EUR
+                        </div>
+                        {course.teocoin_price && (
+                          <div className="teocoin-price text-success small">
+                            {formatPrice(course.teocoin_price)} TEO
+                          </div>
+                        )}
                       </div>
                     </div>
                   </div>

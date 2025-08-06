@@ -61,10 +61,21 @@ const TeacherDashboard = () => {
         
         const res = await fetchTeacherDashboard();
         console.log('🔍 TeacherDashboard API Response:', res);
-        setCourses(res.data.courses);
+        console.log('📚 Courses data:', res.data.courses);
+        
+        // Sanitize courses data to prevent toLowerCase errors
+        const sanitizedCourses = (res.data.courses || []).map(course => ({
+          ...course,
+          category: course.category || 'ALTRO',
+          status: course.status || course.is_approved ? 'approved' : 'pending',
+          price: course.price || course.price_eur || 0,
+          price_eur: course.price_eur || course.price || 0
+        }));
+        
+        setCourses(sanitizedCourses);
         setSales(res.data.sales);
         setTransactions(res.data.transactions || []);
-        console.log('📚 Courses set in state:', res.data.courses);
+        console.log('📚 Courses set in state:', sanitizedCourses);
         
         // Popola le lezioni da subito con i dati che arrivano dall'API
         const lessonsData = {};

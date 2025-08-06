@@ -36,8 +36,7 @@ const CourseEditModal = ({ show, onHide, courseId, onCourseUpdated }) => {
     setLoading(true);
     setError('');
     try {
-      const response = await fetchCourseDetail(courseId);
-      const course = response.data;
+      const course = await fetchCourseDetail(courseId);
       
       setTitle(course.title || '');
       setDescription(course.description || '');
