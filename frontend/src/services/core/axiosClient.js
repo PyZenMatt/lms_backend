@@ -1,8 +1,41 @@
 import axios from 'axios';
 
+// Debug environment variables
+console.log('🔧 Environment check:', {
+  NODE_ENV: import.meta.env.NODE_ENV,
+  MODE: import.meta.env.MODE,
+  VITE_API_BASE_URL: import.meta.env.VITE_API_BASE_URL,
+  all_env_vars: import.meta.env
+});
+
+// Determine base URL with fallback
+const getBaseURL = () => {
+  const envBaseURL = import.meta.env.VITE_API_BASE_URL;
+  
+  if (envBaseURL) {
+    console.log('✅ Using env VITE_API_BASE_URL:', envBaseURL);
+    return envBaseURL;
+  }
+  
+  // Fallback logic based on current host
+  const currentHost = window.location.host;
+  if (currentHost.includes('schoolplatform-frontend.onrender.com')) {
+    const fallbackURL = 'https://schoolplatform.onrender.com';
+    console.log('⚠️ Using fallback URL for production:', fallbackURL);
+    return fallbackURL;
+  }
+  
+  const defaultURL = 'http://localhost:8000';
+  console.log('⚠️ Using default localhost URL:', defaultURL);
+  return defaultURL;
+};
+
+const baseURL = getBaseURL();
+console.log('🚀 Final API base URL:', baseURL + '/api/v1');
+
 // Create API instance for gas-free endpoints
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL + '/api/v1',
+  baseURL: baseURL + '/api/v1',
   timeout: 15000, // Longer timeout for blockchain operations
   headers: {
     'Content-Type': 'application/json',
