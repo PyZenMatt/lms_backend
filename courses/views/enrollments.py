@@ -5,11 +5,12 @@ from rest_framework import status
 from django.shortcuts import get_object_or_404
 from django.db import transaction
 from django.conf import settings
+from django.utils import timezone
 from decimal import Decimal
 import uuid
 import logging
 
-from courses.models import Course
+from courses.models import Course, CourseEnrollment
 from rewards.models import BlockchainTransaction
 from courses.serializers import StudentCourseSerializer
 from users.permissions import IsTeacher
@@ -281,14 +282,32 @@ class CourseEnrollmentView(APIView):
                 course.students.add(request.user)
                 debug_messages.append(f"✅ Student {request.user.id} added to course {course_id}")
                 
-                # Create enrollment record/transaction
+                # Create CourseEnrollment record in database
+                enrollment_record, created = CourseEnrollment.objects.get_or_create(
+                    student=request.user,
+                    course=course,
+                    defaults={
+                        'payment_method': payment_method if payment_method in ['fiat', 'teocoin', 'teocoin_discount'] else 'fiat',
+                        'amount_paid': amount,
+                        'enrollment_date': timezone.now(),
+                        'discount_applied': discount_applied
+                    }
+                )
+                
+                if created:
+                    debug_messages.append(f"✅ CourseEnrollment record created: {enrollment_record.pk}")
+                else:
+                    debug_messages.append(f"ℹ️ CourseEnrollment record already exists: {enrollment_record.pk}")
+                
+                # Create enrollment response data
                 enrollment_data = {
                     'course_id': course_id,
-                    'student_id': request.user.id,
+                    'student_id': request.user.pk,
                     'amount_paid': float(amount),
                     'payment_method': payment_method,
                     'discount_applied': discount_applied,
-                    'discount_info': discount_info
+                    'discount_info': discount_info,
+                    'enrollment_record_id': enrollment_record.pk
                 }
                 debug_messages.append("✅ Enrollment data created")
                 
@@ -334,6 +353,12 @@ class CourseEnrollmentView(APIView):
                         # Don't fail the enrollment if this fails
                 else:
                     debug_messages.append("ℹ️ No discount absorption needed")
+                
+                # Invalidate student dashboard cache
+                from django.core.cache import cache
+                student_dashboard_cache_key = f'student_dashboard_{request.user.id}'
+                cache.delete(student_dashboard_cache_key)
+                debug_messages.append("🗑️ Student dashboard cache invalidated")
                 
                 debug_messages.append("🎉 Enrollment completed successfully!")
                 return Response({

@@ -1,6 +1,6 @@
 
 import React, { useEffect, useState } from 'react';
-import { Row, Col, Card } from 'react-bootstrap';
+import { Row, Col, Card, Button, Spinner } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 import RoleGuard from '../../components/guards/RoleGuard';
 import TeoCoinBalanceWidget from '../../components/TeoCoinBalanceWidget';
@@ -26,11 +26,14 @@ const StudentDashboard = () => {
       setLoading(true);
       setError('');
       try {
+        console.log('🔄 Loading student dashboard data...');
         const profileRes = await fetchUserProfile();
         setUserProfile(profileRes.data);
         const res = await fetchStudentDashboard();
+        console.log('📚 Dashboard courses loaded:', res.data.courses?.length || 0);
         setCourses(res.data.courses || []);
       } catch (err) {
+        console.error('❌ Error loading dashboard:', err);
         setError('Errore nel caricamento della dashboard');
       } finally {
         setLoading(false);
@@ -38,6 +41,44 @@ const StudentDashboard = () => {
     };
     loadDashboard();
   }, []);
+
+  // Add automatic refresh when page becomes visible (e.g., user returns from course purchase)
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (!document.hidden) {
+        console.log('👁️ Page became visible, refreshing dashboard...');
+        const refreshDashboard = async () => {
+          try {
+            const res = await fetchStudentDashboard();
+            console.log('🔄 Dashboard refreshed, courses:', res.data.courses?.length || 0);
+            setCourses(res.data.courses || []);
+          } catch (err) {
+            console.error('❌ Error refreshing dashboard:', err);
+          }
+        };
+        refreshDashboard();
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
+  }, []);
+
+  // Manual refresh function
+  const handleRefreshDashboard = async () => {
+    setLoading(true);
+    try {
+      console.log('🔄 Manual refresh triggered...');
+      const res = await fetchStudentDashboard();
+      console.log('📚 Courses reloaded:', res.data.courses?.length || 0);
+      setCourses(res.data.courses || []);
+    } catch (err) {
+      console.error('❌ Error refreshing dashboard:', err);
+      setError('Errore durante l\'aggiornamento');
+    } finally {
+      setLoading(false);
+    }
+  };
 
 
 
@@ -99,9 +140,24 @@ const StudentDashboard = () => {
         <Col md={8}>
           <Card className="border-0 shadow-sm">
             <Card.Header className="bg-light border-0">
-              <Card.Title as="h5" className="mb-1">
-                I Tuoi Corsi ({courses.length})
-              </Card.Title>
+              <div className="d-flex justify-content-between align-items-center">
+                <Card.Title as="h5" className="mb-0">
+                  I Tuoi Corsi ({courses.length})
+                </Card.Title>
+                <Button 
+                  variant="outline-primary" 
+                  size="sm" 
+                  onClick={handleRefreshDashboard}
+                  disabled={loading}
+                  title="Aggiorna elenco corsi"
+                >
+                  {loading ? (
+                    <Spinner animation="border" size="sm" />
+                  ) : (
+                    <i className="feather icon-refresh-cw"></i>
+                  )}
+                </Button>
+              </div>
             </Card.Header>
             <Card.Body>
               {courses.length === 0 ? (

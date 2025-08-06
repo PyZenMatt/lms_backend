@@ -17,12 +17,19 @@ const StudentLessonDetailNew = () => {
   useEffect(() => {
     const fetchLesson = async () => {
       try {
-        const response = await api.get(`/lessons/${lessonId}/`);
+        console.log('🔍 StudentLessonDetailNew - lessonId from params:', lessonId, 'type:', typeof lessonId);
+        
+        // Ensure lessonId is a string/number, not an object
+        const cleanLessonId = lessonId?.toString() || lessonId;
+        console.log('🔧 Cleaned lessonId:', cleanLessonId);
+        
+        const response = await api.get(`/lessons/${cleanLessonId}/`);
         const data = response.data;
+        console.log('📚 Lesson data received:', data);
         setLesson(data);
         setCompleted(data.completed || false);
       } catch (error) {
-        console.error('Error fetching lesson:', error);
+        console.error('❌ Error fetching lesson:', error);
       }
     };
     fetchLesson();
@@ -33,11 +40,18 @@ const StudentLessonDetailNew = () => {
     if (!lessonId) return;
     const fetchExercises = async () => {
       try {
-        const response = await api.get(`/lessons/${lessonId}/exercises/`);
+        console.log('🏋️ Fetching exercises for lessonId:', lessonId, 'type:', typeof lessonId);
+        
+        // Ensure lessonId is a string/number, not an object
+        const cleanLessonId = lessonId?.toString() || lessonId;
+        console.log('🔧 Cleaned lessonId for exercises:', cleanLessonId);
+        
+        const response = await api.get(`/lessons/${cleanLessonId}/exercises/`);
         const data = response.data;
+        console.log('📝 Exercises data received:', data);
         setExercises(Array.isArray(data) ? data : []);
       } catch (error) {
-        console.error('Error fetching exercises:', error);
+        console.error('❌ Error fetching exercises:', error);
         setExercises([]);
       }
     };
