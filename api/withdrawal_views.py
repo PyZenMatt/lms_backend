@@ -534,3 +534,97 @@ class UserPendingWithdrawalsView(APIView):
                 'error': 'Internal server error',
                 'error_code': 'INTERNAL_ERROR'
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class ProcessPendingWithdrawalsView(APIView):
+    """Process all pending withdrawal requests (ADMIN or scheduled task)"""
+    permission_classes = [IsAuthenticated]  # For now, authenticated users can trigger (for testing)
+    
+    def post(self, request):
+        """
+        Process all pending withdrawals by minting tokens
+        Only the platform should call this endpoint
+        """
+        try:
+            logger.info(f"Processing pending withdrawals triggered by {request.user.email}")
+            
+            # Call the service to process withdrawals
+            result = teocoin_withdrawal_service.process_pending_withdrawals()
+            
+            if result['success']:
+                return Response({
+                    'success': True,
+                    'message': f'Processed {result["results"]["total_processed"]} withdrawal requests',
+                    'results': result['results']
+                }, status=status.HTTP_200_OK)
+            else:
+                return Response({
+                    'success': False,
+                    'error': result.get('error', 'Failed to process withdrawals'),
+                    'error_code': 'PROCESSING_FAILED'
+                }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            
+        except Exception as e:
+            logger.error(f"Error processing pending withdrawals: {e}")
+            return Response({
+                'success': False,
+                'error': 'Internal server error',
+                'error_code': 'INTERNAL_ERROR'
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class MintToAddressView(APIView):
+    """Direct mint to address (ADMIN only - for testing)"""
+    permission_classes = [IsAuthenticated]  # For now, authenticated users can use (for testing)
+    
+    def post(self, request):
+        """
+        Mint TeoCoin tokens directly to an address
+        
+        Body:
+        {
+            "amount": "10.00",
+            "to_address": "0x742d35Cc6475C1C2C6b2FF4a4F5D6f865c123456"
+        }
+        """
+        try:
+            amount = request.data.get('amount')
+            to_address = request.data.get('to_address')
+            
+            if not amount or not to_address:
+                return Response({
+                    'success': False,
+                    'error': 'Amount and to_address are required',
+                    'error_code': 'MISSING_PARAMETERS'
+                }, status=status.HTTP_400_BAD_REQUEST)
+            
+            # Convert to Decimal
+            amount_decimal = Decimal(str(amount))
+            
+            # Call the service to mint tokens
+            result = teocoin_withdrawal_service.mint_tokens_to_address(
+                amount=amount_decimal,
+                to_address=to_address
+            )
+            
+            if result['success']:
+                return Response({
+                    'success': True,
+                    'message': f'Successfully minted {amount_decimal} TEO to {to_address}',
+                    'transaction_hash': result.get('transaction_hash'),
+                    'simulation': result.get('simulation', False)
+                }, status=status.HTTP_200_OK)
+            else:
+                return Response({
+                    'success': False,
+                    'error': result.get('error', 'Minting failed'),
+                    'error_code': 'MINT_FAILED'
+                }, status=status.HTTP_400_BAD_REQUEST)
+            
+        except Exception as e:
+            logger.error(f"Error minting tokens: {e}")
+            return Response({
+                'success': False,
+                'error': 'Internal server error',
+                'error_code': 'INTERNAL_ERROR'
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

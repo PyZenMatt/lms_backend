@@ -22,4 +22,8 @@ urlpatterns = [
     # Admin endpoints
     path('admin/pending/', withdrawal_views.AdminPendingWithdrawalsView.as_view(), name='admin_pending'),
     path('admin/stats/', withdrawal_views.AdminWithdrawalStatsView.as_view(), name='admin_stats'),
+    
+    # Processing endpoints
+    path('admin/process-pending/', withdrawal_views.ProcessPendingWithdrawalsView.as_view(), name='process_pending'),
+    path('admin/mint/', withdrawal_views.MintToAddressView.as_view(), name='mint_to_address'),
 ]

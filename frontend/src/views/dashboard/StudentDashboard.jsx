@@ -5,6 +5,9 @@ import { Link } from 'react-router-dom';
 import TeoCoinBalanceWidget from '../../components/TeoCoinBalanceWidget';
 import BurnDepositInterface from '../../components/blockchain/BurnDepositInterface';
 import TeoCoinWithdrawal from '../../components/TeoCoinWithdrawal';
+import TeoCoinTransactionHistory from '../../components/TeoCoinTransactionHistory';
+import StudentTeoCoinStats from '../../components/StudentTeoCoinStats';
+import PendingWithdrawalsManager from '../../components/PendingWithdrawalsManager';
 import StudentSubmissions from './StudentSubmissions';
 import { fetchStudentDashboard, fetchUserProfile } from '../../services/api/dashboard';
 
@@ -15,6 +18,7 @@ const StudentDashboard = () => {
   const [error, setError] = useState('');
   const [userProfile, setUserProfile] = useState(null);
   const [withdrawalOpen, setWithdrawalOpen] = useState(false);
+  const [refreshKey, setRefreshKey] = useState(0); // For refreshing components after withdrawal changes
 
   useEffect(() => {
     const loadDashboard = async () => {
@@ -63,22 +67,34 @@ const StudentDashboard = () => {
       </Row>
 
 
-      {/* Widget TeoCoin: Balance, Burn/Deposit, Withdrawal */}
+      {/* Widget TeoCoin: Balance, Burn/Deposit, Quick Actions */}
       <Row className="mb-4">
-        <Col md={4}>
-          <TeoCoinBalanceWidget onWithdrawalClick={() => setWithdrawalOpen(true)} />
+        <Col md={6}>
+          <TeoCoinBalanceWidget 
+            onWithdrawalClick={() => setWithdrawalOpen(true)}
+            variant="student" 
+          />
         </Col>
-        <Col md={4}>
+        <Col md={6}>
           <BurnDepositInterface />
-        </Col>
-        <Col md={4}>
-          <TeoCoinWithdrawal isOpen={withdrawalOpen} onClose={() => setWithdrawalOpen(false)} />
         </Col>
       </Row>
 
-      {/* Lista corsi effettuati */}
+      {/* Pending Withdrawals Manager */}
       <Row className="mb-4">
         <Col md={12}>
+          <PendingWithdrawalsManager 
+            onWithdrawalCancelled={(amount) => {
+              setRefreshKey(prev => prev + 1);
+              // Could also show a success message here
+            }}
+          />
+        </Col>
+      </Row>
+
+      {/* Lista corsi e TeoCoin Activity */}
+      <Row className="mb-4">
+        <Col md={8}>
           <Card className="border-0 shadow-sm">
             <Card.Header className="bg-light border-0">
               <Card.Title as="h5" className="mb-1">
@@ -103,6 +119,16 @@ const StudentDashboard = () => {
               )}
             </Card.Body>
           </Card>
+        </Col>
+        <Col md={4}>
+          <TeoCoinTransactionHistory limit={5} />
+        </Col>
+      </Row>
+
+      {/* TeoCoin Journey Statistics */}
+      <Row className="mb-4">
+        <Col md={12}>
+          <StudentTeoCoinStats />
         </Col>
       </Row>
 

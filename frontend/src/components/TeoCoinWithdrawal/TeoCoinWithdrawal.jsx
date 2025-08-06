@@ -293,36 +293,18 @@ const TeoCoinWithdrawal = ({ open, onClose, userBalance = 0 }) => {
       }
       
       if (data.success) {
-        showAlert(`Withdrawal request submitted successfully! Request ID: ${data.withdrawal_id}`, 'success');
+        showAlert(
+          `Withdrawal request submitted successfully! Request ID: ${data.withdrawal_id}. 
+          Your tokens will be minted to your wallet within 1-24 hours.`, 
+          'success'
+        );
         setWithdrawalAmount('');
 
-        // Mint TEO on-chain via MetaMask
-        if (window.ethereum && contract && walletAddress) {
-          try {
-            setIsProcessing(true);
-            // Usa direttamente il contract con signer
-            const decimals = await contract.decimals();
-            const amountWei = parseEther(parseFloat(withdrawalAmount).toString());
-            const tx = await contract.mintTo(walletAddress, amountWei);
-            showAlert('Mint transaction sent! Attendi conferma... TX: ' + tx.hash, 'info', 10000);
-            await tx.wait();
-            showAlert('Mint completato con successo!', 'success');
-            // Aggiorna balances dopo mint
-            await refreshBalances();
-            await loadWithdrawalHistory();
-          } catch (mintErr) {
-            console.error('Errore mint on-chain:', mintErr);
-            showAlert('Mint on-chain fallito: ' + (mintErr?.message || mintErr), 'error', 10000);
-          } finally {
-            setIsProcessing(false);
-          }
-        } else {
-          // Se non c'è MetaMask o contract, aggiorna solo balances
-          setTimeout(async () => {
-            await refreshBalances();
-            await loadWithdrawalHistory();
-          }, 1000);
-        }
+        // Aggiorna balances dopo la richiesta
+        setTimeout(async () => {
+          await refreshBalances();
+          await loadWithdrawalHistory();
+        }, 1000);
       } else {
         // Handle API-level errors (when response is 200 but success is false)
         const errorMessage = data.error || data.message || 'Withdrawal failed for unknown reason';
@@ -348,6 +330,43 @@ const TeoCoinWithdrawal = ({ open, onClose, userBalance = 0 }) => {
       setIsProcessing(false);
     }
   }, [withdrawalAmount, dbBalance, walletConnected, walletAddress, getCsrfToken, showAlert, refreshBalances]);
+
+  // Process pending withdrawal requests (triggers server-side minting)
+  const handleProcessPendingWithdrawals = useCallback(async () => {
+    try {
+      setIsProcessing(true);
+      const token = localStorage.getItem('accessToken');
+      
+      const response = await fetch('/api/v1/teocoin/withdrawals/admin/process-pending/', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+          'X-CSRFToken': getCsrfToken()
+        }
+      });
+
+      const data = await response.json();
+      
+      if (data.success) {
+        showAlert(
+          `✅ ${data.message}. Processed: ${data.results.successful}, Failed: ${data.results.failed}`,
+          'success',
+          8000
+        );
+        // Refresh balances and history after processing
+        await refreshBalances();
+        await loadWithdrawalHistory();
+      } else {
+        showAlert(`❌ Processing failed: ${data.error}`, 'error');
+      }
+    } catch (error) {
+      console.error('Processing failed:', error);
+      showAlert(`❌ Processing failed: ${error.message}`, 'error');
+    } finally {
+      setIsProcessing(false);
+    }
+  }, [getCsrfToken, showAlert, refreshBalances]);
 
   const loadWithdrawalHistory = useCallback(async () => {
     try {
@@ -577,7 +596,7 @@ const TeoCoinWithdrawal = ({ open, onClose, userBalance = 0 }) => {
                 sx={{ mb: 2 }}
               />
 
-              <Box display="flex" gap={2}>
+              <Box display="flex" gap={2} mb={2}>
                 <Button
                   variant="contained"
                   onClick={handleWithdrawal}
@@ -599,6 +618,20 @@ const TeoCoinWithdrawal = ({ open, onClose, userBalance = 0 }) => {
                   sx={{ minWidth: 'fit-content' }}
                 >
                   Add TEO to Wallet
+                </Button>
+              </Box>
+
+              {/* Admin/Test Button - Process pending withdrawals */}
+              <Box display="flex" gap={2}>
+                <Button
+                  variant="outlined"
+                  color="warning"
+                  onClick={handleProcessPendingWithdrawals}
+                  disabled={isProcessing || pendingWithdrawals === 0}
+                  startIcon={isProcessing ? <CircularProgress size={20} /> : <Refresh />}
+                  fullWidth
+                >
+                  {isProcessing ? 'Processing...' : `Process ${pendingWithdrawals} Pending Withdrawals`}
                 </Button>
               </Box>
             </Card>

@@ -65,3 +65,14 @@ LOGGING = {
 },
     
 }
+
+# Development blockchain configuration
+# ⚠️ WARNING: These are test keys for development only, NEVER use in production
+PLATFORM_PRIVATE_KEY = os.getenv('PLATFORM_PRIVATE_KEY', 'e1636922fa350bfe8ed929096d330eb70bbe3dc17dbb03dacdcf1dd668fc4255')  # Correct dev key
+ADMIN_PRIVATE_KEY = os.getenv('ADMIN_PRIVATE_KEY', 'e1636922fa350bfe8ed929096d330eb70bbe3dc17dbb03dacdcf1dd668fc4255')  # Same key
+
+# Override platform wallet address to match our correct private key
+PLATFORM_WALLET_ADDRESS = os.getenv('PLATFORM_WALLET_ADDRESS', '0x3b72a4E942CF1467134510cA3952F01b63005044')
+
+# Enable DB-based TeoCoin system for development
+USE_DB_TEOCOIN_SYSTEM = os.getenv('USE_DB_TEOCOIN_SYSTEM', 'True').lower() == 'true'

@@ -8,10 +8,12 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework import status
 from decimal import Decimal
+from django.db.models import Sum, Count
 import logging
 
 from services.teocoin_withdrawal_service import teocoin_withdrawal_service
 from services.hybrid_teocoin_service import hybrid_teocoin_service
+from blockchain.models import DBTeoCoinTransaction
 
 logger = logging.getLogger(__name__)
 
@@ -352,4 +354,153 @@ class AdminPlatformStatsView(APIView):
             return Response({
                 'success': False,
                 'error': 'Internal server error'
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class StudentTeoCoinStatsView(APIView):
+    """Get student's personal TeoCoin statistics and journey info"""
+    permission_classes = [IsAuthenticated]
+    
+    def get(self, request):
+        """
+        Get student's TeoCoin statistics and journey information
+        
+        Returns:
+        {
+            "success": true,
+            "stats": {
+                "total_earned": "250.00",
+                "total_used_discounts": "50.00", 
+                "total_withdrawn": "100.00",
+                "total_transactions": 15,
+                "achievement_level": "Bronze",
+                "next_level_info": "Earn 100 more TEO to reach Silver level",
+                "recent_achievement": "First withdrawal completed!"
+            }
+        }
+        """
+        try:
+            user = request.user
+            
+            # Get transaction statistics
+            transactions = DBTeoCoinTransaction.objects.filter(user=user)
+            
+            # Calculate totals by transaction type
+            total_earned = transactions.filter(
+                transaction_type__in=['reward', 'bonus', 'deposit']
+            ).aggregate(total=Sum('amount'))['total'] or Decimal('0')
+            
+            total_used_discounts = abs(transactions.filter(
+                transaction_type='discount'
+            ).aggregate(total=Sum('amount'))['total'] or Decimal('0'))
+            
+            total_withdrawn = abs(transactions.filter(
+                transaction_type='withdrawal'
+            ).aggregate(total=Sum('amount'))['total'] or Decimal('0'))
+            
+            total_transactions = transactions.count()
+            
+            # Determine achievement level based on total earned
+            if total_earned >= Decimal('500'):
+                achievement_level = "Gold"
+                next_level_info = "You've reached the highest level! Keep earning to maintain your status."
+            elif total_earned >= Decimal('250'):
+                achievement_level = "Silver"
+                next_level_info = f"Earn {500 - total_earned} more TEO to reach Gold level"
+            elif total_earned >= Decimal('100'):
+                achievement_level = "Bronze"
+                next_level_info = f"Earn {250 - total_earned} more TEO to reach Silver level"
+            else:
+                achievement_level = "Beginner"
+                next_level_info = f"Earn {100 - total_earned} more TEO to reach Bronze level"
+            
+            # Get recent achievement (latest transaction)
+            latest_transaction = transactions.order_by('-created_at').first()
+            recent_achievement = None
+            
+            if latest_transaction:
+                if latest_transaction.transaction_type == 'withdrawal':
+                    recent_achievement = "Withdrawal completed successfully!"
+                elif latest_transaction.transaction_type == 'reward':
+                    recent_achievement = f"Earned {latest_transaction.amount} TEO from exercise completion!"
+                elif latest_transaction.transaction_type == 'discount':
+                    recent_achievement = f"Used {abs(latest_transaction.amount)} TEO for course discount!"
+            
+            return Response({
+                'success': True,
+                'stats': {
+                    'total_earned': str(total_earned),
+                    'total_used_discounts': str(total_used_discounts),
+                    'total_withdrawn': str(total_withdrawn),
+                    'total_transactions': total_transactions,
+                    'achievement_level': achievement_level,
+                    'next_level_info': next_level_info,
+                    'recent_achievement': recent_achievement
+                }
+            }, status=status.HTTP_200_OK)
+            
+        except Exception as e:
+            logger.error(f"Error getting student TeoCoin stats for user {request.user.id}: {e}")
+            return Response({
+                'success': False,
+                'error': 'Failed to load TeoCoin statistics'
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class StudentTeoCoinTransactionHistoryView(APIView):
+    """Get user's TeoCoin transaction history"""
+    permission_classes = [IsAuthenticated]
+    
+    def get(self, request):
+        """
+        Get user's transaction history with optional limit
+        
+        Query Parameters:
+        - limit: Number of transactions to return (default 10)
+        
+        Returns:
+        {
+            "success": true,
+            "transactions": [
+                {
+                    "id": 1,
+                    "type": "reward",
+                    "amount": "10.00",
+                    "description": "Exercise completion reward",
+                    "created_at": "2025-08-06T12:30:00Z",
+                    "status": "completed"
+                }
+            ]
+        }
+        """
+        try:
+            user = request.user
+            limit = int(request.GET.get('limit', 10))
+            
+            # Get transactions from database
+            transactions = DBTeoCoinTransaction.objects.filter(
+                user=user
+            ).order_by('-created_at')[:limit]
+            
+            transaction_data = []
+            for tx in transactions:
+                transaction_data.append({
+                    'id': tx.pk,
+                    'type': tx.transaction_type,
+                    'amount': str(tx.amount),
+                    'description': tx.description or f"{tx.transaction_type.title()} transaction",
+                    'created_at': tx.created_at.isoformat(),
+                    'status': 'completed'  # DB transactions are always completed
+                })
+            
+            return Response({
+                'success': True,
+                'transactions': transaction_data
+            }, status=status.HTTP_200_OK)
+            
+        except Exception as e:
+            logger.error(f"Error getting transaction history for user {request.user.id}: {e}")
+            return Response({
+                'success': False,
+                'error': 'Failed to load transaction history'
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

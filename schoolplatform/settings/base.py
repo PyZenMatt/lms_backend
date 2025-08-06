@@ -126,6 +126,11 @@ ADMIN_WALLET_ADDRESS = os.getenv('ADMIN_WALLET_ADDRESS')
 
 # Platform wallet address for TeoCoin payments (with minting permissions)
 PLATFORM_WALLET_ADDRESS = os.getenv('PLATFORM_WALLET_ADDRESS', '0x3b72a4E942CF1467134510cA3952F01b63005044')
+PLATFORM_PRIVATE_KEY = os.getenv('PLATFORM_PRIVATE_KEY')
+
+# Reward Pool Configuration 
+REWARD_POOL_ADDRESS = os.getenv('REWARD_POOL_ADDRESS', '0x17051AB7603B0F7263BC86bF1b0ce137EFfdEcc1')
+REWARD_POOL_PRIVATE_KEY = os.getenv('REWARD_POOL_PRIVATE_KEY', os.getenv('ADMIN_PRIVATE_KEY'))
 
 # Payment configuration
 TEOCOIN_EUR_RATE = 10  # 1 EUR = 10 TEO (base rate before discounts)

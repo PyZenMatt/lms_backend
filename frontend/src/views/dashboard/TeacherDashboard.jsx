@@ -354,39 +354,23 @@ const TeacherDashboard = () => {
 
 
 
-      {/* Sezione credito, burn, deposit e withdrawal */}
+      {/* Sezione credito, burn e deposit */}
       <Row>
-        <Col xs={12} md={6} lg={3} className="mb-4">
-          <TeoCoinBalanceWidget userProfile={userProfile} />
+        <Col xs={12} md={6} lg={6} className="mb-4">
+          <TeoCoinBalanceWidget 
+            userProfile={userProfile} 
+            onWithdrawalClick={() => setWithdrawalOpen(true)}
+          />
         </Col>
-        <Col xs={12} md={6} lg={3} className="mb-4">
+        <Col xs={12} md={6} lg={6} className="mb-4">
           <MetaMaskDeposit userProfile={userProfile} />
         </Col>
-        <Col xs={12} md={6} lg={3} className="mb-4">
+      </Row>
+
+      {/* Sezione Staking - separata */}
+      <Row className="mb-4">
+        <Col xs={12} md={8} lg={6} className="mx-auto">
           <DatabaseStaking userProfile={userProfile} />
-        </Col>
-        <Col xs={12} md={6} lg={3} className="mb-4">
-          <Card className="border-0 shadow-sm h-100">
-            <Card.Header className="bg-warning text-white">
-              <Card.Title as="h6" className="mb-0">
-                💰 TeoCoin Withdrawal
-              </Card.Title>
-            </Card.Header>
-            <Card.Body className="text-center">
-              <p className="text-muted mb-3 small">
-                Withdraw TeoCoin from your platform balance to MetaMask wallet
-              </p>
-              <Button
-                variant="warning"
-                size="sm"
-                onClick={() => setWithdrawalOpen(true)}
-                disabled={loading || !userProfile?.teocoin_balance || userProfile.teocoin_balance <= 0}
-              >
-                <i className="feather icon-send me-1"></i>
-                Open Withdrawal
-              </Button>
-            </Card.Body>
-          </Card>
         </Col>
       </Row>
 

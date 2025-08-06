@@ -47,7 +47,7 @@ INSTALLED_APPS = [
     'courses',
     'rewards',
     'notifications',
-    'blockchain',
+    'blockchain.apps.BlockchainConfig',
     'services.apps.ServicesConfig',
 ]
 

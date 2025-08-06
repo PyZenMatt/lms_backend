@@ -13,7 +13,9 @@ from .teocoin_views import (
     TeoCoinTransactionHistoryView,
     AdminPendingWithdrawalsView,
     AdminWithdrawalStatsView,
-    AdminPlatformStatsView
+    AdminPlatformStatsView,
+    StudentTeoCoinStatsView,
+    StudentTeoCoinTransactionHistoryView
 )
 from .db_teocoin_views import (
     TeoCoinBalanceView,
@@ -73,6 +75,10 @@ urlpatterns = [
     path('legacy/withdrawals/', UserWithdrawalHistoryView.as_view(), name='legacy_withdrawal_history'),
     path('legacy/balance/', DBTeoCoinBalanceView.as_view(), name='legacy_balance'),
     path('legacy/transactions/', TeoCoinTransactionHistoryView.as_view(), name='legacy_transactions'),
+    
+    # Student Statistics
+    path('student/stats/', StudentTeoCoinStatsView.as_view(), name='student_stats'),
+    path('transactions/history/', StudentTeoCoinTransactionHistoryView.as_view(), name='student_transactions'),
     
     # Admin Endpoints
     path('admin/withdrawals/pending/', AdminPendingWithdrawalsView.as_view(), name='admin_pending_withdrawals'),
