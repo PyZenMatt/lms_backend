@@ -10,7 +10,7 @@ import sys
 
 # Setup Django
 sys.path.append('/home/teo/Project/school/schoolplatform')
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'schoolplatform.settings')
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'schoolplatform.settings.dev')
 django.setup()
 
 from blockchain.models import TeoCoinWithdrawalRequest, DBTeoCoinBalance
