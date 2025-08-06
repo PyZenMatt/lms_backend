@@ -240,7 +240,7 @@ const TeoCoinBalanceWidget = ({ variant = 'default', onWithdrawalClick }) => {
                 )}
               </div>
             </div>
-            {(isTeacher || isAdmin) && (
+            {isTeacher && (
               <>
                 <div className="col-md-4">
                   <div className="text-center p-3 bg-light rounded">
@@ -268,6 +268,17 @@ const TeoCoinBalanceWidget = ({ variant = 'default', onWithdrawalClick }) => {
                 </div>
               </>
             )}
+            {isAdmin && (
+              <div className="col-md-8">
+                <div className="text-center p-3 bg-light rounded">
+                  <h6 className="text-muted mb-1 small">Admin Access</h6>
+                  <p className="text-warning mb-0">
+                    <i className="feather icon-shield me-2"></i>
+                    Full platform control and withdrawal management
+                  </p>
+                </div>
+              </div>
+            )}
             {!(isTeacher || isAdmin) && (
               <div className="col-md-8">
                 <div className="text-center p-3 bg-light rounded">
@@ -282,7 +293,7 @@ const TeoCoinBalanceWidget = ({ variant = 'default', onWithdrawalClick }) => {
           </div>
 
           {/* Current Tier Display - Teachers only */}
-          {stakingInfo && (isTeacher || isAdmin) && (
+          {stakingInfo && isTeacher && (
             <div className="text-center p-3 rounded mb-4" style={{
               background: 'linear-gradient(135deg, rgba(40, 167, 69, 0.1) 0%, rgba(40, 167, 69, 0.05) 100%)'
             }}>
@@ -292,6 +303,21 @@ const TeoCoinBalanceWidget = ({ variant = 'default', onWithdrawalClick }) => {
               </div>
               <p className="text-muted small mb-0">
                 Earning {stakingInfo.teacher_earnings_percentage}% • Platform takes {stakingInfo.commission_rate}%
+              </p>
+            </div>
+          )}
+
+          {/* Admin Information */}
+          {isAdmin && (
+            <div className="text-center p-3 rounded mb-4" style={{
+              background: 'linear-gradient(135deg, rgba(255, 193, 7, 0.1) 0%, rgba(255, 193, 7, 0.05) 100%)'
+            }}>
+              <div className="d-flex align-items-center justify-content-center mb-2">
+                <i className="feather icon-shield text-warning me-2" style={{ fontSize: '1.5rem' }}></i>
+                <h5 className="text-warning mb-0">Administrator Access</h5>
+              </div>
+              <p className="text-muted small mb-0">
+                Manage platform withdrawals and oversee all TeoCoin operations
               </p>
             </div>
           )}
@@ -350,9 +376,11 @@ const TeoCoinBalanceWidget = ({ variant = 'default', onWithdrawalClick }) => {
           <div className="alert alert-info">
             <i className="feather icon-info me-2"></i>
             <small>
-              {(isTeacher || isAdmin)
+              {isTeacher
                 ? 'Manage your TeoCoin: withdraw to MetaMask, stake for higher commissions, or deposit from MetaMask'
-                : 'Manage your TeoCoin: withdraw to MetaMask, use for course discounts, or deposit from MetaMask'
+                : isAdmin
+                  ? 'Manage your TeoCoin: withdraw to MetaMask, process withdrawals, or deposit from MetaMask'
+                  : 'Manage your TeoCoin: withdraw to MetaMask, use for course discounts, or deposit from MetaMask'
               }
             </small>
           </div>

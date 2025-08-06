@@ -12,13 +12,24 @@ const PendingTeachersCard = () => {
   const loadTeachers = async () => {
     setLoading(true);
     setError('');
+    setSuccess(''); // Clear success message when loading
     try {
       const res = await fetchPendingTeachers();
-      setTeachers(res.data.slice(0, 5)); // Limit to 5 for dashboard card
+      console.log('Pending teachers response:', res); // Debug log
+      
+      // Handle different response structures
+      const teachersData = res.data || res || [];
+      const teachersList = Array.isArray(teachersData) ? teachersData : [];
+      
+      setTeachers(teachersList.slice(0, 5)); // Limit to 5 for dashboard card
+      setError(''); // Clear any previous errors on success
     } catch (err) {
-      // If the error is a 404 (no teachers), treat as empty, not error
-      if (err?.response?.status === 404) {
+      console.error('Error loading pending teachers:', err);
+      
+      // If the error is a 404 or no content, treat as empty, not error
+      if (err?.response?.status === 404 || err?.response?.status === 204) {
         setTeachers([]);
+        setError(''); // Make sure no error is shown for 404/204
       } else {
         setError('Errore nel caricamento dei teacher in attesa');
       }
@@ -28,6 +39,9 @@ const PendingTeachersCard = () => {
   };
 
   useEffect(() => {
+    // Clear any previous states when component mounts
+    setError('');
+    setSuccess('');
     loadTeachers();
   }, []);
 
@@ -77,9 +91,11 @@ const PendingTeachersCard = () => {
             <Spinner animation="border" size="sm" />
           </div>
         )}
-        {error && <Alert variant="danger" className="m-3">{error}</Alert>}
+        {error && !loading && (
+          <Alert variant="danger" className="m-3">{error}</Alert>
+        )}
         {success && <Alert variant="success" className="m-3">{success}</Alert>}
-        {!loading && teachers.length === 0 && (
+        {!loading && !error && teachers.length === 0 && (
           <div className="text-center p-3 text-muted">
             <i className="feather icon-check-circle f-40 mb-2 text-success"></i>
             <p>Nessun teacher in attesa di approvazione</p>

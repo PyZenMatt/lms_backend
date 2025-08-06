@@ -6,7 +6,7 @@ import BurnDepositInterface from './BurnDepositInterface';
 import { useAuth } from '../../contexts/AuthContext';
 
 
-const DBAdminTeoCoinDashboard = () => {
+const DBAdminTeoCoinDashboard = ({ onWithdrawalClick }) => {
   const { user } = useAuth();
   const [dashboardData, setDashboardData] = useState({
     statistics: {},
@@ -82,7 +82,7 @@ useEffect(() => {
       </button>
       <PendingWithdrawals />
       <BurnDepositInterface />
-      <TeoCoinBalanceWidget />
+      <TeoCoinBalanceWidget onWithdrawalClick={onWithdrawalClick} />
     </div>
   );
 };
