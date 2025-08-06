@@ -598,7 +598,21 @@ const StripeCardForm = ({ course, finalPrice, paymentResult, onPaymentSuccess, o
             })
           });
           
-          const enrollData = await enrollResponse.json();
+          console.log('📨 Enroll response status:', enrollResponse.status);
+          console.log('📨 Enroll response headers:', enrollResponse.headers);
+          
+          if (!enrollResponse.ok) {
+            throw new Error(`Enrollment request failed with status: ${enrollResponse.status}`);
+          }
+          
+          const responseText = await enrollResponse.text();
+          console.log('📨 Raw enrollment response:', responseText);
+          
+          if (!responseText.trim()) {
+            throw new Error('Server returned empty response');
+          }
+          
+          const enrollData = JSON.parse(responseText);
           console.log('📨 Course enrollment response:', enrollData);
           
           if (enrollData.success) {
