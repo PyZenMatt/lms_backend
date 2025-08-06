@@ -66,6 +66,7 @@ const TeoCoinWithdrawal = ({ open, onClose, userBalance = 0 }) => {
   const [walletAddress, setWalletAddress] = useState('');
   const [withdrawalAmount, setWithdrawalAmount] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [alert, setAlert] = useState(null);
   const [dbBalance, setDbBalance] = useState(userBalance);
   const [metamaskBalance, setMetamaskBalance] = useState(0);
