@@ -530,9 +530,6 @@ const StripeCardForm = ({ course, finalPrice, paymentResult, onPaymentSuccess, o
       // Create payment intent with retry mechanism
       console.log('🔄 Creating payment intent for course:', course.id);
       
-      const apiUrl = `/api/v1/courses/${course.id}/create-payment-intent/`;
-      console.log('📡 API URL:', apiUrl);
-      
       const paymentData = {
         use_teocoin_discount: paymentResult?.discountInfo ? true : false,
         discount_percent: paymentResult?.discountInfo?.discount_percentage || 0,
@@ -544,25 +541,17 @@ const StripeCardForm = ({ course, finalPrice, paymentResult, onPaymentSuccess, o
       
       console.log('💳 Payment data:', paymentData);
       
-      const response = await fetch(apiUrl, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('accessToken')}`,
-        },
-        body: JSON.stringify(paymentData)
-      });
+      const response = await api.post(`/courses/${course.id}/create-payment-intent/`, paymentData);
       
       console.log('📡 Payment intent response status:', response.status);
-      
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error('❌ Payment intent API error:', { status: response.status, text: errorText });
-        throw new Error(`Payment API error (${response.status}): ${errorText}`);
+      console.log('� Payment intent response:', response.data);
+
+      if (!response.data) {
+        console.error('❌ Payment intent API error: No response data');
+        throw new Error('Payment API error: No response data');
       }
 
-      const data = await response.json();
-      console.log('💳 Payment intent response:', data);
+      const data = response.data;
 
       if (data.success) {
         const { client_secret } = data;

@@ -12,17 +12,17 @@ console.log('🔧 Environment check:', {
 const getBaseURL = () => {
   const envBaseURL = import.meta.env.VITE_API_BASE_URL;
   
+  // Force production URL for Render
+  const currentHost = window.location.host;
+  if (currentHost.includes('schoolplatform-frontend.onrender.com')) {
+    const forcedURL = 'https://schoolplatform.onrender.com';
+    console.log('🔧 FORCED production URL:', forcedURL);
+    return forcedURL;
+  }
+  
   if (envBaseURL) {
     console.log('✅ Using env VITE_API_BASE_URL:', envBaseURL);
     return envBaseURL;
-  }
-  
-  // Fallback logic based on current host
-  const currentHost = window.location.host;
-  if (currentHost.includes('schoolplatform-frontend.onrender.com')) {
-    const fallbackURL = 'https://schoolplatform.onrender.com';
-    console.log('⚠️ Using fallback URL for production:', fallbackURL);
-    return fallbackURL;
   }
   
   const defaultURL = 'http://localhost:8000';
