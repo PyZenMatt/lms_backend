@@ -89,9 +89,19 @@ class CourseDetailView(generics.RetrieveUpdateDestroyAPIView):
         try:
             obj = super().get_object()
             user = self.request.user
-            # Admin può vedere tutto, altri solo corsi approvati
-            if not (user.is_staff or user.is_superuser) and not obj.is_approved:
+            
+            # Admin può vedere tutto
+            if user.is_staff or user.is_superuser:
+                return obj
+            
+            # Teacher può vedere i propri corsi anche se non approvati
+            if hasattr(user, 'role') and user.role == 'teacher' and obj.teacher == user:
+                return obj
+                
+            # Altri utenti possono vedere solo corsi approvati
+            if not obj.is_approved:
                 raise PermissionDenied("Corso non approvato")
+                
             return obj
         except Exception as e:
             logger.error(f"Error in get_object: {e}")

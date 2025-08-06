@@ -22,7 +22,7 @@ export const setupDevelopmentErrorHandling = () => {
     ];
     
     const shouldSuppress = suppressedErrors.some(error => 
-      message.toLowerCase().includes(error.toLowerCase())
+      (message || '').toLowerCase().includes((error || '').toLowerCase())
     );
     
     if (!shouldSuppress) {
@@ -38,7 +38,7 @@ export const setupDevelopmentErrorHandling = () => {
     const error = event.reason;
     
     if (error && error.message) {
-      const message = error.message.toLowerCase();
+      const message = (error.message || '').toLowerCase();
       
       if (message.includes('fetch') || 
           message.includes('websocket') || 

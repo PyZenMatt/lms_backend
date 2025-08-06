@@ -33,7 +33,7 @@ export const transformProgressData = (backendData) => {
       averageScore: backendData.average_score || 0
     },
     categories: backendData.categories?.map(cat => ({
-      id: cat.slug || cat.name.toLowerCase(),
+      id: cat.slug || (cat.name || '').toLowerCase(),
       name: cat.name,
       icon: getCategoryIcon(cat.name),
       progress: Math.round(cat.progress_percentage || 0),
