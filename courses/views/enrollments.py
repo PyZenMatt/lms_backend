@@ -252,6 +252,8 @@ class CourseEnrollmentView(APIView):
 
     def post(self, request, course_id):
         """Enroll student in course with payment processing"""
+        print(f"🔥 CourseEnrollmentView called - Course: {course_id}, User: {request.user.id}")
+        logger.info(f"🔥 CourseEnrollmentView called - Course: {course_id}, User: {request.user.id}")
         try:
             course = get_object_or_404(Course, id=course_id)
             
