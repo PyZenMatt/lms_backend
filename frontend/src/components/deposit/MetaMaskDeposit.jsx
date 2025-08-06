@@ -37,11 +37,6 @@ const MetaMaskDeposit = ({ onDepositComplete }) => {
           </Alert>
         )}
 
-        <div className="alert alert-info mb-3">
-          <i className="feather icon-info me-2"></i>
-          <strong>How it works:</strong> Transfer TeoCoin tokens from your MetaMask wallet to your platform database balance. Once deposited, you can use them for staking and other platform features.
-        </div>
-
         {/* Use existing BurnDepositInterface */}
         <BurnDepositInterface onTransactionComplete={handleDepositComplete} />
       </Card.Body>

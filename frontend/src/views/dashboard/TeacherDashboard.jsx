@@ -367,9 +367,9 @@ const TeacherDashboard = () => {
         </Col>
       </Row>
 
-      {/* Sezione Staking - separata */}
+      {/* Sezione Staking - larghezza piena su schermi grandi */}
       <Row className="mb-4">
-        <Col xs={12} md={8} lg={6} className="mx-auto">
+        <Col xs={12}>
           <DatabaseStaking userProfile={userProfile} />
         </Col>
       </Row>
