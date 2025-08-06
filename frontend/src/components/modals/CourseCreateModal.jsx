@@ -351,21 +351,22 @@ const CourseCreateModal = ({ show, onHide, onCreated }) => {
 
         <Form.Group className="mb-3">
           <Form.Label className="fw-semibold">
-            <i className="feather icon-dollar-sign me-2"></i>Prezzo (TeoCoin)
+            <i className="feather icon-euro me-2"></i>Prezzo (Euro)
           </Form.Label>
           <div className="input-group input-group-lg">
             <Form.Control 
               type="number" 
               min={0} 
+              step="0.01"
               value={price} 
               onChange={e => setPrice(e.target.value)} 
-              placeholder="0"
+              placeholder="0.00"
               isInvalid={!!validationErrors.price}
             />
-            <span className="input-group-text">TEO</span>
+            <span className="input-group-text">€</span>
           </div>
           <Form.Text className="text-muted">
-            Imposta un prezzo equo considerando la durata e il valore del contenuto
+            Imposta un prezzo in Euro. Gli studenti potranno usare TeoCoin per ottenere sconti!
           </Form.Text>
           <Form.Control.Feedback type="invalid">
             {validationErrors.price}

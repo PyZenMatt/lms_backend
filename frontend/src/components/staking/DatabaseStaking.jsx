@@ -228,11 +228,23 @@ const DatabaseStaking = ({ onBalanceUpdate }) => {
     <>
       <Card className="database-staking-card">
         <Card.Header className="bg-gradient-primary text-white">
-          <h5 className="mb-0">
-            <i className="feather icon-database me-2"></i>
-            Database Staking
-            <Badge bg="light" text="dark" className="ms-2">Virtual System</Badge>
-          </h5>
+          <div className="d-flex justify-content-between align-items-center">
+            <h5 className="mb-0">
+              <i className="feather icon-database me-2"></i>
+              Database Staking
+              <Badge bg="light" text="dark" className="ms-2">Virtual System</Badge>
+            </h5>
+            <Button 
+              variant="outline-light" 
+              size="sm" 
+              onClick={loadStakingData}
+              disabled={loading}
+              title="Refresh staking data"
+            >
+              <i className={`feather icon-refresh-cw me-1 ${loading ? 'fa-spin' : ''}`}></i>
+              Refresh
+            </Button>
+          </div>
         </Card.Header>
 
         <Card.Body>

@@ -27,8 +27,9 @@ const TeoCoinBalanceWidget = ({ variant = 'default', onWithdrawalClick }) => {
         throw new Error('No authentication token found');
       }
       
-      if (isTeacher || isAdmin) {
-        // Use the staking service to get balance data for teachers and admins
+      if (isTeacher) {
+        // Use the staking service to get balance data for teachers only
+        console.log('🔄 TeoCoinBalanceWidget: Fetching staking info for teacher');
         const response = await stakingService.getStakingInfo();
         setStakingInfo(response);
         
@@ -50,6 +51,54 @@ const TeoCoinBalanceWidget = ({ variant = 'default', onWithdrawalClick }) => {
           }
         } catch (withdrawalErr) {
           console.warn('Failed to load pending withdrawals:', withdrawalErr);
+        }
+      } else if (isAdmin) {
+        // For admins, use the student balance API (no staking access)
+        console.log('🔄 TeoCoinBalanceWidget: Fetching balance for admin (using student endpoint)');
+        const balanceResponse = await fetch(`${API_BASE_URL}/api/v1/teocoin/student/balance/`, {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        });
+
+        if (!balanceResponse.ok) {
+          throw new Error(`Admin balance API error! status: ${balanceResponse.status}`);
+        }
+
+        const balanceData = await balanceResponse.json();
+        
+        // Extract balance data correctly for admins (similar to students)
+        const adminBalance = balanceData.success && balanceData.balance 
+          ? parseFloat(balanceData.balance.available || 0)
+          : 0;
+
+        setStakingInfo({
+          current_balance: adminBalance,
+          staked_amount: 0,   // Admins can't stake  
+          tier: 'Admin',
+          commission_rate: null,
+          teacher_earnings_percentage: null
+        });
+
+        // Get pending withdrawals for admin
+        try {
+          const withdrawalResponse = await fetch(`${API_BASE_URL}/api/v1/teocoin/withdrawals/history/`, {
+            headers: {
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json',
+            },
+          });
+
+          if (withdrawalResponse.ok) {
+            const withdrawalData = await withdrawalResponse.json();
+            if (withdrawalData.success) {
+              const pending = withdrawalData.withdrawals?.filter(w => w.status === 'pending' || w.status === 'processing').length || 0;
+              setPendingWithdrawals(pending);
+            }
+          }
+        } catch (withdrawalErr) {
+          console.warn('Failed to load pending withdrawals for admin:', withdrawalErr);
         }
       } else {
         // For students, use the new student balance API

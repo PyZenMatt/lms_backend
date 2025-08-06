@@ -409,6 +409,14 @@ const TeacherDashboard = () => {
       <CourseCreateModal 
         show={showCreateModal} 
         onHide={() => setShowCreateModal(false)} 
+        onCreated={(course) => {
+          console.log('✅ Course created successfully:', course);
+          setShowCreateModal(false);
+          // Force refresh of teacher data to show the new course
+          setTimeout(() => {
+            window.location.reload(); // or implement a more elegant refresh
+          }, 1000);
+        }}
       />
       
       {/* Lesson Creation Modals */}
