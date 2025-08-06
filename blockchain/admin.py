@@ -221,15 +221,15 @@ class TeoCoinWithdrawalRequestAdmin(admin.ModelAdmin):
         'status', 'created_at', 'completed_at'
     )
     list_filter = ('status', 'created_at', 'completed_at')
-    search_fields = ('user__username', 'user__email', 'wallet_address')
+    search_fields = ('user__username', 'user__email', 'metamask_address')
     readonly_fields = ('created_at',)
     
     fieldsets = (
         ('Withdrawal Details', {
-            'fields': ('user', 'amount', 'wallet_address')
+            'fields': ('user', 'amount', 'metamask_address')
         }),
         ('Processing', {
-            'fields': ('status', 'blockchain_tx_hash', 'completed_at')
+            'fields': ('status', 'transaction_hash', 'completed_at')
         }),
         ('Timestamps', {
             'fields': ('created_at',)
@@ -250,10 +250,10 @@ class TeoCoinWithdrawalRequestAdmin(admin.ModelAdmin):
     @admin.display(description='Wallet Address')
     def wallet_address_display(self, obj):
         """Display shortened wallet address."""
-        if obj.wallet_address:
+        if obj.metamask_address:
             return format_html(
                 '<code>{}</code>',
-                f"{obj.wallet_address[:8]}...{obj.wallet_address[-6:]}"
+                f"{obj.metamask_address[:8]}...{obj.metamask_address[-6:]}"
             )
         return '-'
     
