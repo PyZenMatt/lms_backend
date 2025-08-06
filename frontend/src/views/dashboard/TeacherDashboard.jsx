@@ -409,13 +409,18 @@ const TeacherDashboard = () => {
       <CourseCreateModal 
         show={showCreateModal} 
         onHide={() => setShowCreateModal(false)} 
-        onCreated={(course) => {
+        onCreated={async (course) => {
           console.log('✅ Course created successfully:', course);
           setShowCreateModal(false);
-          // Force refresh of teacher data to show the new course
-          setTimeout(() => {
-            window.location.reload(); // or implement a more elegant refresh
-          }, 1000);
+          
+          // Add the new course to the existing courses list instead of reloading
+          setCourses(prevCourses => [...prevCourses, course]);
+          
+          // Optional: Refresh dashboard data if needed
+          // You could also just add the course to the state without reloading
+          // setTimeout(() => {
+          //   window.location.reload(); // or implement a more elegant refresh
+          // }, 1000);
         }}
       />
       

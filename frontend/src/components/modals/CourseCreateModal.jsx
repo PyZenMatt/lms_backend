@@ -23,6 +23,7 @@ const CourseCreateModal = ({ show, onHide, onCreated }) => {
   // UI states
   const [currentStep, setCurrentStep] = useState(1);
   const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState(false);
   const [error, setError] = useState('');
   const [validationErrors, setValidationErrors] = useState({});
   const [showToast, setShowToast] = useState(false);
@@ -215,7 +216,10 @@ const CourseCreateModal = ({ show, onHide, onCreated }) => {
         formData.append('cover_image', coverImage);
       }
 
-      await createCourse(formData);
+      const createdCourse = await createCourse(formData);
+      
+      // Show success state
+      setSuccess(true);
       
       // Show success notification
       setToastConfig({
@@ -225,20 +229,23 @@ const CourseCreateModal = ({ show, onHide, onCreated }) => {
       });
       setShowToast(true);
       
-      resetForm();
-      if (onCreated) onCreated();
+      // Wait a moment to show the success state before closing
+      setTimeout(() => {
+        resetForm();
+        setSuccess(false);
+        if (onCreated) onCreated(createdCourse);
+        onHide();
+      }, 2000); // 2 seconds delay to show success message
       
-      // Close modal immediately after success
-      onHide();
     } catch (err) {
       console.error('Errore creazione corso:', err);
       const errorMessage = err.response?.data?.detail || 
                           err.response?.data?.message || 
                           'Errore nella creazione del corso. Verifica tutti i campi.';
       setError(errorMessage);
-    } finally {
-      setLoading(false);
+      setLoading(false); // Only set loading false on error
     }
+    // Note: we don't set loading to false on success to keep the success state visible
   };
 
   const handleClose = () => {
@@ -651,14 +658,22 @@ const CourseCreateModal = ({ show, onHide, onCreated }) => {
             <div className="d-flex justify-content-between w-100">
               <div>
                 {currentStep > 1 && (
-                  <Button variant="outline-secondary" onClick={prevStep}>
+                  <Button 
+                    variant="outline-secondary" 
+                    onClick={prevStep}
+                    disabled={loading || success}
+                  >
                     <i className="feather icon-arrow-left me-2"></i>Indietro
                   </Button>
                 )}
               </div>
               
               <div className="d-flex gap-2">
-                <Button variant="outline-secondary" onClick={handleClose}>
+                <Button 
+                  variant="outline-secondary" 
+                  onClick={handleClose}
+                  disabled={loading || success}
+                >
                   <i className="feather icon-x me-2"></i>Annulla
                 </Button>
                 
@@ -666,7 +681,7 @@ const CourseCreateModal = ({ show, onHide, onCreated }) => {
                   <Button 
                     variant="primary" 
                     onClick={nextStep}
-                    disabled={!canProceedToNext()}
+                    disabled={!canProceedToNext() || loading || success}
                   >
                     Avanti
                     <i className="feather icon-arrow-right ms-2"></i>
@@ -674,11 +689,15 @@ const CourseCreateModal = ({ show, onHide, onCreated }) => {
                 ) : (
                   <Button 
                     type="submit" 
-                    variant="success" 
-                    disabled={loading || !canProceedToNext()}
+                    variant={success ? "success" : "primary"} 
+                    disabled={loading || !canProceedToNext() || success}
                     className="px-4"
                   >
-                    {loading ? (
+                    {success ? (
+                      <>
+                        <i className="feather icon-check-circle me-2"></i>Corso Creato! ✨
+                      </>
+                    ) : loading ? (
                       <>
                         <Spinner size="sm" animation="border" className="me-2" />
                         Creazione...
