@@ -66,6 +66,21 @@ class BurnDepositView(APIView):
             
             logger.info(f"✅ Validation passed for {amount_decimal} TEO")
             
+            # Check teocoin_service initialization
+            if not hasattr(teocoin_service, 'w3') or teocoin_service.w3 is None:
+                logger.error("❌ TeoCoin service not properly initialized - Web3 connection missing")
+                return Response({
+                    'success': False,
+                    'error': 'Blockchain service not available'
+                }, status=status.HTTP_503_SERVICE_UNAVAILABLE)
+            
+            if not hasattr(teocoin_service, 'admin_private_key') or not teocoin_service.admin_private_key:
+                logger.error("❌ Admin private key not configured")
+                return Response({
+                    'success': False,
+                    'error': 'Service configuration error - admin credentials missing'
+                }, status=status.HTTP_503_SERVICE_UNAVAILABLE)
+            
             # Check if transaction already processed (prevent double-processing)
             from blockchain.models import DBTeoCoinTransaction
             
