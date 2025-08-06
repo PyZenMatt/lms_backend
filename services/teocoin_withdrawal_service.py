@@ -15,6 +15,7 @@ from django.conf import settings
 from django.core.exceptions import ValidationError
 import logging
 import re
+import os
 
 from web3 import Web3
 from web3.exceptions import TransactionNotFound, BlockNotFound
@@ -762,12 +763,36 @@ class TeoCoinWithdrawalService:
             # Get platform wallet address
             platform_address = getattr(settings, 'PLATFORM_WALLET_ADDRESS')
             
+            # Enhanced logging to debug the wallet address issue
+            logger.info(f"🔍 Raw PLATFORM_WALLET_ADDRESS from settings: {platform_address}")
+            logger.info(f"🔍 Environment variable PLATFORM_WALLET_ADDRESS: {os.getenv('PLATFORM_WALLET_ADDRESS', 'NOT_SET')}")
+            logger.info(f"🔍 Settings.py default value: 0x3b72a4E942CF1467134510cA3952F01b63005044")
+            
             # Validate addresses
             to_address_checksum = Web3.to_checksum_address(to_address)
             platform_address_checksum = Web3.to_checksum_address(platform_address)
             
             logger.info(f"🎯 Minting {amount} TEO to {to_address_checksum}")
             logger.info(f"🏛️ From platform wallet: {platform_address_checksum}")
+            
+            # Check if platform address matches the expected one from private key
+            private_key = getattr(settings, 'PLATFORM_PRIVATE_KEY', None)
+            if private_key:
+                # Derive address from private key for verification
+                try:
+                    from eth_account import Account
+                    derived_address = Account.from_key(private_key).address
+                    logger.info(f"🔑 Address derived from private key: {derived_address}")
+                    if derived_address.lower() != platform_address_checksum.lower():
+                        logger.error(f"❌ WALLET MISMATCH! Config: {platform_address_checksum}, Key: {derived_address}")
+                        return {
+                            'success': False,
+                            'error': f'Wallet address mismatch. Config has {platform_address_checksum} but private key belongs to {derived_address}'
+                        }
+                except Exception as e:
+                    logger.warning(f"Could not verify address from private key: {e}")
+            else:
+                logger.warning("🚨 PLATFORM_PRIVATE_KEY not configured")
             
             # Check if we have the mintTo function
             if hasattr(self.teo_contract.functions, 'mintTo'):
