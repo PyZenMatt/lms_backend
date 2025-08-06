@@ -596,6 +596,12 @@ const StripeCardForm = ({ course, finalPrice, paymentResult, onPaymentSuccess, o
           console.log('📨 Enroll response data:', enrollResponse.data);
           
           const enrollData = enrollResponse.data;
+          
+          // Log debug messages from backend
+          if (enrollData.debug) {
+            console.log('🔍 Backend Debug Messages:');
+            enrollData.debug.forEach(msg => console.log('  ', msg));
+          }
           console.log('📨 Course enrollment response:', enrollData);
           
           if (enrollData.success) {

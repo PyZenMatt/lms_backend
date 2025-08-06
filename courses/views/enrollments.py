@@ -252,28 +252,34 @@ class CourseEnrollmentView(APIView):
 
     def post(self, request, course_id):
         """Enroll student in course with payment processing"""
-        print(f"🔥 CourseEnrollmentView called - Course: {course_id}, User: {request.user.id}")
-        logger.info(f"🔥 CourseEnrollmentView called - Course: {course_id}, User: {request.user.id}")
+        debug_messages = []
+        debug_messages.append(f"🔥 CourseEnrollmentView called - Course: {course_id}, User: {request.user.id}")
+        
         try:
             course = get_object_or_404(Course, id=course_id)
+            debug_messages.append(f"✅ Course found: {course.title}")
             
             payment_method = request.data.get('payment_method', 'stripe')
             amount = Decimal(str(request.data.get('amount', course.price_eur)))
             discount_applied = request.data.get('discount_applied', False)
             discount_info = request.data.get('discount_info', None)
             
-            logger.info(f"Course enrollment request - Course: {course_id}, User: {request.user.id}, Amount: {amount}")
+            debug_messages.append(f"📊 Payment data: method={payment_method}, amount={amount}, discount_applied={discount_applied}")
             
             # Check if user is already enrolled
             if course.students.filter(id=request.user.id).exists():
+                debug_messages.append("❌ User already enrolled")
                 return Response({
                     'success': False,
-                    'error': 'Sei già iscritto a questo corso'
+                    'error': 'Sei già iscritto a questo corso',
+                    'debug': debug_messages
                 }, status=status.HTTP_400_BAD_REQUEST)
             
+            debug_messages.append("🎯 Starting enrollment transaction")
             with transaction.atomic():
                 # Enroll student in course
                 course.students.add(request.user)
+                debug_messages.append(f"✅ Student {request.user.id} added to course {course_id}")
                 
                 # Create enrollment record/transaction
                 enrollment_data = {
@@ -284,11 +290,11 @@ class CourseEnrollmentView(APIView):
                     'discount_applied': discount_applied,
                     'discount_info': discount_info
                 }
-                
-                logger.info(f"Student {request.user.id} successfully enrolled in course {course_id}")
+                debug_messages.append("✅ Enrollment data created")
                 
                 # Award TeoCoin reward if configured
                 if course.teocoin_reward > 0:
+                    debug_messages.append(f"🎁 Attempting TeoCoin reward: {course.teocoin_reward} TEO")
                     try:
                         from services.hybrid_teocoin_service import hybrid_teocoin_service
                         reward_result = hybrid_teocoin_service.credit_user(
@@ -296,12 +302,15 @@ class CourseEnrollmentView(APIView):
                             amount=course.teocoin_reward,
                             reason=f'Course enrollment reward: {course.title}'
                         )
-                        logger.info(f"TeoCoin reward granted: {course.teocoin_reward} TEO")
+                        debug_messages.append(f"✅ TeoCoin reward granted: {course.teocoin_reward} TEO")
                     except Exception as e:
-                        logger.error(f"Failed to grant TeoCoin reward: {e}")
+                        debug_messages.append(f"❌ TeoCoin reward failed: {e}")
+                else:
+                    debug_messages.append("ℹ️ No TeoCoin reward configured")
                 
                 # Create discount absorption opportunity if discount was applied
                 if discount_applied and discount_info and course.teacher:
+                    debug_messages.append("💰 Creating discount absorption opportunity")
                     try:
                         from services.teacher_discount_absorption_service import TeacherDiscountAbsorptionService
                         
@@ -318,13 +327,15 @@ class CourseEnrollmentView(APIView):
                             course=course,
                             discount_data=absorption_data
                         )
-                        
-                        logger.info(f"Discount absorption opportunity created: {absorption.pk}")
+                        debug_messages.append(f"✅ Discount absorption opportunity created: {absorption.pk}")
                         
                     except Exception as e:
-                        logger.error(f"Failed to create discount absorption opportunity: {e}")
+                        debug_messages.append(f"❌ Discount absorption failed: {e}")
                         # Don't fail the enrollment if this fails
+                else:
+                    debug_messages.append("ℹ️ No discount absorption needed")
                 
+                debug_messages.append("🎉 Enrollment completed successfully!")
                 return Response({
                     'success': True,
                     'message': 'Iscrizione al corso completata con successo',
@@ -333,12 +344,15 @@ class CourseEnrollmentView(APIView):
                         'id': course.pk,
                         'title': course.title,
                         'description': course.description
-                    }
+                    },
+                    'debug': debug_messages
                 })
                 
         except Exception as e:
-            logger.error(f"Error in course enrollment: {e}")
+            debug_messages.append(f"💥 FATAL ERROR: {e}")
+            debug_messages.append(f"💥 Error type: {type(e).__name__}")
             return Response({
                 'success': False,
-                'error': 'Errore durante l\'iscrizione al corso'
+                'error': 'Errore durante l\'iscrizione al corso',
+                'debug': debug_messages
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
