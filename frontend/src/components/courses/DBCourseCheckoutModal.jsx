@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Modal, Button, Alert, Spinner, Nav, Tab, Card, Badge } from 'react-bootstrap';
 import { useAuth } from '../../contexts/AuthContext';
 import { getTeoCoinBalance, applyTeoCoinDiscount } from '../../services/api/teocoin';
+import api from '../../services/core/axiosClient';
 import { loadStripe } from '@stripe/stripe-js';
 import {
     Elements,
@@ -583,36 +584,18 @@ const StripeCardForm = ({ course, finalPrice, paymentResult, onPaymentSuccess, o
           console.log('✅ Payment successful!', result.paymentIntent);
           
           // Now enroll the student after successful payment
-          const enrollResponse = await fetch(`/api/v1/courses/${course.id}/enroll/`, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${localStorage.getItem('accessToken')}`,
-            },
-            body: JSON.stringify({
-              payment_method: 'stripe',
-              amount: finalPrice,
-              discount_applied: paymentResult?.discountInfo ? true : false,
-              discount_info: paymentResult?.discountInfo,
-              stripe_payment_intent: result.paymentIntent.id
-            })
+          const enrollResponse = await api.post(`/courses/${course.id}/enroll/`, {
+            payment_method: 'stripe',
+            amount: finalPrice,
+            discount_applied: paymentResult?.discountInfo ? true : false,
+            discount_info: paymentResult?.discountInfo,
+            stripe_payment_intent: result.paymentIntent.id
           });
           
           console.log('📨 Enroll response status:', enrollResponse.status);
-          console.log('📨 Enroll response headers:', enrollResponse.headers);
+          console.log('📨 Enroll response data:', enrollResponse.data);
           
-          if (!enrollResponse.ok) {
-            throw new Error(`Enrollment request failed with status: ${enrollResponse.status}`);
-          }
-          
-          const responseText = await enrollResponse.text();
-          console.log('📨 Raw enrollment response:', responseText);
-          
-          if (!responseText.trim()) {
-            throw new Error('Server returned empty response');
-          }
-          
-          const enrollData = JSON.parse(responseText);
+          const enrollData = enrollResponse.data;
           console.log('📨 Course enrollment response:', enrollData);
           
           if (enrollData.success) {
