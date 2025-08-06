@@ -14,24 +14,31 @@ const PendingTeachersCard = () => {
     setError('');
     setSuccess(''); // Clear success message when loading
     try {
+      console.log('🔄 Loading pending teachers...');
       const res = await fetchPendingTeachers();
-      console.log('Pending teachers response:', res); // Debug log
+      console.log('📊 Pending teachers response:', res.data);
       
       // Handle different response structures
-      const teachersData = res.data || res || [];
+      const teachersData = res.data?.data || res.data || res || [];
       const teachersList = Array.isArray(teachersData) ? teachersData : [];
       
+      console.log(`✅ Found ${teachersList.length} pending teachers`);
       setTeachers(teachersList.slice(0, 5)); // Limit to 5 for dashboard card
       setError(''); // Clear any previous errors on success
     } catch (err) {
-      console.error('Error loading pending teachers:', err);
+      console.error('❌ Error loading pending teachers:', err);
+      console.error('Response data:', err?.response?.data);
+      console.error('Response status:', err?.response?.status);
       
       // If the error is a 404 or no content, treat as empty, not error
       if (err?.response?.status === 404 || err?.response?.status === 204) {
+        console.log('ℹ️ No pending teachers found (404/204)');
         setTeachers([]);
         setError(''); // Make sure no error is shown for 404/204
       } else {
-        setError('Errore nel caricamento dei teacher in attesa');
+        const errorMsg = err?.response?.data?.error || 'Errore nel caricamento dei teacher in attesa';
+        setError(errorMsg);
+        console.error('Setting error message:', errorMsg);
       }
     } finally {
       setLoading(false);
@@ -42,6 +49,7 @@ const PendingTeachersCard = () => {
     // Clear any previous states when component mounts
     setError('');
     setSuccess('');
+    console.log('🎬 PendingTeachersCard component mounted');
     loadTeachers();
   }, []);
 

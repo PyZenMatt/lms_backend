@@ -3,8 +3,7 @@
  * Shows user's pending withdrawals and allows real-time processing
  */
 import React, { useState, useEffect } from 'react';
-
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+import api from '../../services/core/axiosClient';
 
 const PendingWithdrawals = ({ onTransactionComplete = null }) => {
   const [pendingWithdrawals, setPendingWithdrawals] = useState([]);
@@ -17,26 +16,34 @@ const PendingWithdrawals = ({ onTransactionComplete = null }) => {
   const loadPendingWithdrawals = async () => {
     try {
       setLoading(true);
-      const response = await fetch(`${API_BASE_URL}/api/v1/teocoin/withdrawals/pending/`, {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('accessToken')}`,
-        }
-      });
+      console.log('🔄 Loading pending withdrawals...');
+      
+      const response = await api.get('/teocoin/withdrawals/pending/');
+      console.log('📊 Pending withdrawals response:', response.data);
 
-      const data = await response.json();
-
-      if (response.ok && Array.isArray(data.pending_withdrawals)) {
-        setPendingWithdrawals(data.pending_withdrawals);
+      if (response.data.success && Array.isArray(response.data.pending_withdrawals)) {
+        setPendingWithdrawals(response.data.pending_withdrawals);
         setError('');
-      } else if (response.ok && data.success === false && Array.isArray(data.pending_withdrawals) && data.pending_withdrawals.length === 0) {
+        console.log(`✅ Loaded ${response.data.pending_withdrawals.length} pending withdrawals`);
+      } else if (response.data.success === false && Array.isArray(response.data.pending_withdrawals) && response.data.pending_withdrawals.length === 0) {
         setPendingWithdrawals([]);
         setError('');
+        console.log('ℹ️ No pending withdrawals found');
       } else {
-        setError(data.error || 'Error loading pending withdrawals');
+        const errorMsg = response.data.error || 'Error loading pending withdrawals';
+        setError(errorMsg);
+        console.error('❌ Error in response:', errorMsg);
       }
     } catch (err) {
-      console.error('Error loading pending withdrawals:', err);
-      setError('Network error loading withdrawals');
+      console.error('❌ Error loading pending withdrawals:', err);
+      console.error('Response data:', err.response?.data);
+      console.error('Response status:', err.response?.status);
+      
+      if (err.response?.data?.error) {
+        setError(err.response.data.error);
+      } else {
+        setError('Network error loading withdrawals');
+      }
     } finally {
       setLoading(false);
     }
@@ -48,27 +55,21 @@ const PendingWithdrawals = ({ onTransactionComplete = null }) => {
     setError('');
 
     try {
-      const response = await fetch(`${API_BASE_URL}/api/v1/teocoin/withdrawals/${withdrawalId}/process/`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('accessToken')}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({})
-      });
+      console.log(`🎯 Processing withdrawal ${withdrawalId}...`);
+      
+      const response = await api.post(`/teocoin/withdrawals/${withdrawalId}/process/`, {});
+      console.log(`📤 Process withdrawal response:`, response.data);
 
-      const data = await response.json();
-
-      if (response.ok && data.success) {
+      if (response.data.success) {
         // Success! Show transaction details
         setResults(prev => ({
           ...prev,
           [withdrawalId]: {
             success: true,
-            transaction_hash: data.transaction_hash,
-            gas_used: data.gas_used,
-            amount_minted: data.amount_minted,
-            message: data.message
+            transaction_hash: response.data.transaction_hash,
+            gas_used: response.data.gas_used,
+            amount_minted: response.data.amount_minted,
+            message: response.data.message
           }
         }));
 
@@ -77,23 +78,31 @@ const PendingWithdrawals = ({ onTransactionComplete = null }) => {
           prev.filter(w => w.id !== withdrawalId)
         );
 
+        console.log(`✅ Withdrawal ${withdrawalId} processed successfully`);
+
         // Callback to parent component
         if (onTransactionComplete) {
-          onTransactionComplete(data);
+          onTransactionComplete(response.data);
         }
 
       } else {
         // Error during processing
+        const errorMsg = response.data.error || 'Processing failed';
         setResults(prev => ({
           ...prev,
           [withdrawalId]: {
             success: false,
-            error: data.error || 'Processing failed'
+            error: errorMsg
           }
         }));
+        console.error(`❌ Withdrawal ${withdrawalId} processing failed:`, errorMsg);
       }
     } catch (err) {
-      console.error('Error processing withdrawal:', err);
+      console.error(`❌ Error processing withdrawal ${withdrawalId}:`, err);
+      console.error('Response data:', err.response?.data);
+      console.error('Response status:', err.response?.status);
+      
+      const errorMsg = err.response?.data?.error || 'Network error during processing';
       setResults(prev => ({
         ...prev,
         [withdrawalId]: {
