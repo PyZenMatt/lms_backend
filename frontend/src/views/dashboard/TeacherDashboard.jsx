@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Row, Col, Card, Button, Modal, Spinner, Badge } from 'react-bootstrap';
 import { Link, useNavigate } from 'react-router-dom';
 import './TeacherDashboard.css';
+import RoleGuard from '../../components/guards/RoleGuard';
 
 import DatabaseStaking from '../../components/staking/DatabaseStaking';
 import MetaMaskDeposit from '../../components/deposit/MetaMaskDeposit';
@@ -12,6 +13,7 @@ import CoursesTable from '../../components/courses/CoursesTable';
 import { fetchTeacherDashboard, fetchUserProfile } from '../../services/api/dashboard';
 import { fetchLessonsForCourse, fetchExercisesForLesson } from '../../services/api/courses';
 import CourseCreateModal from '../../components/modals/CourseCreateModal';
+import CourseEditModal from '../../components/modals/CourseEditModal';
 import LessonCreateModal from '../../components/modals/LessonCreateModal';
 import ExerciseCreateModal from '../../components/modals/ExerciseCreateModal';
 import AdvancedAnalyticsDashboard from '../../components/analytics/AdvancedAnalyticsDashboard';
@@ -31,6 +33,8 @@ const TeacherDashboard = () => {
   const [error, setError] = useState('');
   const [transactions, setTransactions] = useState([]);
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editingCourseId, setEditingCourseId] = useState(null);
   const [userProfile, setUserProfile] = useState(null);
   const [withdrawalOpen, setWithdrawalOpen] = useState(false);
   
@@ -191,7 +195,15 @@ const TeacherDashboard = () => {
   };
 
   const handleEditCourse = (courseId) => {
-    navigate(`/teacher/corsi/${courseId}/edit`);
+    setEditingCourseId(courseId);
+    setShowEditModal(true);
+  };
+
+  const handleCourseUpdated = (courseId) => {
+    // Ricarica la dashboard per mostrare i cambiamenti
+    loadDashboard();
+    setShowEditModal(false);
+    setEditingCourseId(null);
   };
 
   const handleEditLesson = (lessonId) => {
@@ -264,9 +276,10 @@ const TeacherDashboard = () => {
   }
 
   return (
-    <React.Fragment>
-      {/* 🔥 PHASE 4: Enhanced Notification System */}
-      <EnhancedNotificationSystem />
+    <RoleGuard allowedRoles={['teacher']}>
+      <React.Fragment>
+        {/* 🔥 PHASE 4: Enhanced Notification System */}
+        <EnhancedNotificationSystem />
       
       {/* Enhanced Welcome Section */}
       <Row className="mb-4">
@@ -454,7 +467,19 @@ const TeacherDashboard = () => {
         onClose={() => setWithdrawalOpen(false)}
         userBalance={userProfile?.teocoin_balance || 0}
       />
+      
+      {/* Course Edit Modal */}
+      <CourseEditModal
+        show={showEditModal}
+        onHide={() => {
+          setShowEditModal(false);
+          setEditingCourseId(null);
+        }}
+        courseId={editingCourseId}
+        onCourseUpdated={handleCourseUpdated}
+      />
     </React.Fragment>
+    </RoleGuard>
   );
 };
 

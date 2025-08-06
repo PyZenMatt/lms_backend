@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-
 import { Row, Col } from 'react-bootstrap';
+import RoleGuard from '../../components/guards/RoleGuard';
 import PendingTeachersCard from '../../components/cards/PendingTeachersCard';
 import PendingCoursesCard from '../../components/cards/PendingCoursesCard';
 import AdminTeoCoinDashboard from '../../components/blockchain/DBAdminTeoCoinDashboard';
@@ -11,8 +11,9 @@ const AdminDashboard = () => {
   const [withdrawalOpen, setWithdrawalOpen] = useState(false);
 
   return (
-    <React.Fragment>
-      <Row className="g-3 mb-4">
+    <RoleGuard allowedRoles={['admin']}>
+      <React.Fragment>
+        <Row className="g-3 mb-4">
         <Col xs={12} className="mb-4">
           <PendingTeachersCard />
         </Col>
@@ -31,6 +32,7 @@ const AdminDashboard = () => {
         userBalance={0} // Admin balance will be fetched by the component itself
       />
     </React.Fragment>
+    </RoleGuard>
   );
 };
 

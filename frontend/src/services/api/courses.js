@@ -162,3 +162,12 @@ export const completeHybridPayment = async (courseId, paymentIntentId) => {
   
   return response;
 };
+
+export const updateCourse = async (courseId, formData) => {
+  console.log('🔄 Updating course:', courseId, formData);
+  return api.put(`courses/${courseId}/`, formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data'
+    }
+  });
+};

@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import { Row, Col, Card } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
+import RoleGuard from '../../components/guards/RoleGuard';
 import TeoCoinBalanceWidget from '../../components/TeoCoinBalanceWidget';
 import BurnDepositInterface from '../../components/blockchain/BurnDepositInterface';
 import TeoCoinWithdrawal from '../../components/TeoCoinWithdrawal';
@@ -51,8 +52,9 @@ const StudentDashboard = () => {
   }
 
   return (
-    <>
-      {/* Hero di benvenuto */}
+    <RoleGuard allowedRoles={['student']}>
+      <>
+        {/* Hero di benvenuto */}
       <Row className="mb-4">
         <Col md={12}>
           <Card className="border-0 shadow-sm">
@@ -155,6 +157,7 @@ const StudentDashboard = () => {
         userBalance={userProfile?.teocoin_balance || 0}
       />
     </>
+    </RoleGuard>
   );
 };
 

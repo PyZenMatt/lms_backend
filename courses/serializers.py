@@ -193,12 +193,13 @@ class CourseSerializer(serializers.ModelSerializer):
     student_count = serializers.SerializerMethodField()
     cover_image_url = serializers.SerializerMethodField()
     teocoin_price = serializers.SerializerMethodField()
+    price = serializers.DecimalField(max_digits=10, decimal_places=2, source='price_eur', required=False)
 
     class Meta:
         model = Course
         fields = [
             'id', 'title', 'description', 'category', 'category_display', 'cover_image', 'cover_image_url',
-            'price_eur', 'teocoin_price', 'teocoin_discount_percent', 'teocoin_reward', 'teacher', 'lessons', 'total_duration', 'students', 'student_count',
+            'price', 'price_eur', 'teocoin_price', 'teocoin_discount_percent', 'teocoin_reward', 'teacher', 'lessons', 'total_duration', 'students', 'student_count',
             'created_at', 'updated_at', 'is_enrolled', 'is_approved'
         ]
         read_only_fields = ['teacher', 'students']

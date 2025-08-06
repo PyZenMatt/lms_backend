@@ -67,6 +67,11 @@ const routes = [
       },
       {
         exact: 'true',
+        path: '/dashboard',
+        element: lazy(() => import('./components/common/DashboardRedirect.jsx'))
+      },
+      {
+        exact: 'true',
         path: '/dashboard/student',
         element: lazy(() => import('./views/dashboard/StudentDashboard.jsx'))
       },
@@ -161,7 +166,7 @@ const routes = [
       // Default redirect
       {
         path: '*',
-        element: () => <Navigate to="/dashboard/student" replace />
+        element: () => <Navigate to="/dashboard" replace />
       }
     ]
   }
