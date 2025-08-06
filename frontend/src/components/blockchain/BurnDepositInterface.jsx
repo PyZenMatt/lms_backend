@@ -6,6 +6,7 @@ import React, { useState, useEffect } from 'react';
 import { Card, Spinner, Button, Modal, Form, Alert } from 'react-bootstrap';
 import { useAuth } from '../../contexts/AuthContext';
 import { ethers } from 'ethers';
+import api from '../../services/core/axiosClient';
 
 const BurnDepositInterface = ({ onTransactionComplete }) => {
   const { user: currentUser } = useAuth();
@@ -181,22 +182,15 @@ const BurnDepositInterface = ({ onTransactionComplete }) => {
       setLastTxHash(txHash);
 
       // Step 2: Submit burn proof to backend
-      const response = await fetch('/api/v1/teocoin/burn-deposit/', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('accessToken')}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          transaction_hash: txHash,
-          amount: burnAmount,
-          metamask_address: account
-        })
+      const response = await api.post('/teocoin/burn-deposit/', {
+        transaction_hash: txHash,
+        amount: burnAmount,
+        metamask_address: account
       });
 
-      const data = await response.json();
+      const data = response.data;
 
-      if (response.ok && data.success) {
+      if (data && data.success) {
         setSuccess(`🎉 Successfully deposited ${burnAmount} TEO to your platform balance! TX: ${txHash.substring(0, 10)}...`);
         setBurnAmount('');
         setShowModal(false);
@@ -212,7 +206,7 @@ const BurnDepositInterface = ({ onTransactionComplete }) => {
         // Also trigger event for other listeners
         window.dispatchEvent(new Event('teocoin-balance-updated'));
       } else {
-        throw new Error(data.error || 'Failed to process burn deposit');
+        throw new Error(data?.error || 'Failed to process burn deposit');
       }
 
     } catch (error) {
