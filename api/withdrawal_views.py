@@ -214,17 +214,34 @@ class UserWithdrawalHistoryView(APIView):
     
     def get(self, request):
         """Get current user's withdrawal history"""
+        import logging
+        logger = logging.getLogger(__name__)
+        
         try:
+            logger.info(f"📊 Withdrawal history request for {request.user.email}")
+            
             limit = int(request.query_params.get('limit', 20))
             limit = min(limit, 100)  # Cap at 100
             
             status_filter = request.query_params.get('status')
+            logger.info(f"📊 Limit: {limit}, Status filter: {status_filter}")
             
-            withdrawals = teocoin_withdrawal_service.get_user_withwithdrawal_history(
+            # Check if service is properly initialized
+            if not hasattr(teocoin_withdrawal_service, 'get_user_withdrawal_history'):
+                logger.error("❌ TeoCoin withdrawal service not properly initialized")
+                return Response({
+                    'success': False,
+                    'error': 'Service not available',
+                    'error_code': 'SERVICE_ERROR'
+                }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            
+            withdrawals = teocoin_withdrawal_service.get_user_withdrawal_history(
                 user=request.user,
                 limit=limit,
                 status=status_filter
             )
+            
+            logger.info(f"✅ Retrieved {len(withdrawals)} withdrawals for {request.user.email}")
             
             return Response({
                 'success': True,
@@ -233,7 +250,9 @@ class UserWithdrawalHistoryView(APIView):
             }, status=status.HTTP_200_OK)
             
         except Exception as e:
-            logger.error(f"Error getting withdrawal history for {request.user.email}: {e}")
+            logger.error(f"❌ Error getting withdrawal history for {request.user.email}: {e}")
+            import traceback
+            logger.error(f"📜 Full traceback: {traceback.format_exc()}")
             return Response({
                 'success': False,
                 'error': 'Internal server error',

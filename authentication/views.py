@@ -42,6 +42,39 @@ class RegisterView(generics.CreateAPIView):
     """
     serializer_class = RegisterSerializer
     permission_classes = (permissions.AllowAny,)
+    
+    def create(self, request, *args, **kwargs):
+        """Override create to provide custom response"""
+        import logging
+        logger = logging.getLogger(__name__)
+        
+        try:
+            logger.info(f"📝 Registration attempt for: {request.data.get('username', 'unknown')}")
+            
+            serializer = self.get_serializer(data=request.data)
+            serializer.is_valid(raise_exception=True)
+            user = serializer.save()
+            
+            logger.info(f"✅ Registration successful for: {user.username}")
+            
+            # Custom success response
+            return Response({
+                'success': True,
+                'message': 'Registrazione completata con successo',
+                'user': {
+                    'id': user.id,
+                    'username': user.username,
+                    'email': user.email,
+                    'role': user.role,
+                }
+            }, status=status.HTTP_201_CREATED)
+            
+        except Exception as e:
+            logger.error(f"❌ Registration failed: {e}")
+            return Response({
+                'success': False,
+                'error': str(e)
+            }, status=status.HTTP_400_BAD_REQUEST)
 
 class VerifyEmailView(views.APIView):
     """

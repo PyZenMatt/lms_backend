@@ -70,29 +70,44 @@ class RegisterSerializer(serializers.ModelSerializer):
         Returns:
             Created User instance
         """
-        # Create new user with provided data
-        user = User.objects.create_user(
-            username=validated_data['username'],
-            email=validated_data['email'],
-            password=validated_data['password'],
-            first_name=validated_data.get('first_name', ''),
-            last_name=validated_data.get('last_name', ''),
-            role=validated_data['role'],
-            is_active=True,  # User is active but email not verified
-        )
+        import logging
+        logger = logging.getLogger(__name__)
         
-        # Send email verification
-        request = self.context.get('request')
-        uid = urlsafe_base64_encode(force_bytes(user.pk))
-        token = default_token_generator.make_token(user)
-        verify_url = f"{request.scheme}://{request.get_host()}/api/auth/verify-email/{uid}/{token}/" # type: ignore
-        
-        # Send verification email to user
-        user.email_user(
-            subject='Verifica la tua email',  # Subject: Verify your email
-            message=f'Visita {verify_url} per verificare la tua email.'  # Message: Visit URL to verify email
-        )
-        return user
+        try:
+            # Create new user with provided data
+            user = User.objects.create_user(
+                username=validated_data['username'],
+                email=validated_data['email'],
+                password=validated_data['password'],
+                first_name=validated_data.get('first_name', ''),
+                last_name=validated_data.get('last_name', ''),
+                role=validated_data['role'],
+                is_active=True,  # User is active but email not verified
+            )
+            logger.info(f"✅ User created successfully: {user.username}")
+            
+            # Send email verification
+            request = self.context.get('request')
+            uid = urlsafe_base64_encode(force_bytes(user.pk))
+            token = default_token_generator.make_token(user)
+            verify_url = f"{request.scheme}://{request.get_host()}/api/auth/verify-email/{uid}/{token}/" # type: ignore
+            
+            # Send verification email to user
+            try:
+                user.email_user(
+                    subject='Verifica la tua email',  # Subject: Verify your email
+                    message=f'Visita {verify_url} per verificare la tua email.'  # Message: Visit URL to verify email
+                )
+                logger.info(f"✅ Email sent successfully to {user.email}")
+            except Exception as email_error:
+                logger.warning(f"⚠️ Email sending failed: {email_error}, but user was created successfully")
+                # Don't fail the registration if email fails
+            
+            return user
+            
+        except Exception as e:
+            logger.error(f"❌ Error creating user: {e}")
+            raise
 
 class EmailVerifySerializer(serializers.Serializer):
     """

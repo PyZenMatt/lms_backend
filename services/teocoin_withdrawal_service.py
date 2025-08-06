@@ -440,31 +440,45 @@ class TeoCoinWithdrawalService:
             List of withdrawal dictionaries
         """
         try:
+            logger.info(f"📊 Getting withdrawal history for {user.email}")
+            
             queryset = TeoCoinWithdrawalRequest.objects.filter(user=user)
             
             if status:
                 queryset = queryset.filter(status=status)
             
             withdrawals = queryset.order_by('-created_at')[:limit]
+            logger.info(f"📊 Found {len(withdrawals)} withdrawals for {user.email}")
             
-            return [
-                {
-                    'id': w.id,
-                    'amount': str(w.amount),
-                    'metamask_address': w.metamask_address,
-                    'status': w.status,
-                    'transaction_hash': w.transaction_hash,
-                    'error_message': w.error_message,
-                    'created_at': w.created_at.isoformat(),
-                    'completed_at': w.completed_at.isoformat() if w.completed_at else None,
-                    'estimated_processing_time': w.estimated_processing_time,
-                    'can_cancel': w.can_be_cancelled
-                }
-                for w in withdrawals
-            ]
+            result = []
+            for w in withdrawals:
+                try:
+                    withdrawal_data = {
+                        'id': getattr(w, 'id', None),
+                        'amount': str(getattr(w, 'amount', 0)),
+                        'metamask_address': getattr(w, 'metamask_address', ''),
+                        'status': getattr(w, 'status', 'unknown'),
+                        'transaction_hash': getattr(w, 'transaction_hash', None),
+                        'error_message': getattr(w, 'error_message', None),
+                        'created_at': getattr(w, 'created_at', timezone.now()).isoformat(),
+                        'completed_at': getattr(w, 'completed_at', None).isoformat() if getattr(w, 'completed_at', None) else None,
+                        'estimated_processing_time': getattr(w, 'estimated_processing_time', 'Unknown'),
+                        'can_cancel': getattr(w, 'can_be_cancelled', False)
+                    }
+                    result.append(withdrawal_data)
+                    logger.debug(f"✅ Processed withdrawal {withdrawal_data['id']}")
+                    
+                except Exception as attr_error:
+                    logger.error(f"❌ Error processing withdrawal {w}: {attr_error}")
+                    continue
+            
+            logger.info(f"✅ Returning {len(result)} withdrawals for {user.email}")
+            return result
             
         except Exception as e:
-            logger.error(f"Error getting withdrawals for {user.email}: {e}")
+            logger.error(f"❌ Error getting withdrawals for {user.email}: {e}")
+            import traceback
+            logger.error(f"📜 Full traceback: {traceback.format_exc()}")
             return []
     
     @transaction.atomic

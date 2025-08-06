@@ -21,12 +21,16 @@ DATABASES = {
 # Email backend for prod
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 
-# CORS for prod
+# CORS for prod - frontend is served from different origin
 CORS_ALLOW_ALL_ORIGINS = False
 CORS_ALLOWED_ORIGINS = [
-    "https://schoolplatform-frontend.onrender.com",
-    # altri frontend prod
+    "https://schoolplatform-frontend.onrender.com",  # Frontend origin
+    "https://schoolplatform.onrender.com",           # Backend origin (for admin)
+    "https://www.schoolplatform.onrender.com",       # www variant
 ]
+
+# Allow credentials for cross-origin requests
+CORS_ALLOW_CREDENTIALS = True
 
 # Cookie security for prod
 SESSION_COOKIE_SECURE = True

@@ -69,13 +69,21 @@ const SignUpNew = () => {
 
       const response = await api.post('/register/', payload);
       
-      if (formData.role === 'student') {
-        setSuccess('🎉 Registrazione completata! Il tuo account studente è attivo. Puoi effettuare il login subito.');
-        setTimeout(() => {
-          navigate('/auth/signin-1');
-        }, 2000);
+      console.log('Registration response:', response.data);
+      
+      // Handle successful response
+      if (response.data?.success !== false) {
+        if (formData.role === 'student') {
+          setSuccess('🎉 Registrazione completata! Il tuo account studente è attivo. Puoi effettuare il login subito.');
+          setTimeout(() => {
+            navigate('/auth/signin-1');
+          }, 2000);
+        } else {
+          setSuccess('📧 Registrazione inviata! La tua richiesta di accesso come docente è in attesa di approvazione da parte dell\'amministratore. Ti contatteremo via email quando sarà approvata. Grazie per la pazienza!');
+        }
       } else {
-        setSuccess('📧 Registrazione inviata! La tua richiesta di accesso come docente è in attesa di approvazione da parte dell\'amministratore. Ti contatteremo via email quando sarà approvata. Grazie per la pazienza!');
+        // Handle API error response
+        setError(response.data?.error || 'Errore durante la registrazione. Riprova.');
       }
     } catch (err) {
       console.error('Signup error:', err);
