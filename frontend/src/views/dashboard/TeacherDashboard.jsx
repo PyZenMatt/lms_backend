@@ -418,6 +418,7 @@ const TeacherDashboard = () => {
                 loadingExercises={loadingExercises}
                 onLoadExercises={loadExercisesForLesson}
                 onViewCourse={handleViewCourse}
+                onViewLessons={handleExpandCourse}
                 onViewLesson={handleViewLesson}
                 onEditCourse={handleEditCourse}
                 onEditLesson={handleEditLesson}

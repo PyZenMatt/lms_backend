@@ -110,14 +110,42 @@ const StudentDashboard = () => {
                   <p className="text-muted mt-3">Nessun corso acquistato</p>
                 </div>
               ) : (
-                <ul className="list-group">
+                <div className="row g-3">
                   {courses.map(course => (
-                    <li key={course.id} className="list-group-item d-flex justify-content-between align-items-center">
-                      <span>{course.title}</span>
-                      <Link to={`/corsi/${course.id}`} className="btn btn-sm btn-outline-primary">Vai al corso</Link>
-                    </li>
+                    <div key={course.id} className="col-12">
+                      <div className="card border-0 shadow-sm">
+                        <div className="card-body">
+                          <div className="d-flex justify-content-between align-items-start">
+                            <div className="flex-grow-1">
+                              <h6 className="card-title mb-2">{course.title}</h6>
+                              <div className="d-flex align-items-center text-muted small mb-2">
+                                <i className="feather icon-play-circle me-1"></i>
+                                <span>{course.lessons?.length || 0} lezioni disponibili</span>
+                                <span className="mx-2">•</span>
+                                <i className="feather icon-user me-1"></i>
+                                <span>Docente: {course.teacher?.first_name || course.teacher?.username}</span>
+                              </div>
+                              {course.description && (
+                                <p className="text-muted small mb-0" style={{
+                                  display: '-webkit-box',
+                                  WebkitLineClamp: 2,
+                                  WebkitBoxOrient: 'vertical',
+                                  overflow: 'hidden'
+                                }}>
+                                  {course.description}
+                                </p>
+                              )}
+                            </div>
+                            <Link to={`/corsi/${course.id}`} className="btn btn-sm btn-primary ms-3">
+                              <i className="feather icon-arrow-right me-1"></i>
+                              Inizia
+                            </Link>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
                   ))}
-                </ul>
+                </div>
               )}
             </Card.Body>
           </Card>

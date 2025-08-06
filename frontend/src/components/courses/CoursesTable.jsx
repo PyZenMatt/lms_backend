@@ -21,7 +21,8 @@ const CoursesTable = ({
   onEditCourse,
   onEditLesson,
   onViewExercise,
-  onEditExercise
+  onEditExercise,
+  onViewLessons // Nuova prop per visualizzare le lezioni di un corso
 }) => {
   const navigate = useNavigate();
 
@@ -33,6 +34,17 @@ const CoursesTable = ({
       navigate(`/teacher/corsi/${courseId}/edit`);
     }
   };
+  const handleViewLessons = (courseId) => {
+    if (onViewLessons) {
+      onViewLessons(courseId);
+    } else {
+      // Fallback: espande il corso per mostrare le lezioni
+      if (onExpandCourse) {
+        onExpandCourse(courseId);
+      }
+    }
+  };
+
   const handleCreateLesson = (courseId) => {
     if (onCreateLesson) {
       onCreateLesson(courseId);
@@ -245,10 +257,29 @@ const CoursesTable = ({
                         >
                           {course.status || 'Draft'}
                         </Badge>
-                        <small className="text-muted">
-                          <i className="feather icon-clock me-1"></i>
+                        <button
+                          type="button"
+                          className="btn p-0 text-muted lessons-badge border-0 bg-transparent"
+                          onClick={() => handleViewLessons(course.id)}
+                          style={{
+                            cursor: 'pointer',
+                            transition: 'all 0.2s ease',
+                            borderRadius: '4px',
+                            fontSize: '0.875rem'
+                          }}
+                          onMouseEnter={(e) => {
+                            e.target.style.backgroundColor = '#f8f9fa';
+                            e.target.style.color = '#007bff';
+                          }}
+                          onMouseLeave={(e) => {
+                            e.target.style.backgroundColor = 'transparent';
+                            e.target.style.color = '#6c757d';
+                          }}
+                          title={`Clicca per vedere le ${course.lessons?.length || 0} lezioni`}
+                        >
+                          <i className="feather icon-play-circle me-1"></i>
                           {course.lessons?.length || 0} lezioni
-                        </small>
+                        </button>
                       </div>
                     </div>
                     <div className="text-end">
