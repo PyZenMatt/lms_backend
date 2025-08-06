@@ -78,7 +78,7 @@ const routes = [
       {
         exact: 'true',
         path: '/dashboard/admin',
-        element: lazy(() => import('./views/dashboard/AdminDashboard.jsx'))
+        element: lazy(() => import('./views/admin/AdminDashboard.jsx'))
       },
       {
         path: '/corsi/:courseId',
@@ -155,36 +155,8 @@ const routes = [
         element: lazy(() => import('./views/admin/AdminDashboard.jsx'))
       },
       {
-        path: '/admin/users',
-        element: lazy(() => import('./views/admin/AdminUsers.jsx'))
-      },
-      {
-        path: '/admin/corsi',
-        element: lazy(() => import('./views/admin/AdminCourses.jsx'))
-      },
-      {
         path: '/admin/corsi/:courseId',
         element: lazy(() => import('./views/admin/AdminCourseDetail.jsx'))
-      },
-      {
-        path: '/admin/transactions',
-        element: lazy(() => import('./views/admin/AdminTransactions.jsx'))
-      },
-      {
-        path: '/admin/withdrawals',
-        element: lazy(() => import('./views/admin/AdminWithdrawals.jsx'))
-      },
-      {
-        path: '/admin/staking',
-        element: lazy(() => import('./views/admin/AdminStaking.jsx'))
-      },
-      {
-        path: '/admin/analytics',
-        element: lazy(() => import('./views/admin/AdminAnalytics.jsx'))
-      },
-      {
-        path: '/admin/settings',
-        element: lazy(() => import('./views/admin/AdminSettings.jsx'))
       },
       // Default redirect
       {
