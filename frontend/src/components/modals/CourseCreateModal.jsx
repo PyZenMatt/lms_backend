@@ -635,7 +635,7 @@ const CourseCreateModal = ({ show, onHide, onCreated }) => {
           </Modal.Title>
         </Modal.Header>
         
-        <Form onSubmit={handleSubmit}>
+        <Form>
           <Modal.Body className="pt-2">
             {renderStepIndicator()}
             
@@ -688,10 +688,11 @@ const CourseCreateModal = ({ show, onHide, onCreated }) => {
                   </Button>
                 ) : (
                   <Button 
-                    type="submit" 
+                    type="button"
                     variant={success ? "success" : "primary"} 
                     disabled={loading || !canProceedToNext() || success}
                     className="px-4"
+                    onClick={handleSubmit}
                   >
                     {success ? (
                       <>

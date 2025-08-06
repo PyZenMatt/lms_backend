@@ -25,7 +25,7 @@ const Navigation = () => {
       return navigation;
     }
     
-    const role = user.role.toLowerCase();
+    const role = (user.role || '').toLowerCase();
     console.log('Ruolo utente:', role);
     
     // Seleziona il menu in base al ruolo

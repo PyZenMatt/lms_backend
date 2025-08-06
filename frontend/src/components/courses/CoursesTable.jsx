@@ -76,7 +76,7 @@ const CoursesTable = ({
   };
 
   const getBadgeVariant = (status) => {
-    switch (status?.toLowerCase()) {
+    switch ((status || '').toLowerCase()) {
       case 'published':
       case 'active':
         return 'success';

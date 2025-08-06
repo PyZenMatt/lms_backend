@@ -87,19 +87,8 @@ export default defineConfig({
           // Vendor chunks
           'react-vendor': ['react', 'react-dom'],
           'bootstrap-vendor': ['react-bootstrap', 'bootstrap'],
-          'router-vendor': ['react-router-dom'],
-          
-          // Feature-based chunks
-          'dashboard': [
-            './src/views/dashboard/StudentDashboard.jsx',
-            './src/views/dashboard/TeacherDashboard.jsx'
-          ],
-          'courses': [
-            './src/views/courses/AllCourses.jsx',
-          ],
-          'components': [
-            './src/components/ui/StatWidget.jsx',
-          ]
+          'router-vendor': ['react-router-dom']
+          // Removed hardcoded component chunks to avoid conflicts with lazy loading
         },
         // Optimize chunk file names
         chunkFileNames: (chunkInfo) => {

@@ -34,174 +34,163 @@ const routes = [
   {
     exact: 'true',
     path: '/',
-    element: lazy(() => import('./views/landing/TeoArtLandingNew'))
+    element: lazy(() => import('./views/landing/TeoArtLandingNew.jsx'))
   },
   {
     exact: 'true',
     path: '/landing',
-    element: lazy(() => import('./views/landing/TeoArtLandingNew'))
+    element: lazy(() => import('./views/landing/TeoArtLandingNew.jsx'))
   },
   {
     exact: 'true',
     path: '/login',
-    element: lazy(() => import('./views/auth/signin/SignIn1'))
+    element: lazy(() => import('./views/auth/signin/SignIn1.jsx'))
   },
   {
     exact: 'true',
     path: '/auth/signin-1',
-    element: lazy(() => import('./views/auth/signin/SignIn1'))
+    element: lazy(() => import('./views/auth/signin/SignIn1.jsx'))
   },
   {
     exact: 'true',
     path: '/auth/signup-1',
-    element: lazy(() => import('./views/auth/signup/SignUpNew'))
+    element: lazy(() => import('./views/auth/signup/SignUpNew.jsx'))
   },
   {
     path: '*',
     layout: AdminLayout,
     routes: [
-
       {
         exact: 'true',
         path: '/corsi',
-        element: lazy(() => import('./views/courses/AllCourses'))
+        element: lazy(() => import('./views/courses/AllCourses.jsx'))
       },
       {
         exact: 'true',
         path: '/dashboard/student',
-        element: lazy(() => import('./views/dashboard/StudentDashboard'))
+        element: lazy(() => import('./views/dashboard/StudentDashboard.jsx'))
       },
       {
         exact: 'true',
         path: '/dashboard/teacher',
-        element: lazy(() => import('./views/dashboard/TeacherDashboard'))
-      },
-      {
-        path: '*',
-        exact: 'true',
-        element: () => <Navigate to={BASE_URL} />
-      },
-      {
-        path: '/corsi/:courseId',
-        element: lazy(() => import('./views/courses/StudentCourseDetailNew'))
-      },
-      {
-        path: '/lezioni/:lessonId',
-        element: lazy(() => import('./views/courses/StudentLessonDetailNew'))
-      },
-      {
-        path: '/esercizi/:exerciseId',
-        element: lazy(() => import('./views/courses/StudentExerciseDetailNew'))
-      },
-      {
-        path: '/submission-graded/:submissionId',
-        element: lazy(() => import('./views/courses/ExerciseGradedDetail'))
-      },
-      {
-        exact: 'true',
-        path: '/review/assigned',
-        element: lazy(() => import('./views/review/AssignedReviewsList'))
-      },
-      {
-        exact: 'true',
-        path: '/review/:submissionId',
-        element: lazy(() => import('./views/review/ReviewDetail'))
-      },
-      {
-        path: '/corsi-docente/:courseId',
-        element: lazy(() => import('./views/courses/TeacherCourseDetail'))
-      },
-      {
-        path: '/lezioni-docente/:lessonId',
-        element: lazy(() => import('./views/courses/TeacherLessonDetail'))
-      },
-      {
-        path: '/esercizi-docente/:exerciseId',
-        element: lazy(() => import('./views/courses/TeacherExerciseDetail'))
-      },
-      // --- ROUTE DOCENTE per bottoni ---
-      {
-        path: '/teacher/corsi/:courseId/edit',
-        element: lazy(() => import('./views/courses/TeacherCourseDetail'))
-      },
-      {
-        path: '/teacher/corsi/:courseId/preview',
-        element: lazy(() => import('./views/courses/TeacherCourseDetail'))
-      },
-      {
-        path: '/teacher/corsi/:courseId/lezioni/nuova',
-        element: lazy(() => import('./views/courses/TeacherLessonDetail'))
-      },
-      {
-        path: '/teacher/lezioni/:lessonId/edit',
-        element: lazy(() => import('./views/courses/TeacherLessonDetail'))
-      },
-      {
-        path: '/teacher/lezioni/:lessonId/esercizi/nuovo',
-        element: lazy(() => import('./views/courses/TeacherExerciseDetail'))
-      },
-      {
-        path: '/teacher/esercizi/:exerciseId/edit',
-        element: lazy(() => import('./views/courses/TeacherExerciseDetail'))
-      },
-      {
-        exact: 'true',
-        path: '/profile',
-        element: lazy(() => import('./views/profile/UserProfileNew'))
-      },
-      {
-        exact: 'true',
-        path: '/profile/notifications',
-        element: lazy(() => import('./views/profile/NotificationListNew'))
-      },
-      {
-        exact: 'true',
-        path: '/profile/settings',
-        element: lazy(() => import('./views/profile/ProfileSettings'))
-      },
-      {
-        exact: 'true',
-        path: '/profile/settings/theme',
-        element: lazy(() => import('./views/settings/ThemeSettings'))
-      },
-      {
-        exact: 'true',
-        path: '/demo/dark-theme',
-        element: lazy(() => import('./views/demo/DarkThemeShowcase'))
-      },
-      {
-        exact: 'true',
-        path: '/dev/status',
-        element: lazy(() => import('./views/dev/DevelopmentStatusDashboard'))
-      },
-      {
-        exact: 'true',
-        path: '/profile/progress',
-        element: lazy(() => import('./views/profile/ProfileProgress'))
+        element: lazy(() => import('./views/dashboard/TeacherDashboard.jsx'))
       },
       {
         exact: 'true',
         path: '/dashboard/admin',
-        element: lazy(() => import('./views/admin/AdminDashboard'))
+        element: lazy(() => import('./views/dashboard/AdminDashboard.jsx'))
       },
       {
-        exact: 'true',
-        path: '/admin/pending-courses',
-        element: lazy(() => import('./views/admin/PendingCoursesTable'))
+        path: '/corsi/:courseId',
+        element: lazy(() => import('./views/courses/StudentCourseDetailNew.jsx'))
+      },
+      {
+        path: '/lezioni/:lessonId',
+        element: lazy(() => import('./views/courses/StudentLessonDetailNew.jsx'))
+      },
+      {
+        path: '/esercizi/:exerciseId',
+        element: lazy(() => import('./views/courses/StudentExerciseDetailNew.jsx'))
+      },
+      {
+        path: '/esercizi/:exerciseId/voto',
+        element: lazy(() => import('./views/courses/ExerciseGradedDetail.jsx'))
+      },
+      {
+        path: '/review/assigned',
+        element: lazy(() => import('./views/review/AssignedReviewsList.jsx'))
+      },
+      {
+        path: '/review/:reviewId',
+        element: lazy(() => import('./views/review/ReviewDetail.jsx'))
+      },
+      {
+        path: '/corsi-docente/:courseId',
+        element: lazy(() => import('./views/courses/TeacherCourseDetail.jsx'))
+      },
+      {
+        path: '/lezioni-docente/:lessonId',
+        element: lazy(() => import('./views/courses/TeacherLessonDetail.jsx'))
+      },
+      {
+        path: '/esercizi-docente/:exerciseId',
+        element: lazy(() => import('./views/courses/TeacherExerciseDetail.jsx'))
+      },
+      // Teacher action routes
+      {
+        path: '/teacher/corsi/:courseId/edit',
+        element: lazy(() => import('./views/courses/TeacherCourseDetail.jsx'))
+      },
+      {
+        path: '/teacher/corsi/:courseId/preview',
+        element: lazy(() => import('./views/courses/TeacherCourseDetail.jsx'))
+      },
+      {
+        path: '/teacher/corsi/:courseId/lezioni/nuova',
+        element: lazy(() => import('./views/courses/TeacherLessonDetail.jsx'))
+      },
+      {
+        path: '/teacher/lezioni/:lessonId/edit',
+        element: lazy(() => import('./views/courses/TeacherLessonDetail.jsx'))
+      },
+      {
+        path: '/teacher/lezioni/:lessonId/preview',
+        element: lazy(() => import('./views/courses/TeacherLessonDetail.jsx'))
+      },
+      {
+        path: '/teacher/lezioni/:lessonId/esercizi/nuovo',
+        element: lazy(() => import('./views/courses/TeacherExerciseDetail.jsx'))
+      },
+      {
+        path: '/teacher/esercizi/:exerciseId/edit',
+        element: lazy(() => import('./views/courses/TeacherExerciseDetail.jsx'))
+      },
+      {
+        path: '/teacher/esercizi/:exerciseId/preview',
+        element: lazy(() => import('./views/courses/TeacherExerciseDetail.jsx'))
+      },
+      // Admin routes
+      {
+        path: '/admin',
+        element: lazy(() => import('./views/admin/AdminDashboard.jsx'))
+      },
+      {
+        path: '/admin/users',
+        element: lazy(() => import('./views/admin/AdminUsers.jsx'))
+      },
+      {
+        path: '/admin/corsi',
+        element: lazy(() => import('./views/admin/AdminCourses.jsx'))
       },
       {
         path: '/admin/corsi/:courseId',
-        element: lazy(() => import('./views/admin/AdminCourseDetail'))
+        element: lazy(() => import('./views/admin/AdminCourseDetail.jsx'))
       },
       {
-        path: '/admin/lezioni/:lessonId',
-        element: lazy(() => import('./views/admin/AdminLessonDetail'))
+        path: '/admin/transactions',
+        element: lazy(() => import('./views/admin/AdminTransactions.jsx'))
       },
       {
-        path: '/admin/esercizi/:exerciseId',
-        element: lazy(() => import('./views/admin/AdminExerciseDetail'))
+        path: '/admin/withdrawals',
+        element: lazy(() => import('./views/admin/AdminWithdrawals.jsx'))
       },
-
+      {
+        path: '/admin/staking',
+        element: lazy(() => import('./views/admin/AdminStaking.jsx'))
+      },
+      {
+        path: '/admin/analytics',
+        element: lazy(() => import('./views/admin/AdminAnalytics.jsx'))
+      },
+      {
+        path: '/admin/settings',
+        element: lazy(() => import('./views/admin/AdminSettings.jsx'))
+      },
+      // Default redirect
+      {
+        path: '*',
+        element: () => <Navigate to="/dashboard/student" replace />
+      }
     ]
   }
 ];
