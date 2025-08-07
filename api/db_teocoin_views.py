@@ -99,8 +99,32 @@ class ApplyDiscountView(APIView):
                     'error': error_msg
                 }, status=status.HTTP_400_BAD_REQUEST)
             
-            # Check user balance
+            # Check if discount was already applied for this course
             db_service = DBTeoCoinService()
+            
+            # Check for existing discount transaction for this course
+            from blockchain.models import DBTeoCoinTransaction
+            existing_discount = DBTeoCoinTransaction.objects.filter(
+                user=request.user,
+                course_id=str(course_id),
+                transaction_type='discount',
+                amount__lt=0  # Negative amount = deduction
+            ).first()
+            
+            if existing_discount:
+                logger.info(f"Discount already applied for course {course_id} by user {request.user.id}")
+                # Return success without double deduction
+                balance = db_service.get_user_balance(request.user)
+                return Response({
+                    'success': True,
+                    'message': 'Discount already applied for this course',
+                    'teo_used': float(abs(existing_discount.amount)),
+                    'new_balance': float(balance['available_balance']),
+                    'discount_percentage': float(discount_percentage),
+                    'already_applied': True
+                })
+            
+            # Check user balance
             balance = db_service.get_user_balance(request.user)
             if balance['available_balance'] < teo_amount:
                 return Response({
@@ -108,7 +132,7 @@ class ApplyDiscountView(APIView):
                     'error': f'Insufficient balance. Available: {balance["available_balance"]} TEO, Required: {teo_amount} TEO'
                 }, status=status.HTTP_400_BAD_REQUEST)
             
-            # Deduct TeoCoin for discount
+            # Deduct TeoCoin for discount (only if not already done)
             success = db_service.deduct_balance(
                 user=request.user,
                 amount=teo_amount,
