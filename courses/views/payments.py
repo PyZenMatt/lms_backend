@@ -309,6 +309,45 @@ class ConfirmPaymentView(APIView):
             
             logger.info(f"✅ Student enrolled: {user.username} in {course.title} for €{final_price}")
             
+            # CRITICAL: Deduct TeoCoin AFTER payment confirmed and enrollment created
+            if use_teocoin_discount and discount_amount > 0:
+                try:
+                    logger.info(f"💰 Payment confirmed, now deducting TeoCoin: {discount_amount} TEO")
+                    
+                    # Initialize DB TeoCoin service
+                    db_teo_service = DBTeoCoinService()
+                    
+                    # Check if discount was already applied (prevent double deduction)
+                    from blockchain.models import DBTeoCoinTransaction
+                    existing_discount = DBTeoCoinTransaction.objects.filter(
+                        user=user,
+                        course_id=str(course_id),
+                        transaction_type='discount',
+                        amount__lt=0  # Negative amount = deduction
+                    ).first()
+                    
+                    if existing_discount:
+                        logger.info(f"✅ TeoCoin discount already applied: {abs(existing_discount.amount)} TEO")
+                    else:
+                        # Deduct TEO after successful payment
+                        success = db_teo_service.deduct_balance(
+                            user=user,
+                            amount=discount_amount,  # discount_amount = TEO to deduct
+                            transaction_type='discount',
+                            description=f'TeoCoin discount for course: {course.title} (after payment)',
+                            course_id=str(course_id)
+                        )
+                        
+                        if success:
+                            logger.info(f"✅ TeoCoin deducted after payment: {discount_amount} TEO")
+                        else:
+                            logger.error(f"❌ Failed to deduct TeoCoin after payment: {discount_amount} TEO")
+                            # Note: Don't fail the enrollment, payment already succeeded
+                            
+                except Exception as e:
+                    logger.error(f"❌ TeoCoin deduction error after payment: {e}")
+                    # Note: Don't fail the enrollment, payment already succeeded
+            
             # Process teacher notification for discount decision
             teacher_notification_sent = False
             if use_teocoin_discount and discount_request_id and process_discount:

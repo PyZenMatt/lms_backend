@@ -80,90 +80,34 @@ class ApplyDiscountView(APIView):
     permission_classes = [IsAuthenticated]
     
     def post(self, request):
-        """Apply TeoCoin discount"""
+        """
+        DEPRECATED: Apply TeoCoin discount
+        
+        This endpoint is now deprecated to prevent premature TeoCoin deduction.
+        TeoCoin is now deducted automatically in ConfirmPaymentView after Stripe payment succeeds.
+        """
         try:
-            # Log incoming request data
-            logger.info(f"ApplyDiscountView received data: {request.data}")
+            logger.warning(f"🚨 DEPRECATED: ApplyDiscountView called by user {request.user.id}")
+            logger.warning("🚨 This endpoint should not be called directly by frontend")
+            logger.warning("🚨 TeoCoin deduction now happens after payment confirmation")
             
-            course_id = request.data.get('course_id')
-            teo_amount = Decimal(str(request.data.get('teo_amount', '0')))
-            discount_percentage = Decimal(str(request.data.get('discount_percentage', '0')))
-            
-            logger.info(f"Parsed values - course_id: {course_id}, teo_amount: {teo_amount}, discount_percentage: {discount_percentage}")
-            
-            if not course_id or teo_amount <= 0:
-                error_msg = f'Course ID and TeoCoin amount required. Received course_id: {course_id}, teo_amount: {teo_amount}'
-                logger.error(error_msg)
-                return Response({
-                    'success': False,
-                    'error': error_msg
-                }, status=status.HTTP_400_BAD_REQUEST)
-            
-            # Check if discount was already applied for this course
-            db_service = DBTeoCoinService()
-            
-            # Check for existing discount transaction for this course
-            from blockchain.models import DBTeoCoinTransaction
-            existing_discount = DBTeoCoinTransaction.objects.filter(
-                user=request.user,
-                course_id=str(course_id),
-                transaction_type='discount',
-                amount__lt=0  # Negative amount = deduction
-            ).first()
-            
-            if existing_discount:
-                logger.info(f"Discount already applied for course {course_id} by user {request.user.id}")
-                # Return success without double deduction
-                balance = db_service.get_user_balance(request.user)
-                return Response({
-                    'success': True,
-                    'message': 'Discount already applied for this course',
-                    'teo_used': float(abs(existing_discount.amount)),
-                    'new_balance': float(balance['available_balance']),
-                    'discount_percentage': float(discount_percentage),
-                    'already_applied': True
-                })
-            
-            # Check user balance
-            balance = db_service.get_user_balance(request.user)
-            if balance['available_balance'] < teo_amount:
-                return Response({
-                    'success': False,
-                    'error': f'Insufficient balance. Available: {balance["available_balance"]} TEO, Required: {teo_amount} TEO'
-                }, status=status.HTTP_400_BAD_REQUEST)
-            
-            # Deduct TeoCoin for discount (only if not already done)
-            success = db_service.deduct_balance(
-                user=request.user,
-                amount=teo_amount,
-                transaction_type='discount',
-                description=f'Discount applied for course {course_id}',
-                course_id=course_id
-            )
-            
-            if not success:
-                return Response({
-                    'success': False,
-                    'error': 'Failed to apply discount'
-                }, status=status.HTTP_400_BAD_REQUEST)
-            
-            # Get updated balance
-            new_balance_data = db_service.get_user_balance(request.user)
-            
-            return Response({
-                'success': True,
-                'message': 'Discount applied successfully',
-                'teo_used': float(teo_amount),
-                'new_balance': float(new_balance_data['available_balance']),
-                'discount_percentage': float(discount_percentage)
-            })
-            
-        except Exception as e:
-            logger.error(f"Error applying TeoCoin discount: {e}")
+            # Return error to prevent frontend from using this endpoint
             return Response({
                 'success': False,
-                'error': 'Failed to apply discount'
-            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+                'error': 'This endpoint is deprecated. TeoCoin discount is now applied automatically after payment confirmation.',
+                'code': 'ENDPOINT_DEPRECATED',
+                'message': 'Please use the payment flow instead. TeoCoin will be deducted only after successful payment.',
+                'migration_note': 'Frontend should not call this endpoint directly'
+            }, status=status.HTTP_410_GONE)  # 410 = Gone (deprecated)
+            
+        except Exception as e:
+            logger.error(f"Error in deprecated ApplyDiscountView: {str(e)}")
+            return Response({
+                'success': False,
+                'error': 'Endpoint deprecated - use payment flow instead'
+            }, status=status.HTTP_410_GONE)
+                'discount_percentage': float(discount_percentage)
+            })
 
 
 class PurchaseCourseView(APIView):
