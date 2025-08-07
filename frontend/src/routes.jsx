@@ -123,6 +123,10 @@ const routes = [
       },
       // Teacher action routes
       {
+        path: '/teacher/absorptions',
+        element: lazy(() => import('./components/teacher/TeacherAbsorptionDashboard.jsx'))
+      },
+      {
         path: '/teacher/corsi/:courseId/edit',
         element: lazy(() => import('./views/courses/TeacherCourseDetail.jsx'))
       },

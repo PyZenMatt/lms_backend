@@ -82,14 +82,21 @@ class ApplyDiscountView(APIView):
     def post(self, request):
         """Apply TeoCoin discount"""
         try:
+            # Log incoming request data
+            logger.info(f"ApplyDiscountView received data: {request.data}")
+            
             course_id = request.data.get('course_id')
             teo_amount = Decimal(str(request.data.get('teo_amount', '0')))
             discount_percentage = Decimal(str(request.data.get('discount_percentage', '0')))
             
+            logger.info(f"Parsed values - course_id: {course_id}, teo_amount: {teo_amount}, discount_percentage: {discount_percentage}")
+            
             if not course_id or teo_amount <= 0:
+                error_msg = f'Course ID and TeoCoin amount required. Received course_id: {course_id}, teo_amount: {teo_amount}'
+                logger.error(error_msg)
                 return Response({
                     'success': False,
-                    'error': 'Course ID and TeoCoin amount required'
+                    'error': error_msg
                 }, status=status.HTTP_400_BAD_REQUEST)
             
             # Check user balance
@@ -152,7 +159,8 @@ class PurchaseCourseView(APIView):
                 }, status=status.HTTP_400_BAD_REQUEST)
             
             # Check user balance
-            balance = hybrid_teocoin_service.get_user_balance(request.user)
+            db_service = DBTeoCoinService()
+            balance = db_service.get_user_balance(request.user)
             if balance['available_balance'] < teo_amount:
                 return Response({
                     'success': False,
@@ -160,24 +168,25 @@ class PurchaseCourseView(APIView):
                 }, status=status.HTTP_400_BAD_REQUEST)
             
             # Deduct TeoCoin for course purchase
-            result = hybrid_teocoin_service.debit_user(
+            success = db_service.deduct_balance(
                 user=request.user,
                 amount=teo_amount,
-                reason=f'Course purchase: {course_id}',
+                transaction_type='purchase',
+                description=f'Course purchase: {course_id}',
                 course_id=course_id
             )
             
-            if not result['success']:
+            if not success:
                 return Response({
                     'success': False,
-                    'error': result.get('error', 'Failed to purchase course')
+                    'error': 'Failed to purchase course'
                 }, status=status.HTTP_400_BAD_REQUEST)
             
             # TODO: Integrate with course enrollment system
             # This should enroll the user in the course
             
             # Get updated balance
-            new_balance_data = hybrid_teocoin_service.get_user_balance(request.user)
+            new_balance_data = db_service.get_user_balance(request.user)
             
             return Response({
                 'success': True,
@@ -325,9 +334,9 @@ class WithdrawalStatusView(APIView):
                 'withdrawal': {
                     'id': withdrawal.pk,
                     'amount': str(withdrawal.amount),
-                    'wallet_address': withdrawal.wallet_address,
+                    'metamask_address': withdrawal.metamask_address,
                     'status': withdrawal.status,
-                    'blockchain_tx_hash': withdrawal.blockchain_tx_hash,
+                    'transaction_hash': withdrawal.transaction_hash,
                     'created_at': withdrawal.created_at.isoformat(),
                     'completed_at': withdrawal.completed_at.isoformat() if withdrawal.completed_at else None,
                     'error_message': withdrawal.error_message

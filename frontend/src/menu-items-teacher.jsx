@@ -140,6 +140,13 @@ const teacherMenuItems = {
           type: 'item',
           icon: 'feather icon-gift',
           url: '/teacher/rewards'
+        },
+        {
+          id: 'teocoin-absorptions',
+          title: 'Richieste Sconto TEO',
+          type: 'item',
+          icon: 'feather icon-dollar-sign',
+          url: '/teacher/absorptions'
         }
       ]
     },
