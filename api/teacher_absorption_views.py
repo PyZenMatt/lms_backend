@@ -99,10 +99,7 @@ class TeacherMakeAbsorptionChoiceView(APIView):
     
     def post(self, request):
         """
-        SIMPLIFIED ENDPOINT - Returns success without complex processing
-        
-        This endpoint has been simplified to avoid production errors.
-        Frontend now uses the notifications system for teacher interactions.
+        Process teacher choice for discount absorption and credit TeoCoin
         """
         try:
             # Basic teacher check
@@ -117,14 +114,65 @@ class TeacherMakeAbsorptionChoiceView(APIView):
                     'error': 'Only teachers can make absorption choices'
                 }, status=status.HTTP_403_FORBIDDEN)
             
-            # Get basic request data
+            # Get request data
             absorption_id = request.data.get('absorption_id')
             choice = request.data.get('choice', 'absorb')
+            amount = request.data.get('amount', 10.0)  # TEO amount to credit
+            transaction_type = request.data.get('transaction_type', 'discount_absorption')
+            description = request.data.get('description', 'TeoCoin discount absorption')
             
             # Log the choice for tracking
             logger.info(f"Teacher {request.user.id} made choice '{choice}' for absorption {absorption_id}")
             
-            # Return success without complex processing to avoid errors
+            # If teacher chooses TEO, credit them
+            if choice == 'absorb' or choice == 'teo':
+                try:
+                    from services.db_teocoin_service import DBTeoCoinService
+                    from decimal import Decimal
+                    db_service = DBTeoCoinService()
+                    
+                    success = db_service.add_balance(
+                        user=request.user,
+                        amount=Decimal(str(amount)),
+                        transaction_type=transaction_type,
+                        description=description
+                    )
+                    
+                    if success:
+                        logger.info(f"✅ Credited {amount} TEO to teacher {request.user.id}")
+                        
+                        return Response({
+                            'success': True,
+                            'absorption': {
+                                'id': absorption_id,
+                                'status': 'processed',
+                                'choice_made': choice,
+                                'final_teacher_eur': 0,
+                                'final_teacher_teo': float(amount),
+                                'final_platform_eur': 0,
+                                'decided_at': None
+                            },
+                            'teo_credited': float(amount),
+                            'message': f'TEO credited successfully: {amount} TEO',
+                            'note': 'TeoCoin credited to your account'
+                        })
+                    else:
+                        logger.error(f"❌ Failed to credit {amount} TEO to teacher {request.user.id}")
+                        return Response({
+                            'success': False,
+                            'error': 'Failed to credit TeoCoin',
+                            'message': 'TeoCoin crediting failed'
+                        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+                        
+                except Exception as credit_error:
+                    logger.error(f"Error crediting TeoCoin: {credit_error}")
+                    return Response({
+                        'success': False,
+                        'error': f'TeoCoin crediting error: {str(credit_error)}',
+                        'message': 'Failed to process TeoCoin credit'
+                    }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            
+            # EUR choice - no TeoCoin crediting
             return Response({
                 'success': True,
                 'absorption': {
@@ -132,22 +180,22 @@ class TeacherMakeAbsorptionChoiceView(APIView):
                     'status': 'processed',
                     'choice_made': choice,
                     'final_teacher_eur': 0,
-                    'final_teacher_teo': 10.0 if choice == 'absorb' else 0,
+                    'final_teacher_teo': 0,
                     'final_platform_eur': 0,
                     'decided_at': None
                 },
-                'message': f'Choice recorded: {"TEO option selected" if choice == "absorb" else "EUR option selected"}',
-                'note': 'Simplified processing - full implementation via notifications system'
+                'message': f'Choice recorded: {"EUR option selected" if choice == "eur" else "Choice processed"}',
+                'note': 'No TeoCoin credited for EUR choice'
             })
             
         except Exception as e:
-            logger.error(f"Error in simplified teacher choice endpoint: {str(e)}")
-            # Always return success to avoid frontend errors
+            logger.error(f"Error in teacher choice endpoint: {str(e)}")
+            # Return error instead of always success
             return Response({
-                'success': True,
-                'message': 'Choice recorded successfully',
-                'error_note': 'Fallback response due to processing error'
-            }, status=status.HTTP_200_OK)
+                'success': False,
+                'error': f'Processing error: {str(e)}',
+                'message': 'Failed to process choice'
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 class TeacherAbsorptionHistoryView(APIView):

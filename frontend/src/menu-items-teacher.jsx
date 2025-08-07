@@ -135,15 +135,8 @@ const teacherMenuItems = {
           url: '/teacher/nft-certificates'
         },
         {
-          id: 'teocoin-rewards',
-          title: 'Sistema Ricompense',
-          type: 'item',
-          icon: 'feather icon-gift',
-          url: '/teacher/rewards'
-        },
-        {
           id: 'teocoin-absorptions',
-          title: 'Richieste Sconto TEO',
+          title: 'Gestione TEO',
           type: 'item',
           icon: 'feather icon-dollar-sign',
           url: '/teacher/absorptions'
