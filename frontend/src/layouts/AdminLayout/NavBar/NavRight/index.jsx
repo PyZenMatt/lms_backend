@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 import PerfectScrollbar from 'react-perfect-scrollbar';
 
 import ChatList from './ChatList';
-import TeacherDiscountNotification from '../../../../components/teacher/TeacherDiscountNotification';
+import TeacherDiscountNotification from '../../../../components/teacher/UnifiedTeacherNotifications';
 import { useAuth } from '../../../../contexts/AuthContext';
 import ThemeToggle from '../../../../components/ui/ThemeToggle';
 
