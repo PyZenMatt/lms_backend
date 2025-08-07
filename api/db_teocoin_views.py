@@ -106,7 +106,6 @@ class ApplyDiscountView(APIView):
                 'success': False,
                 'error': 'Endpoint deprecated - use payment flow instead'
             }, status=status.HTTP_410_GONE)
-            })
 
 
 class PurchaseCourseView(APIView):
