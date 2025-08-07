@@ -109,22 +109,42 @@ const UnifiedTeacherDashboard = () => {
 
   const handleDiscountChoice = async (notification, choice) => {
     const notificationId = notification.id;
-    
+    const parsed = notification.parsed || {};
     try {
       setProcessing((prev) => ({ ...prev, [notificationId]: true }));
-      
-      // Mark the notification as read (no more API calls to broken endpoints)
-      await markAsRead(notificationId);
-      
-      // Show appropriate message based on choice
-      const message = choice === 'teo' 
-        ? '✅ Hai scelto di ricevere TEO per questo sconto' 
-        : '💰 Hai scelto di mantenere la commissione in EUR';
-      
-      if (window.showToast) {
-        window.showToast(message, 'success');
+      if (choice === 'teo') {
+        // Accredita TeoCoin tramite endpoint
+        const courseTitle = parsed.course_title || 'Unknown Course';
+        const teoAmount = parsed.teo_amount || 10.0;
+        const creditResponse = await axiosClient.post('/api/v1/teocoin/teacher/choice/', {
+          absorption_id: notificationId,
+          choice: 'teo',
+          amount: teoAmount,
+          transaction_type: 'discount_absorption',
+          description: `Discount absorption for course: ${courseTitle}`
+        });
+        if (creditResponse.data.success) {
+          if (window.showToast) {
+            window.showToast(`✅ Hai ricevuto ${teoAmount} TEO per l'assorbimento sconto!`, 'success');
+          }
+        } else {
+          throw new Error(creditResponse.data.error || 'Failed to credit TeoCoin');
+        }
+      } else {
+        // EUR choice - call endpoint without crediting
+        await axiosClient.post('/api/v1/teocoin/teacher/choice/', {
+          absorption_id: notificationId,
+          choice: 'eur',
+          amount: 0,
+          transaction_type: 'discount_declined',
+          description: 'Teacher chose EUR commission over TEO'
+        });
+        if (window.showToast) {
+          window.showToast('💰 Hai scelto di mantenere la commissione in EUR', 'success');
+        }
       }
-      
+      // Mark notification as read
+      await markAsRead(notificationId);
     } catch (err) {
       console.error('Error handling discount choice:', err);
       if (window.showToast) {
