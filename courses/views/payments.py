@@ -124,18 +124,8 @@ class CreatePaymentIntentView(APIView):
                             'code': 'TEO_DEDUCTION_FAILED'
                         }, status=status.HTTP_400_BAD_REQUEST)
                     
-                    # Create Teacher Discount Absorption Opportunity
-                    absorption = TeacherDiscountAbsorptionService.create_absorption_opportunity(
-                        student=user,
-                        teacher=course.teacher,
-                        course=course,
-                        discount_data={
-                            'discount_percentage': discount_percent,
-                            'teo_used': float(teo_cost),
-                            'discount_amount_eur': float(discount_value_eur),
-                            'course_price_eur': float(original_price)
-                        }
-                    )
+                    # Note: Teacher Discount Absorption Opportunity will be created 
+                    # during enrollment process to avoid duplication
                     
                     # Student gets guaranteed discount immediately
                     discount_amount = discount_value_eur
@@ -143,7 +133,7 @@ class CreatePaymentIntentView(APIView):
                     
                     logger.info(f"✅ TeoCoin discount applied: {discount_percent}% off €{original_price}")
                     logger.info(f"💰 {teo_cost} TEO deducted from student, pays €{final_price}")
-                    logger.info(f"📋 Teacher absorption opportunity created: ID {absorption.pk}")
+                    logger.info(f"📋 Teacher absorption opportunity will be created during enrollment")
                     
                     # Teacher will be notified through the absorption dashboard
                         

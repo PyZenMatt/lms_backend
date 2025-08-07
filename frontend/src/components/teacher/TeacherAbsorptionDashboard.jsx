@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Container, Row, Col, Card, Tab, Tabs, Button, Badge, Alert, Spinner } from 'react-bootstrap';
 import axiosClient from '../../services/core/axiosClient';
 
@@ -8,33 +8,84 @@ const TeacherAbsorptionDashboard = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  const fetchPendingAbsorptions = async () => {
+  // Parse notification message to extract absorption data
+  const parseNotificationData = useCallback((message) => {
+    try {
+      // Extract data from notification message using regex
+      const studentMatch = message.match(/Student ([^\s]+)/);
+      const discountMatch = message.match(/(\d+)% discount/);
+      const courseMatch = message.match(/on '([^']+)'/);
+      const teoMatch = message.match(/Accept TEO: ([\d.]+) TEO/);
+      const bonusMatch = message.match(/\+ ([\d.]+) bonus/);
+      const hoursMatch = message.match(/within (\d+) hours/);
+      
+      return {
+        student: studentMatch ? studentMatch[1] : 'Unknown',
+        discount_percent: discountMatch ? parseInt(discountMatch[1]) : 0,
+        course_title: courseMatch ? courseMatch[1] : 'Unknown Course',
+        teo_amount: teoMatch ? parseFloat(teoMatch[1]) : 0,
+        bonus_amount: bonusMatch ? parseFloat(bonusMatch[1]) : 0,
+        hours_remaining: hoursMatch ? parseInt(hoursMatch[1]) : 0
+      };
+    } catch (error) {
+      console.error('Error parsing notification data:', error);
+      return {};
+    }
+  }, []);
+
+  // Fetch notifications instead of direct absorption API
+  const fetchNotifications = useCallback(async () => {
     try {
       setLoading(true);
-      const response = await axiosClient.get('/teocoin/teacher/absorptions/');
+      const response = await axiosClient.get('/notifications/');
       
-      if (response.data && response.data.success) {
-        setPendingAbsorptions(response.data.pending_absorptions || []);
+      if (response.data && Array.isArray(response.data)) {
+        // Filter for TeoCoin discount notifications
+        const discountNotifications = response.data.filter(
+          (notification) => notification.notification_type === 'teocoin_discount_pending' && !notification.read
+        );
+        
+        // Convert notifications to absorption format for backward compatibility
+        const absorptions = discountNotifications.map((notification) => ({
+          id: notification.related_object_id || notification.id,
+          notification_id: notification.id,
+          message: notification.message,
+          created_at: notification.created_at,
+          // Parse absorption data from notification message
+          ...parseNotificationData(notification.message)
+        }));
+        
+        setPendingAbsorptions(absorptions);
         setError(null);
       } else {
-        setError('Errore nel caricamento delle richieste');
+        setError('Errore nel caricamento delle notifiche');
       }
     } catch (err) {
+      console.error('Error fetching notifications:', err);
       setError('Errore di connessione');
       setPendingAbsorptions([]);
     } finally {
       setLoading(false);
     }
-  };
+  }, [parseNotificationData]);
+
+  const fetchPendingAbsorptions = fetchNotifications; // Alias for backward compatibility
 
   useEffect(() => {
     if (activeTab === 'pending') {
-      fetchPendingAbsorptions();
+      fetchNotifications();
     }
-  }, [activeTab]);
+  }, [activeTab, fetchNotifications]);
 
   const handleChoice = async (absorptionId, choice) => {
     try {
+      // Find the absorption/notification
+      const absorption = pendingAbsorptions.find((a) => a.id === absorptionId);
+      if (!absorption) {
+        setError('Richiesta non trovata');
+        return;
+      }
+
       // Map frontend choice to API expected values
       const apiChoice = choice === 'A' ? 'refuse' : 'absorb'; // A = EUR (refuse discount), B = TEO (absorb discount)
       
@@ -44,6 +95,15 @@ const TeacherAbsorptionDashboard = () => {
       });
 
       if (response.data && response.data.success) {
+        // Mark the related notification as read
+        if (absorption.notification_id) {
+          try {
+            await axiosClient.post(`/notifications/${absorption.notification_id}/read/`);
+          } catch (notifErr) {
+            console.warn('Could not mark notification as read:', notifErr);
+          }
+        }
+        
         await fetchPendingAbsorptions();
         setError(null);
       } else {
