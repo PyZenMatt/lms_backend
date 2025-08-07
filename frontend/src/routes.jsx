@@ -158,6 +158,23 @@ const routes = [
         path: '/teacher/esercizi/:exerciseId/preview',
         element: lazy(() => import('./views/courses/TeacherExerciseDetail.jsx'))
       },
+      // Profile routes
+      {
+        path: '/profile/notifications',
+        element: lazy(() => import('./views/profile/NotificationListNew.jsx'))
+      },
+      {
+        path: '/profile/settings',
+        element: lazy(() => import('./views/profile/ProfileSettings.jsx'))
+      },
+      {
+        path: '/profile/progress',
+        element: lazy(() => import('./views/profile/ProfileProgress.jsx'))
+      },
+      {
+        path: '/profile',
+        element: lazy(() => import('./views/profile/ProfileSettings.jsx'))
+      },
       // Admin routes
       {
         path: '/admin',

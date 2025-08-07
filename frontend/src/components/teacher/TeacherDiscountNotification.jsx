@@ -43,7 +43,7 @@ const TeacherDiscountNotification = () => {
     try {
       setProcessing(prev => ({ ...prev, [absorptionId]: true }));
       
-      const response = await axiosClient.post('/teocoin/teacher/choice/', {
+      const response = await axiosClient.post('/api/v1/teocoin/teacher/choice/', {
         absorption_id: absorptionId,
         choice: choice
       });
