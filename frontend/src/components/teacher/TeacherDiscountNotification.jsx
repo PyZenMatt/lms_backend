@@ -40,15 +40,31 @@ const TeacherDiscountNotification = () => {
   }, []);
 
   const handleChoice = async (absorptionId, choice) => {
+    console.log('🎯 Navbar teacher choice clicked:', {
+      absorptionId,
+      choice
+    });
+    
     try {
       setProcessing(prev => ({ ...prev, [absorptionId]: true }));
+      
+      console.log('📤 Calling navbar teacher choice endpoint:', {
+        endpoint: '/api/v1/teocoin/teacher/choice/',
+        data: {
+          absorption_id: absorptionId,
+          choice: choice
+        }
+      });
       
       const response = await axiosClient.post('/api/v1/teocoin/teacher/choice/', {
         absorption_id: absorptionId,
         choice: choice
       });
 
+      console.log('📥 Navbar teacher choice response:', response.data);
+
       if (response.data.success) {
+        console.log('✅ Navbar teacher choice successful');
         // Rimuovi dalla lista locale
         setPendingAbsorptions(prev => 
           prev.filter(absorption => absorption.id !== absorptionId)
@@ -64,10 +80,16 @@ const TeacherDiscountNotification = () => {
           );
         }
       } else {
+        console.error('❌ Navbar teacher choice failed:', response.data);
         throw new Error(response.data.error || 'Errore nella scelta');
       }
     } catch (err) {
-      console.error('Errore nella scelta:', err);
+      console.error('❌ Errore nella scelta navbar:', err);
+      console.error('❌ Navbar error details:', {
+        message: err.message,
+        response: err.response?.data,
+        status: err.response?.status
+      });
       if (window.showToast) {
         window.showToast('❌ Errore nella scelta: ' + err.message, 'error');
       }

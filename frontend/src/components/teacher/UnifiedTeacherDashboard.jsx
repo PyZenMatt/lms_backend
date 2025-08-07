@@ -110,12 +110,33 @@ const UnifiedTeacherDashboard = () => {
   const handleDiscountChoice = async (notification, choice) => {
     const notificationId = notification.id;
     const parsed = notification.parsed || {};
+    
+    console.log('🎯 Teacher choice clicked:', {
+      choice,
+      notificationId,
+      parsed,
+      notification
+    });
+    
     try {
       setProcessing((prev) => ({ ...prev, [notificationId]: true }));
+      
       if (choice === 'teo') {
         // Accredita TeoCoin tramite endpoint
         const courseTitle = parsed.course_title || 'Unknown Course';
         const teoAmount = parsed.teo_amount || 10.0;
+        
+        console.log('📤 Calling TEO credit endpoint:', {
+          endpoint: '/api/v1/teocoin/teacher/choice/',
+          data: {
+            absorption_id: notificationId,
+            choice: 'teo',
+            amount: teoAmount,
+            transaction_type: 'discount_absorption',
+            description: `Discount absorption for course: ${courseTitle}`
+          }
+        });
+        
         const creditResponse = await axiosClient.post('/api/v1/teocoin/teacher/choice/', {
           absorption_id: notificationId,
           choice: 'teo',
@@ -123,30 +144,59 @@ const UnifiedTeacherDashboard = () => {
           transaction_type: 'discount_absorption',
           description: `Discount absorption for course: ${courseTitle}`
         });
+        
+        console.log('📥 TEO credit response:', creditResponse.data);
+        
         if (creditResponse.data.success) {
+          console.log('✅ TEO credit successful');
           if (window.showToast) {
             window.showToast(`✅ Hai ricevuto ${teoAmount} TEO per l'assorbimento sconto!`, 'success');
           }
         } else {
+          console.error('❌ TEO credit failed:', creditResponse.data);
           throw new Error(creditResponse.data.error || 'Failed to credit TeoCoin');
         }
       } else {
         // EUR choice - call endpoint without crediting
-        await axiosClient.post('/api/v1/teocoin/teacher/choice/', {
+        console.log('📤 Calling EUR choice endpoint:', {
+          endpoint: '/api/v1/teocoin/teacher/choice/',
+          data: {
+            absorption_id: notificationId,
+            choice: 'eur',
+            amount: 0,
+            transaction_type: 'discount_declined',
+            description: 'Teacher chose EUR commission over TEO'
+          }
+        });
+        
+        const eurResponse = await axiosClient.post('/api/v1/teocoin/teacher/choice/', {
           absorption_id: notificationId,
           choice: 'eur',
           amount: 0,
           transaction_type: 'discount_declined',
           description: 'Teacher chose EUR commission over TEO'
         });
+        
+        console.log('📥 EUR choice response:', eurResponse.data);
+        
         if (window.showToast) {
           window.showToast('💰 Hai scelto di mantenere la commissione in EUR', 'success');
         }
       }
+      
       // Mark notification as read
+      console.log('📝 Marking notification as read:', notificationId);
       await markAsRead(notificationId);
+      
+      console.log('✅ Discount choice completed successfully');
+      
     } catch (err) {
-      console.error('Error handling discount choice:', err);
+      console.error('❌ Error handling discount choice:', err);
+      console.error('❌ Error details:', {
+        message: err.message,
+        response: err.response?.data,
+        status: err.response?.status
+      });
       if (window.showToast) {
         window.showToast('❌ Errore nella scelta: ' + err.message, 'error');
       }

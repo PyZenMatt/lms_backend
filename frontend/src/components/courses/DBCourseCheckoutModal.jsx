@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Modal, Button, Alert, Spinner, Nav, Tab, Card, Badge } from 'react-bootstrap';
 import { useAuth } from '../../contexts/AuthContext';
-import { getTeoCoinBalance, applyTeoCoinDiscount } from '../../services/api/teocoin';
+import { getTeoCoinBalance } from '../../services/api/teocoin';
 import api from '../../services/core/axiosClient';
 import { loadStripe } from '@stripe/stripe-js';
 import {
@@ -156,34 +156,27 @@ const DBCourseCheckoutModal = ({ course, show, handleClose, onPurchaseComplete }
     setError('');
     
     try {
-      const data = await applyTeoCoinDiscount(course.id, teoNeeded, selectedDiscount);
-      console.log('📨 DB Discount response:', data);
+      console.log('✅ DB TeoCoin discount will be applied after payment confirmation');
       
-      if (data.success) {
-        console.log('✅ DB TeoCoin discount applied successfully!');
-        
-        // Update local balance
-        setDbBalance(parseFloat(data.new_balance || 0));
-        
-        // Store discount info and switch to Stripe payment
-        const discountInfo = {
-          teo_used: teoNeeded,
-          discount_amount_eur: discountAmount,
-          discount_percentage: selectedDiscount,
-          final_price: finalPrice,
-          transaction_id: data.transaction_id
-        };
-        
-        setPaymentResult({ type: 'discount_applied', discountInfo });
-        setDiscountApplied(true);
-        setActiveTab('fiat');
-        
-      } else {
-        setError(data.error || 'Errore durante l\'applicazione dello sconto TeoCoin');
-      }
+      // Store discount info and switch to Stripe payment
+      // TeoCoin will be deducted after successful Stripe payment
+      const discountInfo = {
+        teo_used: teoNeeded,
+        discount_amount_eur: discountAmount,
+        discount_percentage: selectedDiscount,
+        final_price: finalPrice,
+        // transaction_id will be created after payment
+      };
+      
+      setPaymentResult({ type: 'discount_applied', discountInfo });
+      setDiscountApplied(true);
+      setActiveTab('fiat');
+      
+      console.log('💳 Switched to card payment with TeoCoin discount info:', discountInfo);
+      
     } catch (error) {
-      console.error('❌ DB TeoCoin discount error:', error);
-      setError('Errore di connessione durante l\'applicazione dello sconto');
+      console.error('❌ DB TeoCoin discount preparation error:', error);
+      setError('Errore durante la preparazione dello sconto TeoCoin');
     } finally {
       setLoading(false);
     }
