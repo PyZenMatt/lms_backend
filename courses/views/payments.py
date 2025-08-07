@@ -109,31 +109,17 @@ class CreatePaymentIntentView(APIView):
                             'available_teo': float(available_teo)
                         }, status=status.HTTP_400_BAD_REQUEST)
                     
-                    # Deduct TEO from student's account immediately
-                    success = db_teo_service.deduct_balance(
-                        user=user,
-                        amount=teo_cost,
-                        transaction_type='discount',
-                        description=f'TeoCoin discount for course: {course.title}',
-                        course_id=str(course_id)
-                    )
+                    # NOTE: Do NOT deduct TEO here - will be deducted by ApplyDiscountView
+                    # This prevents double deduction when frontend calls both endpoints
+                    logger.info(f"✅ TEO balance check passed: {available_teo} TEO available for {teo_cost} TEO cost")
                     
-                    if not success:
-                        return Response({
-                            'error': 'Failed to deduct TeoCoin from your account',
-                            'code': 'TEO_DEDUCTION_FAILED'
-                        }, status=status.HTTP_400_BAD_REQUEST)
-                    
-                    # Note: Teacher Discount Absorption Opportunity will be created 
-                    # during enrollment process to avoid duplication
-                    
-                    # Student gets guaranteed discount immediately
+                    # Student gets guaranteed discount (TEO will be deducted separately)
                     discount_amount = discount_value_eur
                     final_price = original_price - discount_amount
                     
-                    logger.info(f"✅ TeoCoin discount applied: {discount_percent}% off €{original_price}")
-                    logger.info(f"💰 {teo_cost} TEO deducted from student, pays €{final_price}")
-                    logger.info(f"📋 Teacher absorption opportunity will be created during enrollment")
+                    logger.info(f"✅ TeoCoin discount calculated: {discount_percent}% off €{original_price}")
+                    logger.info(f"💰 Student will pay €{final_price} (TEO deduction handled separately)")
+                    logger.info(f"📋 TEO will be deducted by ApplyDiscountView to prevent double deduction")
                     
                     # Teacher will be notified through the absorption dashboard
                         
