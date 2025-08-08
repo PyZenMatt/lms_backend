@@ -5,7 +5,7 @@ import { Link } from 'react-router-dom';
 import PerfectScrollbar from 'react-perfect-scrollbar';
 
 import ChatList from './ChatList';
-import TeacherDiscountNotification from '../../../../components/teacher/UnifiedTeacherNotifications';
+import TeacherDiscountNotification from '../../../../components/teacher/TeacherDiscountNotification';
 import { useAuth } from '../../../../contexts/AuthContext';
 import ThemeToggle from '../../../../components/ui/ThemeToggle';
 
@@ -52,11 +52,12 @@ const NavRight = () => {
             <TeacherDiscountNotification />
           </ListGroup.Item>
         )}
+        
         {/* Theme Toggle */}
         <ListGroup.Item as="li" bsPrefix=" ">
           <ThemeToggle size="sm" />
         </ListGroup.Item>
-        {/* Notification Button */}
+        
         <ListGroup.Item as="li" bsPrefix=" ">
           <button
             type="button"
@@ -66,7 +67,51 @@ const NavRight = () => {
           >
             <span className="pcoded-micon"><i className="feather icon-bell"></i></span>
             <span className="pcoded-mtext">Notifiche</span>
-          </button>
+            <ListGroup.Item as="li" bsPrefix=" ">
+              <button
+                type="button"
+                className="nav-link btn btn-link"
+                onClick={() => navigate('/profile/notifications')}
+                style={{ padding: 0 }}
+              >
+                <span className="pcoded-micon"><i className="feather icon-bell"></i></span>
+                <span className="pcoded-mtext">Notifiche</span>
+              </button>
+            </ListGroup.Item>
+            <Dropdown.Toggle as={Link} variant="link" to="#" id="dropdown-basic">
+              <i className="icon feather icon-settings" />
+            </Dropdown.Toggle>
+            <Dropdown.Menu align="end" className="profile-notification">
+              <div className="pro-head">
+                <img src={avatar1} className="img-radius" alt="User Profile" />
+                <span>John Doe</span>
+                <Link to="#" className="dud-logout" title="Logout" onClick={e => { e.preventDefault(); logout(); }}>
+                  <i className="feather icon-log-out" />
+                </Link>
+              </div>
+              <ListGroup as="ul" bsPrefix=" " variant="flush" className="pro-body">
+                <ListGroup.Item as="li" bsPrefix=" ">
+                  <Link to="#" className="dropdown-item">
+                    <i className="feather icon-settings" /> Settings
+                  </Link>
+                </ListGroup.Item>
+                <ListGroup.Item as="li" bsPrefix=" ">
+                  <Link to="#" className="dropdown-item">
+                    <i className="feather icon-user" /> Profile
+                  </Link>
+                </ListGroup.Item>
+                <ListGroup.Item as="li" bsPrefix=" ">
+                  <Link to="#" className="dropdown-item">
+                    <i className="feather icon-mail" /> My Messages
+                  </Link>
+                </ListGroup.Item>
+                <ListGroup.Item as="li" bsPrefix=" ">
+                  <Link to="#" className="dropdown-item">
+                    <i className="feather icon-lock" /> Lock Screen
+                  </Link>
+                </ListGroup.Item>
+              </ListGroup>
+            </Dropdown.Menu>
         </ListGroup.Item>
       </ListGroup>
       <ChatList listOpen={listOpen} closed={() => setListOpen(false)} />
