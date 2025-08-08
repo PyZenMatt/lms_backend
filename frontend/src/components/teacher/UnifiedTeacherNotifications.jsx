@@ -118,23 +118,41 @@ const UnifiedTeacherNotifications = () => {
         try {
           // Extract course info from notification
           const courseMatch = notification.message.match(/on '([^']+)'/);
-          const teoMatch = notification.message.match(/Accept TEO: ([\d.]+) TEO/);
-          
+          // Try to extract total TEO (used + bonus) if present
+          const totalRe = /=\s*([\d.,]+)\s*TEO\s*total/i;
+          const partsRe = /Accept\s+TEO:\s*([\d.,]+)\s*TEO\s*\+\s*([\d.,]+)\s*bonus/i;
+          let amountTotal = null;
+          const mt = notification.message.match(totalRe);
+          if (mt && mt[1]) amountTotal = parseFloat(mt[1].replace(',', '.'));
+          if ((!amountTotal || !isFinite(amountTotal)) && partsRe.test(notification.message)) {
+            const mp = notification.message.match(partsRe);
+            const used = parseFloat(mp[1].replace(',', '.'));
+            const bonus = parseFloat(mp[2].replace(',', '.'));
+            amountTotal = (isFinite(used) ? used : 0) + (isFinite(bonus) ? bonus : 0);
+          }
+          if ((!amountTotal || !isFinite(amountTotal)) && parsed) {
+            // Fallback: if parsed teos are available with bonus ratio 1.25
+            const used = parsed.teo_amount || 0;
+            amountTotal = used > 0 ? used * 1.25 : null;
+          }
+          if (!amountTotal || !isFinite(amountTotal) || amountTotal <= 0) {
+            throw new Error('Importo TEO non disponibile nella notifica');
+          }
+
           const courseTitle = courseMatch ? courseMatch[1] : 'Unknown Course';
-          const teoAmount = teoMatch ? parseFloat(teoMatch[1]) : parsed.teo_amount || 10.0;
           
           // Call the teacher absorption endpoint to credit TeoCoin
           const creditResponse = await axiosClient.post('/teocoin/teacher/choice/', {
             absorption_id: notificationId,
             choice: 'teo',
-            amount: teoAmount,
+            amount_total: amountTotal,
             transaction_type: 'discount_absorption',
-            description: `Discount absorption for course: ${courseTitle}`
+            description: `Discount absorption for course: ${courseTitle} - total ${amountTotal} TEO`
           });
           
           if (creditResponse.data.success) {
             if (window.showToast) {
-              window.showToast(`✅ Hai ricevuto ${teoAmount} TEO per l'assorbimento sconto!`, 'success');
+              window.showToast(`✅ Hai ricevuto ${amountTotal} TEO per l'assorbimento sconto!`, 'success');
             }
           } else {
             throw new Error(creditResponse.data.error || 'Failed to credit TeoCoin');
@@ -168,7 +186,7 @@ const UnifiedTeacherNotifications = () => {
       
       // Show appropriate message based on choice
       const message = choice === 'teo' 
-        ? `✅ Hai scelto di ricevere ${parsed.teo_amount || 10} TEO per questo sconto` 
+        ? `✅ Scelta TEO registrata` 
         : '💰 Hai scelto di mantenere la commissione in EUR';
       
       if (window.showToast && choice === 'eur') {
