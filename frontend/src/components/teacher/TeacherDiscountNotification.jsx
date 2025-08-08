@@ -172,7 +172,7 @@ const TeacherDiscountNotification = () => {
                 <div className="mb-3">
                   <div className="d-flex justify-content-between text-sm">
                     <span>Prezzo corso:</span>
-                    <span>€{absorption.course.price}</span>
+                    <span>€{absorption.course.price_eur}</span>
                   </div>
                   <div className="d-flex justify-content-between text-sm">
                     <span>Sconto richiesto:</span>

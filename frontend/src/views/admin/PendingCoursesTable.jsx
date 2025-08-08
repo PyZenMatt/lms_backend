@@ -85,7 +85,7 @@ const PendingCoursesTable = () => {
                   <Link to={`/admin/corsi/${c.id}`}>{c.title}</Link>
                 </td>
                 <td>{c.teacher?.username || '-'}</td>
-                <td>{c.price}</td>
+                <td>{c.price_eur}</td>
                 <td>
                   <Button
                     variant="success"

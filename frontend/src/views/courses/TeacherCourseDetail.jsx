@@ -101,7 +101,7 @@ const TeacherCourseDetail = () => {
                     <h5>Dettagli</h5>
                     <Row>
                       <Col md={6}>
-                        <p><strong>Prezzo:</strong> {course.price} TEO</p>
+                        <p><strong>Prezzo:</strong> {course.price_eur} EUR</p>
                         <p><strong>Categoria:</strong> {course.category || 'Non specificata'}</p>
                       </Col>
                       <Col md={6}>
@@ -143,7 +143,7 @@ const TeacherCourseDetail = () => {
                   <div className="stat-item mb-3">
                     <div className="d-flex justify-content-between">
                       <span>Prezzo:</span>
-                      <Badge bg="primary">{course.price} TEO</Badge>
+                      <Badge bg="primary">{course.price_eur} EUR</Badge>
                     </div>
                   </div>
                 </div>

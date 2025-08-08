@@ -160,144 +160,97 @@ class BlockchainRewardManager:
     @transaction.atomic
     def award_exercise_completion(cls, submission):
         """
-        🚨 FIX PRODUZIONE: Assegna premio usando SEMPRE il database TeoCoin service
+        🚨 SISTEMA SEMPLIFICATO: Reward fisso dal database (NO reward pool)
         """
         try:
-            # Verifica che non sia già stato premiato
-            existing_transaction = BlockchainTransaction.objects.filter(
+            from services.db_teocoin_service import DBTeoCoinService
+            db_service = DBTeoCoinService()
+            
+            # Verifica che non sia già stato premiato nel database TeoCoin
+            from blockchain.models import DBTeoCoinTransaction
+            existing_transaction = DBTeoCoinTransaction.objects.filter(
                 user=submission.student,
-                transaction_type='exercise_reward',
+                transaction_type='exercise_completion',
                 related_object_id=str(submission.id)
             ).first()
             
             if existing_transaction:
                 logger.info(f"Exercise {submission.id} già premiato per utente {submission.student.email}")
-                return existing_transaction
+                return True  # Considera successo
             
-            # Calcola il premio per questo esercizio specifico
-            course = submission.exercise.lesson.course
-            if not course:
-                logger.error(f"Corso non trovato per esercizio {submission.exercise.id}")
-                return None
-            
-            # Conta tutti gli esercizi del corso
-            total_exercises = 0
-            for lesson in course.lessons_in_course.all():
-                total_exercises += lesson.exercises.count()
-            
-            if total_exercises == 0:
-                logger.error(f"Nessun esercizio trovato per corso {course.id}")
-                return None
-            
-            # Distribuisce i reward tra tutti gli esercizi
-            exercise_rewards = BlockchainRewardCalculator.distribute_exercise_rewards(
-                course, total_exercises
-            )
-            
-            # Trova l'indice dell'esercizio corrente
-            exercise_index = 0
-            current_exercise_index = 0
-            for lesson in course.lessons_in_course.all():
-                for exercise in lesson.exercises.all():
-                    if exercise.id == submission.exercise.id:
-                        current_exercise_index = exercise_index
-                        break
-                    exercise_index += 1
-            
-            reward_amount = exercise_rewards[current_exercise_index]
-            
-            # 🚨 FIX CRITICO: USA SEMPRE DBTeoCoinService in production
-            from services.db_teocoin_service import DBTeoCoinService
-            db_service = DBTeoCoinService()
+            # REWARD FISSO: 2 TEO per ogni esercizio completato
+            reward_amount = Decimal('2.0')
             
             # Accredita TeoCoin nel database
             success = db_service.add_balance(
                 user=submission.student,
                 amount=reward_amount,
-                transaction_type='exercise_reward',
+                transaction_type='exercise_completion',
                 description=f"Exercise completion reward: {submission.exercise.title}",
-                course_id=str(course.id)
+                related_object_id=str(submission.id)
             )
             
             if success:
-                # Crea la transazione blockchain per tracking
-                blockchain_transaction = BlockchainTransaction.objects.create(
-                    user=submission.student,
-                    amount=reward_amount,
-                    transaction_type='exercise_reward',
-                    status='confirmed',  # Già confermata perché è nel DB
-                    related_object_id=str(submission.id),
-                    notes=f"Exercise reward for: {submission.exercise.title}",
-                    tx_hash=f"db_exercise_{submission.id}_{timezone.now().strftime('%Y%m%d_%H%M%S')}"
-                )
-                
-                # Aggiorna il reward_amount nella submission
-                submission.reward_amount = int(reward_amount * 1000)  # Supporta 3 decimali
-                submission.save()
-                
                 logger.info(
                     f"✅ Exercise reward awarded (DB): {reward_amount} TEO to {submission.student.email} "
                     f"for exercise {submission.exercise.title}"
                 )
-                
-                return blockchain_transaction
+                return True
             else:
                 logger.error(f"❌ Failed to credit exercise reward to {submission.student.email}")
-                return None
+                return False
             
         except Exception as e:
             logger.error(f"Error awarding exercise completion reward: {str(e)}")
-            raise
+            return False
     
     @classmethod
     @transaction.atomic
     def award_review_completion(cls, review):
         """
-        🚨 FIX PRODUZIONE: Assegna premio review usando SEMPRE il database TeoCoin service
+        🚨 SISTEMA SEMPLIFICATO: Reward fisso dal database per review (NO calcoli complessi)
         """
         try:
-            # Verifica che non sia già stato premiato
-            existing_transaction = BlockchainTransaction.objects.filter(
+            from services.db_teocoin_service import DBTeoCoinService
+            db_service = DBTeoCoinService()
+            
+            # Verifica che non sia già stato premiato nel database TeoCoin
+            from blockchain.models import DBTeoCoinTransaction
+            existing_transaction = DBTeoCoinTransaction.objects.filter(
                 user=review.reviewer,
-                transaction_type='review_reward',
+                transaction_type='review_completion',
                 related_object_id=str(review.id)
             ).first()
             
             if existing_transaction:
                 logger.info(f"Review {review.id} già premiata per reviewer {review.reviewer.email}")
-                return existing_transaction
+                return True  # Considera successo
             
-            # Ottiene il premio dell'esercizio originale
-            submission = review.submission
-            if not submission.reward_amount:
-                logger.error(f"Submission {submission.id} non ha reward_amount impostato")
-                return None
-            
-            # Calcola il 5% del premio dell'esercizio
-            exercise_reward = Decimal(submission.reward_amount) / Decimal('1000')  # Riconverte da millesimi
-            course = submission.exercise.lesson.course
-            reviewer_reward = BlockchainRewardCalculator.calculate_reviewer_reward(exercise_reward, course)
-            
-            # 🚨 FIX CRITICO: USA SEMPRE DBTeoCoinService in production
-            from services.db_teocoin_service import DBTeoCoinService
-            db_service = DBTeoCoinService()
+            # REWARD FISSO: 1 TEO per ogni review completata
+            reviewer_reward = Decimal('1.0')
             
             # Accredita TeoCoin nel database
             success = db_service.add_balance(
                 user=review.reviewer,
                 amount=reviewer_reward,
-                transaction_type='review_reward',
-                description=f"Review reward for submission {submission.id}",
-                course_id=str(course.id)
+                transaction_type='review_completion',
+                description=f"Review completion reward for submission {review.submission.id}",
+                related_object_id=str(review.id)
             )
             
             if success:
-                # Crea la transazione blockchain per tracking
-                blockchain_transaction = BlockchainTransaction.objects.create(
-                    user=review.reviewer,
-                    amount=reviewer_reward,
-                    transaction_type='review_reward',
-                    status='confirmed',  # Già confermata perché è nel DB
+                logger.info(
+                    f"✅ Review reward awarded (DB): {reviewer_reward} TEO to {review.reviewer.email} "
+                    f"for reviewing submission {review.submission.id}"
+                )
+                return True
+            else:
+                logger.error(f"❌ Failed to credit review reward to {review.reviewer.email}")
+                return False
+            
+        except Exception as e:
+            logger.error(f"Error awarding review completion reward: {str(e)}")
+            return False
                     related_object_id=str(review.id),
                     notes=f"Review reward for submission {submission.id}",
                     tx_hash=f"db_review_{review.id}_{timezone.now().strftime('%Y%m%d_%H%M%S')}"

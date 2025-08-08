@@ -278,7 +278,7 @@ const AllCourses = () => {
                         <>
                           <div className="d-flex justify-content-between align-items-center mb-1">
                             <span className="text-primary fw-bold">💳 €{course.price_eur}</span>
-                            <small className="text-success">+{course.teocoin_reward} TEO</small>
+                            <small className="text-success">+2 TEO reward</small>
                           </div>
                           <div className="d-flex justify-content-between align-items-center">
                             <span className="text-success">🪙 Use {Math.floor(course.price_eur * course.teocoin_discount_percent / 100)} TEO for {course.teocoin_discount_percent}% discount</span>
@@ -287,9 +287,7 @@ const AllCourses = () => {
                       ) : (
                         <div className="text-center">
                           <span className="text-success fw-bold">🆓 GRATUITO</span>
-                          {course.teocoin_reward > 0 && (
-                            <small className="d-block text-muted">+{course.teocoin_reward} TEO reward</small>
-                          )}
+                          <small className="d-block text-muted">+2 TEO reward per exercise</small>
                         </div>
                       )}
                     </div>
