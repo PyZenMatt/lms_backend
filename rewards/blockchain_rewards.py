@@ -160,7 +160,7 @@ class BlockchainRewardManager:
     @transaction.atomic
     def award_exercise_completion(cls, submission):
         """
-        Assegna premio per completamento esercizio con minting blockchain
+        🚨 FIX PRODUZIONE: Assegna premio usando SEMPRE il database TeoCoin service
         """
         try:
             # Verifica che non sia già stato premiato
@@ -172,7 +172,7 @@ class BlockchainRewardManager:
             
             if existing_transaction:
                 logger.info(f"Exercise {submission.id} già premiato per utente {submission.student.email}")
-                return None
+                return existing_transaction
             
             # Calcola il premio per questo esercizio specifico
             course = submission.exercise.lesson.course
@@ -206,53 +206,44 @@ class BlockchainRewardManager:
             
             reward_amount = exercise_rewards[current_exercise_index]
             
-            # Crea la transazione blockchain
-            blockchain_transaction = BlockchainTransaction.objects.create(
+            # 🚨 FIX CRITICO: USA SEMPRE DBTeoCoinService in production
+            from services.db_teocoin_service import DBTeoCoinService
+            db_service = DBTeoCoinService()
+            
+            # Accredita TeoCoin nel database
+            success = db_service.add_balance(
                 user=submission.student,
                 amount=reward_amount,
                 transaction_type='exercise_reward',
-                status='pending',
-                related_object_id=str(submission.id),
-                notes=f"Exercise reward for: {submission.exercise.title}"
+                description=f"Exercise completion reward: {submission.exercise.title}",
+                course_id=str(course.id)
             )
             
-            # Aggiorna il reward_amount nella submission
-            submission.reward_amount = int(reward_amount * 1000)  # Supporta 3 decimali
-            submission.save()
-            
-            # Use BlockchainService for token transfer
-            try:
-                result = blockchain_service.mint_tokens_to_user(
+            if success:
+                # Crea la transazione blockchain per tracking
+                blockchain_transaction = BlockchainTransaction.objects.create(
                     user=submission.student,
                     amount=reward_amount,
-                    reason=f"Exercise reward for: {submission.exercise.title}"
+                    transaction_type='exercise_reward',
+                    status='confirmed',  # Già confermata perché è nel DB
+                    related_object_id=str(submission.id),
+                    notes=f"Exercise reward for: {submission.exercise.title}",
+                    tx_hash=f"db_exercise_{submission.id}_{timezone.now().strftime('%Y%m%d_%H%M%S')}"
                 )
                 
-                if result.get('success'):
-                    logger.info(f"Exercise reward transferred successfully: {reward_amount} TeoCoin to {submission.student.username}")
-                    return blockchain_transaction
-                else:
-                    logger.error(f"Exercise reward transfer failed: {result.get('error')}")
-                    return None
-                    
-            except Exception as e:
-                logger.error(f"Error transferring exercise reward: {str(e)}")
+                # Aggiorna il reward_amount nella submission
+                submission.reward_amount = int(reward_amount * 1000)  # Supporta 3 decimali
+                submission.save()
+                
+                logger.info(
+                    f"✅ Exercise reward awarded (DB): {reward_amount} TEO to {submission.student.email} "
+                    f"for exercise {submission.exercise.title}"
+                )
+                
+                return blockchain_transaction
+            else:
+                logger.error(f"❌ Failed to credit exercise reward to {submission.student.email}")
                 return None
-            
-            # # Effettua il trasferimento dalla reward pool
-            # blockchain_tx = cls._transfer_from_reward_pool(
-            #     user=submission.student,
-            #     amount=reward_amount,
-            #     blockchain_transaction=blockchain_transaction,
-            #     reason=f"Exercise completion reward: {submission.exercise.title}"
-            # )
-            
-            logger.info(
-                f"Exercise reward awarded: {reward_amount} TEO to {submission.student.email} "
-                f"for exercise {submission.exercise.title}"
-            )
-            
-            return blockchain_tx
             
         except Exception as e:
             logger.error(f"Error awarding exercise completion reward: {str(e)}")
@@ -262,7 +253,7 @@ class BlockchainRewardManager:
     @transaction.atomic
     def award_review_completion(cls, review):
         """
-        Assegna premio per completamento review con minting blockchain
+        🚨 FIX PRODUZIONE: Assegna premio review usando SEMPRE il database TeoCoin service
         """
         try:
             # Verifica che non sia già stato premiato
@@ -274,7 +265,7 @@ class BlockchainRewardManager:
             
             if existing_transaction:
                 logger.info(f"Review {review.id} già premiata per reviewer {review.reviewer.email}")
-                return None
+                return existing_transaction
             
             # Ottiene il premio dell'esercizio originale
             submission = review.submission
@@ -287,49 +278,40 @@ class BlockchainRewardManager:
             course = submission.exercise.lesson.course
             reviewer_reward = BlockchainRewardCalculator.calculate_reviewer_reward(exercise_reward, course)
             
-            # Crea la transazione blockchain
-            blockchain_transaction = BlockchainTransaction.objects.create(
+            # 🚨 FIX CRITICO: USA SEMPRE DBTeoCoinService in production
+            from services.db_teocoin_service import DBTeoCoinService
+            db_service = DBTeoCoinService()
+            
+            # Accredita TeoCoin nel database
+            success = db_service.add_balance(
                 user=review.reviewer,
                 amount=reviewer_reward,
                 transaction_type='review_reward',
-                status='pending',
-                related_object_id=str(review.id),
-                notes=f"Review reward for submission {submission.id}"
+                description=f"Review reward for submission {submission.id}",
+                course_id=str(course.id)
             )
             
-            # Use BlockchainService for reviewer reward transfer
-            try:
-                result = blockchain_service.mint_tokens_to_user(
+            if success:
+                # Crea la transazione blockchain per tracking
+                blockchain_transaction = BlockchainTransaction.objects.create(
                     user=review.reviewer,
                     amount=reviewer_reward,
-                    reason=f"Review reward for exercise: {submission.exercise.title}"
+                    transaction_type='review_reward',
+                    status='confirmed',  # Già confermata perché è nel DB
+                    related_object_id=str(review.id),
+                    notes=f"Review reward for submission {submission.id}",
+                    tx_hash=f"db_review_{review.id}_{timezone.now().strftime('%Y%m%d_%H%M%S')}"
                 )
                 
-                if result.get('success'):
-                    logger.info(f"Review reward transferred successfully: {reviewer_reward} TeoCoin to {review.reviewer.username}")
-                    return blockchain_transaction
-                else:
-                    logger.error(f"Review reward transfer failed: {result.get('error')}")
-                    return None
-                    
-            except Exception as e:
-                logger.error(f"Error transferring review reward: {str(e)}")
+                logger.info(
+                    f"✅ Review reward awarded (DB): {reviewer_reward} TEO to {review.reviewer.email} "
+                    f"for reviewing exercise {submission.exercise.title}"
+                )
+                
+                return blockchain_transaction
+            else:
+                logger.error(f"❌ Failed to credit review reward to {review.reviewer.email}")
                 return None
-            
-            # # Effettua il trasferimento dalla reward pool
-            # blockchain_tx = cls._transfer_from_reward_pool(
-            #     user=review.reviewer,
-            #     amount=reviewer_reward,
-            #     blockchain_transaction=blockchain_transaction,
-            #     reason=f"Review reward for exercise: {submission.exercise.title}"
-            # )
-            
-            logger.info(
-                f"Review reward awarded: {reviewer_reward} TEO to {review.reviewer.email} "
-                f"for reviewing exercise {submission.exercise.title}"
-            )
-            
-            return blockchain_tx
             
         except Exception as e:
             logger.error(f"Error awarding review completion reward: {str(e)}")
@@ -428,3 +410,58 @@ def setup_course_reward_system(course):
     except Exception as e:
         logger.error(f"Error setting up course reward system: {str(e)}")
         raise
+
+
+# Alias per compatibilità con codice esistente
+class BlockchainRewards:
+    """
+    Alias per BlockchainRewardManager per compatibilità con codice esistente
+    🚨 FORZA sempre l'uso del database per tutti i reward
+    """
+    
+    @classmethod
+    def calculate_exercise_reward(cls, submission):
+        """Calcola il reward per un esercizio"""
+        try:
+            course = submission.exercise.lesson.course
+            if not course:
+                return Decimal('0')
+            
+            # Conta tutti gli esercizi del corso
+            total_exercises = 0
+            for lesson in course.lessons_in_course.all():
+                total_exercises += lesson.exercises.count()
+            
+            if total_exercises == 0:
+                return Decimal('0')
+            
+            # Distribuisce i reward tra tutti gli esercizi
+            exercise_rewards = BlockchainRewardCalculator.distribute_exercise_rewards(
+                course, total_exercises
+            )
+            
+            # Trova l'indice dell'esercizio corrente
+            exercise_index = 0
+            current_exercise_index = 0
+            for lesson in course.lessons_in_course.all():
+                for exercise in lesson.exercises.all():
+                    if exercise.id == submission.exercise.id:
+                        current_exercise_index = exercise_index
+                        break
+                    exercise_index += 1
+            
+            return exercise_rewards[current_exercise_index]
+            
+        except Exception as e:
+            logger.error(f"Error calculating exercise reward: {str(e)}")
+            return Decimal('0')
+    
+    @classmethod
+    def award_exercise_completion(cls, submission):
+        """Alias per BlockchainRewardManager.award_exercise_completion"""
+        return BlockchainRewardManager.award_exercise_completion(submission)
+    
+    @classmethod
+    def award_review_completion(cls, review):
+        """Alias per BlockchainRewardManager.award_review_completion"""
+        return BlockchainRewardManager.award_review_completion(review)

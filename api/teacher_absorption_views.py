@@ -99,9 +99,26 @@ class TeacherMakeAbsorptionChoiceView(APIView):
     
     def post(self, request):
         """
-        Process teacher choice for discount absorption and credit TeoCoin
+        🚨 FIX PRODUZIONE: Process teacher choice for discount absorption and credit TeoCoin
         """
         try:
+            # 🔒 Controllo autenticazione sicuro
+            if not hasattr(request, 'user'):
+                logger.error("Request object missing 'user' attribute")
+                return Response({
+                    'success': False,
+                    'error': 'Authentication error: invalid request',
+                    'message': 'Request object malformed'
+                }, status=status.HTTP_401_UNAUTHORIZED)
+            
+            if not request.user or not request.user.is_authenticated:
+                logger.error("User not authenticated")
+                return Response({
+                    'success': False,
+                    'error': 'Authentication required',
+                    'message': 'User must be logged in'
+                }, status=status.HTTP_401_UNAUTHORIZED)
+            
             # Basic teacher check
             is_teacher = (
                 getattr(request.user, 'role', None) == 'teacher' or
@@ -109,6 +126,7 @@ class TeacherMakeAbsorptionChoiceView(APIView):
             )
             
             if not is_teacher:
+                logger.warning(f"Non-teacher user {request.user.id} attempted teacher action")
                 return Response({
                     'success': False,
                     'error': 'Only teachers can make absorption choices'
@@ -122,14 +140,18 @@ class TeacherMakeAbsorptionChoiceView(APIView):
             description = request.data.get('description', 'TeoCoin discount absorption')
             
             # Log the choice for tracking
-            logger.info(f"Teacher {request.user.id} made choice '{choice}' for absorption {absorption_id}")
+            logger.info(f"✅ Teacher {request.user.id} ({request.user.username}) made choice '{choice}' for absorption {absorption_id}")
             
-            # If teacher chooses TEO, credit them
+            # 🚨 FIX CRITICO: Se teacher sceglie TEO/absorb, accredita TeoCoin SEMPRE via database
             if choice == 'absorb' or choice == 'teo':
                 try:
                     from services.db_teocoin_service import DBTeoCoinService
                     from decimal import Decimal
                     db_service = DBTeoCoinService()
+                    
+                    # Verifica saldo prima del credito
+                    initial_balance = db_service.get_balance(request.user)
+                    logger.info(f"Teacher {request.user.username} initial balance: {initial_balance} TEO")
                     
                     success = db_service.add_balance(
                         user=request.user,
@@ -139,7 +161,12 @@ class TeacherMakeAbsorptionChoiceView(APIView):
                     )
                     
                     if success:
-                        logger.info(f"✅ Credited {amount} TEO to teacher {request.user.id}")
+                        # Verifica il nuovo saldo
+                        new_balance = db_service.get_balance(request.user)
+                        credited_amount = new_balance - initial_balance
+                        
+                        logger.info(f"✅ TeoCoin credited successfully: {amount} TEO to {request.user.username}")
+                        logger.info(f"✅ Balance change: {initial_balance} → {new_balance} TEO (+{credited_amount})")
                         
                         return Response({
                             'success': True,
@@ -153,7 +180,9 @@ class TeacherMakeAbsorptionChoiceView(APIView):
                                 'decided_at': None
                             },
                             'teo_credited': float(amount),
-                            'message': f'TEO credited successfully: {amount} TEO',
+                            'initial_balance': float(initial_balance),
+                            'new_balance': float(new_balance),
+                            'message': f'✅ TEO credited successfully: {amount} TEO',
                             'note': 'TeoCoin credited to your account'
                         })
                     else:
