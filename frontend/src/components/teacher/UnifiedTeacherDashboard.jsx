@@ -11,19 +11,15 @@ const UnifiedTeacherDashboard = () => {
   const [error, setError] = useState(null);
   const [processing, setProcessing] = useState({});
 
-  // Parse discount notification message to extract data
   const parseDiscountNotification = (notification) => {
     try {
       const message = notification.message;
-      
-      // Extract data from notification message using regex patterns
       const studentMatch = message.match(/Student ([^\s]+)/);
       const discountMatch = message.match(/(\d+)% discount/);
       const courseMatch = message.match(/on '([^']+)'/);
       const teoMatch = message.match(/Accept TEO: ([\d.]+) TEO/);
       const eurMatch = message.match(/Keep EUR: €([\d.]+)/);
       const hoursMatch = message.match(/within (\d+) hours/);
-      
       return {
         type: 'discount_decision',
         student: studentMatch ? studentMatch[1] : 'Unknown',
@@ -44,23 +40,13 @@ const UnifiedTeacherDashboard = () => {
     try {
       setLoading(true);
       setError(null);
-      
-      // Get all notifications (both read and unread) for dashboard view
-      const response = await axiosClient.get('/notifications/', {
-        params: {
-          limit: 50 // Get last 50 notifications
-        }
-      });
-      
+      const response = await axiosClient.get('/notifications/', { params: { limit: 50 } });
       if (response.data && Array.isArray(response.data)) {
-        // Process notifications and add parsed data
         const processedNotifications = response.data.map((notification) => ({
           ...notification,
-          parsed: notification.notification_type === 'teocoin_discount_pending' 
-            ? parseDiscountNotification(notification) 
-            : { type: 'regular' }
+          parsed:
+            notification.notification_type === 'teocoin_discount_pending' ? parseDiscountNotification(notification) : { type: 'regular' }
         }));
-        
         setNotifications(processedNotifications);
       } else {
         setError('Errore nel caricamento delle notifiche');
@@ -76,130 +62,43 @@ const UnifiedTeacherDashboard = () => {
 
   useEffect(() => {
     fetchNotifications();
-    
-    // Refresh every 30 seconds for real-time updates
     const interval = setInterval(fetchNotifications, 30000);
-    
     return () => clearInterval(interval);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const markAsRead = async (notificationId) => {
     try {
       await axiosClient.patch(`/notifications/${notificationId}/read/`);
-      
-      // Update local state to mark as read
-      setNotifications((prev) => 
-        prev.map((notification) => 
-          notification.id === notificationId 
-            ? { ...notification, read: true }
-            : notification
-        )
-      );
-      
-      if (window.showToast) {
-        window.showToast('✅ Notifica marcata come letta', 'success');
-      }
+      setNotifications((prev) => prev.map((n) => (n.id === notificationId ? { ...n, read: true } : n)));
+      if (window.showToast) window.showToast('✅ Notifica marcata come letta', 'success');
     } catch (err) {
       console.error('Error marking notification as read:', err);
-      if (window.showToast) {
-        window.showToast('❌ Errore nel marcare la notifica', 'error');
-      }
+      if (window.showToast) window.showToast('❌ Errore nel marcare la notifica', 'error');
     }
   };
 
   const handleDiscountChoice = async (notification, choice) => {
     const notificationId = notification.id;
+    const absorptionId = notification.related_object_id || notification.absorption_id || notificationId;
     const parsed = notification.parsed || {};
-    
-    console.log('🎯 Teacher choice clicked:', {
-      choice,
-      notificationId,
-      parsed,
-      notification
-    });
-    
     try {
       setProcessing((prev) => ({ ...prev, [notificationId]: true }));
-      
+      const resp = await axiosClient.post('/teocoin/teacher/choice/', {
+        absorption_id: absorptionId,
+        choice: choice === 'teo' ? 'teo' : 'eur'
+      });
+      if (!resp.data?.success) throw new Error(resp.data?.error || 'Operazione non riuscita');
       if (choice === 'teo') {
-        // Accredita TeoCoin tramite endpoint
-        const courseTitle = parsed.course_title || 'Unknown Course';
-        const teoAmount = parsed.teo_amount || 10.0;
-        
-        console.log('📤 Calling TEO credit endpoint:', {
-          endpoint: '/teocoin/teacher/choice/',
-          data: {
-            absorption_id: notificationId,
-            choice: 'teo',
-            amount: teoAmount,
-            transaction_type: 'discount_absorption',
-            description: `Discount absorption for course: ${courseTitle}`
-          }
-        });
-        
-        const creditResponse = await axiosClient.post('/teocoin/teacher/choice/', {
-          absorption_id: notificationId,
-          choice: 'teo',
-          amount: teoAmount,
-          transaction_type: 'discount_absorption',
-          description: `Discount absorption for course: ${courseTitle}`
-        });
-        
-        console.log('📥 TEO credit response:', creditResponse.data);
-        
-        if (creditResponse.data.success) {
-          console.log('✅ TEO credit successful');
-          if (window.showToast) {
-            window.showToast(`✅ Hai ricevuto ${teoAmount} TEO per l'assorbimento sconto!`, 'success');
-          }
-        } else {
-          console.error('❌ TEO credit failed:', creditResponse.data);
-          throw new Error(creditResponse.data.error || 'Failed to credit TeoCoin');
-        }
+        const credited = resp.data?.absorption?.final_teacher_teo ?? parsed.teo_amount;
+        if (window.showToast) window.showToast(`✅ TEO accettati: ${credited} TEO (incluso +25% bonus)`, 'success');
       } else {
-        // EUR choice - call endpoint without crediting
-        console.log('� Calling EUR choice endpoint:', {
-          endpoint: '/teocoin/teacher/choice/',
-          data: {
-            absorption_id: notificationId,
-            choice: 'eur',
-            amount: eurAmount,
-            transaction_type: 'discount_commission',
-            description: `EUR commission for course: ${courseTitle}`
-          }
-        });
-        
-        const eurResponse = await axiosClient.post('/teocoin/teacher/choice/', {
-          absorption_id: notificationId,
-          choice: 'eur',
-          amount: eurAmount,
-          transaction_type: 'discount_commission',
-          description: `EUR commission for course: ${courseTitle}`
-        });
-        
-        console.log('📥 EUR choice response:', eurResponse.data);
-        
-        if (window.showToast) {
-          window.showToast('💰 Hai scelto di mantenere la commissione in EUR', 'success');
-        }
+        if (window.showToast) window.showToast('💰 Scelta EUR confermata', 'success');
       }
-      
-      // Mark notification as read
-      console.log('📝 Marking notification as read:', notificationId);
       await markAsRead(notificationId);
-      
-      console.log('✅ Discount choice completed successfully');
-      
     } catch (err) {
       console.error('❌ Error handling discount choice:', err);
-      console.error('❌ Error details:', {
-        message: err.message,
-        response: err.response?.data,
-        status: err.response?.status
-      });
-      if (window.showToast) {
-        window.showToast('❌ Errore nella scelta: ' + err.message, 'error');
-      }
+      if (window.showToast) window.showToast('❌ Errore nella scelta: ' + err.message, 'error');
     } finally {
       setProcessing((prev) => ({ ...prev, [notificationId]: false }));
     }
@@ -208,11 +107,8 @@ const UnifiedTeacherDashboard = () => {
   const formatTimeRemaining = (expiresAt) => {
     try {
       const now = new Date();
-      const expiry = new Date(expiresAt);
-      const diffMs = expiry - now;
-      
+      const diffMs = new Date(expiresAt) - now;
       if (diffMs <= 0) return 'Scaduto';
-      
       const diffHours = diffMs / (1000 * 60 * 60);
       if (diffHours < 1) return `${Math.round(diffHours * 60)}m rimanenti`;
       return `${Math.round(diffHours)}h rimanenti`;
@@ -231,7 +127,6 @@ const UnifiedTeacherDashboard = () => {
     const { parsed } = notification;
     const isProcessing = processing[notification.id];
     const isRead = notification.read;
-    
     return (
       <Card key={notification.id} className={`mb-3 ${isRead ? 'opacity-75' : ''}`} border={getNotificationVariant(notification)}>
         <Card.Header className="bg-warning text-dark">
@@ -254,29 +149,18 @@ const UnifiedTeacherDashboard = () => {
               <p className="mb-1 text-muted">Studente: {parsed.student}</p>
               <p className="mb-0 text-muted">Sconto richiesto: {parsed.discount_percent}%</p>
             </div>
-            <Badge 
-              bg={parsed.hours_remaining > 2 ? "success" : "danger"}
-              className="ms-2"
-            >
+            <Badge bg={parsed.hours_remaining > 2 ? 'success' : 'danger'} className="ms-2">
               <Clock size={12} className="me-1" />
               {formatTimeRemaining(parsed.expires_at)}
             </Badge>
           </div>
-
           <Alert variant="info" className="py-2 mb-3">
             <small>
               <strong>Dettagli:</strong> {notification.message}
             </small>
           </Alert>
-
           <div className="d-flex justify-content-between align-items-center">
-            <small className="text-muted">
-              {formatDistanceToNow(new Date(notification.created_at), { 
-                addSuffix: true, 
-                locale: it 
-              })}
-            </small>
-            
+            <small className="text-muted">{formatDistanceToNow(new Date(notification.created_at), { addSuffix: true, locale: it })}</small>
             {!isRead ? (
               <div className="d-flex gap-2">
                 <Button
@@ -294,12 +178,7 @@ const UnifiedTeacherDashboard = () => {
                     </>
                   )}
                 </Button>
-                <Button
-                  variant="warning"
-                  size="sm"
-                  onClick={() => handleDiscountChoice(notification, 'teo')}
-                  disabled={isProcessing}
-                >
+                <Button variant="warning" size="sm" onClick={() => handleDiscountChoice(notification, 'teo')} disabled={isProcessing}>
                   {isProcessing ? (
                     <Spinner size="sm" animation="border" />
                   ) : (
@@ -324,7 +203,6 @@ const UnifiedTeacherDashboard = () => {
 
   const renderRegularNotification = (notification) => {
     const isRead = notification.read;
-    
     return (
       <Card key={notification.id} className={`mb-3 ${isRead ? 'opacity-75' : ''}`} border={getNotificationVariant(notification)}>
         <Card.Body>
@@ -335,21 +213,13 @@ const UnifiedTeacherDashboard = () => {
                 <div>
                   <p className="mb-1">{notification.message}</p>
                   <small className="text-muted">
-                    {formatDistanceToNow(new Date(notification.created_at), { 
-                      addSuffix: true, 
-                      locale: it 
-                    })}
+                    {formatDistanceToNow(new Date(notification.created_at), { addSuffix: true, locale: it })}
                   </small>
                 </div>
               </div>
             </div>
             {!isRead && (
-              <Button
-                variant="outline-primary"
-                size="sm"
-                onClick={() => markAsRead(notification.id)}
-                title="Marca come letta"
-              >
+              <Button variant="outline-primary" size="sm" onClick={() => markAsRead(notification.id)} title="Marca come letta">
                 <CheckCircle size={16} />
               </Button>
             )}
@@ -380,17 +250,8 @@ const UnifiedTeacherDashboard = () => {
                       {unreadNotifications.length} non lette
                     </Badge>
                   )}
-                  <Button 
-                    variant="outline-primary" 
-                    size="sm" 
-                    onClick={fetchNotifications}
-                    disabled={loading}
-                  >
-                    {loading ? (
-                      <Spinner size="sm" animation="border" />
-                    ) : (
-                      '🔄 Aggiorna'
-                    )}
+                  <Button variant="outline-primary" size="sm" onClick={fetchNotifications} disabled={loading}>
+                    {loading ? <Spinner size="sm" animation="border" /> : '🔄 Aggiorna'}
                   </Button>
                 </div>
               </div>
@@ -401,14 +262,12 @@ const UnifiedTeacherDashboard = () => {
                   <strong>Errore:</strong> {error}
                 </Alert>
               )}
-
               {loading && notifications.length === 0 && (
                 <div className="text-center py-4">
                   <Spinner animation="border" />
                   <p className="mt-2 text-muted">Caricamento notifiche...</p>
                 </div>
               )}
-
               {!loading && notifications.length === 0 && (
                 <Alert variant="info" className="text-center">
                   <BellFill size={48} className="mb-3 text-muted" />
@@ -416,8 +275,6 @@ const UnifiedTeacherDashboard = () => {
                   <p>Non hai ancora ricevuto notifiche.</p>
                 </Alert>
               )}
-
-              {/* Priority Section: Discount Decisions */}
               {discountNotifications.length > 0 && (
                 <div className="mb-4">
                   <h5 className="mb-3">
@@ -427,8 +284,6 @@ const UnifiedTeacherDashboard = () => {
                   {discountNotifications.map((notification) => renderDiscountNotification(notification))}
                 </div>
               )}
-
-              {/* Regular Notifications */}
               {regularNotifications.length > 0 && (
                 <div>
                   <h5 className="mb-3">
@@ -447,3 +302,4 @@ const UnifiedTeacherDashboard = () => {
 };
 
 export default UnifiedTeacherDashboard;
+
