@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { ListGroup, Dropdown } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 
 import ChatList from './ChatList';
 import { useAuth } from '../../../../contexts/AuthContext';
 import ThemeToggle from '../../../../components/ui/ThemeToggle';
+import UnifiedTeacherNotifications from '../../../../components/teacher/UnifiedTeacherNotifications.jsx';
 
 import avatar1 from '../../../../assets/images/user/avatar-1.jpg';
 // avatars used in menu header
@@ -13,7 +13,6 @@ import avatar1 from '../../../../assets/images/user/avatar-1.jpg';
 const NavRight = () => {
   const [listOpen, setListOpen] = useState(false);
   const { logout } = useAuth();
-  const navigate = useNavigate();
 
   return (
     <React.Fragment>
@@ -25,13 +24,9 @@ const NavRight = () => {
           <ThemeToggle size="sm" />
         </ListGroup.Item>
         
+        {/* Notifications dropdown with Accept/Decline actions for teachers */}
         <ListGroup.Item as="li" bsPrefix=" ">
-          <button type="button" className="nav-link btn btn-link" onClick={() => navigate('/profile/notifications')} style={{ padding: 0 }}>
-            <span className="pcoded-micon">
-              <i className="feather icon-bell"></i>
-            </span>
-            <span className="pcoded-mtext">Notifiche</span>
-          </button>
+          <UnifiedTeacherNotifications />
         </ListGroup.Item>
         
         <ListGroup.Item as="li" bsPrefix=" ">

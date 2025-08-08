@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Badge, Dropdown, Card, Button, Spinner, Alert } from 'react-bootstrap';
 import { BellFill, Clock, CheckCircle, XCircle, CurrencyExchange } from 'react-bootstrap-icons';
 import axiosClient from '../../services/core/axiosClient';
@@ -40,7 +40,7 @@ const UnifiedTeacherNotifications = () => {
     }
   };
 
-  const fetchNotifications = async () => {
+  const fetchNotifications = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
@@ -55,11 +55,9 @@ const UnifiedTeacherNotifications = () => {
       
       if (response.data && Array.isArray(response.data)) {
         // Process notifications and add parsed data
-        const processedNotifications = response.data.map(notification => ({
+        const processedNotifications = response.data.map((notification) => ({
           ...notification,
-          parsed: notification.notification_type === 'teocoin_discount_pending' 
-            ? parseDiscountNotification(notification) 
-            : { type: 'regular' }
+          parsed: notification.notification_type === 'teocoin_discount_pending' ? parseDiscountNotification(notification) : { type: 'regular' }
         }));
         
         setNotifications(processedNotifications);
@@ -73,25 +71,21 @@ const UnifiedTeacherNotifications = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
     fetchNotifications();
-    
     // Refresh every 30 seconds for real-time notifications
     const interval = setInterval(fetchNotifications, 30000);
-    
     return () => clearInterval(interval);
-  }, []);
+  }, [fetchNotifications]);
 
   const markAsRead = async (notificationId) => {
     try {
       await axiosClient.patch(`/notifications/${notificationId}/read/`);
       
       // Remove from local state
-      setNotifications(prev => 
-        prev.filter(notification => notification.id !== notificationId)
-      );
+  setNotifications((prev) => prev.filter((notification) => notification.id !== notificationId));
       
       if (window.showToast) {
         window.showToast('✅ Notifica marcata come letta', 'success');
@@ -106,78 +100,49 @@ const UnifiedTeacherNotifications = () => {
 
   const handleDiscountChoice = async (notification, choice) => {
     const notificationId = notification.id;
+    const absorptionId = notification.related_object_id || notification.absorption_id || notificationId;
     
     try {
-      setProcessing(prev => ({ ...prev, [notificationId]: true }));
-      
-      // Parse the notification to extract relevant data
-      const parsed = notification.parsed;
+  setProcessing((prev) => ({ ...prev, [notificationId]: true }));
       
       if (choice === 'teo') {
-        // Credit the teacher with TeoCoin using the teacher absorption endpoint
+        // Server computes correct TEO; we only send the absorption_id and choice
         try {
-          // Extract course info from notification
-          const courseMatch = notification.message.match(/on '([^']+)'/);
-          // Try to extract total TEO (used + bonus) if present
-          const totalRe = /=\s*([\d.,]+)\s*TEO\s*total/i;
-          const partsRe = /Accept\s+TEO:\s*([\d.,]+)\s*TEO\s*\+\s*([\d.,]+)\s*bonus/i;
-          let amountTotal = null;
-          const mt = notification.message.match(totalRe);
-          if (mt && mt[1]) amountTotal = parseFloat(mt[1].replace(',', '.'));
-          if ((!amountTotal || !isFinite(amountTotal)) && partsRe.test(notification.message)) {
-            const mp = notification.message.match(partsRe);
-            const used = parseFloat(mp[1].replace(',', '.'));
-            const bonus = parseFloat(mp[2].replace(',', '.'));
-            amountTotal = (isFinite(used) ? used : 0) + (isFinite(bonus) ? bonus : 0);
-          }
-          if ((!amountTotal || !isFinite(amountTotal)) && parsed) {
-            // Fallback: if parsed teos are available with bonus ratio 1.25
-            const used = parsed.teo_amount || 0;
-            amountTotal = used > 0 ? used * 1.25 : null;
-          }
-          if (!amountTotal || !isFinite(amountTotal) || amountTotal <= 0) {
-            throw new Error('Importo TEO non disponibile nella notifica');
-          }
-
-          const courseTitle = courseMatch ? courseMatch[1] : 'Unknown Course';
-          
-          // Call the teacher absorption endpoint to credit TeoCoin
           const creditResponse = await axiosClient.post('/teocoin/teacher/choice/', {
-            absorption_id: notificationId,
-            choice: 'teo',
-            amount_total: amountTotal,
-            transaction_type: 'discount_absorption',
-            description: `Discount absorption for course: ${courseTitle} - total ${amountTotal} TEO`
+            absorption_id: absorptionId,
+            choice: 'teo'
           });
-          
-          if (creditResponse.data.success) {
+          if (creditResponse.data?.success) {
+            const credited = creditResponse.data?.absorption?.final_teacher_teo;
             if (window.showToast) {
-              window.showToast(`✅ Hai ricevuto ${amountTotal} TEO per l'assorbimento sconto!`, 'success');
+              window.showToast(`✅ TEO accettati: ${credited} TEO`, 'success');
             }
           } else {
-            throw new Error(creditResponse.data.error || 'Failed to credit TeoCoin');
+            throw new Error(creditResponse.data?.error || 'Failed to credit TeoCoin');
           }
         } catch (creditError) {
           console.error('Error crediting TeoCoin:', creditError);
           if (window.showToast) {
             window.showToast('⚠️ Errore nel credito TEO: ' + creditError.message, 'error');
           }
-          // Don't continue to mark as read if crediting failed
-          return;
+          return; // Don't mark as read on failure
         }
       } else {
         // EUR choice - call endpoint without crediting
         try {
-          await axiosClient.post('/teocoin/teacher/choice/', {
-            absorption_id: notificationId,
-            choice: 'eur',
-            amount: 0,
-            transaction_type: 'discount_declined',
-            description: 'Teacher chose EUR commission over TEO'
+          const eurResp = await axiosClient.post('/teocoin/teacher/choice/', {
+            absorption_id: absorptionId,
+            choice: 'eur'
           });
+          if (!eurResp.data?.success) {
+            throw new Error(eurResp.data?.error || 'Operazione non riuscita');
+          }
         } catch (choiceError) {
           console.error('Error recording EUR choice:', choiceError);
-          // Continue anyway for EUR choice
+          if (window.showToast) {
+            window.showToast('❌ Errore nella scelta EUR: ' + choiceError.message, 'error');
+          }
+          return; // Don't mark as read on failure
         }
       }
       
@@ -185,9 +150,7 @@ const UnifiedTeacherNotifications = () => {
       await markAsRead(notificationId);
       
       // Show appropriate message based on choice
-      const message = choice === 'teo' 
-        ? `✅ Scelta TEO registrata` 
-        : '💰 Hai scelto di mantenere la commissione in EUR';
+  const message = choice === 'teo' ? `✅ Scelta TEO registrata` : '💰 Hai scelto di mantenere la commissione in EUR';
       
       if (window.showToast && choice === 'eur') {
         window.showToast(message, 'success');

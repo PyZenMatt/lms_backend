@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Row, Col, Card, Button, Modal, Spinner, Badge } from 'react-bootstrap';
+import { Row, Col, Card, Button, Alert } from 'react-bootstrap';
 import { Link, useNavigate } from 'react-router-dom';
 import './TeacherDashboard.css';
 import RoleGuard from '../../components/guards/RoleGuard';
@@ -8,7 +8,6 @@ import DatabaseStaking from '../../components/staking/DatabaseStaking';
 import MetaMaskDeposit from '../../components/deposit/MetaMaskDeposit';
 import TeoCoinBalanceWidget from '../../components/TeoCoinBalanceWidget';
 import TeoCoinWithdrawal from '../../components/TeoCoinWithdrawal';
-import StatCard from '../../components/common/StatCard';
 import CoursesTable from '../../components/courses/CoursesTable';
 import { fetchTeacherDashboard, fetchUserProfile } from '../../services/api/dashboard';
 import { fetchLessonsForCourse, fetchExercisesForLesson } from '../../services/api/courses';
@@ -16,14 +15,13 @@ import CourseCreateModal from '../../components/modals/CourseCreateModal';
 import CourseEditModal from '../../components/modals/CourseEditModal';
 import LessonCreateModal from '../../components/modals/LessonCreateModal';
 import ExerciseCreateModal from '../../components/modals/ExerciseCreateModal';
-import AdvancedAnalyticsDashboard from '../../components/analytics/AdvancedAnalyticsDashboard';
 import EnhancedNotificationSystem from '../../components/notifications/EnhancedNotificationSystem';
 
 // Import dashboard styles
 import './dashboard-styles.css';
 
 // Placeholder avatar
-import avatar1 from '../../assets/images/user/avatar-1.jpg';
+// import avatar1 from '../../assets/images/user/avatar-1.jpg';
 
 const TeacherDashboard = () => {
   const navigate = useNavigate();
@@ -31,7 +29,7 @@ const TeacherDashboard = () => {
   const [sales, setSales] = useState({ daily: 0, monthly: 0, yearly: 0 });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [transactions, setTransactions] = useState([]);
+  // const [transactions, setTransactions] = useState([]);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [editingCourseId, setEditingCourseId] = useState(null);
@@ -50,50 +48,50 @@ const TeacherDashboard = () => {
   const [lessonExercises, setLessonExercises] = useState({});
   const [loadingExercises, setLoadingExercises] = useState({});
 
+  const loadDashboard = async () => {
+    setLoading(true);
+    setError('');
+    try {
+      // Fetch user profile
+      const profileRes = await fetchUserProfile();
+      setUserProfile(profileRes.data);
+
+      const res = await fetchTeacherDashboard();
+      console.log('🔍 TeacherDashboard API Response:', res);
+      console.log('📚 Courses data:', res.data.courses);
+
+      // Sanitize courses data to prevent toLowerCase errors
+      const sanitizedCourses = (res.data.courses || []).map((course) => ({
+        ...course,
+        category: course.category || 'ALTRO',
+        status: course.status || (course.is_approved ? 'approved' : 'pending'),
+        price: course.price || course.price_eur || 0,
+        price_eur: course.price_eur || course.price || 0
+      }));
+
+      setCourses(sanitizedCourses);
+      setSales(res.data.sales);
+      // setTransactions(res.data.transactions || []);
+      console.log('📚 Courses set in state:', sanitizedCourses);
+
+      // Popola le lezioni da subito con i dati che arrivano dall'API
+      const lessonsData = {};
+      (res.data.courses || []).forEach((course) => {
+        if (course.lessons && course.lessons.length > 0) {
+          lessonsData[course.id] = course.lessons;
+        }
+      });
+      setCourseLessons(lessonsData);
+      console.log('📖 Lessons populated from API:', lessonsData);
+    } catch (err) {
+      console.error('Errore API dashboard:', err, err.response?.data);
+      setError('Errore nel caricamento della dashboard');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const loadDashboard = async () => {
-      setLoading(true);
-      setError('');
-      try {
-        // Fetch user profile
-        const profileRes = await fetchUserProfile();
-        setUserProfile(profileRes.data);
-        
-        const res = await fetchTeacherDashboard();
-        console.log('🔍 TeacherDashboard API Response:', res);
-        console.log('📚 Courses data:', res.data.courses);
-        
-        // Sanitize courses data to prevent toLowerCase errors
-        const sanitizedCourses = (res.data.courses || []).map(course => ({
-          ...course,
-          category: course.category || 'ALTRO',
-          status: course.status || course.is_approved ? 'approved' : 'pending',
-          price: course.price || course.price_eur || 0,
-          price_eur: course.price_eur || course.price || 0
-        }));
-        
-        setCourses(sanitizedCourses);
-        setSales(res.data.sales);
-        setTransactions(res.data.transactions || []);
-        console.log('📚 Courses set in state:', sanitizedCourses);
-        
-        // Popola le lezioni da subito con i dati che arrivano dall'API
-        const lessonsData = {};
-        res.data.courses.forEach(course => {
-          if (course.lessons && course.lessons.length > 0) {
-            lessonsData[course.id] = course.lessons;
-          }
-        });
-        setCourseLessons(lessonsData);
-        console.log('📖 Lessons populated from API:', lessonsData);
-        
-      } catch (err) {
-        console.error('Errore API dashboard:', err, err.response?.data);
-        setError('Errore nel caricamento della dashboard');
-      } finally {
-        setLoading(false);
-      }
-    };
     loadDashboard();
   }, []);
 
@@ -103,49 +101,49 @@ const TeacherDashboard = () => {
       setExpandedCourse(null);
       return;
     }
-    
+
     setExpandedCourse(courseId);
-    
+
     // Se le lezioni sono già presenti, non fare chiamata API
     if (courseLessons[courseId]) {
       console.log('📖 Lessons already loaded for course:', courseId);
       return;
     }
-    
-    setLoadingLessons(prev => ({ ...prev, [courseId]: true }));
-    
+
+    setLoadingLessons((prev) => ({ ...prev, [courseId]: true }));
+
     try {
       const res = await fetchLessonsForCourse(courseId);
-      setCourseLessons(prev => ({ ...prev, [courseId]: res.data }));
+      setCourseLessons((prev) => ({ ...prev, [courseId]: res.data }));
       console.log('📖 Lessons loaded from API for course:', courseId, res.data);
     } catch (err) {
       console.error('Errore caricamento lezioni:', err);
-      setCourseLessons(prev => ({ ...prev, [courseId]: [] }));
+      setCourseLessons((prev) => ({ ...prev, [courseId]: [] }));
     } finally {
-      setLoadingLessons(prev => ({ ...prev, [courseId]: false }));
+      setLoadingLessons((prev) => ({ ...prev, [courseId]: false }));
     }
   };
 
   // Lesson modal management
   const handleShowLessonModal = (courseId) => {
-    setShowLessonModal(prev => ({ ...prev, [courseId]: true }));
+    setShowLessonModal((prev) => ({ ...prev, [courseId]: true }));
   };
   
   const handleHideLessonModal = (courseId) => {
-    setShowLessonModal(prev => ({ ...prev, [courseId]: false }));
+    setShowLessonModal((prev) => ({ ...prev, [courseId]: false }));
   };
   
   const handleLessonCreated = async (courseId) => {
     // Refresh lessons for the course
     try {
-      setLoadingLessons(prev => ({ ...prev, [courseId]: true }));
+      setLoadingLessons((prev) => ({ ...prev, [courseId]: true }));
       const res = await fetchLessonsForCourse(courseId);
-      setCourseLessons(prev => ({ ...prev, [courseId]: res.data }));
+      setCourseLessons((prev) => ({ ...prev, [courseId]: res.data }));
     } catch (error) {
       console.error('Error refreshing lessons:', error);
-      setCourseLessons(prev => ({ ...prev, [courseId]: [] }));
+      setCourseLessons((prev) => ({ ...prev, [courseId]: [] }));
     } finally {
-      setLoadingLessons(prev => ({ ...prev, [courseId]: false }));
+      setLoadingLessons((prev) => ({ ...prev, [courseId]: false }));
     }
     handleHideLessonModal(courseId);
   };
@@ -153,14 +151,14 @@ const TeacherDashboard = () => {
   // Load exercises for a lesson
   const loadExercisesForLesson = async (lessonId) => {
     try {
-      setLoadingExercises(prev => ({ ...prev, [lessonId]: true }));
-      const res = await fetchExercisesForLesson(lessonId);
-      setLessonExercises(prev => ({ ...prev, [lessonId]: res.data }));
+  setLoadingExercises((prev) => ({ ...prev, [lessonId]: true }));
+  const res = await fetchExercisesForLesson(lessonId);
+  setLessonExercises((prev) => ({ ...prev, [lessonId]: res.data }));
     } catch (error) {
       console.error('Error loading exercises:', error);
-      setLessonExercises(prev => ({ ...prev, [lessonId]: [] }));
+  setLessonExercises((prev) => ({ ...prev, [lessonId]: [] }));
     } finally {
-      setLoadingExercises(prev => ({ ...prev, [lessonId]: false }));
+  setLoadingExercises((prev) => ({ ...prev, [lessonId]: false }));
     }
   };
 
@@ -168,33 +166,29 @@ const TeacherDashboard = () => {
   const handleShowExerciseModal = (lesson) => {
     console.log('🎯 Selected lesson for exercise creation:', lesson);
     setSelectedLesson(lesson);
-    setShowExerciseModal(prev => ({ ...prev, [lesson.id]: true }));
+  setShowExerciseModal((prev) => ({ ...prev, [lesson.id]: true }));
   };
 
   const handleHideExerciseModal = (lessonId) => {
-    setShowExerciseModal(prev => ({ ...prev, [lessonId]: false }));
+    setShowExerciseModal((prev) => ({ ...prev, [lessonId]: false }));
     setSelectedLesson(null);
   };
 
   const handleExerciseCreated = async (lessonId, courseId) => {
     // Refresh lessons for the course to show updated exercise count
     try {
-      setLoadingLessons(prev => ({ ...prev, [courseId]: true }));
+      setLoadingLessons((prev) => ({ ...prev, [courseId]: true }));
       const res = await fetchLessonsForCourse(courseId);
-      setCourseLessons(prev => ({ ...prev, [courseId]: res.data }));
+      setCourseLessons((prev) => ({ ...prev, [courseId]: res.data }));
     } catch (error) {
       console.error('Error refreshing lessons:', error);
     } finally {
-      setLoadingLessons(prev => ({ ...prev, [courseId]: false }));
+      setLoadingLessons((prev) => ({ ...prev, [courseId]: false }));
     }
     handleHideExerciseModal(lessonId);
   };
 
-  // Handle component updates
-  const handleComponentUpdate = () => {
-    // This can be used to refresh data across components
-    console.log('Component data updated');
-  };
+  // (reserved) cross-component update hook
 
   // Navigation functions
   const handleViewCourse = (courseId) => {
@@ -210,7 +204,7 @@ const TeacherDashboard = () => {
     setShowEditModal(true);
   };
 
-  const handleCourseUpdated = (courseId) => {
+  const handleCourseUpdated = (_courseId) => {
     // Ricarica la dashboard per mostrare i cambiamenti
     loadDashboard();
     setShowEditModal(false);
@@ -289,6 +283,13 @@ const TeacherDashboard = () => {
   return (
     <RoleGuard allowedRoles={['teacher']}>
       <React.Fragment>
+        {!!error && (
+          <Row className="mb-3">
+            <Col md={12}>
+              <Alert variant="danger">{error}</Alert>
+            </Col>
+          </Row>
+        )}
         {/* Quick access: Centro Review */}
         <Row className="mb-3">
           <Col md={12}>
