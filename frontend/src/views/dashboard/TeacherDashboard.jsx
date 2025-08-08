@@ -289,6 +289,17 @@ const TeacherDashboard = () => {
   return (
     <RoleGuard allowedRoles={['teacher']}>
       <React.Fragment>
+        {/* Quick access: Centro Review */}
+        <Row className="mb-3">
+          <Col md={12}>
+            <div className="d-flex justify-content-end">
+              <Button variant="outline-primary" size="sm" onClick={() => navigate('/review/assigned')}>
+                Vai al Centro Review
+              </Button>
+            </div>
+          </Col>
+        </Row>
+
         {/* 🔥 PHASE 4: Enhanced Notification System */}
         <EnhancedNotificationSystem />
       

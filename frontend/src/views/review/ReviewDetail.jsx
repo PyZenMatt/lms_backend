@@ -4,7 +4,8 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import { Card, Button, Alert, Spinner, Form } from 'react-bootstrap';
 
 const ReviewDetail = () => {
-  const { submissionId } = useParams();
+  const { submissionId, reviewId } = useParams();
+  const resolvedId = submissionId || reviewId;
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [submission, setSubmission] = useState(null);
@@ -14,10 +15,10 @@ const ReviewDetail = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const token = localStorage.getItem('token') || localStorage.getItem('access');
+  const token = localStorage.getItem('token') || localStorage.getItem('access');
     const fetchSubmission = async () => {
       try {
-        const res = await fetch(`${API_BASE_URL}/api/v1/submissions/${submissionId}/`, {
+    const res = await fetch(`${API_BASE_URL}/api/v1/submissions/${resolvedId}/`, {
           headers: token ? { 'Authorization': `Bearer ${token}` } : {}
         });
         if (res.ok) {
@@ -33,7 +34,7 @@ const ReviewDetail = () => {
       }
     };
     fetchSubmission();
-  }, [submissionId]);
+  }, [resolvedId]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -42,7 +43,7 @@ const ReviewDetail = () => {
     setSuccess(false);
     const token = localStorage.getItem('token') || localStorage.getItem('access');
     try {
-      const res = await fetch(`${API_BASE_URL}/api/v1/exercises/${submissionId}/review/`, {
+      const res = await fetch(`${API_BASE_URL}/api/v1/exercises/${resolvedId}/review/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

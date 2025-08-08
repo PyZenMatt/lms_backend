@@ -4,7 +4,6 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import Loader from './components/Loader/Loader';
 import AdminLayout from './layouts/AdminLayout';
 
-import { BASE_URL } from './config/constant';
 
 export const renderRoutes = (routes = []) => (
   <Suspense fallback={<Loader />}>
@@ -103,6 +102,11 @@ const routes = [
       },
       {
         path: '/review/assigned',
+        element: lazy(() => import('./views/review/AssignedReviewsList.jsx'))
+      },
+      // Alias retrocompatibile
+      {
+        path: '/peer-review',
         element: lazy(() => import('./views/review/AssignedReviewsList.jsx'))
       },
       {

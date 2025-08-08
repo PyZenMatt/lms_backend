@@ -1,6 +1,5 @@
-
 import React, { useEffect, useState } from 'react';
-import { Row, Col, Card, Button, Spinner } from 'react-bootstrap';
+import { Row, Col, Card, Button, Spinner, Alert } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 import RoleGuard from '../../components/guards/RoleGuard';
 import TeoCoinBalanceWidget from '../../components/TeoCoinBalanceWidget';
@@ -11,6 +10,7 @@ import StudentTeoCoinStats from '../../components/StudentTeoCoinStats';
 import PendingWithdrawalsManager from '../../components/PendingWithdrawalsManager';
 import StudentSubmissions from './StudentSubmissions';
 import { fetchStudentDashboard, fetchUserProfile } from '../../services/api/dashboard';
+import StudentAssignedReviewsWidget from '../../components/review/StudentAssignedReviewsWidget';
 
 
 const StudentDashboard = () => {
@@ -19,7 +19,7 @@ const StudentDashboard = () => {
   const [error, setError] = useState('');
   const [userProfile, setUserProfile] = useState(null);
   const [withdrawalOpen, setWithdrawalOpen] = useState(false);
-  const [refreshKey, setRefreshKey] = useState(0); // For refreshing components after withdrawal changes
+  // const [refreshKey, setRefreshKey] = useState(0); // For refreshing components after withdrawal changes
 
   useEffect(() => {
     const loadDashboard = async () => {
@@ -73,14 +73,12 @@ const StudentDashboard = () => {
       console.log('📚 Courses reloaded:', res.data.courses?.length || 0);
       setCourses(res.data.courses || []);
     } catch (err) {
-      console.error('❌ Error refreshing dashboard:', err);
-      setError('Errore durante l\'aggiornamento');
+  console.error('❌ Error refreshing dashboard:', err);
+  setError("Errore durante l'aggiornamento");
     } finally {
       setLoading(false);
     }
   };
-
-
 
   if (loading) {
     return (
@@ -100,23 +98,26 @@ const StudentDashboard = () => {
         <Col md={12}>
           <Card className="border-0 shadow-sm">
             <Card.Body className="text-center py-5">
-              <h2 className="fw-bold mb-1 text-dark">
-                Benvenuto, {userProfile?.first_name || userProfile?.username || 'Studente'}!
-              </h2>
+              <h2 className="fw-bold mb-1 text-dark">Benvenuto, {userProfile?.first_name || userProfile?.username || 'Studente'}!</h2>
               <p className="text-muted mb-0">Continua il tuo percorso di apprendimento artistico</p>
             </Card.Body>
           </Card>
         </Col>
       </Row>
 
+      {!!error && (
+        <Row className="mb-3">
+          <Col md={12}>
+            <Alert variant="danger">{error}</Alert>
+          </Col>
+        </Row>
+      )}
+
 
       {/* Widget TeoCoin: Balance, Burn/Deposit, Quick Actions */}
       <Row className="mb-4">
         <Col md={6}>
-          <TeoCoinBalanceWidget 
-            onWithdrawalClick={() => setWithdrawalOpen(true)}
-            variant="student" 
-          />
+          <TeoCoinBalanceWidget onWithdrawalClick={() => setWithdrawalOpen(true)} variant="student" />
         </Col>
         <Col md={6}>
           <BurnDepositInterface />
@@ -126,12 +127,7 @@ const StudentDashboard = () => {
       {/* Pending Withdrawals Manager */}
       <Row className="mb-4">
         <Col md={12}>
-          <PendingWithdrawalsManager 
-            onWithdrawalCancelled={(amount) => {
-              setRefreshKey(prev => prev + 1);
-              // Could also show a success message here
-            }}
-          />
+          <PendingWithdrawalsManager />
         </Col>
       </Row>
 
@@ -215,6 +211,13 @@ const StudentDashboard = () => {
       <Row className="mb-4">
         <Col md={12}>
           <StudentTeoCoinStats />
+        </Col>
+      </Row>
+
+      {/* Peer Review assegnate (widget) */}
+      <Row className="mb-4">
+        <Col md={12}>
+          <StudentAssignedReviewsWidget />
         </Col>
       </Row>
 
