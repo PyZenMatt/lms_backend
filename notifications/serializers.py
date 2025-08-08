@@ -8,7 +8,7 @@ class NotificationSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Notification
-        fields = ['id', 'message', 'notification_type', 'read', 'created_at', 'related_object', 'link']
+        fields = ['id', 'message', 'notification_type', 'read', 'created_at', 'related_object', 'link', 'related_object_id']
         ordering = ['-created_at']
 
     def get_link(self, obj):
@@ -41,6 +41,16 @@ class NotificationSerializer(serializers.ModelSerializer):
             return None
         except Exception:
             return None
+
+    def to_representation(self, instance):
+        """Include a backward-compatible absorption_id for discount notifications"""
+        data = super().to_representation(instance)
+        try:
+            if data.get('notification_type') == 'teocoin_discount_pending' and data.get('related_object_id'):
+                data['absorption_id'] = data['related_object_id']
+        except Exception:
+            pass
+        return data
 
     def get_related_object(self, obj):
         try:

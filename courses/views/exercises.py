@@ -6,6 +6,7 @@ from rest_framework.exceptions import PermissionDenied
 from django.shortcuts import get_object_or_404
 from django.db import transaction
 from django.db import models
+from django.db.models import Q
 from courses.models import Exercise, Lesson, Course, ExerciseSubmission, ExerciseReview
 from courses.serializers import ExerciseSerializer, ExerciseSubmissionSerializer
 from users.permissions import IsTeacher
@@ -21,29 +22,29 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-def create_reward_transaction(user, amount, transaction_type, submission_id):
+def create_reward_transaction(user, amount, transaction_type, submission_id, reference: str | None = None):
     """
-    Create a reward transaction for a user using DB-based TeoCoin service
+    Create a reward transaction for a user using DB-based TeoCoin service.
+    Maps specific reward types to DB-allowed transaction types and encodes the
+    semantic type in the description for auditing.
     """
     from services.db_teocoin_service import db_teocoin_service
     
     # Convert amount to Decimal for DB service
     from decimal import Decimal
     amount_decimal = Decimal(str(amount))
-    
-    # Create description based on transaction type
-    if transaction_type == 'exercise_reward':
-        description = f"Exercise completion reward (submission {submission_id})"
-    elif transaction_type == 'review_reward':
-        description = f"Exercise review reward (submission {submission_id})"
-    else:
-        description = f"{transaction_type.replace('_', ' ').title()} for submission {submission_id}"
-    
-    # Use DB service to add balance and create transaction
+    # Encode original semantic type in description for auditing, but map to a
+    # valid DB transaction type (choices) for persistence
+    pretty = transaction_type.replace('_', ' ').title()
+    suffix = f" | ref={reference}" if reference else ""
+    description = f"[{transaction_type}] {pretty} (submission {submission_id}){suffix}"
+    mapped_type = 'bonus'
+
+    # Use DB service to add balance and create transaction with mapped type
     success = db_teocoin_service.add_balance(
         user=user,
         amount=amount_decimal,
-        transaction_type=transaction_type,
+        transaction_type=mapped_type,
         description=description
     )
     
@@ -142,8 +143,8 @@ class SubmitExerciseView(APIView):
             )
 
         submission.save()
-
-        return Response({"success": "Esercizio inviato con successo."}, status=status.HTTP_201_CREATED)
+        # Ritorna i dati reali della submission creata, così il frontend si sincronizza subito
+        return Response(ExerciseSubmissionSerializer(submission).data, status=status.HTTP_201_CREATED)
 
 
 class ReviewExerciseView(APIView):
@@ -170,6 +171,26 @@ class ReviewExerciseView(APIView):
         review.reviewed_at = timezone.now()
         review.save()
 
+        # Premio immediato al reviewer: 2 TEO per ogni review completata (idempotente)
+        try:
+            from blockchain.models import DBTeoCoinTransaction
+            exists = DBTeoCoinTransaction.objects.filter(
+                user=request.user,
+                transaction_type='bonus'
+            ).filter(
+                Q(description__contains='[review_reward]') & Q(description__contains=f"ref=review:{review.id}")
+            ).exists()
+            if not exists:
+                _ = create_reward_transaction(
+                    user=request.user,
+                    amount=2,
+                    transaction_type='review_reward',
+                    submission_id=submission.id,
+                    reference=f"review:{review.id}"
+                )
+        except Exception as e:
+            logger.error(f"Errore creazione reward reviewer immediato: {e}")
+
         # Aggiorna sempre la media dopo ogni review
         ExerciseReview.calculate_average_score(submission)
 
@@ -185,110 +206,47 @@ class ReviewExerciseView(APIView):
             try:
                 with transaction.atomic():
                     logger.info(f"📊 Calculating average score for submission {submission.id}")
-                    # Calcola la media solo sulle review con score non None
+                    # Calcola media e numero di review completate
                     scores = [r.score for r in reviews if r.score is not None]
-                    if scores:
-                        average = sum(scores) / len(scores)
-                    else:
-                        average = None
-                    passed = average is not None and average >= 6
-                    
-                    logger.info(f"📈 Submission {submission.id}: average={average}, passed={passed}")
-                    
-                    # Get course - handle both lesson.course and direct course relationship
-                    course = None
-                    try:
-                        if hasattr(submission.exercise, 'lesson') and submission.exercise.lesson:
-                            course = submission.exercise.lesson.course
-                        elif hasattr(submission.exercise, 'course') and submission.exercise.course:
-                            course = submission.exercise.course
-                    except AttributeError:
-                        course = None
-                    
-                    logger.info(f"🎓 Course found: {course.title if course else 'None'}")
-                    
+                    completed_count = len(scores)
+                    average = (sum(scores) / completed_count) if completed_count > 0 else None
+
+                    # Regola: studente premiato solo se almeno 3 review e media >= 6
+                    passed = average is not None and completed_count >= 3 and average >= 6
+
+                    logger.info(f"📈 Submission {submission.id}: completed={completed_count}, average={average}, passed={passed}")
+
                     # Update submission status
                     submission.passed = passed
-                    
-                    # Process rewards if course found
+
                     reward_transactions_created = []
-                    if course and hasattr(course, 'price'):
-                        logger.info(f"💰 Processing rewards for course {course.title} (price: {course.price})")
-                        
-                        # Exercise reward for student (if passed)
-                        if passed:
-                            # Reward max is PER STUDENT, not per course
-                            reward_max_per_student = int(course.price * 0.15)
-                            
-                            # Check how much this student has already received for this course using DB service
-                            from blockchain.models import DBTeoCoinTransaction
-                            
-                            # Get all exercise submissions for this student in this course
-                            course_submission_ids = ExerciseSubmission.objects.filter(
-                                exercise__lesson__course=course,
-                                student=submission.student
-                            ).values_list('id', flat=True)
-                            
-                            # Sum up exercise rewards for those submissions
-                            student_rewards_for_course = 0
-                            for sub_id in course_submission_ids:
-                                reward_amount = DBTeoCoinTransaction.objects.filter(
-                                    user=submission.student,
-                                    transaction_type='exercise_reward',
-                                    description__contains=f'submission {sub_id}'
-                                ).aggregate(total=models.Sum('amount'))['total'] or 0
-                                student_rewards_for_course += reward_amount
-                            
-                            remaining_for_student = reward_max_per_student - student_rewards_for_course
 
-                            logger.info(f"🎯 Exercise reward check: max_per_student={reward_max_per_student}, student_received={student_rewards_for_course}, remaining_for_student={remaining_for_student}")
+                    # Premio fisso 2 TEO allo studente SE passato (idempotente)
+                    if passed:
+                        from blockchain.models import DBTeoCoinTransaction
+                        existing_student_reward = DBTeoCoinTransaction.objects.filter(
+                            user=submission.student,
+                            transaction_type='bonus'
+                        ).filter(
+                            Q(description__contains='[exercise_reward]') & Q(description__contains=f"submission {submission.id}")
+                        ).exists()
 
-                            if remaining_for_student > 0:
-                                reward_cap = max(1, int(course.price * 0.05))  # Ensure minimum 1
-                                random_reward = min(random.randint(1, reward_cap), remaining_for_student)
-
-                                logger.info(f"🎁 Creating exercise reward: {random_reward} TEO for {submission.student.username}")
-                                
-                                submission.reward_amount = random_reward
-                                
-                                # Create exercise reward transaction
-                                exercise_reward = create_reward_transaction(
-                                    submission.student, 
-                                    random_reward, 
-                                    'exercise_reward', 
-                                    submission.id
-                                )
-                                reward_transactions_created.append(exercise_reward)
-                                
-                                if exercise_reward:
-                                    logger.info(f"✅ Exercise reward transaction created: ID {exercise_reward.id}")
-                                else:
-                                    logger.error(f"❌ Failed to create exercise reward transaction")
-
-                                # Note: We no longer track global course.reward_distributed
-                                # Each student can earn up to their individual limit
-                                logger.info(f"📊 Student reward: {random_reward} TEO (remaining: {remaining_for_student - random_reward})")
-                            else:
-                                logger.warning(f"⚠️ Student {submission.student.username} has already received maximum rewards for this course")
-
-                        # Review rewards for all reviewers
-                        reviewer_reward = max(1, int(course.price * 0.005))
-                        logger.info(f"👥 Creating review rewards: {reviewer_reward} TEO each for {len(reviews)} reviewers")
-                        
-                        for i, r in enumerate(reviews):
-                            logger.info(f"🔍 Creating review reward {i+1}/{len(reviews)} for {r.reviewer.username}")
-                            review_reward = create_reward_transaction(
-                                r.reviewer,
-                                reviewer_reward,
-                                'review_reward',
+                        if not existing_student_reward:
+                            student_reward_amount = 2
+                            submission.reward_amount = student_reward_amount
+                            exercise_reward = create_reward_transaction(
+                                submission.student,
+                                student_reward_amount,
+                                'exercise_reward',
                                 submission.id
                             )
-                            reward_transactions_created.append(review_reward)
-                            
-                            if review_reward:
-                                logger.info(f"✅ Review reward transaction created: ID {review_reward.id}")
+                            reward_transactions_created.append(exercise_reward)
+                            if exercise_reward:
+                                logger.info(f"✅ Exercise reward transaction created: ID {exercise_reward.id}")
                             else:
-                                logger.error(f"❌ Failed to create review reward transaction for {r.reviewer.username}")
+                                logger.error(f"❌ Failed to create exercise reward transaction")
+                        else:
+                            logger.info("ℹ️ Exercise reward already exists; skipping duplicate grant.")
                     
                     logger.info(f"💾 Saving submission changes for {submission.id}")
                     # Save submission changes
@@ -347,6 +305,7 @@ class MySubmissionView(APIView):
 
 class AssignedReviewsView(APIView):
     permission_classes = [IsAuthenticated]
+
     def get(self, request):
         reviews = ExerciseReview.objects.filter(reviewer=request.user, score__isnull=True)
         data = [
@@ -356,36 +315,6 @@ class AssignedReviewsView(APIView):
                 'exercise_title': r.submission.exercise.title,
                 'assigned_at': r.assigned_at,
                 'student_username': r.submission.student.username if r.submission.student else None,
-            } for r in reviews
-        ]
-        return Response(data)
-
-class SubmissionDetailView(APIView):
-    permission_classes = [IsAuthenticated]
-    def get(self, request, submission_id):
-        submission = get_object_or_404(ExerciseSubmission, pk=submission_id)
-        if submission.student != request.user and not submission.reviewers.filter(pk=request.user.pk).exists():
-            return Response({'detail': 'Non autorizzato.'}, status=403)
-        return Response(ExerciseSubmissionSerializer(submission).data)
-
-class SubmissionHistoryView(APIView):
-    permission_classes = [IsAuthenticated]
-    def get(self, request):
-        submissions = ExerciseSubmission.objects.filter(student=request.user)
-        data = ExerciseSubmissionSerializer(submissions, many=True).data
-        return Response(data)
-
-class ReviewHistoryView(APIView):
-    permission_classes = [IsAuthenticated]
-    def get(self, request):
-        reviews = ExerciseReview.objects.filter(reviewer=request.user, score__isnull=False)
-        data = [
-            {
-                'pk': r.pk,
-                'submission_pk': r.submission.pk,
-                'exercise_title': r.submission.exercise.title,
-                'score': r.score,
-                'reviewed_at': r.reviewed_at,
             } for r in reviews
         ]
         return Response(data)

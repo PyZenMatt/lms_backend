@@ -183,26 +183,10 @@ def handle_exercise_submission_approval(sender, instance, created, **kwargs):
 @receiver(post_save, sender=ExerciseReview)
 def handle_review_completion(sender, instance, created, **kwargs):
     """
-    Quando una review viene completata, assegna automaticamente i reward al reviewer
+    DEPRECATO: la logica di premio reviewer è gestita in courses/views/exercises.py
+    (ReviewExerciseView) per evitare duplicazioni e garantire atomicità.
     """
-    # Solo per review completate con score
-    if instance.score is not None and instance.reviewed_at:
-        try:
-            # Verifica che non sia già stata processata
-            existing_transaction = BlockchainTransaction.objects.filter(
-                user=instance.reviewer,
-                transaction_type='review_reward',
-                related_object_id=str(instance.id)
-            ).exists()
-            
-            if not existing_transaction:
-                logger.info(f"Processing blockchain reward for completed review {instance.id}")
-                BlockchainRewardManager.award_review_completion(instance)
-            else:
-                logger.debug(f"Review {instance.id} already has reward transaction")
-                
-        except Exception as e:
-            logger.error(f"Error processing review completion reward: {str(e)}")
+    return
 
 
 @receiver(pre_save, sender=ExerciseReview)
