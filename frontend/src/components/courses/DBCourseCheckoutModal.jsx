@@ -187,7 +187,7 @@ const DBCourseCheckoutModal = ({ course, show, handleClose, onPurchaseComplete }
 
   const refreshDbBalance = async () => {
     try {
-      const response = await fetch('/api/v1/teocoin/withdrawals/balance/', {
+      const response = await fetch('/teocoin/withdrawals/balance/', {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('accessToken')}`,
         },

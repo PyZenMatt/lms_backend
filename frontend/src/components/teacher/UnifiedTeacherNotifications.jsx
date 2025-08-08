@@ -124,7 +124,7 @@ const UnifiedTeacherNotifications = () => {
           const teoAmount = teoMatch ? parseFloat(teoMatch[1]) : parsed.teo_amount || 10.0;
           
           // Call the teacher absorption endpoint to credit TeoCoin
-          const creditResponse = await axiosClient.post('/api/v1/teocoin/teacher/choice/', {
+          const creditResponse = await axiosClient.post('/teocoin/teacher/choice/', {
             absorption_id: notificationId,
             choice: 'teo',
             amount: teoAmount,
@@ -150,7 +150,7 @@ const UnifiedTeacherNotifications = () => {
       } else {
         // EUR choice - call endpoint without crediting
         try {
-          await axiosClient.post('/api/v1/teocoin/teacher/choice/', {
+          await axiosClient.post('/teocoin/teacher/choice/', {
             absorption_id: notificationId,
             choice: 'eur',
             amount: 0,

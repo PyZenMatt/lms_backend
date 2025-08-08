@@ -326,7 +326,7 @@ const TeoCoinManager = ({ open, onClose, userBalance = 0 }) => {
       
       // Refresh DB balance
       console.log('📊 Fetching DB balance...');
-      const dbResponse = await fetch('/api/v1/teocoin/withdrawals/balance/', {
+      const dbResponse = await fetch('/teocoin/withdrawals/balance/', {
         headers: {
           Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json'
@@ -395,7 +395,7 @@ const TeoCoinManager = ({ open, onClose, userBalance = 0 }) => {
         metamask_address: walletAddress
       };
 
-      const response = await fetch('/api/v1/teocoin/withdrawals/create/', {
+      const response = await fetch('/teocoin/withdrawals/create/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -486,7 +486,7 @@ const TeoCoinManager = ({ open, onClose, userBalance = 0 }) => {
 
       console.log('📤 Sending burn verification to API (same as BurnDepositInterface):', requestData);
 
-      const response = await fetch('/api/v1/teocoin/burn-deposit/', {
+      const response = await fetch('/teocoin/burn-deposit/', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,  // Same header order as working component
@@ -576,7 +576,7 @@ const TeoCoinManager = ({ open, onClose, userBalance = 0 }) => {
         amount: parseFloat(stakeAmount)
       };
 
-      const response = await fetch('/api/v1/teocoin/staking/stake/', {
+      const response = await fetch('/teocoin/staking/stake/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -612,7 +612,7 @@ const TeoCoinManager = ({ open, onClose, userBalance = 0 }) => {
   const loadTransactionHistory = useCallback(async () => {
     try {
       const token = localStorage.getItem('accessToken');
-      const response = await fetch('/api/v1/teocoin/transactions/history/', {
+      const response = await fetch('/teocoin/transactions/history/', {
         headers: {
           Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json'

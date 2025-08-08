@@ -49,14 +49,14 @@ const TeacherDiscountNotification = () => {
       setProcessing(prev => ({ ...prev, [absorptionId]: true }));
       
       console.log('📤 Calling navbar teacher choice endpoint:', {
-        endpoint: '/api/v1/teocoin/teacher/choice/',
+        endpoint: '/teocoin/teacher/choice/',
         data: {
           absorption_id: absorptionId,
           choice: choice
         }
       });
       
-      const response = await axiosClient.post('/api/v1/teocoin/teacher/choice/', {
+      const response = await axiosClient.post('/teocoin/teacher/choice/', {
         absorption_id: absorptionId,
         choice: choice
       });

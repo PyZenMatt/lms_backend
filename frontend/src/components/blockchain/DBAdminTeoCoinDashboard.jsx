@@ -26,7 +26,7 @@ useEffect(() => {
       setError(null);
       const token = localStorage.getItem('accessToken') || localStorage.getItem('token') || localStorage.getItem('access');
       if (!token) throw new Error('No authentication token found');
-      const statsResponse = await fetch('/api/v1/teocoin/statistics/', {
+      const statsResponse = await fetch('/teocoin/statistics/', {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
@@ -34,7 +34,7 @@ useEffect(() => {
       });
       if (!statsResponse.ok) throw new Error('Failed to fetch platform statistics');
       const statsData = await statsResponse.json();
-      const adminResponse = await fetch('/api/v1/teocoin/admin/platform/stats/', {
+      const adminResponse = await fetch('/teocoin/admin/platform/stats/', {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',

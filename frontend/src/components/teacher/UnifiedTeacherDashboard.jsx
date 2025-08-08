@@ -127,7 +127,7 @@ const UnifiedTeacherDashboard = () => {
         const teoAmount = parsed.teo_amount || 10.0;
         
         console.log('📤 Calling TEO credit endpoint:', {
-          endpoint: '/api/v1/teocoin/teacher/choice/',
+          endpoint: '/teocoin/teacher/choice/',
           data: {
             absorption_id: notificationId,
             choice: 'teo',
@@ -137,7 +137,7 @@ const UnifiedTeacherDashboard = () => {
           }
         });
         
-        const creditResponse = await axiosClient.post('/api/v1/teocoin/teacher/choice/', {
+        const creditResponse = await axiosClient.post('/teocoin/teacher/choice/', {
           absorption_id: notificationId,
           choice: 'teo',
           amount: teoAmount,
@@ -158,23 +158,23 @@ const UnifiedTeacherDashboard = () => {
         }
       } else {
         // EUR choice - call endpoint without crediting
-        console.log('📤 Calling EUR choice endpoint:', {
-          endpoint: '/api/v1/teocoin/teacher/choice/',
+        console.log('� Calling EUR choice endpoint:', {
+          endpoint: '/teocoin/teacher/choice/',
           data: {
             absorption_id: notificationId,
             choice: 'eur',
-            amount: 0,
-            transaction_type: 'discount_declined',
-            description: 'Teacher chose EUR commission over TEO'
+            amount: eurAmount,
+            transaction_type: 'discount_commission',
+            description: `EUR commission for course: ${courseTitle}`
           }
         });
         
-        const eurResponse = await axiosClient.post('/api/v1/teocoin/teacher/choice/', {
+        const eurResponse = await axiosClient.post('/teocoin/teacher/choice/', {
           absorption_id: notificationId,
           choice: 'eur',
-          amount: 0,
-          transaction_type: 'discount_declined',
-          description: 'Teacher chose EUR commission over TEO'
+          amount: eurAmount,
+          transaction_type: 'discount_commission',
+          description: `EUR commission for course: ${courseTitle}`
         });
         
         console.log('📥 EUR choice response:', eurResponse.data);
