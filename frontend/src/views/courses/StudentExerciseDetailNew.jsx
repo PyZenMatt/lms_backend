@@ -57,6 +57,11 @@ const StudentExerciseDetailNew = () => {
           console.log('📝 Nessuna submission esistente trovata - l\'utente può sottomettere');
           setSubmission(null);
           setStatus('');
+        } else if (res.status === 400) {
+          // 400 può essere un problema di autenticazione - trattiamo come 404
+          console.log('⚠️ Errore 400 - probabilmente nessuna submission esistente');
+          setSubmission(null);
+          setStatus('');
         } else {
           console.error('❌ Errore nel recupero submission:', res.status);
           setSubmission(null);
