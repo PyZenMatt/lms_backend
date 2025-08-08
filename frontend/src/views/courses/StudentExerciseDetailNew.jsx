@@ -17,67 +17,70 @@ const StudentExerciseDetailNew = () => {
   const [error, setError] = useState('');
   const [userRole, setUserRole] = useState('');
 
-  useEffect(() => {
+  // Helper: fetch exercise details
+  const fetchExercise = async () => {
     const token = localStorage.getItem('token') || localStorage.getItem('access');
-    const fetchExercise = async () => {
-      try {
-        const res = await fetch(`${API_BASE_URL}/api/v1/exercises/${exerciseId}/`, {
-          headers: token ? { 'Authorization': `Bearer ${token}` } : {}
-        });
-        if (res.ok) {
-          const data = await res.json();
-          setExercise(data);
-        } else {
-          setError('Errore nel caricamento esercizio');
-        }
-      } catch (err) {
-        setError('Errore nel caricamento esercizio');
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/v1/exercises/${exerciseId}/`, {
+        headers: token ? { Authorization: `Bearer ${token}` } : {}
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setExercise(data);
+      } else {
+        setError("Errore nel caricamento esercizio");
       }
-    };
-    
-    const fetchSubmission = async () => {
-      try {
-        const res = await fetch(`${API_BASE_URL}/api/v1/exercises/${exerciseId}/my_submission/`, {
-          headers: token ? { 'Authorization': `Bearer ${token}` } : {}
-        });
-        if (res.ok) {
-          const data = await res.json();
-          setSubmission(data);
-          // Converti i campi del modello in status leggibile
-          let status = '';
-          if (data.is_approved) {
-            status = 'approved';
-          } else if (data.reviewed) {
-            status = 'rejected';
-          } else {
-            status = 'in_review';
-          }
-          setStatus(status);
-        } else if (res.status === 404) {
-          // 404 significa che l'utente non ha ancora sottomesso una soluzione - questo è normale
-          console.log('📝 Nessuna submission esistente trovata - l\'utente può sottomettere');
-          setSubmission(null);
-          setStatus('');
-        } else if (res.status === 400) {
-          // 400 può essere un problema di autenticazione - trattiamo come 404
-          console.log('⚠️ Errore 400 - probabilmente nessuna submission esistente');
-          setSubmission(null);
-          setStatus('');
-        } else {
-          console.error('❌ Errore nel recupero submission:', res.status);
-          setSubmission(null);
-          setStatus('');
-        }
-      } catch (err) {
-        // Non è un errore se non c'è submission
+    } catch (err) {
+      setError("Errore nel caricamento esercizio");
+    }
+  };
+
+  // Helper: fetch user's submission for this exercise
+  const fetchSubmissionSafe = async () => {
+    const token = localStorage.getItem('token') || localStorage.getItem('access');
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/v1/exercises/${exerciseId}/my_submission/`, {
+        headers: token ? { Authorization: `Bearer ${token}` } : {}
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setSubmission(data);
+        // Mappa campi modello a status leggibile
+        let s = '';
+        if (data.is_approved) s = 'approved';
+        else if (data.reviewed) s = 'rejected';
+        else s = 'in_review';
+        setStatus(s);
+      } else if (res.status === 404 || res.status === 400) {
+        // Tratta 404 e 400 come "nessuna submission"
+        setSubmission(null);
+        setStatus('');
+      } else {
+        console.error('❌ Errore nel recupero submission:', res.status);
         setSubmission(null);
         setStatus('');
       }
+    } catch (err) {
+      // Non è un errore se non c'è submission
+      setSubmission(null);
+      setStatus('');
+    }
+  };
+
+  // Initial load
+  useEffect(() => {
+    let isMounted = true;
+    (async () => {
+      setLoading(true);
+      try {
+        await Promise.all([fetchExercise(), fetchSubmissionSafe()]);
+      } finally {
+        if (isMounted) setLoading(false);
+      }
+    })();
+    return () => {
+      isMounted = false;
     };
-    
-    fetchExercise();
-    fetchSubmission();
-    setLoading(false);
   }, [exerciseId]);
 
   useEffect(() => {
@@ -92,7 +95,10 @@ const StudentExerciseDetailNew = () => {
     fetchRole();
   }, []);
 
-  const canSubmit = !submission || (!submission.is_approved && submission.reviewed);
+  // Valuta possibilità di invio con coercizione booleana
+  const isApproved = !!submission?.is_approved;
+  const isReviewed = !!submission?.reviewed;
+  const canSubmit = !submission || (!isApproved && isReviewed);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -101,24 +107,30 @@ const StudentExerciseDetailNew = () => {
     const token = localStorage.getItem('token') || localStorage.getItem('access');
     
     try {
-      const res = await fetch(`/api/v1/exercises/${exerciseId}/submit/`, {
+      const res = await fetch(`${API_BASE_URL}/api/v1/exercises/${exerciseId}/submit/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+          ...(token ? { Authorization: `Bearer ${token}` } : {})
         },
         body: JSON.stringify({ content: solution })
       });
       
       if (res.ok) {
-        setStatus('in_review');
-        setSubmission({ content: solution, status: 'in_review' });
+        // Refresha i dati reali dal backend
+        await fetchSubmissionSafe();
         setSolution('');
       } else {
-        setError('Errore nell\'invio della soluzione');
+        // Prova a leggere l'errore server per feedback migliore
+        try {
+          const data = await res.json();
+          setError(data?.error || data?.detail || "Errore nell'invio della soluzione");
+        } catch {
+          setError("Errore nell'invio della soluzione");
+        }
       }
     } catch (err) {
-      setError('Errore nell\'invio della soluzione');
+      setError("Errore nell'invio della soluzione");
     } finally {
       setSubmitting(false);
     }
