@@ -42,7 +42,16 @@ const StudentExerciseDetailNew = () => {
         if (res.ok) {
           const data = await res.json();
           setSubmission(data);
-          setStatus(data.status || '');
+          // Converti i campi del modello in status leggibile
+          let status = '';
+          if (data.is_approved) {
+            status = 'approved';
+          } else if (data.reviewed) {
+            status = 'rejected';
+          } else {
+            status = 'in_review';
+          }
+          setStatus(status);
         } else if (res.status === 404) {
           // 404 significa che l'utente non ha ancora sottomesso una soluzione - questo è normale
           console.log('📝 Nessuna submission esistente trovata - l\'utente può sottomettere');
@@ -77,7 +86,7 @@ const StudentExerciseDetailNew = () => {
     fetchRole();
   }, []);
 
-  const canSubmit = !submission || submission.status === 'rejected';
+  const canSubmit = !submission || (!submission.is_approved && submission.reviewed);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -284,14 +293,14 @@ const StudentExerciseDetailNew = () => {
           )}
 
           {/* Cannot Submit Info */}
-          {!canSubmit && submission?.status === 'approved' && (
+          {!canSubmit && submission?.is_approved && (
             <Alert variant="success">
               <i className="feather icon-check-circle mr-2"></i>
               <strong>Ottimo lavoro!</strong> La tua soluzione è stata approvata.
             </Alert>
           )}
 
-          {!canSubmit && submission?.status === 'in_review' && (
+          {!canSubmit && submission && !submission.is_approved && !submission.reviewed && (
             <Alert variant="info">
               <i className="feather icon-clock mr-2"></i>
               <strong>In attesa di revisione</strong> La tua soluzione è in fase di valutazione.
