@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { BrowserRouter } from 'react-router-dom';
 import { loadStripe } from '@stripe/stripe-js';
 import { Elements } from '@stripe/react-stripe-js';
@@ -21,6 +21,11 @@ import './assets/css/dark-theme.css';
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
 
 const App = () => {
+  useEffect(() => {
+    if (!document.title || document.title.includes('Datta')) {
+      document.title = 'SchoolPlatform';
+    }
+  }, []);
   return (
     <ThemeProvider>
       <BrowserRouter>

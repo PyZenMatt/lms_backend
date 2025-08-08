@@ -6,6 +6,7 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
  */
 
 import React, { useState, useEffect } from 'react';
+import { Helmet } from "react-helmet";
 import { Container, Row, Col, Card, Alert, Badge, Button, Accordion, ProgressBar } from 'react-bootstrap';
 import { useTheme } from '../../contexts/ThemeContext';
 import ThemeToggle from '../../components/ui/ThemeToggle';
@@ -51,9 +52,17 @@ const DevelopmentStatusDashboard = () => {
       });
     }
 
+    // Helmet per il titolo
+    const helmet = (
+      <Helmet>
+        <title>SchoolPlatform Development Dashboard</title>
+      </Helmet>
+    );
     setApiStatus(checks);
   };
-
+      <>
+        {helmet}
+        <Container fluid className="p-4">
   const features = [
     {
       name: '🌙 Dark Theme System',
@@ -190,6 +199,7 @@ const DevelopmentStatusDashboard = () => {
                       The application is running in development mode with mock data services. 
                       All UI features are fully functional for demonstration purposes.
                     </p>
+      </>
                     <small>
                       🎭 Mock services provide realistic data simulation when backend is not available.
                     </small>

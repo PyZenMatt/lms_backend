@@ -171,8 +171,7 @@ class TeacherMakeAbsorptionChoiceView(APIView):
                         'error': f'TeoCoin crediting error: {str(credit_error)}',
                         'message': 'Failed to process TeoCoin credit'
                     }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-            
-            # EUR choice - no TeoCoin crediting
+            # EUR choice - return success for EUR option  
             return Response({
                 'success': True,
                 'absorption': {

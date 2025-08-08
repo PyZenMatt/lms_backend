@@ -155,3 +155,10 @@ AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',
 ]
 
+# TeoCoin System Configuration
+USE_DB_TEOCOIN_SYSTEM = os.getenv('USE_DB_TEOCOIN_SYSTEM', 'True').lower() == 'true'
+TEOCOIN_SYSTEM = os.getenv('TEOCOIN_SYSTEM', 'database')  # 'database' or 'blockchain'
+
+# Reward System Configuration
+REWARD_SYSTEM_BACKEND = 'services.db_teocoin_service.DBTeoCoinService'
+

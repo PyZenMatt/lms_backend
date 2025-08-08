@@ -191,7 +191,7 @@ const LandingPage = () => {
             
             <Col lg={6} className="position-relative">
               <div className="hero-cards">
-                {/* Floating Cards - Styled like cards in Datta Able */}
+                {/* Floating Cards - Styled like cards in SchoolPlatform theme */}
                 <Card className="shadow-lg position-absolute card-nft" 
                       style={{ 
                           top: '10%', 

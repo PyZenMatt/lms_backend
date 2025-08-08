@@ -80,6 +80,10 @@ class DBTeoCoinService:
         balance_data = self.get_user_balance(user)
         return balance_data['available_balance']
     
+    def get_balance(self, user: User) -> Decimal:
+        """Alias for get_available_balance for compatibility"""
+        return self.get_available_balance(user)
+    
     def get_staked_balance(self, user: User) -> Decimal:
         """Get user's staked TeoCoin balance"""
         balance_data = self.get_user_balance(user)

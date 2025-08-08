@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Helmet } from "react-helmet";
 import { Row, Col } from 'react-bootstrap';
 import RoleGuard from '../../components/guards/RoleGuard';
 import PendingTeachersCard from '../../components/cards/PendingTeachersCard';
@@ -12,7 +13,10 @@ const AdminDashboard = () => {
 
   return (
     <RoleGuard allowedRoles={['admin']}>
-      <React.Fragment>
+      <>
+        <Helmet>
+          <title>SchoolPlatform Admin Dashboard</title>
+        </Helmet>
         <Row className="g-3 mb-4">
         <Col xs={12} className="mb-4">
           <PendingTeachersCard />
@@ -24,14 +28,13 @@ const AdminDashboard = () => {
           <AdminTeoCoinDashboard onWithdrawalClick={() => setWithdrawalOpen(true)} />
         </Col>
       </Row>
-      
       {/* TeoCoin Withdrawal Modal */}
       <TeoCoinWithdrawal
         open={withdrawalOpen}
         onClose={() => setWithdrawalOpen(false)}
         userBalance={0} // Admin balance will be fetched by the component itself
       />
-    </React.Fragment>
+      </>
     </RoleGuard>
   );
 };
