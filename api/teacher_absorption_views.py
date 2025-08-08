@@ -132,30 +132,38 @@ class TeacherMakeAbsorptionChoiceView(APIView):
                     'error': 'Only teachers can make absorption choices'
                 }, status=status.HTTP_403_FORBIDDEN)
             
-            # Get request data
-            absorption_id = request.data.get('absorption_id')
-            choice = request.data.get('choice', 'absorb')
-            amount = request.data.get('amount', 10.0)  # TEO amount to credit
+            # Get request data con defaults sicuri
+            absorption_id = request.data.get('absorption_id', 'notification')
+            choice = request.data.get('choice', 'absorb').lower()
+            amount = request.data.get('amount', 10.0)  # Default TEO amount
             transaction_type = request.data.get('transaction_type', 'discount_absorption')
-            description = request.data.get('description', 'TeoCoin discount absorption')
+            description = request.data.get('description', f'TeoCoin discount absorption - {absorption_id}')
             
             # Log the choice for tracking
-            logger.info(f"✅ Teacher {request.user.id} ({request.user.username}) made choice '{choice}' for absorption {absorption_id}")
+            logger.info(f"🎯 Teacher choice received: user={request.user.id} ({request.user.username}), choice='{choice}', absorption_id={absorption_id}, amount={amount}")
             
-            # 🚨 FIX CRITICO: Se teacher sceglie TEO/absorb, accredita TeoCoin SEMPRE via database
-            if choice == 'absorb' or choice == 'teo':
+            # 🚨 SCELTA TEO: Accredita TeoCoin via database
+            if choice in ['absorb', 'teo']:
                 try:
                     from services.db_teocoin_service import DBTeoCoinService
                     from decimal import Decimal
+                    
                     db_service = DBTeoCoinService()
+                    
+                    # Converti amount a Decimal sicuro
+                    try:
+                        teo_amount = Decimal(str(amount)) if amount > 0 else Decimal('10.0')
+                    except:
+                        teo_amount = Decimal('10.0')  # Fallback sicuro
                     
                     # Verifica saldo prima del credito
                     initial_balance = db_service.get_balance(request.user)
-                    logger.info(f"Teacher {request.user.username} initial balance: {initial_balance} TEO")
+                    logger.info(f"💰 Teacher {request.user.username} initial balance: {initial_balance} TEO")
                     
+                    # Accredita TeoCoin
                     success = db_service.add_balance(
                         user=request.user,
-                        amount=Decimal(str(amount)),
+                        amount=teo_amount,
                         transaction_type=transaction_type,
                         description=description
                     )
@@ -165,56 +173,69 @@ class TeacherMakeAbsorptionChoiceView(APIView):
                         new_balance = db_service.get_balance(request.user)
                         credited_amount = new_balance - initial_balance
                         
-                        logger.info(f"✅ TeoCoin credited successfully: {amount} TEO to {request.user.username}")
+                        logger.info(f"✅ TeoCoin credited successfully: {teo_amount} TEO to {request.user.username}")
                         logger.info(f"✅ Balance change: {initial_balance} → {new_balance} TEO (+{credited_amount})")
                         
                         return Response({
                             'success': True,
+                            'message': f'Hai ricevuto {teo_amount} TEO per l\'assorbimento sconto',
+                            'amount_credited': float(teo_amount),
+                            'initial_balance': float(initial_balance),
+                            'new_balance': float(new_balance),
+                            'choice': 'teo',
                             'absorption': {
                                 'id': absorption_id,
                                 'status': 'processed',
                                 'choice_made': choice,
                                 'final_teacher_eur': 0,
-                                'final_teacher_teo': float(amount),
+                                'final_teacher_teo': float(teo_amount),
                                 'final_platform_eur': 0,
                                 'decided_at': None
-                            },
-                            'teo_credited': float(amount),
-                            'initial_balance': float(initial_balance),
-                            'new_balance': float(new_balance),
-                            'message': f'✅ TEO credited successfully: {amount} TEO',
-                            'note': 'TeoCoin credited to your account'
+                            }
                         })
                     else:
-                        logger.error(f"❌ Failed to credit {amount} TEO to teacher {request.user.id}")
+                        logger.error(f"❌ Failed to credit {teo_amount} TEO to teacher {request.user.username}")
                         return Response({
                             'success': False,
-                            'error': 'Failed to credit TeoCoin',
+                            'error': 'Errore nell\'accredito TeoCoin',
                             'message': 'TeoCoin crediting failed'
                         }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
                         
                 except Exception as credit_error:
-                    logger.error(f"Error crediting TeoCoin: {credit_error}")
+                    logger.error(f"❌ TeoCoin crediting error: {str(credit_error)}")
                     return Response({
                         'success': False,
                         'error': f'TeoCoin crediting error: {str(credit_error)}',
                         'message': 'Failed to process TeoCoin credit'
                     }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-            # EUR choice - return success for EUR option  
-            return Response({
-                'success': True,
-                'absorption': {
-                    'id': absorption_id,
-                    'status': 'processed',
-                    'choice_made': choice,
-                    'final_teacher_eur': 0,
-                    'final_teacher_teo': 0,
-                    'final_platform_eur': 0,
-                    'decided_at': None
-                },
-                'message': f'Choice recorded: {"EUR option selected" if choice == "eur" else "Choice processed"}',
-                'note': 'No TeoCoin credited for EUR choice'
-            })
+            
+            # 🚨 SCELTA EUR: Nessun accredito TeoCoin
+            elif choice in ['refuse', 'eur']:
+                logger.info(f"✅ Teacher {request.user.username} chose EUR commission for absorption {absorption_id}")
+                
+                return Response({
+                    'success': True,
+                    'message': 'Hai scelto di mantenere la commissione in EUR',
+                    'choice': 'eur',
+                    'absorption': {
+                        'id': absorption_id,
+                        'status': 'processed',
+                        'choice_made': choice,
+                        'final_teacher_eur': 0,  # Placeholder value
+                        'final_teacher_teo': 0,
+                        'final_platform_eur': 0,
+                        'decided_at': None
+                    }
+                })
+            
+            # 🚨 SCELTA NON VALIDA
+            else:
+                logger.warning(f"❌ Invalid choice '{choice}' by teacher {request.user.username}")
+                return Response({
+                    'success': False,
+                    'error': f'Scelta non valida: {choice}. Usa "teo" o "eur"',
+                    'message': 'Invalid choice provided'
+                }, status=status.HTTP_400_BAD_REQUEST)
             
         except Exception as e:
             logger.error(f"Error in teacher choice endpoint: {str(e)}")
