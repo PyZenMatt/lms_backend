@@ -368,3 +368,21 @@ class ExerciseDetailView(RetrieveAPIView):
     def get_queryset(self):
         # ✅ OTTIMIZZATO - Prevent N+1 queries
         return Exercise.objects.select_related('lesson', 'lesson__course', 'lesson__course__teacher')
+
+class SubmissionDetailView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, submission_id: int):
+        submission = get_object_or_404(ExerciseSubmission, id=submission_id)
+
+        # Autorizzazioni minime: studente proprietario, staff, o teacher del corso
+        is_owner = submission.student_id == request.user.id
+        is_staff = getattr(request.user, 'is_staff', False)
+        is_course_teacher = False
+        if submission.exercise and submission.exercise.lesson and submission.exercise.lesson.course:
+            is_course_teacher = (submission.exercise.lesson.course.teacher_id == request.user.id)
+
+        if not (is_owner or is_staff or is_course_teacher):
+            return Response({'detail': 'Non autorizzato.'}, status=403)
+
+        return Response(ExerciseSubmissionSerializer(submission).data, status=200)

@@ -100,67 +100,69 @@ const UnifiedTeacherNotifications = () => {
 
   const handleDiscountChoice = async (notification, choice) => {
     const notificationId = notification.id;
-    const absorptionId = notification.related_object_id || notification.absorption_id || notificationId;
-    
     try {
-  setProcessing((prev) => ({ ...prev, [notificationId]: true }));
-      
+      setProcessing(prev => ({ ...prev, [notificationId]: true }));
+
       if (choice === 'teo') {
-        // Server computes correct TEO; we only send the absorption_id and choice
-        try {
-          const creditResponse = await axiosClient.post('/teocoin/teacher/choice/', {
-            absorption_id: absorptionId,
-            choice: 'teo'
-          });
-          if (creditResponse.data?.success) {
-            const credited = creditResponse.data?.absorption?.final_teacher_teo;
-            if (window.showToast) {
-              window.showToast(`✅ TEO accettati: ${credited} TEO`, 'success');
-            }
-          } else {
-            throw new Error(creditResponse.data?.error || 'Failed to credit TeoCoin');
-          }
-        } catch (creditError) {
-          console.error('Error crediting TeoCoin:', creditError);
-          if (window.showToast) {
-            window.showToast('⚠️ Errore nel credito TEO: ' + creditError.message, 'error');
-          }
-          return; // Don't mark as read on failure
+        const msg = notification.message || '';
+        const totalRe = /=\s*([\d.,]+)\s*TEO\s*total/i;
+        const partsRe = /Accept\s+TEO:\s*([\d.,]+)\s*TEO\s*\+\s*([\d.,]+)\s*bonus/i;
+
+        let amountTotal = null;
+        // 1) payload strutturato se presente
+        const p = notification.payload || notification.data || {};
+        if (p.amount_total) amountTotal = parseFloat(String(p.amount_total).replace(',', '.'));
+        if ((!amountTotal || !isFinite(amountTotal)) && p.amount && p.bonus) {
+          amountTotal = parseFloat(String(p.amount).replace(',', '.')) + parseFloat(String(p.bonus).replace(',', '.'));
         }
-      } else {
-        // EUR choice - call endpoint without crediting
-        try {
-          const eurResp = await axiosClient.post('/teocoin/teacher/choice/', {
-            absorption_id: absorptionId,
-            choice: 'eur'
-          });
-          if (!eurResp.data?.success) {
-            throw new Error(eurResp.data?.error || 'Operazione non riuscita');
-          }
-        } catch (choiceError) {
-          console.error('Error recording EUR choice:', choiceError);
-          if (window.showToast) {
-            window.showToast('❌ Errore nella scelta EUR: ' + choiceError.message, 'error');
-          }
-          return; // Don't mark as read on failure
+        // 2) dal testo
+        if (!amountTotal || !isFinite(amountTotal)) {
+          const mt = msg.match(totalRe);
+          if (mt && mt[1]) amountTotal = parseFloat(mt[1].replace(',', '.'));
         }
+        if (!amountTotal || !isFinite(amountTotal)) {
+          const mp = msg.match(partsRe);
+          if (mp && mp[1] && mp[2]) {
+            const used = parseFloat(mp[1].replace(',', '.'));
+            const bonus = parseFloat(mp[2].replace(',', '.'));
+            amountTotal = (isFinite(used) ? used : 0) + (isFinite(bonus) ? bonus : 0);
+          }
+        }
+        if (!amountTotal || !isFinite(amountTotal) || amountTotal <= 0) {
+          throw new Error('Importo TEO non disponibile nella notifica');
+        }
+
+        const resp = await axiosClient.post('/teocoin/teacher/choice/', {
+          absorption_id: notificationId,
+          choice: 'teo',
+          amount_total: amountTotal,
+          transaction_type: 'discount_absorption',
+          description: `Discount absorption - total ${amountTotal} TEO`
+        });
+        if (!resp.data?.success) throw new Error(resp.data?.error || 'Operazione non riuscita');
+
+        if (window.showToast) window.showToast(`Accreditati ${amountTotal} TEO`, 'success');
+        // marca read SOLO dopo successo
+        await markAsRead(notificationId);
+        setNotifications(prev => prev.filter(n => n.id !== notificationId));
+        return;
       }
-      
-      // Mark notification as read
+
+      // EUR
+      await axiosClient.post('/teocoin/teacher/choice/', {
+        absorption_id: notificationId,
+        choice: 'eur',
+        amount_total: 0,
+        transaction_type: 'discount_declined',
+        description: 'EUR commission chosen'
+      });
       await markAsRead(notificationId);
-      
-      // Show appropriate message based on choice
-  const message = choice === 'teo' ? `✅ Scelta TEO registrata` : '💰 Hai scelto di mantenere la commissione in EUR';
-      
-      if (window.showToast && choice === 'eur') {
-        window.showToast(message, 'success');
-      }
-      
+      setNotifications(prev => prev.filter(n => n.id !== notificationId));
+      if (window.showToast) window.showToast('Scelta EUR confermata', 'success');
+
     } catch (err) {
       console.error('Error handling discount choice:', err);
-      if (window.showToast) {
-        window.showToast('❌ Errore nella scelta: ' + err.message, 'error');
-      }
+      if (window.showToast) window.showToast('Errore: ' + err.message, 'error');
     } finally {
       setProcessing(prev => ({ ...prev, [notificationId]: false }));
     }

@@ -4,10 +4,9 @@ API Views for Teacher Discount Absorption System
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
+from decimal import Decimal, InvalidOperation
 from rest_framework.permissions import IsAuthenticated
-from django.shortcuts import get_object_or_404
-from rewards.models import TeacherDiscountAbsorption
-from services.teacher_discount_absorption_service import TeacherDiscountAbsorptionService
+from services.db_teocoin_service import DBTeoCoinService
 import logging
 
 logger = logging.getLogger(__name__)
