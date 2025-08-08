@@ -15,7 +15,7 @@ django.setup()
 
 from api.teacher_absorption_views import TeacherMakeAbsorptionChoiceView
 from django.contrib.auth import get_user_model
-from django.test import RequestFactory
+from rest_framework.test import APIRequestFactory
 import json
 
 def test_teacher_choice():
@@ -31,8 +31,8 @@ def test_teacher_choice():
     
     print(f"✅ Found teacher: {teacher.username} (ID: {teacher.id})")
     
-    # Create request
-    factory = RequestFactory()
+    # Create DRF request
+    factory = APIRequestFactory()
     
     # Test TEO choice
     request_data = {
@@ -42,8 +42,8 @@ def test_teacher_choice():
     
     request = factory.post(
         '/api/v1/teocoin/teacher/choice/', 
-        json.dumps(request_data),
-        content_type='application/json'
+        request_data,
+        format='json'
     )
     request.user = teacher
     

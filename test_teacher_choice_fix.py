@@ -8,13 +8,13 @@ import sys
 import django
 
 # Setup Django
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'schoolplatform.settings.prod')
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'schoolplatform.settings')
 django.setup()
 
 from services.db_teocoin_service import DBTeoCoinService
 from users.models import User
 from decimal import Decimal
-from django.test import RequestFactory
+from rest_framework.test import APIRequestFactory
 from api.teacher_absorption_views import TeacherMakeAbsorptionChoiceView
 import json
 
@@ -25,7 +25,7 @@ def test_teacher_teocoin_acceptance():
     
     # 1. Setup servizi
     db_service = DBTeoCoinService()
-    factory = RequestFactory()
+    factory = APIRequestFactory()
     
     # 2. Trova teacher per test
     teacher = User.objects.filter(role='teacher').first()
@@ -90,8 +90,8 @@ def test_teacher_teocoin_acceptance():
         
         request = factory.post(
             '/api/v1/teocoin/teacher/choice/',
-            data=json.dumps(request_data),
-            content_type='application/json'
+            data=request_data,
+            format='json'
         )
         request.user = teacher
         
@@ -144,8 +144,8 @@ def test_teacher_teocoin_acceptance():
         
         request_eur = factory.post(
             '/api/v1/teocoin/teacher/choice/',
-            data=json.dumps(request_data_eur),
-            content_type='application/json'
+            data=request_data_eur,
+            format='json'
         )
         request_eur.user = teacher
         

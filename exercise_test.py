@@ -5,6 +5,12 @@
 print("🚀 STARTING COMPLETE EXERCISE SYSTEM TEST")
 print("=" * 60)
 
+# Setup Django
+import os
+import django
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'schoolplatform.settings')
+django.setup()
+
 from services.db_teocoin_service import DBTeoCoinService
 from users.models import User
 from courses.models import Course, Lesson, Exercise, ExerciseSubmission, ExerciseReview
@@ -46,9 +52,7 @@ if not course:
     print("❌ No course found - cannot test exercises")
     exit()
 
-print(f"   📖 Course: {course.title} (Price: €{course.price})")
-
-# Trova lezione
+    print(f"   📖 Course: {course.title} (Price: €{course.price_eur})")# Trova lezione
 lesson = course.lessons_in_course.first()
 if not lesson:
     print("❌ No lesson found in course")

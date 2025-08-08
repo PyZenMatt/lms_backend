@@ -67,17 +67,11 @@ const NavRight = () => {
           >
             <span className="pcoded-micon"><i className="feather icon-bell"></i></span>
             <span className="pcoded-mtext">Notifiche</span>
-            <ListGroup.Item as="li" bsPrefix=" ">
-              <button
-                type="button"
-                className="nav-link btn btn-link"
-                onClick={() => navigate('/profile/notifications')}
-                style={{ padding: 0 }}
-              >
-                <span className="pcoded-micon"><i className="feather icon-bell"></i></span>
-                <span className="pcoded-mtext">Notifiche</span>
-              </button>
-            </ListGroup.Item>
+          </button>
+        </ListGroup.Item>
+        
+        <ListGroup.Item as="li" bsPrefix=" ">
+          <Dropdown>
             <Dropdown.Toggle as={Link} variant="link" to="#" id="dropdown-basic">
               <i className="icon feather icon-settings" />
             </Dropdown.Toggle>
@@ -112,6 +106,7 @@ const NavRight = () => {
                 </ListGroup.Item>
               </ListGroup>
             </Dropdown.Menu>
+          </Dropdown>
         </ListGroup.Item>
       </ListGroup>
       <ChatList listOpen={listOpen} closed={() => setListOpen(false)} />
