@@ -251,24 +251,6 @@ class BlockchainRewardManager:
         except Exception as e:
             logger.error(f"Error awarding review completion reward: {str(e)}")
             return False
-                    related_object_id=str(review.id),
-                    notes=f"Review reward for submission {submission.id}",
-                    tx_hash=f"db_review_{review.id}_{timezone.now().strftime('%Y%m%d_%H%M%S')}"
-                )
-                
-                logger.info(
-                    f"✅ Review reward awarded (DB): {reviewer_reward} TEO to {review.reviewer.email} "
-                    f"for reviewing exercise {submission.exercise.title}"
-                )
-                
-                return blockchain_transaction
-            else:
-                logger.error(f"❌ Failed to credit review reward to {review.reviewer.email}")
-                return None
-            
-        except Exception as e:
-            logger.error(f"Error awarding review completion reward: {str(e)}")
-            raise
     
     @classmethod
     def _transfer_from_reward_pool(cls, user, amount, teocoin_transaction, reason):
