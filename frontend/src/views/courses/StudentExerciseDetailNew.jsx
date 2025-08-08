@@ -1,9 +1,10 @@
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { Container, Row, Col, Card, Button, Alert, Spinner, Badge, Form } from 'react-bootstrap';
 import { fetchUserRole } from '../../services/api/auth';
 import MainCard from '../../components/Card/MainCard';
+
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 const StudentExerciseDetailNew = () => {
   const { exerciseId } = useParams();
