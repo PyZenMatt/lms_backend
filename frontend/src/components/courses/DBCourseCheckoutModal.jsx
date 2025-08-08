@@ -194,28 +194,37 @@ const DBCourseCheckoutModal = ({ course, show, handleClose, onPurchaseComplete }
 
   const refreshDbBalance = async () => {
     try {
-      // Use withdrawal API for consistency
       const response = await fetch('/api/v1/teocoin/withdrawals/balance/', {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('accessToken')}`,
         },
       });
-      
       const data = await response.json();
       console.log('🔍 Checkout Refresh Balance API Response:', data);
-      
-      if (data.success && data.balance) {
-        // Convert withdrawal API format
-        setDbBalance(parseFloat(data.balance.available || 0));
-      } else {
-        console.warn('Balance API returned no data:', data);
-        setDbBalance(0);
+
+      // Robust parsing: only update if valid value found
+      let nextBalance;
+      if (data?.success && data?.balance?.available !== undefined) {
+        nextBalance = parseFloat(data.balance.available);
+      } else if (data?.available !== undefined) {
+        nextBalance = parseFloat(data.available);
+      } else if (data?.teocoin_balance !== undefined) {
+        nextBalance = parseFloat(data.teocoin_balance);
+      } else if (data?.balance !== undefined && typeof data.balance === 'number') {
+        nextBalance = parseFloat(data.balance);
+      } else if (data?.balance?.available_balance !== undefined) {
+        nextBalance = parseFloat(data.balance.available_balance);
       }
-      if (data.success) {
-        setDbBalance(parseFloat(data.balance.available_balance || 0));
+
+      if (nextBalance !== undefined && !isNaN(nextBalance)) {
+        setDbBalance(nextBalance);
+      } else {
+        // Do not touch balance if response is unexpected
+        console.warn('⚠️ Formato risposta inatteso, saldo lasciato invariato');
       }
     } catch (err) {
       console.error('Error refreshing DB balance:', err);
+      // Do not touch balance on error
     }
   };
 

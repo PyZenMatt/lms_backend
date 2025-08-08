@@ -52,15 +52,22 @@ const NavItem = ({ item }) => {
   let subContent;
   if (item.external) {
     subContent = (
-      <a href={item.url} target="_blank" rel="noopener noreferrer" onClick={handleClick}>
+      <NavLink to={item.url} target={itemTarget} className="nav-link" activeClassName="active" onClick={handleClick}>
         <NavIcon items={item} />
         {itemTitle}
         <NavBadge items={item} />
-      </a>
+      </NavLink>
     );
   } else {
     subContent = (
-      <NavLink to={item.url || '#'} className="nav-link" target={itemTarget} onClick={handleClick}>
+      <NavLink
+        to={item.url || '#'}
+        className="nav-link"
+        activeClassName="active"
+        target={itemTarget}
+        onClick={handleClick}
+        exact
+      >
         <NavIcon items={item} />
         {itemTitle}
         <NavBadge items={item} />

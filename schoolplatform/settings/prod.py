@@ -40,6 +40,10 @@ CSRF_COOKIE_SECURE = True
 if not STRIPE_SECRET_KEY:
     raise ImproperlyConfigured("STRIPE_SECRET_KEY environment variable is required for production")
 
+# TeoCoin System Configuration for Production
+USE_DB_TEOCOIN_SYSTEM = True  # Force DB system in production
+TEOCOIN_SYSTEM = 'database'   # Use database, not blockchain for internal operations
+
 # Sentry (only prod)
 import sentry_sdk
 from sentry_sdk.integrations.django import DjangoIntegration

@@ -134,6 +134,36 @@ class TeacherMakeAbsorptionChoiceView(APIView):
                 teacher=request.user
             )
             
+            # 🚨 FIX CRITICO: Se il teacher sceglie 'absorb', accredita i TeoCoin realmente!
+            teocoin_credited = False
+            credited_amount = 0
+            
+            if choice == 'absorb' and absorption.final_teacher_teo > 0:
+                try:
+                    # Importa il servizio TeoCoin DB
+                    from services.db_teocoin_service import DBTeoCoinService
+                    from decimal import Decimal
+                    
+                    db_service = DBTeoCoinService()
+                    credited_amount = float(absorption.final_teacher_teo)
+                    
+                    # Accredita i TeoCoin nel database
+                    teocoin_credited = db_service.add_balance(
+                        user=request.user,
+                        amount=Decimal(str(credited_amount)),
+                        transaction_type='discount_absorption',
+                        description=f'Teacher absorption choice for discount {absorption_id}'
+                    )
+                    
+                    if teocoin_credited:
+                        logger.info(f"✅ TeoCoin credited: {credited_amount} TEO to {request.user.username}")
+                    else:
+                        logger.error(f"❌ Failed to credit TeoCoin: {credited_amount} TEO to {request.user.username}")
+                        
+                except Exception as credit_error:
+                    logger.error(f"❌ Error crediting TeoCoin: {str(credit_error)}")
+                    teocoin_credited = False
+            
             return Response({
                 'success': True,
                 'absorption': {
@@ -143,9 +173,12 @@ class TeacherMakeAbsorptionChoiceView(APIView):
                     'final_teacher_eur': float(absorption.final_teacher_eur) if absorption.final_teacher_eur else 0,
                     'final_teacher_teo': float(absorption.final_teacher_teo),
                     'final_platform_eur': float(absorption.final_platform_eur) if absorption.final_platform_eur else 0,
-                    'decided_at': absorption.decided_at.isoformat() if absorption.decided_at else None
+                    'decided_at': absorption.decided_at.isoformat() if absorption.decided_at else None,
+                    'teocoin_credited': teocoin_credited,
+                    'credited_amount': credited_amount
                 },
-                'message': f'Successfully {"absorbed discount for TEO" if choice == "absorb" else "chose EUR commission"}'
+                'message': f'Successfully {"absorbed discount for TEO" if choice == "absorb" else "chose EUR commission"}' + 
+                          (f' - {credited_amount} TEO credited' if teocoin_credited else '')
             })
             
         except ValueError as ve:

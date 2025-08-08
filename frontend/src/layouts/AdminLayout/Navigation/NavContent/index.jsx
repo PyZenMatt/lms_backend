@@ -19,7 +19,7 @@ const NavContent = ({ navigation }) => {
   let mainContent = '';
 
   mainContent = (
-    <div className="navbar-content datta-scroll">
+  <div className="navbar-content datta-scroll">
       <PerfectScrollbar>
         <ListGroup variant="flush" as="ul" bsPrefix=" " className="nav pcoded-inner-navbar" id="nav-ps-next">
           {navItems}
