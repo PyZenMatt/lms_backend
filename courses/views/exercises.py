@@ -303,6 +303,47 @@ class MySubmissionView(APIView):
             return Response({'detail': 'Nessuna submission trovata.'}, status=404)
         return Response(ExerciseSubmissionSerializer(submission).data)
 
+
+class SubmissionHistoryView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        """Return all submissions by the current user, newest first."""
+        qs = (
+            ExerciseSubmission.objects
+            .filter(student=request.user)
+            .select_related('exercise')
+            .prefetch_related('reviews')
+            .order_by('-created_at')
+        )
+        return Response(ExerciseSubmissionSerializer(qs, many=True).data)
+
+
+class ReviewHistoryView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        """Return the review history for the current user (as reviewer)."""
+        reviews = (
+            ExerciseReview.objects
+            .filter(reviewer=request.user)
+            .select_related('submission__exercise', 'submission__student')
+            .order_by('-assigned_at')
+        )
+        data = [
+            {
+                'pk': r.pk,
+                'submission_id': r.submission.pk if getattr(r, 'submission', None) else None,
+                'exercise_title': r.submission.exercise.title if getattr(r, 'submission', None) and getattr(r.submission, 'exercise', None) else None,
+                'student_username': r.submission.student.username if getattr(r, 'submission', None) and getattr(r.submission, 'student', None) else None,
+                'score': r.score,
+                'assigned_at': r.assigned_at,
+                'reviewed_at': r.reviewed_at,
+            }
+            for r in reviews
+        ]
+        return Response(data)
+
 class AssignedReviewsView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -374,9 +415,8 @@ class SubmissionDetailView(APIView):
 
     def get(self, request, submission_id: int):
         submission = get_object_or_404(ExerciseSubmission, id=submission_id)
-
         # Autorizzazioni minime: studente proprietario, staff, o teacher del corso
-        is_owner = submission.student_id == request.user.id
+        is_owner = submission.student.id == request.user.id if submission.student else False
         is_staff = getattr(request.user, 'is_staff', False)
         is_course_teacher = False
         if submission.exercise and submission.exercise.lesson and submission.exercise.lesson.course:
