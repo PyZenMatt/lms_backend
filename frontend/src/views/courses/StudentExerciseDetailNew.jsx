@@ -43,7 +43,13 @@ const StudentExerciseDetailNew = () => {
           const data = await res.json();
           setSubmission(data);
           setStatus(data.status || '');
+        } else if (res.status === 404) {
+          // 404 significa che l'utente non ha ancora sottomesso una soluzione - questo è normale
+          console.log('📝 Nessuna submission esistente trovata - l\'utente può sottomettere');
+          setSubmission(null);
+          setStatus('');
         } else {
+          console.error('❌ Errore nel recupero submission:', res.status);
           setSubmission(null);
           setStatus('');
         }
