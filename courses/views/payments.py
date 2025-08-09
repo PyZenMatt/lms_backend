@@ -203,12 +203,6 @@ class CreatePaymentIntentView(APIView):
                     'error': f'Stripe payment error: {str(stripe_err)}',
                     'code': 'STRIPE_API_ERROR'
                 }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-            except Exception as e:
-                logger.error(f"❌ Unexpected Stripe error: {e}")
-                return Response({
-                    'error': f'Payment system error: {str(e)}',
-                    'code': 'PAYMENT_SYSTEM_ERROR'
-                }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
             
             return Response({
                 'success': True,
@@ -273,6 +267,7 @@ class ConfirmPaymentView(APIView):
                 }, status=status.HTTP_400_BAD_REQUEST)
             
             # Extract metadata
+            from decimal import Decimal
             metadata = payment_intent.metadata
             discount_request_id = metadata.get('discount_request_id')
             use_teocoin_discount = metadata.get('use_teocoin_discount') == 'True'
@@ -315,57 +310,45 @@ class ConfirmPaymentView(APIView):
                     logger.info(f"💰 Payment confirmed, now deducting TeoCoin: {discount_amount} TEO")
                     db_teo_service = DBTeoCoinService()
                     pre_balance = db_teo_service.get_available_balance(user)
-                    logger.info(f"Saldo TeoCoin prima della deduzione: {pre_balance}")
+                    logger.info(f"💰 TeoCoin balance before deduction: {pre_balance} TEO")
 
+                    # Check if discount was already applied for this course
                     from blockchain.models import DBTeoCoinTransaction
                     existing_discount = DBTeoCoinTransaction.objects.filter(
                         user=user,
-                        course_id=str(course_id),
-                        transaction_type='discount',
-                        amount__lt=0
+                        course=course,
+                        transaction_type='spent_discount',
+                        amount__lt=0  # Negative amount indicates deduction
                     ).first()
 
                     if existing_discount:
-                        # Verifica che il saldo sia coerente con la transazione
-                        logger.info(f"✅ TeoCoin discount already applied: {abs(existing_discount.amount)} TEO")
-                        # Se il saldo non è stato aggiornato, lo aggiorna ora
-                        balance_obj = db_teo_service.get_user_balance(user)
-                        if balance_obj['available_balance'] >= discount_amount:
-                            # Forza la deduzione se la transazione esiste ma il saldo non è stato scalato
-                            success = db_teo_service.deduct_balance(
-                                user=user,
-                                amount=discount_amount,
-                                transaction_type='discount',
-                                description=f'TeoCoin discount fix for course: {course.title} (after payment)',
-                                course_id=str(course_id)
-                            )
-                            post_balance = db_teo_service.get_available_balance(user)
-                            logger.info(f"Saldo TeoCoin dopo fix deduzione: {post_balance}")
-                            if success:
-                                logger.info(f"✅ TeoCoin fix deduction applied: {discount_amount} TEO")
-                            else:
-                                logger.error(f"❌ Failed to apply TeoCoin fix deduction: {discount_amount} TEO")
+                        logger.info(f"✅ TeoCoin discount already applied: {abs(existing_discount.amount)} TEO for course {course_id}")
+                        logger.info(f"💡 Skipping duplicate deduction - discount was already processed")
                     else:
-                        # Deduce TeoCoin normalmente
-                        try:
-                            _ = db_teo_service.get_user_balance(user)
-                        except Exception as e:
-                            logger.error(f"Errore creazione balance record: {e}")
+                        # Apply TeoCoin deduction for the first time
+                        logger.info(f"🔄 Applying TeoCoin deduction for course {course_id}...")
+                        
                         success = db_teo_service.deduct_balance(
                             user=user,
                             amount=discount_amount,
-                            transaction_type='discount',
-                            description=f'TeoCoin discount for course: {course.title} (after payment)',
-                            course_id=str(course_id)
+                            transaction_type='spent_discount',
+                            description=f'TeoCoin discount for course: {course.title} ({discount_amount} TEO)',
+                            course=course
                         )
+                        
                         post_balance = db_teo_service.get_available_balance(user)
-                        logger.info(f"Saldo TeoCoin dopo la deduzione: {post_balance}")
+                        logger.info(f"💰 TeoCoin balance after deduction: {post_balance} TEO")
+                        
                         if success:
-                            logger.info(f"✅ TeoCoin deducted after payment: {discount_amount} TEO")
+                            logger.info(f"✅ SUCCESS: TeoCoin deducted after payment - {discount_amount} TEO")
+                            logger.info(f"💰 Balance change: {pre_balance} → {post_balance} TEO")
                         else:
-                            logger.error(f"❌ Failed to deduct TeoCoin after payment: {discount_amount} TEO")
+                            logger.error(f"❌ FAILED: Could not deduct TeoCoin after payment - {discount_amount} TEO")
+                            logger.error(f"❌ This is a critical bug - discount applied but TeoCoin not deducted!")
+                            
                 except Exception as e:
                     logger.error(f"❌ TeoCoin deduction error after payment: {e}")
+                    logger.error(f"❌ Course: {course.title}, User: {user.email}, Amount: {discount_amount} TEO")
             
             # Process teacher notification for discount decision
             teacher_notification_sent = False

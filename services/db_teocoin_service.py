@@ -1,7 +1,19 @@
 """
-DB-based TeoCoin Service
-Handles TeoCoin operations using database instead of blockchain.
-This service maintains all business logic while using DB for speed and reliability.
+DB-based TeoCoin Service - Complete Business Logic Implementation
+
+🔥 **REFACTORED ARCHITECTURE:**
+This service handles ALL TeoCoin business operations using the database for:
+- ⚡ Instant processing (no blockchain delays)
+- 💰 Zero transaction costs (no gas fees)
+- 🛡️ High reliability (no network failures)
+- 📊 Real-time analytics and reporting
+
+🔗 **BLOCKCHAIN INTEGRATION:**
+Blockchain is used ONLY for:
+- mint: withdrawals to MetaMask (via TeoCoinService)
+- burn: deposits from MetaMask (verification only)
+
+All internal operations (rewards, discounts, transfers, staking) use this DB service.
 """
 
 from decimal import Decimal

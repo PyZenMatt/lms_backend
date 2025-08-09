@@ -26,19 +26,7 @@ export const getTeoCoinDiscount = async (courseId) => {
   }
 };
 
-/**
- * Apply TeoCoin discount to course purchase
- */
-export const applyTeoCoinDiscount = async (courseId, teoAmount, discountPercentage) => {
-  try {
-    const response = await api.post('/teocoin/apply-discount/', {
-      course_id: courseId,
-      teo_amount: teoAmount,
-      discount_percentage: discountPercentage
-    });
-    return response.data;
-  } catch (error) {
-    console.error('Error applying TeoCoin discount:', error);
-    throw error;
-  }
-};
+// NOTE: The applyTeoCoinDiscount function has been removed.
+// TeoCoin discount is now automatically applied during payment confirmation
+// in the CreatePaymentIntentView → ConfirmPaymentView flow.
+// No separate API call is needed to apply the discount.

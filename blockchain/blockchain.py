@@ -1,13 +1,38 @@
 """
-TeoCoin Blockchain Service - Simplified for DB-based System
+TeoCoin Blockchain Service - Refactored for DB-based System
 
-Provides essential blockchain functionality for:
-- Token minting (withdrawals to MetaMask)
-- Balance queries (burn deposit verification) 
-- Transaction verification (burn deposits)
-- Basic contract interaction
+🔥 REFACTORED: This service has been simplified to focus only on essential blockchain operations.
 
-Note: Core TeoCoin operations (rewards, discounts, transfers) now use DB-based system.
+🚀 **CURRENT BLOCKCHAIN USAGE:**
+- ✅ Token minting (withdrawals to MetaMask wallets)
+- ✅ Burn verification (deposits from MetaMask - verification only)
+- ✅ Balance queries (for burn deposit verification)
+- ✅ Basic contract interaction (token info, address validation)
+
+❌ **DEPRECATED BLOCKCHAIN OPERATIONS (now DB-based):**
+- ❌ Course payments (now handled via DBTeoCoinService)
+- ❌ Internal transfers between users (now handled via DBTeoCoinService)
+- ❌ Reward distributions (now handled via DBTeoCoinService)
+- ❌ Discount applications (now handled via DBTeoCoinService)
+- ❌ Teacher commission transfers (now handled via DBTeoCoinService)
+
+🏦 **DB-BASED OPERATIONS (via DBTeoCoinService):**
+All TeoCoin business logic now runs on database for speed, reliability, and cost-effectiveness:
+- Student rewards for lesson completion
+- Course discounts and payments
+- Teacher commission calculations
+- Internal balance transfers
+- Staking operations
+- Transaction history
+
+📋 **INTEGRATION POINTS:**
+1. **Withdrawals:** DB balance → mint tokens → MetaMask wallet
+2. **Deposits:** MetaMask burn → verify transaction → credit DB balance
+3. **Internal Operations:** All via DBTeoCoinService (no blockchain transactions)
+
+This architecture provides the best of both worlds:
+- Fast, reliable, cost-free internal operations via database
+- Real cryptocurrency functionality via selective blockchain integration
 """
 import time
 import logging
@@ -249,16 +274,25 @@ except Exception as e:
     teocoin_service = None
 
 
-# Legacy compatibility functions
+# Legacy compatibility functions - DEPRECATED
 def check_course_payment_prerequisites(student_address: str, course_price: Decimal):
     """
-    Legacy compatibility function for course payment prerequisites.
-    Note: Course payments now use DB-based system, this is kept for compatibility.
+    DEPRECATED: Legacy compatibility function for course payment prerequisites.
+    
+    Course payments now use DB-based system exclusively.
+    Blockchain is only used for:
+    - mint: withdrawals to MetaMask
+    - burn: deposits from MetaMask (verification only)
+    
+    Returns compatibility response indicating DB system is in use.
     """
-    logger.warning("check_course_payment_prerequisites called - course payments now use DB system")
+    logger.warning("check_course_payment_prerequisites called - this function is deprecated")
+    logger.info("All course payments now handled by DB-based TeoCoin system")
     return {
         'student_address': student_address,
         'course_price': str(course_price),
         'prerequisites_met': True,  # DB system handles this
-        'message': 'Course payments now use DB-based system'
+        'system': 'database',
+        'blockchain_operations': 'mint and burn only',
+        'message': 'Course payments handled by DB-based system. Blockchain used only for mint/burn operations.'
     }

@@ -255,57 +255,31 @@ class BlockchainRewardManager:
     @classmethod
     def _transfer_from_reward_pool(cls, user, amount, teocoin_transaction, reason):
         """
-        Effettua il trasferimento dalla reward pool per un utente specifico
+        DEPRECATED: This method is no longer used as we moved to DB-based TeoCoin system.
+        All reward distributions now happen via DBTeoCoinService directly.
+        
+        Kept for compatibility but will always use DB-based transactions.
         """
+        logger.warning(f"_transfer_from_reward_pool called but using DB-based system instead: {reason}")
+        
+        # Simply create a transaction record for historical tracking
         try:
-            # Importa il servizio blockchain
-            from blockchain.blockchain import teocoin_service
-            
-            # Ottiene l'indirizzo wallet dell'utente
-            wallet_address = getattr(user, 'wallet_address', None)
-            if not wallet_address:
-                logger.error(f"User {user.email} non ha wallet address configurato")
-                return None
-            
-            # Crea la transazione blockchain
             blockchain_transaction = BlockchainTransaction.objects.create(
                 user=user,
-                transaction_type='transfer',
+                transaction_type='db_transfer',  # Mark as DB-based
                 amount=amount,
-                to_address=wallet_address,
+                to_address=getattr(user, 'wallet_address', None) or 'db_balance',
                 related_teocoin_transaction=teocoin_transaction,
-                status='pending'
+                status='completed',  # Always completed for DB transactions
+                tx_hash=f"db_reward_{timezone.now().strftime('%Y%m%d_%H%M%S')}",
+                confirmed_at=timezone.now()
             )
             
-            # Effettua il trasferimento dalla reward pool
-            try:
-                # OBSOLETE: Old blockchain transfer from reward pool
-                # tx_hash = teocoin_service.transfer_from_reward_pool(wallet_address, amount)
-                # Using DB-based system instead
-                tx_hash = f"db_transfer_{timezone.now().strftime('%Y%m%d_%H%M%S')}"
-                
-                if tx_hash:
-                    blockchain_transaction.tx_hash = tx_hash
-                    blockchain_transaction.status = 'confirmed'
-                    blockchain_transaction.confirmed_at = timezone.now()
-                    blockchain_transaction.save()
-                    
-                    logger.info(f"Blockchain transfer from reward pool successful: {tx_hash}")
-                else:
-                    raise Exception("Transfer failed - no transaction hash returned")
-                
-            except Exception as blockchain_error:
-                blockchain_transaction.status = 'failed'
-                blockchain_transaction.error_message = str(blockchain_error)
-                blockchain_transaction.save()
-                
-                logger.error(f"Blockchain transfer from reward pool failed: {str(blockchain_error)}")
-                raise
-            
+            logger.info(f"Reward recorded in DB for user {user.email}: {amount} TEO")
             return blockchain_transaction
             
         except Exception as e:
-            logger.error(f"Error in _transfer_from_reward_pool: {str(e)}")
+            logger.error(f"Error recording DB-based reward: {str(e)}")
             raise
 
 

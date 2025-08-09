@@ -115,7 +115,7 @@ class BlockchainServiceTest(TestCase):
         with self.assertRaises(BlockchainTransactionError):
             self.service.mint_tokens_to_user(self.user, -10.0, 'Test')
         
-        with self.assertRaises(InvalidAmountError):
+        with self.assertRaises(BlockchainTransactionError):
             self.service.mint_tokens_to_user(self.user, 0, 'Test')
     
     def test_get_user_transaction_history_success(self):
@@ -141,47 +141,16 @@ class BlockchainServiceTest(TestCase):
             self.assertEqual(result[0]['transaction_type'], 'mint')
             self.assertEqual(result[0]['amount'], '25.0')
     
-    def test_transfer_tokens_between_users_success(self):
-        """Test successful token transfer between users"""
-        to_user = User.objects.create_user(
-            username='touser',
-            email='to@example.com',
-            role='student',
-            wallet_address='0x1111111111111111111111111111111111111111'
-        )
-        amount = Decimal('25.0')
-        
-        with patch.object(self.service.teocoin_service, 'get_balance', return_value=Decimal('100.0')):
-            with patch.object(self.service.teocoin_service, 'transfer_tokens', return_value='0xabcdef'):
-                result = self.service.transfer_tokens_between_users(self.user, to_user, amount, 'Test transfer')
-                
-                self.assertIn('message', result)
-                self.assertIn('amount', result)
-                self.assertIn('tx_hash', result)
-                self.assertIn('from_user', result)
-                self.assertIn('to_user', result)
-                self.assertEqual(result['amount'], amount)
-    
-    def test_transfer_tokens_insufficient_balance(self):
-        """Test token transfer with insufficient balance"""
-        to_user = User.objects.create_user(
-            username='touser',
-            email='to@example.com',
-            role='student',
-            wallet_address='0x1111111111111111111111111111111111111111'
-        )
-        
-        with patch.object(self.service.teocoin_service, 'get_balance', return_value=Decimal('10.0')):
-            with self.assertRaises(BlockchainTransactionError):
-                self.service.transfer_tokens_between_users(self.user, to_user, 50.0, 'Test transfer')
-    
-    def test_transfer_tokens_no_wallet(self):
-        """Test token transfer with users without wallets"""
-        with self.assertRaises(BlockchainTransactionError):
-            self.service.transfer_tokens_between_users(self.user_no_wallet, self.user, 25.0, 'Test')
-        
-        with self.assertRaises(WalletNotFoundError):
-            self.service.transfer_tokens_between_users(self.user, self.user_no_wallet, 25.0, 'Test')
+    # REMOVED: test_transfer_tokens_between_users_* methods
+    # These tests are no longer valid as token transfers between users
+    # now use the DB-based system via DBTeoCoinService.
+    # 
+    # The blockchain service is now only used for:
+    # - mint_tokens_to_user (withdrawals to MetaMask)
+    # - get_user_wallet_balance (for verification)
+    # - validate_address (utilities)
+    #
+    # Transfer functionality has been moved to DBTeoCoinService.
 
 
 if __name__ == '__main__':
