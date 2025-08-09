@@ -531,12 +531,13 @@ const StripeCardForm = ({ course, finalPrice, paymentResult, onPaymentSuccess, o
       console.log('🔄 Creating payment intent for course:', course.id);
       
       const paymentData = {
-        use_teocoin_discount: paymentResult?.discountInfo ? true : false,
-        discount_percent: paymentResult?.discountInfo?.discount_percentage || 0,
-        teocoin_discount: paymentResult?.discountInfo?.discount_amount_eur || 0,
-        payment_method: 'stripe',
-        final_amount: finalPrice,
-        discount_info: paymentResult?.discountInfo
+  use_teocoin_discount: paymentResult?.discountInfo ? true : false,
+  discount_amount: paymentResult?.discountInfo?.discount_amount_eur || 0,
+  original_price: fiatPrice,
+  discount_percent: paymentResult?.discountInfo?.discount_percentage || 0,
+  payment_method: 'stripe',
+  final_amount: finalPrice,
+  discount_info: paymentResult?.discountInfo
       };
       
       console.log('💳 Payment data:', paymentData);
