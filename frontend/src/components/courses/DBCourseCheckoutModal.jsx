@@ -50,7 +50,10 @@ const DBCourseCheckoutModal = ({ course, show, handleClose, onPurchaseComplete }
   const [selectedDiscount, setSelectedDiscount] = useState(10); // 5, 10, or 15
 
   // Calculate pricing options - ensure all values are numbers
-  const fiatPrice = parseFloat(course?.price_eur || 0);
+  if (!course) {
+    console.error('❌ course is undefined in DBCourseCheckoutModal');
+  }
+  const fiatPrice = parseFloat(course?.price_eur ?? 0);
   const teoReward = parseFloat(course?.teocoin_reward || 0);
   
   // Use selected discount percentage
