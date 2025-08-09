@@ -482,8 +482,6 @@ class CourseEnrollment(models.Model):
 
     class Meta:
         unique_together = ('student', 'course')
-        # If you previously used index_together, migrate to indexes below
-        # Example: indexes = [models.Index(fields=['student', 'course'])]
 
     def __str__(self):
         status = "Completato" if self.completed else "In corso"
