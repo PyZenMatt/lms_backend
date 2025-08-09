@@ -341,53 +341,90 @@ const NotificationListNew = () => {
           ) : (
             <div className="list-group">
               {filteredNotifications.map((notification) => (
-                <div 
-                  key={notification.id} 
-                  className={`list-group-item list-group-item-action ${!notification.read ? 'bg-light' : ''}`}
-                >
-                  <Row className="align-items-center">
-                    <Col xs={1} className="text-center">
-                      <div className={`text-${notification.color}`}>
-                        <i className={notification.icon} style={{fontSize: '1.5rem'}}></i>
-                      </div>
-                    </Col>
-                    <Col xs={9}>
-                      <div className="d-flex w-100 justify-content-between">
-                        <h6 className="mb-1 fw-bold">{notification.title}</h6>
-                        <small className="text-muted">{formatTimestamp(notification.timestamp)}</small>
-                      </div>
-                      <p className="mb-1">{notification.message}</p>
-                    </Col>
-                    <Col xs={2} className="text-end">
-                      {!notification.read && (
+                notification.link ? (
+                  <Link
+                    to={notification.link}
+                    key={notification.id}
+                    className={`list-group-item list-group-item-action ${!notification.read ? 'bg-light' : ''}`}
+                    style={{ textDecoration: 'none', color: 'inherit' }}
+                  >
+                    <Row className="align-items-center">
+                      <Col xs={1} className="text-center">
+                        <div className={`text-${notification.color}`}> 
+                          <i className={notification.icon} style={{fontSize: '1.5rem'}}></i>
+                        </div>
+                      </Col>
+                      <Col xs={9}>
+                        <div className="d-flex w-100 justify-content-between">
+                          <h6 className="mb-1 fw-bold">{notification.title}</h6>
+                          <small className="text-muted">{formatTimestamp(notification.timestamp)}</small>
+                        </div>
+                        <p className="mb-1">{notification.message}</p>
+                      </Col>
+                      <Col xs={2} className="text-end">
+                        {!notification.read && (
+                          <Button 
+                            variant="outline-primary" 
+                            size="sm" 
+                            onClick={e => { e.preventDefault(); handleMarkAsRead(notification.id); }}
+                            className="me-1"
+                          >
+                            <i className="feather icon-check"></i>
+                          </Button>
+                        )}
                         <Button 
-                          variant="outline-primary" 
+                          variant="outline-danger" 
                           size="sm" 
-                          onClick={() => handleMarkAsRead(notification.id)}
+                          onClick={e => { e.preventDefault(); handleDeleteNotification(notification.id); }}
                           className="me-1"
                         >
-                          <i className="feather icon-check"></i>
+                          <i className="feather icon-trash-2"></i>
                         </Button>
-                      )}
-                      <Button 
-                        variant="outline-danger" 
-                        size="sm" 
-                        onClick={() => handleDeleteNotification(notification.id)}
-                        className="me-1"
-                      >
-                        <i className="feather icon-trash-2"></i>
-                      </Button>
-                      {notification.link && (
-                        <Link 
-                          to={notification.link} 
-                          className="btn btn-sm btn-light"
+                        <i className="feather icon-external-link"></i>
+                      </Col>
+                    </Row>
+                  </Link>
+                ) : (
+                  <div 
+                    key={notification.id} 
+                    className={`list-group-item list-group-item-action ${!notification.read ? 'bg-light' : ''}`}
+                  >
+                    <Row className="align-items-center">
+                      <Col xs={1} className="text-center">
+                        <div className={`text-${notification.color}`}> 
+                          <i className={notification.icon} style={{fontSize: '1.5rem'}}></i>
+                        </div>
+                      </Col>
+                      <Col xs={9}>
+                        <div className="d-flex w-100 justify-content-between">
+                          <h6 className="mb-1 fw-bold">{notification.title}</h6>
+                          <small className="text-muted">{formatTimestamp(notification.timestamp)}</small>
+                        </div>
+                        <p className="mb-1">{notification.message}</p>
+                      </Col>
+                      <Col xs={2} className="text-end">
+                        {!notification.read && (
+                          <Button 
+                            variant="outline-primary" 
+                            size="sm" 
+                            onClick={() => handleMarkAsRead(notification.id)}
+                            className="me-1"
+                          >
+                            <i className="feather icon-check"></i>
+                          </Button>
+                        )}
+                        <Button 
+                          variant="outline-danger" 
+                          size="sm" 
+                          onClick={() => handleDeleteNotification(notification.id)}
+                          className="me-1"
                         >
-                          <i className="feather icon-external-link"></i>
-                        </Link>
-                      )}
-                    </Col>
-                  </Row>
-                </div>
+                          <i className="feather icon-trash-2"></i>
+                        </Button>
+                      </Col>
+                    </Row>
+                  </div>
+                )
               ))}
             </div>
           )}
