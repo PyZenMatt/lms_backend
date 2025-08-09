@@ -270,19 +270,9 @@ const BurnDepositInterface = ({ onTransactionComplete }) => {
 
     } catch (error) {
       console.error('Burn deposit error:', error);
-      // Map common RPC errors to user-friendly messages
-      const msg = error?.message || String(error);
-      let userMsg = msg;
-      if (msg.toLowerCase().includes('insufficient funds')) {
-        userMsg = 'Insufficient MATIC for gas. Please add funds and try again.';
-      } else if (msg.toLowerCase().includes('user rejected')) {
-        userMsg = 'Transaction rejected in MetaMask.';
-      } else if (msg.toLowerCase().includes('revert')) {
-        userMsg = 'Transaction would revert. Check amount and permissions.';
-      } else if (msg.toLowerCase().includes('internal json-rpc error')) {
-        userMsg = 'RPC error from provider. Please retry once. If it stays pending, use MetaMask “Speed Up”.';
-      }
-      setError(`Failed to process burn deposit: ${userMsg}`);
+      // Show only the original provider/MetaMask message without custom prefixes
+      const raw = error?.message || String(error);
+      setError(raw);
     } finally {
       setProcessing(false);
     }

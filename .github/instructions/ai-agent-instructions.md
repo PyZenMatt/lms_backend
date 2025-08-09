@@ -212,3 +212,7 @@ VITE_LLM_API_URL=https://api.openai.com/v1/...
 ---
 
 Aggiorna questa sezione ogni volta che cambi provider, endpoint o logica di integrazione LLM.
+
+
+## Extra Dettagli Unificati
+Il backend Django fornisce un'API RESTful tramite Django REST Framework, e si interfaccia con il frontend React. Il frontend utilizza Tailwind CSS e Vite. Il progetto è contenuto in una repo monolitica con directory separate: `backend/`, `frontend/`, `docs-site/` (per la documentazione Jekyll).
