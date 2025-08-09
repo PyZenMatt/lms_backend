@@ -23,6 +23,8 @@ from services.exceptions import (
     CourseNotFoundError,
     InsufficientTeoCoinsError
 )
+from services.db_teocoin_service import DBTeoCoinService
+from blockchain.models import DBTeoCoinTransaction
 
 logger = logging.getLogger(__name__)
 
@@ -262,6 +264,7 @@ class CourseEnrollmentView(APIView):
             
             payment_method = request.data.get('payment_method', 'stripe')
             amount = Decimal(str(request.data.get('amount', course.price_eur)))
+            stripe_payment_intent = request.data.get('stripe_payment_intent')
             discount_applied = request.data.get('discount_applied', False)
             discount_info = request.data.get('discount_info', None)
             
@@ -283,15 +286,29 @@ class CourseEnrollmentView(APIView):
                 debug_messages.append(f"✅ Student {request.user.id} added to course {course_id}")
                 
                 # Create CourseEnrollment record in database
+                enrollment_defaults = {
+                    'payment_method': payment_method if payment_method in ['fiat', 'teocoin', 'teocoin_discount', 'free', 'admin'] else 'fiat',
+                    'amount_paid_eur': amount,
+                    'original_price_eur': course.price_eur,
+                }
+
+                # If discount info present, persist it on enrollment
+                if discount_applied and isinstance(discount_info, dict):
+                    try:
+                        discount_amount_eur = Decimal(str(discount_info.get('discount_amount_eur', '0')))
+                    except Exception:
+                        discount_amount_eur = Decimal('0')
+                    enrollment_defaults['discount_amount_eur'] = discount_amount_eur
+                    if enrollment_defaults['payment_method'] == 'stripe':
+                        enrollment_defaults['payment_method'] = 'teocoin_discount'
+
+                if stripe_payment_intent:
+                    enrollment_defaults['stripe_payment_intent_id'] = str(stripe_payment_intent)
+
                 enrollment_record, created = CourseEnrollment.objects.get_or_create(
                     student=request.user,
                     course=course,
-                    defaults={
-                        'payment_method': payment_method if payment_method in ['fiat', 'teocoin', 'teocoin_discount'] else 'fiat',
-                        'amount_paid': amount,
-                        'enrollment_date': timezone.now(),
-                        'discount_applied': discount_applied
-                    }
+                    defaults=enrollment_defaults
                 )
                 
                 if created:
@@ -299,7 +316,7 @@ class CourseEnrollmentView(APIView):
                 else:
                     debug_messages.append(f"ℹ️ CourseEnrollment record already exists: {enrollment_record.pk}")
                 
-                # Create enrollment response data
+                # Prepare enrollment response data
                 enrollment_data = {
                     'course_id': course_id,
                     'student_id': request.user.pk,
@@ -311,19 +328,82 @@ class CourseEnrollmentView(APIView):
                 }
                 debug_messages.append("✅ Enrollment data created")
                 
+                # CRITICAL: Deduct TeoCoin for discount in DB (with duplicate prevention)
+                teocoin_balance_info = None
+                if discount_applied and isinstance(discount_info, dict):
+                    try:
+                        db_teo_service = DBTeoCoinService()
+                        # Determine discount to deduct (1 EUR = 1 TEO)
+                        discount_amount_eur = Decimal(str(discount_info.get('discount_amount_eur', '0')))
+                        teo_used_reported = discount_info.get('teo_used')
+                        debug_messages.append(
+                            f"🪙 Discount info received: eur={discount_amount_eur}, teo_used={teo_used_reported}"
+                        )
+
+                        if discount_amount_eur > 0:
+                            pre_balance = db_teo_service.get_available_balance(request.user)
+
+                            # Check for existing discount transaction for this course
+                            existing_discount = DBTeoCoinTransaction.objects.filter(
+                                user=request.user,
+                                course=course,
+                                transaction_type='spent_discount',
+                                amount__lt=0
+                            ).first()
+
+                            if existing_discount:
+                                debug_messages.append(
+                                    f"✅ Existing discount transaction found ({abs(existing_discount.amount)} TEO) - skipping duplicate deduction"
+                                )
+                                post_balance = db_teo_service.get_available_balance(request.user)
+                            else:
+                                debug_messages.append(
+                                    f"🔄 Deducting {discount_amount_eur} TEO from DB balance for discount"
+                                )
+                                deduction_success = db_teo_service.deduct_balance(
+                                    user=request.user,
+                                    amount=discount_amount_eur,
+                                    transaction_type='spent_discount',
+                                    description=f"TeoCoin discount for course: {course.title} ({discount_amount_eur} TEO)",
+                                    course=course
+                                )
+                                post_balance = db_teo_service.get_available_balance(request.user)
+
+                                if deduction_success:
+                                    debug_messages.append(
+                                        f"✅ TeoCoin deducted successfully: {pre_balance} → {post_balance}"
+                                    )
+                                else:
+                                    debug_messages.append(
+                                        f"❌ TeoCoin deduction failed - balance may be insufficient"
+                                    )
+
+                            teocoin_balance_info = {
+                                'before': str(pre_balance),
+                                'after': str(post_balance),
+                                'deducted': str(discount_amount_eur),
+                            }
+                    except Exception as e:
+                        debug_messages.append(f"💥 TeoCoin deduction error: {e}")
+
                 # Award TeoCoin reward if configured
                 if course.teocoin_reward > 0:
                     debug_messages.append(f"🎁 Attempting TeoCoin reward: {course.teocoin_reward} TEO")
                     try:
-                        from services.hybrid_teocoin_service import hybrid_teocoin_service
-                        reward_result = hybrid_teocoin_service.credit_user(
+                        db_teo_service = DBTeoCoinService()
+                        reward_ok = db_teo_service.add_balance(
                             user=request.user,
                             amount=course.teocoin_reward,
-                            reason=f'Course enrollment reward: {course.title}'
+                            transaction_type='course_purchase_bonus',
+                            description=f"Course enrollment bonus: {course.title}",
+                            course=course
                         )
-                        debug_messages.append(f"✅ TeoCoin reward granted: {course.teocoin_reward} TEO")
+                        if reward_ok:
+                            debug_messages.append(f"✅ TeoCoin reward granted: {course.teocoin_reward} TEO")
+                        else:
+                            debug_messages.append("❌ TeoCoin reward failed: service returned False")
                     except Exception as e:
-                        debug_messages.append(f"❌ TeoCoin reward failed: {e}")
+                        debug_messages.append(f"❌ TeoCoin reward exception: {e}")
                 else:
                     debug_messages.append("ℹ️ No TeoCoin reward configured")
                 
@@ -365,6 +445,7 @@ class CourseEnrollmentView(APIView):
                     'success': True,
                     'message': 'Iscrizione al corso completata con successo',
                     'enrollment': enrollment_data,
+                    'teocoin': teocoin_balance_info,
                     'course': {
                         'id': course.pk,
                         'title': course.title,
