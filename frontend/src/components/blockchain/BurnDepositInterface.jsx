@@ -2,15 +2,14 @@
  * TeoCoin Burn Deposit Component
  * Allows users to burn TEO tokens from MetaMask and credit platform balance
  */
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
+import PropTypes from 'prop-types';
 import { Card, Spinner, Button, Modal, Form, Alert } from 'react-bootstrap';
-import { useAuth } from '../../contexts/AuthContext';
 import { ethers } from 'ethers';
 import api from '../../services/core/axiosClient';
 
 const BurnDepositInterface = ({ onTransactionComplete }) => {
-  const { user: currentUser } = useAuth();
-  const [loading, setLoading] = useState(false);
+  // const { user: currentUser } = useAuth(); // Not used in this component
   const [showModal, setShowModal] = useState(false);
   const [burnAmount, setBurnAmount] = useState('');
   const [metamaskBalance, setMetamaskBalance] = useState('0');
@@ -24,11 +23,7 @@ const BurnDepositInterface = ({ onTransactionComplete }) => {
   const [account, setAccount] = useState('');
 
   // Check MetaMask connection
-  useEffect(() => {
-    checkMetaMaskConnection();
-  }, []);
-
-  const checkMetaMaskConnection = async () => {
+  const checkMetaMaskConnection = useCallback(async () => {
     if (typeof window.ethereum !== 'undefined') {
       try {
         const accounts = await window.ethereum.request({ method: 'eth_accounts' });
@@ -37,11 +32,15 @@ const BurnDepositInterface = ({ onTransactionComplete }) => {
           setIsConnected(true);
           await loadMetaMaskBalance(accounts[0]);
         }
-      } catch (error) {
-        console.error('Error checking MetaMask connection:', error);
+      } catch (err) {
+        console.error('Error checking MetaMask connection:', err);
       }
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    checkMetaMaskConnection();
+  }, [checkMetaMaskConnection]);
 
   const connectMetaMask = async () => {
     if (typeof window.ethereum === 'undefined') {
@@ -72,39 +71,42 @@ const BurnDepositInterface = ({ onTransactionComplete }) => {
       const TEO_CONTRACT_ADDRESS = '0x20D6656A31297ab3b8A87291Ed562D4228Be9ff8';
       const TEO_ABI = [
         {
-          "constant": true,
-          "inputs": [{"name": "_owner", "type": "address"}],
-          "name": "balanceOf",
-          "outputs": [{"name": "balance", "type": "uint256"}],
-          "type": "function"
+          constant: true,
+          inputs: [{ name: '_owner', type: 'address' }],
+          name: 'balanceOf',
+          outputs: [{ name: 'balance', type: 'uint256' }],
+          type: 'function'
         },
         {
-          "constant": false,
-          "inputs": [{"name": "_value", "type": "uint256"}],
-          "name": "burn",
-          "outputs": [],
-          "type": "function"
+          constant: false,
+          inputs: [{ name: '_value', type: 'uint256' }],
+          name: 'burn',
+          outputs: [],
+          type: 'function'
         },
         {
-          "constant": false,
-          "inputs": [{"name": "_to", "type": "address"}, {"name": "_value", "type": "uint256"}],
-          "name": "transfer",
-          "outputs": [{"name": "", "type": "bool"}],
-          "type": "function"
+          constant: false,
+          inputs: [
+            { name: '_to', type: 'address' },
+            { name: '_value', type: 'uint256' }
+          ],
+          name: 'transfer',
+          outputs: [{ name: '', type: 'bool' }],
+          type: 'function'
         },
         {
-          "constant": true,
-          "inputs": [],
-          "name": "name",
-          "outputs": [{"name": "", "type": "string"}],
-          "type": "function"
+          constant: true,
+          inputs: [],
+          name: 'name',
+          outputs: [{ name: '', type: 'string' }],
+          type: 'function'
         },
         {
-          "constant": true,
-          "inputs": [],
-          "name": "symbol",
-          "outputs": [{"name": "", "type": "string"}], 
-          "type": "function"
+          constant: true,
+          inputs: [],
+          name: 'symbol',
+          outputs: [{ name: '', type: 'string' }],
+          type: 'function'
         }
       ];
 
@@ -137,48 +139,133 @@ const BurnDepositInterface = ({ onTransactionComplete }) => {
     try {
       const provider = new ethers.BrowserProvider(window.ethereum);
       const signer = await provider.getSigner();
+      // Basic network sanity: expect Polygon Amoy (0x13882 = 80002)
+      try {
+        const net = await provider.getNetwork();
+        if (Number(net?.chainId) !== 80002) {
+          console.warn('Unexpected chainId', net?.chainId);
+        }
+      } catch (e) {
+        console.warn('Network check failed', e);
+      }
       
       // Contract setup
       const TEO_CONTRACT_ADDRESS = '0x20D6656A31297ab3b8A87291Ed562D4228Be9ff8';
       const TEO_ABI = [
         {
-          "constant": false,
-          "inputs": [{"name": "_value", "type": "uint256"}],
-          "name": "burn",
-          "outputs": [],
-          "type": "function"
+          constant: false,
+          inputs: [{ name: '_value', type: 'uint256' }],
+          name: 'burn',
+          outputs: [],
+          type: 'function'
         },
         {
-          "constant": true,
-          "inputs": [{"name": "_owner", "type": "address"}],
-          "name": "balanceOf",
-          "outputs": [{"name": "balance", "type": "uint256"}],
-          "type": "function"
+          constant: true,
+          inputs: [{ name: '_owner', type: 'address' }],
+          name: 'balanceOf',
+          outputs: [{ name: 'balance', type: 'uint256' }],
+          type: 'function'
         },
         {
-          "constant": true,
-          "inputs": [],
-          "name": "name",
-          "outputs": [{"name": "", "type": "string"}],
-          "type": "function"
+          constant: true,
+          inputs: [],
+          name: 'name',
+          outputs: [{ name: '', type: 'string' }],
+          type: 'function'
         },
         {
-          "constant": true,
-          "inputs": [],
-          "name": "symbol",
-          "outputs": [{"name": "", "type": "string"}], 
-          "type": "function"
+          constant: true,
+          inputs: [],
+          name: 'symbol',
+          outputs: [{ name: '', type: 'string' }],
+          type: 'function'
         }
       ];
 
       const contract = new ethers.Contract(TEO_CONTRACT_ADDRESS, TEO_ABI, signer);
       const amountWei = ethers.parseEther(burnAmount);
 
-      // Step 1: Execute burn transaction in MetaMask
-      const burnTx = await contract.burn(amountWei);
-      const burnResult = await burnTx.wait();
+      // 0) Ensure wallet has enough native token for gas
+      const nativeBalance = await provider.getBalance(account);
+      // Prepare EIP-1559 fee data with margin and gas estimate with buffer
+      const feeData = await provider.getFeeData();
+      let maxFeePerGas = feeData.maxFeePerGas || feeData.gasPrice || ethers.parseUnits('30', 'gwei');
+      let maxPriorityFeePerGas = feeData.maxPriorityFeePerGas || ethers.parseUnits('1.5', 'gwei');
+      // +20% safety margin
+      maxFeePerGas = (maxFeePerGas * 12n) / 10n;
+      maxPriorityFeePerGas = (maxPriorityFeePerGas * 12n) / 10n;
 
-      const txHash = burnResult.hash || burnTx.hash;
+      // 1) Simulate to catch revert upfront
+      try {
+        if (typeof contract.simulate?.burn === 'function') {
+          await contract.simulate.burn(amountWei, { from: account });
+        } else if (typeof contract.burn?.staticCall === 'function') {
+          await contract.burn.staticCall(amountWei);
+        }
+      } catch (simErr) {
+        console.error('Simulation revert:', simErr);
+        throw new Error('Transaction would revert. Check amount/permissions.');
+      }
+
+      // 2) Estimate gas with buffer (+30%)
+      let gasLimit;
+      try {
+        const est = await contract.estimateGas.burn(amountWei, { from: account });
+        gasLimit = (est * 13n) / 10n;
+      } catch (eg) {
+        console.warn('estimateGas failed, using fallback', eg);
+        gasLimit = 120000n;
+      }
+
+      // Check native balance can cover worst-case fee
+      try {
+        const worstCaseFee = gasLimit * maxFeePerGas;
+        if (nativeBalance < worstCaseFee) {
+          throw new Error('Insufficient MATIC to cover gas fees. Please add funds.');
+        }
+      } catch (feeErr) {
+        setError(feeErr.message);
+        setProcessing(false);
+        return;
+      }
+
+      // 3) Send with retry & fee bump on transient RPC errors
+      const sendWithRetry = async (attempt = 1, maxAttempts = 3, feeBumpPct = 15) => {
+        try {
+          const overrides = {
+            gasLimit,
+            maxFeePerGas,
+            maxPriorityFeePerGas
+          };
+          const burnTx = await contract.burn(amountWei, overrides);
+          const burnResult = await burnTx.wait();
+          return burnResult.hash || burnTx.hash;
+        } catch (err) {
+          const msg = err?.message || String(err);
+          const code = err?.code || err?.info?.error?.code;
+          const retryable =
+            code === -32603 ||
+            code === -32000 ||
+            msg.includes('underpriced') ||
+            msg.includes('replacement') ||
+            msg.includes('timeout') ||
+            msg.toLowerCase().includes('internal json-rpc error');
+          if (retryable && attempt < maxAttempts) {
+            // bump fees by ≥15%
+            maxFeePerGas = (maxFeePerGas * BigInt(100 + feeBumpPct)) / 100n;
+            maxPriorityFeePerGas = (maxPriorityFeePerGas * BigInt(100 + feeBumpPct)) / 100n;
+            console.warn(`Retrying burn (attempt ${attempt + 1}) with higher fees`, {
+              maxFeePerGas: maxFeePerGas.toString(),
+              maxPriorityFeePerGas: maxPriorityFeePerGas.toString()
+            });
+            return await sendWithRetry(attempt + 1, maxAttempts, feeBumpPct);
+          }
+          throw err;
+        }
+      };
+
+      // Step 1: Execute burn transaction via MetaMask with robust params
+      const txHash = await sendWithRetry();
       setLastTxHash(txHash);
 
       // Step 2: Submit burn proof to backend
@@ -211,7 +298,19 @@ const BurnDepositInterface = ({ onTransactionComplete }) => {
 
     } catch (error) {
       console.error('Burn deposit error:', error);
-      setError(`Failed to process burn deposit: ${error.message}`);
+      // Map common RPC errors to user-friendly messages
+      const msg = error?.message || String(error);
+      let userMsg = msg;
+      if (msg.toLowerCase().includes('insufficient funds')) {
+        userMsg = 'Insufficient MATIC for gas. Please add funds and try again.';
+      } else if (msg.toLowerCase().includes('user rejected')) {
+        userMsg = 'Transaction rejected in MetaMask.';
+      } else if (msg.toLowerCase().includes('revert')) {
+        userMsg = 'Transaction would revert. Check amount and permissions.';
+      } else if (msg.toLowerCase().includes('internal json-rpc error')) {
+        userMsg = 'RPC error from provider. Please retry; we will auto-bump fees.';
+      }
+      setError(`Failed to process burn deposit: ${userMsg}`);
     } finally {
       setProcessing(false);
     }
@@ -234,9 +333,9 @@ const BurnDepositInterface = ({ onTransactionComplete }) => {
               
               {/* Debug Info */}
               <div className="alert alert-info small text-start mb-3">
-                <strong>Debug Info:</strong><br/>
-                MetaMask Available: {typeof window.ethereum !== 'undefined' ? 'Yes' : 'No'}<br/>
-                Current Status: Not Connected
+                <div><strong>Debug Info:</strong></div>
+                <div>MetaMask Available: {typeof window.ethereum !== 'undefined' ? 'Yes' : 'No'}</div>
+                <div>Current Status: Not Connected</div>
               </div>
               
               <Button 
@@ -257,12 +356,13 @@ const BurnDepositInterface = ({ onTransactionComplete }) => {
             <div>
               {/* Debug Info for Connected State */}
               <div className="alert alert-info small mb-3">
-                <strong>Debug Info:</strong><br/>
-                Connected: Yes<br/>
-                Account: {account}<br/>
-                Balance: {metamaskBalance} TEO<br/>
-                {error && <><span className="text-danger">Error: {error}</span><br/></>}
-                {success && <><span className="text-success">Success: {success}</span><br/></>}
+                <div><strong>Debug Info:</strong></div>
+                <div>Connected: Yes</div>
+                <div>Account: {account}</div>
+                <div>Balance: {metamaskBalance} TEO</div>
+                {lastTxHash && <div>Last TX: {lastTxHash.substring(0, 10)}...</div>}
+                {error && <div className="text-danger">Error: {error}</div>}
+                {success && <div className="text-success">Success: {success}</div>}
               </div>
               
               <div className="d-flex justify-content-between align-items-center mb-3">
@@ -317,7 +417,7 @@ const BurnDepositInterface = ({ onTransactionComplete }) => {
                     console.log('🔄 Refresh button clicked');
                     loadMetaMaskBalance(account);
                   }}
-                  disabled={loading}
+                  disabled={processing}
                   className="btn-outline-primary"
                   style={{ 
                     borderColor: '#007bff', 
@@ -418,3 +518,7 @@ const BurnDepositInterface = ({ onTransactionComplete }) => {
 };
 
 export default BurnDepositInterface;
+
+BurnDepositInterface.propTypes = {
+  onTransactionComplete: PropTypes.func
+};

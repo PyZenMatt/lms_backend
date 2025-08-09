@@ -6,7 +6,7 @@ This script helps test the complete withdrawal -> burn -> deposit cycle
 
 import os, sys, django
 sys.path.append('.')
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'schoolplatform.settings')
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'schoolplatform.settings.dev')
 django.setup()
 
 from users.models import User

@@ -9,8 +9,8 @@ import django
 import json
 from decimal import Decimal
 
-# Setup Django
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'schoolplatform.settings')
+sys.path.append('.')
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'schoolplatform.settings.prod')
 django.setup()
 
 from django.contrib.auth import get_user_model
