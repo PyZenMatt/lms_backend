@@ -55,10 +55,13 @@ const UnifiedTeacherNotifications = () => {
       
       if (response.data && Array.isArray(response.data)) {
         // Process notifications and add parsed data
-        const processedNotifications = response.data.map((notification) => ({
-          ...notification,
-          parsed: notification.notification_type === 'teocoin_discount_pending' ? parseDiscountNotification(notification) : { type: 'regular' }
-        }));
+        const processedNotifications = response.data.map((notification) => {
+          const isPending = notification.notification_type === 'teocoin_discount_pending';
+          return {
+            ...notification,
+            parsed: isPending ? parseDiscountNotification(notification) : { type: 'regular' }
+          };
+        });
         
         setNotifications(processedNotifications);
       } else {
@@ -83,9 +86,9 @@ const UnifiedTeacherNotifications = () => {
   const markAsRead = async (notificationId) => {
     try {
       await axiosClient.patch(`/notifications/${notificationId}/read/`);
-      
+
       // Remove from local state
-  setNotifications((prev) => prev.filter((notification) => notification.id !== notificationId));
+      setNotifications((prev) => prev.filter((notification) => notification.id !== notificationId));
       
       if (window.showToast) {
         window.showToast('✅ Notifica marcata come letta', 'success');
@@ -101,70 +104,33 @@ const UnifiedTeacherNotifications = () => {
   const handleDiscountChoice = async (notification, choice) => {
     const notificationId = notification.id;
     try {
-      setProcessing(prev => ({ ...prev, [notificationId]: true }));
+      setProcessing((prev) => ({ ...prev, [notificationId]: true }));
+
+      // Use absorption id from notification link when present
+      const absorptionId = notification.related_object_id || notification.absorption_id || notificationId;
+
+      // Minimal backend contract
+      const resp = await axiosClient.post('/teocoin/teacher/choice/', {
+        absorption_id: absorptionId,
+        choice: choice === 'teo' ? 'teo' : 'eur'
+      });
+
+      if (!resp.data?.success) throw new Error(resp.data?.error || 'Operazione non riuscita');
 
       if (choice === 'teo') {
-        const msg = notification.message || '';
-        const totalRe = /=\s*([\d.,]+)\s*TEO\s*total/i;
-        const partsRe = /Accept\s+TEO:\s*([\d.,]+)\s*TEO\s*\+\s*([\d.,]+)\s*bonus/i;
-
-        let amountTotal = null;
-        // 1) payload strutturato se presente
-        const p = notification.payload || notification.data || {};
-        if (p.amount_total) amountTotal = parseFloat(String(p.amount_total).replace(',', '.'));
-        if ((!amountTotal || !isFinite(amountTotal)) && p.amount && p.bonus) {
-          amountTotal = parseFloat(String(p.amount).replace(',', '.')) + parseFloat(String(p.bonus).replace(',', '.'));
-        }
-        // 2) dal testo
-        if (!amountTotal || !isFinite(amountTotal)) {
-          const mt = msg.match(totalRe);
-          if (mt && mt[1]) amountTotal = parseFloat(mt[1].replace(',', '.'));
-        }
-        if (!amountTotal || !isFinite(amountTotal)) {
-          const mp = msg.match(partsRe);
-          if (mp && mp[1] && mp[2]) {
-            const used = parseFloat(mp[1].replace(',', '.'));
-            const bonus = parseFloat(mp[2].replace(',', '.'));
-            amountTotal = (isFinite(used) ? used : 0) + (isFinite(bonus) ? bonus : 0);
-          }
-        }
-        if (!amountTotal || !isFinite(amountTotal) || amountTotal <= 0) {
-          throw new Error('Importo TEO non disponibile nella notifica');
-        }
-
-        const resp = await axiosClient.post('/teocoin/teacher/choice/', {
-          absorption_id: notificationId,
-          choice: 'teo',
-          amount_total: amountTotal,
-          transaction_type: 'discount_absorption',
-          description: `Discount absorption - total ${amountTotal} TEO`
-        });
-        if (!resp.data?.success) throw new Error(resp.data?.error || 'Operazione non riuscita');
-
-        if (window.showToast) window.showToast(`Accreditati ${amountTotal} TEO`, 'success');
-        // marca read SOLO dopo successo
-        await markAsRead(notificationId);
-        setNotifications(prev => prev.filter(n => n.id !== notificationId));
-        return;
+        const credited = resp.data?.absorption?.final_teacher_teo ?? notification.parsed?.teo_amount;
+        if (window.showToast) window.showToast(`TEO accettati${credited ? `: ${credited} TEO` : ''}`, 'success');
+      } else if (window.showToast) {
+        window.showToast('Scelta EUR confermata', 'success');
       }
 
-      // EUR
-      await axiosClient.post('/teocoin/teacher/choice/', {
-        absorption_id: notificationId,
-        choice: 'eur',
-        amount_total: 0,
-        transaction_type: 'discount_declined',
-        description: 'EUR commission chosen'
-      });
       await markAsRead(notificationId);
-      setNotifications(prev => prev.filter(n => n.id !== notificationId));
-      if (window.showToast) window.showToast('Scelta EUR confermata', 'success');
-
+      setNotifications((prev) => prev.filter((n) => n.id !== notificationId));
     } catch (err) {
       console.error('Error handling discount choice:', err);
       if (window.showToast) window.showToast('Errore: ' + err.message, 'error');
     } finally {
-      setProcessing(prev => ({ ...prev, [notificationId]: false }));
+      setProcessing((prev) => ({ ...prev, [notificationId]: false }));
     }
   };
 
@@ -202,18 +168,11 @@ const UnifiedTeacherNotifications = () => {
             <div>
               <strong className="text-warning">🪙 Decisione TeoCoin Sconto</strong>
               <br />
-              <small className="text-muted">
-                Corso: {parsed.course_title}
-              </small>
+              <small className="text-muted">Corso: {parsed.course_title}</small>
               <br />
-              <small className="text-muted">
-                Studente: {parsed.student}
-              </small>
+              <small className="text-muted">Studente: {parsed.student}</small>
             </div>
-            <Badge 
-              bg={parsed.hours_remaining > 2 ? "success" : "warning"}
-              className="ms-2"
-            >
+            <Badge bg={parsed.hours_remaining > 2 ? 'success' : 'warning'} className="ms-2">
               <Clock size={12} className="me-1" />
               {formatTimeRemaining(parsed.expires_at)}
             </Badge>
@@ -233,12 +192,7 @@ const UnifiedTeacherNotifications = () => {
           </Alert>
 
           <div className="d-grid gap-2 d-md-flex justify-content-md-end">
-            <Button
-              variant="outline-primary"
-              size="sm"
-              onClick={() => handleDiscountChoice(notification, 'eur')}
-              disabled={isProcessing}
-            >
+            <Button variant="outline-primary" size="sm" onClick={() => handleDiscountChoice(notification, 'eur')} disabled={isProcessing}>
               {isProcessing ? (
                 <Spinner size="sm" animation="border" />
               ) : (
@@ -248,12 +202,7 @@ const UnifiedTeacherNotifications = () => {
                 </>
               )}
             </Button>
-            <Button
-              variant="warning"
-              size="sm"
-              onClick={() => handleDiscountChoice(notification, 'teo')}
-              disabled={isProcessing}
-            >
+            <Button variant="warning" size="sm" onClick={() => handleDiscountChoice(notification, 'teo')} disabled={isProcessing}>
               {isProcessing ? (
                 <Spinner size="sm" animation="border" />
               ) : (
@@ -289,16 +238,15 @@ const UnifiedTeacherNotifications = () => {
             </Button>
           </div>
           <div className="text-muted text-xs mt-1">
-            {formatDistanceToNow(new Date(notification.created_at), { 
-              addSuffix: true, 
-              locale: it 
+            {formatDistanceToNow(new Date(notification.created_at), {
+              addSuffix: true,
+              locale: it
             })}
           </div>
         </Card.Body>
       </Card>
     );
   };
-
   const unreadCount = notifications.length;
 
   return (
@@ -310,21 +258,12 @@ const UnifiedTeacherNotifications = () => {
       >
         <BellFill size={20} className="text-primary" />
         {unreadCount > 0 && (
-          <Badge 
-            bg="danger" 
-            pill 
-            className="position-absolute top-0 start-100 translate-middle"
-            style={{ fontSize: '0.7rem' }}
-          >
+          <Badge bg="danger" pill className="position-absolute top-0 start-100 translate-middle" style={{ fontSize: '0.7rem' }}>
             {unreadCount}
           </Badge>
         )}
       </Dropdown.Toggle>
-
-      <Dropdown.Menu 
-        className="dropdown-menu-end" 
-        style={{ width: '400px', maxHeight: '500px', overflowY: 'auto' }}
-      >
+      <Dropdown.Menu className="dropdown-menu-end" style={{ width: '400px', maxHeight: '500px', overflowY: 'auto' }}>
         <Dropdown.Header>
           <div className="d-flex justify-content-between align-items-center">
             <span>🔔 Notifiche Teacher</span>
@@ -348,18 +287,14 @@ const UnifiedTeacherNotifications = () => {
 
         {notifications.map((notification) => (
           <div key={notification.id} className="dropdown-item-text p-0">
-            {notification.parsed.type === 'discount_decision' 
+            {notification.parsed.type === 'discount_decision'
               ? renderDiscountNotification(notification)
-              : renderRegularNotification(notification)
-            }
+              : renderRegularNotification(notification)}
           </div>
         ))}
 
         {unreadCount > 0 && (
-          <Dropdown.Item 
-            className="text-center text-primary"
-            onClick={fetchNotifications}
-          >
+          <Dropdown.Item className="text-center text-primary" onClick={fetchNotifications}>
             🔄 Aggiorna notifiche
           </Dropdown.Item>
         )}
