@@ -108,15 +108,34 @@ const DBCourseCheckoutModal = ({ course, show, handleClose, onPurchaseComplete }
   };
 
   // Handle Stripe payment success
-  const handleStripeSuccess = (result) => {
+  const handleStripeSuccess = async (result) => {
     console.log('🎉 Payment success handler called!');
     console.log('💳 Payment result:', result);
-    
-    setPaymentResult(result);
+    let updatedResult = result;
+    // If discountApplied, call backend to apply TeoCoin discount
+    if (discountApplied && paymentResult?.discountInfo) {
+      try {
+        const { teo_used, discount_percentage } = paymentResult.discountInfo;
+        const discountApiResult = await import('../../services/api/teocoin')
+          .then(mod => mod.applyTeoCoinDiscount(course.id, teo_used, discount_percentage));
+        console.log('🪙 TeoCoin discount API result:', discountApiResult);
+        // Optionally update DB balance and show transaction
+        if (discountApiResult.success) {
+          await refreshDbBalance();
+          updatedResult = {
+            ...result,
+            discountApiResult,
+          };
+        } else {
+          console.error('❌ TeoCoin discount API error:', discountApiResult.error);
+        }
+      } catch (err) {
+        console.error('❌ Error applying TeoCoin discount:', err);
+      }
+    }
+    setPaymentResult(updatedResult);
     setStep('success');
-    
     console.log('✅ Step set to success, paymentResult set');
-    
     if (onPurchaseComplete) {
       console.log('🔄 Calling onPurchaseComplete...');
       onPurchaseComplete();
