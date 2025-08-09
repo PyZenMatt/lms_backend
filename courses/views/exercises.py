@@ -135,12 +135,12 @@ class SubmitExerciseView(APIView):
                 reviewer=reviewer
             )
             submission.reviewers.add(reviewer)
-                Notification.objects.create(
-                    user=reviewer,
-                    message=f"Hai un nuovo esercizio da valutare: {exercise.title}",
-                    notification_type='review_assigned',
-                    related_object_id=submission.id,
-                    link=f"/review/{submission.id}"
+            Notification.objects.create(
+                user=reviewer,
+                message=f"Hai un nuovo esercizio da valutare: {exercise.title}",
+                notification_type='review_assigned',
+                related_object_id=submission.id,
+                link=f"/review/{submission.id}"
                 )
 
         submission.save()
