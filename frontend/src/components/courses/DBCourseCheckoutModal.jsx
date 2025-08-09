@@ -296,6 +296,7 @@ const DBCourseCheckoutModal = ({ course, show, handleClose, onPurchaseComplete }
             <StripeCardForm 
               course={course}
               finalPrice={effectivePrice}
+              fiatPrice={fiatPrice}
               paymentResult={paymentResult}
               onPaymentSuccess={handleStripeSuccess}
               onPaymentError={handleStripeError}
@@ -471,7 +472,7 @@ const DBCourseCheckoutModal = ({ course, show, handleClose, onPurchaseComplete }
 };
 
 // Stripe Card Payment Form Component
-const StripeCardForm = ({ course, finalPrice, paymentResult, onPaymentSuccess, onPaymentError, loading, setLoading }) => {
+const StripeCardForm = ({ course, finalPrice, fiatPrice, paymentResult, onPaymentSuccess, onPaymentError, loading, setLoading }) => {
   const stripe = useStripe();
   const elements = useElements();
   const [processing, setProcessing] = useState(false);
