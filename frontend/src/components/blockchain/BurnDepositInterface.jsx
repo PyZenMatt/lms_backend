@@ -229,43 +229,15 @@ const BurnDepositInterface = ({ onTransactionComplete }) => {
         return;
       }
 
-      // 3) Send with retry & fee bump on transient RPC errors
-      const sendWithRetry = async (attempt = 1, maxAttempts = 3, feeBumpPct = 15) => {
-        try {
-          const overrides = {
-            gasLimit,
-            maxFeePerGas,
-            maxPriorityFeePerGas
-          };
-          const burnTx = await contract.burn(amountWei, overrides);
-          const burnResult = await burnTx.wait();
-          return burnResult.hash || burnTx.hash;
-        } catch (err) {
-          const msg = err?.message || String(err);
-          const code = err?.code || err?.info?.error?.code;
-          const retryable =
-            code === -32603 ||
-            code === -32000 ||
-            msg.includes('underpriced') ||
-            msg.includes('replacement') ||
-            msg.includes('timeout') ||
-            msg.toLowerCase().includes('internal json-rpc error');
-          if (retryable && attempt < maxAttempts) {
-            // bump fees by ≥15%
-            maxFeePerGas = (maxFeePerGas * BigInt(100 + feeBumpPct)) / 100n;
-            maxPriorityFeePerGas = (maxPriorityFeePerGas * BigInt(100 + feeBumpPct)) / 100n;
-            console.warn(`Retrying burn (attempt ${attempt + 1}) with higher fees`, {
-              maxFeePerGas: maxFeePerGas.toString(),
-              maxPriorityFeePerGas: maxPriorityFeePerGas.toString()
-            });
-            return await sendWithRetry(attempt + 1, maxAttempts, feeBumpPct);
-          }
-          throw err;
-        }
+      // 3) Send a single transaction (avoid auto-retries to prevent MetaMask confirmation loops)
+      const overrides = {
+        gasLimit,
+        maxFeePerGas,
+        maxPriorityFeePerGas
       };
-
-      // Step 1: Execute burn transaction via MetaMask with robust params
-      const txHash = await sendWithRetry();
+      const burnTx = await contract.burn(amountWei, overrides);
+      const burnResult = await burnTx.wait();
+      const txHash = burnResult.hash || burnTx.hash;
       setLastTxHash(txHash);
 
       // Step 2: Submit burn proof to backend
@@ -308,7 +280,7 @@ const BurnDepositInterface = ({ onTransactionComplete }) => {
       } else if (msg.toLowerCase().includes('revert')) {
         userMsg = 'Transaction would revert. Check amount and permissions.';
       } else if (msg.toLowerCase().includes('internal json-rpc error')) {
-        userMsg = 'RPC error from provider. Please retry; we will auto-bump fees.';
+        userMsg = 'RPC error from provider. Please retry once. If it stays pending, use MetaMask “Speed Up”.';
       }
       setError(`Failed to process burn deposit: ${userMsg}`);
     } finally {
