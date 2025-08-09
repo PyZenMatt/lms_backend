@@ -314,47 +314,58 @@ class ConfirmPaymentView(APIView):
                 try:
                     logger.info(f"💰 Payment confirmed, now deducting TeoCoin: {discount_amount} TEO")
                     db_teo_service = DBTeoCoinService()
-                    # Log saldo prima
                     pre_balance = db_teo_service.get_available_balance(user)
                     logger.info(f"Saldo TeoCoin prima della deduzione: {pre_balance}")
 
-                    # Check if discount was already applied (prevent double deduction)
                     from blockchain.models import DBTeoCoinTransaction
                     existing_discount = DBTeoCoinTransaction.objects.filter(
                         user=user,
                         course_id=str(course_id),
                         transaction_type='discount',
-                        amount__lt=0  # Negative amount = deduction
+                        amount__lt=0
                     ).first()
 
                     if existing_discount:
+                        # Verifica che il saldo sia coerente con la transazione
                         logger.info(f"✅ TeoCoin discount already applied: {abs(existing_discount.amount)} TEO")
+                        # Se il saldo non è stato aggiornato, lo aggiorna ora
+                        balance_obj = db_teo_service.get_user_balance(user)
+                        if balance_obj['available_balance'] >= discount_amount:
+                            # Forza la deduzione se la transazione esiste ma il saldo non è stato scalato
+                            success = db_teo_service.deduct_balance(
+                                user=user,
+                                amount=discount_amount,
+                                transaction_type='discount',
+                                description=f'TeoCoin discount fix for course: {course.title} (after payment)',
+                                course_id=str(course_id)
+                            )
+                            post_balance = db_teo_service.get_available_balance(user)
+                            logger.info(f"Saldo TeoCoin dopo fix deduzione: {post_balance}")
+                            if success:
+                                logger.info(f"✅ TeoCoin fix deduction applied: {discount_amount} TEO")
+                            else:
+                                logger.error(f"❌ Failed to apply TeoCoin fix deduction: {discount_amount} TEO")
                     else:
-                        # Ensure balance record exists
+                        # Deduce TeoCoin normalmente
                         try:
                             _ = db_teo_service.get_user_balance(user)
                         except Exception as e:
                             logger.error(f"Errore creazione balance record: {e}")
-
-                        # Deduct TEO after successful payment
                         success = db_teo_service.deduct_balance(
                             user=user,
-                            amount=discount_amount,  # discount_amount = TEO to deduct
+                            amount=discount_amount,
                             transaction_type='discount',
                             description=f'TeoCoin discount for course: {course.title} (after payment)',
                             course_id=str(course_id)
                         )
                         post_balance = db_teo_service.get_available_balance(user)
                         logger.info(f"Saldo TeoCoin dopo la deduzione: {post_balance}")
-
                         if success:
                             logger.info(f"✅ TeoCoin deducted after payment: {discount_amount} TEO")
                         else:
                             logger.error(f"❌ Failed to deduct TeoCoin after payment: {discount_amount} TEO")
-                            # Note: Don't fail the enrollment, payment already succeeded
                 except Exception as e:
                     logger.error(f"❌ TeoCoin deduction error after payment: {e}")
-                    # Note: Don't fail the enrollment, payment already succeeded
             
             # Process teacher notification for discount decision
             teacher_notification_sent = False

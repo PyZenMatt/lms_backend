@@ -293,7 +293,8 @@ class DBTeoCoinService:
     
     # ========== DISCOUNT SYSTEM ==========
     
-    def calculate_discount(self, user: User, course_price: Decimal) -> Dict[str, Decimal]:
+    from typing import Any, Dict
+    def calculate_discount(self, user: 'User', course_price: Decimal) -> Dict[str, Any]:
         """
         Calculate TeoCoin discount for a course purchase
         
@@ -319,7 +320,8 @@ class DBTeoCoinService:
             'discount_amount': discount_amount,
             'final_price': final_price,
             'teo_required': teo_available_for_discount,
-            'discount_percentage': (discount_amount / course_price * 100) if course_price > 0 else Decimal('0')
+            'discount_percentage': (discount_amount / course_price * 100) if course_price > 0 else Decimal('0'),
+            'can_apply_discount': teo_available_for_discount > 0
         }
     
     @transaction.atomic

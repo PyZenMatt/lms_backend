@@ -8,7 +8,7 @@ import django
 
 # Setup Django
 sys.path.append('/home/teo/Project/school/schoolplatform')
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'schoolplatform.settings')
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'schoolplatform.settings.dev')
 django.setup()
 
 from django.contrib.auth import get_user_model
@@ -49,15 +49,23 @@ def test_apply_discount():
             balance = db_service.get_user_balance(test_user)
             print(f"📊 New balance: {balance}")
         
-        # 4. Test discount calculation
-        test_course_price = Decimal('50.00')
+        # 4. Recupera un corso esistente
+        from courses.models import Course
+        test_course = Course.objects.first()
+        if not test_course:
+            print("❌ No course found for testing")
+            return
+        test_course_price = test_course.price_eur
+        print(f"📝 Using test course: {test_course.title} (ID: {test_course.id}) - Price: €{test_course_price}")
+
+        # 5. Test discount calculation
         discount_info = db_service.calculate_discount(
             user=test_user,
             course_price=test_course_price
         )
         print(f"🎯 Discount calculation for €{test_course_price}: {discount_info}")
-        
-        # 5. Test applying discount
+
+        # 6. Test applying discount
         if discount_info['can_apply_discount']:
             print(f"💳 Attempting to apply discount...")
             
@@ -66,7 +74,7 @@ def test_apply_discount():
                 amount=discount_info['teo_required'],
                 transaction_type='discount',
                 description='Test discount application',
-                course_id='test_course_123'
+                course_id="123"  # Usa un ID stringa numerica
             )
             
             if success:
