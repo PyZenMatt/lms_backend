@@ -106,6 +106,7 @@ urlpatterns = [
     path('exercises/<int:exercise_id>/my_submission/', MySubmissionView.as_view(), name='my-exercise-submission'),
     path('reviews/assigned/', AssignedReviewsView.as_view(), name='assigned-reviews'),
     path('submissions/<int:submission_id>/', SubmissionDetailView.as_view(), name='submission-detail'),
+    path('submissions/<int:submission_id>/review-detail/', SubmissionDetailForReviewerView.as_view(), name='submission-detail-for-reviewer'),
     path('exercises/submissions/', SubmissionHistoryView.as_view(), name='submission-history'),
     path('reviews/history/', ReviewHistoryView.as_view(), name='review-history'),
     path('exercises/<int:exercise_id>/submissions/', ExerciseSubmissionsView.as_view(), name='exercise-submissions'), # opzionale

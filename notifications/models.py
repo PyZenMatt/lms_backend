@@ -52,6 +52,7 @@ class Notification(models.Model):
     notification_type = models.CharField(max_length=30, choices=NOTIFICATION_TYPES)
     read = models.BooleanField(default=False)
     related_object_id = models.PositiveIntegerField(null=True, blank=True)
+    link = models.CharField(max_length=255, null=True, blank=True, help_text="URL di destinazione per azione diretta")
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:

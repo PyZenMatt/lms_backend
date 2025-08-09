@@ -1,3 +1,20 @@
+class SubmissionDetailForReviewerView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, submission_id: int):
+        submission = get_object_or_404(ExerciseSubmission, id=submission_id)
+        # Permesso: reviewer assegnato, staff, teacher del corso, o studente owner
+        is_owner = submission.student.id == request.user.id if submission.student else False
+        is_staff = getattr(request.user, 'is_staff', False)
+        is_course_teacher = False
+        if submission.exercise and submission.exercise.lesson and submission.exercise.lesson.course:
+            is_course_teacher = (submission.exercise.lesson.course.teacher_id == request.user.id)
+        is_reviewer = submission.reviewers.filter(id=request.user.id).exists()
+
+        if not (is_owner or is_staff or is_course_teacher or is_reviewer):
+            return Response({'detail': 'Non autorizzato.'}, status=403)
+
+        return Response(ExerciseSubmissionSerializer(submission).data, status=200)
 from rest_framework import generics, status
 from rest_framework.views import APIView
 from rest_framework.response import Response

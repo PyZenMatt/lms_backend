@@ -18,9 +18,16 @@ const ReviewDetail = () => {
   const token = localStorage.getItem('token') || localStorage.getItem('access');
     const fetchSubmission = async () => {
       try {
-    const res = await fetch(`${API_BASE_URL}/api/v1/submissions/${resolvedId}/`, {
+        // Usa endpoint /review-detail/ per reviewer, fallback su /submissions/<id>/ per owner
+        let res = await fetch(`${API_BASE_URL}/api/v1/submissions/${resolvedId}/review-detail/`, {
           headers: token ? { 'Authorization': `Bearer ${token}` } : {}
         });
+        if (res.status === 403) {
+          // Fallback: prova endpoint owner
+          res = await fetch(`${API_BASE_URL}/api/v1/submissions/${resolvedId}/`, {
+            headers: token ? { 'Authorization': `Bearer ${token}` } : {}
+          });
+        }
         if (res.ok) {
           const data = await res.json();
           setSubmission(data);
