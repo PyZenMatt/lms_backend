@@ -128,6 +128,36 @@ def process_teocoin_discount_payment(request, course_id, amount_eur, teocoin_dis
             
             logger.info(f"✅ Student enrolled immediately with discount: {enrollment.id}")
             
+            # ✅ CRITICAL FIX: Deduct TeoCoin from student's database balance
+            from services.db_teocoin_service import db_teocoin_service
+            
+            teo_required = Decimal(str(discount_value_eur))  # 1 EUR = 1 TEO for discount
+            
+            teocoin_deduction_success = db_teocoin_service.deduct_balance(
+                user=request.user,
+                amount=teo_required,
+                transaction_type='spent_discount',
+                description=f"TeoCoin discount for course: {course.title} ({teocoin_discount}% discount)",
+                course=course
+            )
+            
+            if teocoin_deduction_success:
+                logger.info(f"✅ TeoCoin deducted successfully: {teo_required} TEO from {request.user.email}")
+                
+                # Update enrollment with more detailed info
+                enrollment.original_price_eur = amount_eur
+                enrollment.discount_amount_eur = discount_value_eur
+                enrollment.save()
+                
+            else:
+                logger.error(f"❌ Failed to deduct TeoCoin: {teo_required} TEO from {request.user.email}")
+                # Rollback the enrollment since TeoCoin deduction failed
+                enrollment.delete()
+                return Response({
+                    'success': False,
+                    'error': f'Failed to deduct TeoCoin balance. Required: {teo_required} TEO'
+                }, status=status.HTTP_400_BAD_REQUEST)
+            
         except Exception as enrollment_error:
             logger.error(f"Enrollment error: {enrollment_error}")
             return Response({

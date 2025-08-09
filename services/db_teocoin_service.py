@@ -91,7 +91,7 @@ class DBTeoCoinService:
     
     @transaction.atomic
     def add_balance(self, user: User, amount: Decimal, transaction_type: str, 
-                   description: str = "", course_id: Optional[str] = None) -> bool:
+                   description: str = "", course=None) -> bool:
         """
         Add TeoCoin to user's available balance
         
@@ -100,7 +100,7 @@ class DBTeoCoinService:
             amount: Amount to add
             transaction_type: Type of transaction (earn_lesson, purchase, etc.)
             description: Transaction description
-            course_id: Optional course ID for context
+            course: Optional course object for context
             
         Returns:
             bool: Success status
@@ -127,7 +127,7 @@ class DBTeoCoinService:
                 transaction_type=transaction_type,
                 amount=amount,
                 description=description,
-                course_id=course_id
+                course=course
             )
             
             return True
@@ -138,7 +138,7 @@ class DBTeoCoinService:
     
     @transaction.atomic
     def deduct_balance(self, user: User, amount: Decimal, transaction_type: str,
-                      description: str = "", course_id: Optional[str] = None) -> bool:
+                      description: str = "", course=None) -> bool:
         """
         Deduct TeoCoin from user's available balance
         
@@ -147,7 +147,7 @@ class DBTeoCoinService:
             amount: Amount to deduct
             transaction_type: Type of transaction (discount, stake, etc.)
             description: Transaction description
-            course_id: Optional course ID for context
+            course: Optional course object for context
             
         Returns:
             bool: Success status
@@ -170,7 +170,7 @@ class DBTeoCoinService:
                 transaction_type=transaction_type,
                 amount=-amount,  # Negative for deduction
                 description=description,
-                course_id=course_id
+                course=course
             )
             
             return True
@@ -326,14 +326,14 @@ class DBTeoCoinService:
     
     @transaction.atomic
     def apply_course_discount(self, user: User, course_price: Decimal, 
-                            course_id: str, course_title: str = "") -> Dict[str, Any]:
+                            course, course_title: str = "") -> Dict[str, Any]:
         """
         Apply TeoCoin discount to a course purchase
         
         Args:
             user: User purchasing course
             course_price: Original course price
-            course_id: Course identifier
+            course: Course object
             course_title: Course title for description
             
         Returns:
@@ -356,7 +356,7 @@ class DBTeoCoinService:
             amount=teo_required,
             transaction_type='course_discount',
             description=f"Discount for course: {course_title}",
-            course_id=course_id
+            course=course
         )
         
         if success:
