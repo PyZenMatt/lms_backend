@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import Button from '@/components/ui/Button';
 import Card from '@/components/ui/Card';
@@ -13,7 +13,18 @@ export default function LessonDetailPage() {
   const navigate = useNavigate();
   const { data: lesson, isLoading, error, refetch } = useLesson(cid, id);
   const actions = useLessonActions(cid, id);
-  const [serverError, setServerError] = useState<string | null>(null);
+  const [serverError, setServerError] = useState(null);
+
+  const onDelete = async (lessonId) => {
+    if (window.confirm('Sei sicuro di voler eliminare questa lezione?')) {
+      try {
+        await actions.remove(lessonId);
+        navigate(`/courses/${cid}/lessons`);
+      } catch (e) {
+        setServerError(getUserSafeMessage(e));
+      }
+    }
+  };
 
   if (isLoading) {
     return (
@@ -40,24 +51,15 @@ export default function LessonDetailPage() {
   return (
     <div>
       <div className="d-flex justify-content-between align-items-center mb-3">
-        <H4 className="mb-0">{lesson.title}</H4>
+        <H4 className="mb-0" data-testid="page-title">
+          {lesson.title}
+        </H4>
         <div className="d-flex gap-2">
           <Button onClick={() => navigate(`/courses/${cid}/lessons`)}>Torna alla lista</Button>
           <Button variant="secondary" onClick={() => navigate(`/courses/${cid}/lessons/${id}?edit=1`)}>
             Modifica
           </Button>
-          <Button
-            variant="danger"
-            onClick={async () => {
-              if (!window.confirm('Eliminare questa lezione?')) return;
-              try {
-                await actions.remove(id);
-                navigate(`/courses/${cid}/lessons`);
-              } catch (e: any) {
-                setServerError(getUserSafeMessage(e));
-              }
-            }}
-          >
+          <Button variant="danger" onClick={() => onDelete(id)}>
             Elimina
           </Button>
         </div>

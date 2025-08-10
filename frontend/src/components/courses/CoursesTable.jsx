@@ -400,17 +400,11 @@ const CoursesTable = ({
                           {course.lessons.map((lesson, lessonIndex) => (
                             <Card key={lesson.id} className="lesson-card mb-3 border-0 shadow-sm">
                               <Card.Body className="p-3">
-                                <div
-                                  className="lesson-header cursor-pointer"
-                                  role="button"
-                                  tabIndex={0}
-                                  onKeyDown={(e) => {
-                                    if (e.key === 'Enter' || e.key === ' ') {
-                                      e.preventDefault();
-                                      handleToggleLesson(lesson.id);
-                                    }
-                                  }}
+                                <button
+                                  type="button"
+                                  className="lesson-header cursor-pointer btn-reset"
                                   onClick={() => handleToggleLesson(lesson.id)}
+                                  style={{ background: 'none', border: 'none', padding: 0, width: '100%', textAlign: 'left' }}
                                 >
                                   <div className="d-flex justify-content-between align-items-center">
                                     <div className="flex-grow-1">
@@ -472,7 +466,7 @@ const CoursesTable = ({
                                       <i className={`feather icon-chevron-${expandedLessons[lesson.id] ? 'up' : 'down'} text-muted`}></i>
                                     </div>
                                   </div>
-                                </div>
+                                </button>
 
                                 <Collapse in={expandedLessons[lesson.id]}>
                                   <div
