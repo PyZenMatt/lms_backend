@@ -16,10 +16,10 @@ django.setup()
 # ========================================
 # IMPORTS DOPO SETUP DJANGO
 # ========================================
-from services.db_teocoin_service import DBTeoCoinService
+from backend.services.db_teocoin_service import DBTeoCoinService
 from users.models import User
 from courses.models import Course, Lesson, Exercise, ExerciseSubmission, ExerciseReview
-from rewards.blockchain_rewards import BlockchainRewards, BlockchainRewardManager
+from backend.rewards.blockchain_rewards import BlockchainRewards, BlockchainRewardManager
 from decimal import Decimal
 from django.utils import timezone
 import random
@@ -89,7 +89,7 @@ def test_complete_exercise_system():
 
     # Test calcolo reward per il corso
     try:
-        from rewards.blockchain_rewards import BlockchainRewardCalculator
+        from backend.rewards.blockchain_rewards import BlockchainRewardCalculator
         
         # Calcola pool reward totale del corso
         total_pool = BlockchainRewardCalculator.calculate_course_reward_pool(course)
@@ -189,7 +189,7 @@ def test_complete_exercise_system():
     if submission:
         try:
             # Verifica se già premiato
-            from rewards.models import BlockchainTransaction
+            from backend.rewards.models import BlockchainTransaction
             existing_reward = BlockchainTransaction.objects.filter(
                 user=student,
                 transaction_type='exercise_reward',
@@ -268,7 +268,7 @@ def test_complete_exercise_system():
                 print("   🎁 Testing reviewer reward...")
                 
                 # Verifica se reviewer già premiato
-                from rewards.models import BlockchainTransaction
+                from backend.rewards.models import BlockchainTransaction
                 existing_review_reward = BlockchainTransaction.objects.filter(
                     user=teacher,
                     transaction_type='review_reward',
@@ -327,7 +327,7 @@ def test_complete_exercise_system():
                 print(f"   📊 Teacher transactions in DB: {teacher_transactions}")
         
         # Reward transactions
-        from rewards.models import BlockchainTransaction
+        from backend.rewards.models import BlockchainTransaction
         reward_transactions = BlockchainTransaction.objects.filter(
             transaction_type__in=['exercise_reward', 'review_reward']
         ).count()

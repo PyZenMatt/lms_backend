@@ -27,8 +27,8 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'schoolplatform.settings')
 django.setup()
 
 from django.contrib.auth import get_user_model
-from services.db_teocoin_service import db_teocoin_service
-from services.consolidated_teocoin_service import ConsolidatedTeoCoinService
+from backend.services.db_teocoin_service import db_teocoin_service
+from backend.services.consolidated_teocoin_service import ConsolidatedTeoCoinService
 
 User = get_user_model()
 
@@ -130,7 +130,7 @@ class TeoCoinUserTester:
             print(f"   Processing withdrawal...")
             
             # Use the Phase 1 withdrawal service to create request
-            from services.teocoin_withdrawal_service import teocoin_withdrawal_service
+            from backend.services.teocoin_withdrawal_service import teocoin_withdrawal_service
             
             withdrawal_result = teocoin_withdrawal_service.create_withdrawal_request(
                 user=user,

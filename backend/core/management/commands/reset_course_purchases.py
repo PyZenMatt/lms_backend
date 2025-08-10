@@ -13,7 +13,7 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'core.settings')
 django.setup()
 
 from courses.models import Course
-from rewards.models import BlockchainTransaction
+from backend.rewards.models import BlockchainTransaction
 from users.models import User
 
 def reset_course_purchases():

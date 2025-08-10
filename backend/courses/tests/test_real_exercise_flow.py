@@ -14,7 +14,7 @@ django.setup()
 
 from django.contrib.auth import get_user_model
 from courses.models import ExerciseSubmission, ExerciseReview
-from services.db_teocoin_service import DBTeoCoinService
+from backend.services.db_teocoin_service import DBTeoCoinService
 from django.utils import timezone
 
 User = get_user_model()

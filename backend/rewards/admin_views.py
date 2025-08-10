@@ -5,8 +5,8 @@ from rest_framework import status
 from django.db.models import Count, Sum, Q
 from django.utils import timezone
 from datetime import timedelta
-from rewards.models import BlockchainTransaction
-from rewards.serializers import BlockchainTransactionSerializer
+from backend.rewards.models import BlockchainTransaction
+from backend.rewards.serializers import BlockchainTransactionSerializer
 import logging
 
 logger = logging.getLogger(__name__)

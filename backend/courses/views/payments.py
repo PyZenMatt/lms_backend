@@ -28,14 +28,14 @@ from courses.models import Course, CourseEnrollment
 from users.models import User
 
 # LEGACY IMPORTS REMOVED - using clean database services now
-# from services.gas_free_v2_service import GasFreeV2Service
+# from backend.services.gas_free_v2_service import GasFreeV2Service
 # from views.gas_free_v2_views import create_discount_request_v2
 
-from services.hybrid_teocoin_service import hybrid_teocoin_service
-from services.teacher_discount_absorption_service import TeacherDiscountAbsorptionService
-from services.db_teocoin_service import DBTeoCoinService
+from backend.services.hybrid_teocoin_service import hybrid_teocoin_service
+from backend.services.teacher_discount_absorption_service import TeacherDiscountAbsorptionService
+from backend.services.db_teocoin_service import DBTeoCoinService
 from blockchain.blockchain import TeoCoinService
-from notifications.services import teocoin_notification_service
+from backend.notifications.services import teocoin_notification_service
 
 logger = logging.getLogger(__name__)
 

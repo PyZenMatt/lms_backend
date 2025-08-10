@@ -14,9 +14,9 @@ from django.db.models import Q
 import json
 import logging
 
-from notifications.models import Notification
-from services.base import TransactionalService
-from services.exceptions import (
+from backend.notifications.models import Notification
+from backend.services.base import TransactionalService
+from backend.services.exceptions import (
     TeoArtServiceException,
     UserNotFoundError,
 )

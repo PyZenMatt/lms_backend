@@ -15,7 +15,7 @@ django.setup()
 
 from django.contrib.auth import get_user_model
 from courses.models import Course, CourseEnrollment
-from rewards.models import BlockchainTransaction
+from backend.rewards.models import BlockchainTransaction
 
 User = get_user_model()
 

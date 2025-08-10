@@ -13,7 +13,7 @@ from django.template.loader import render_to_string
 from django.utils import timezone
 from datetime import timedelta
 
-from notifications.models import Notification
+from backend.notifications.models import Notification
 from users.models import User
 
 logger = logging.getLogger(__name__)

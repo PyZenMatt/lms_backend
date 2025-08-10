@@ -13,8 +13,8 @@ def test_exercise_system():
     try:
         from courses.models import Course, Lesson, Exercise, ExerciseSubmission
         from users.models import User
-        from services.db_teocoin_service import DBTeoCoinService
-        from rewards.blockchain_rewards import BlockchainRewards
+        from backend.services.db_teocoin_service import DBTeoCoinService
+        from backend.rewards.blockchain_rewards import BlockchainRewards
         from decimal import Decimal
         from django.utils import timezone
         print("✅ 1. Imports: SUCCESS")

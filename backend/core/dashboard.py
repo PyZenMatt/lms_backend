@@ -1,8 +1,8 @@
 import logging
-from notifications.models import Notification 
+from backend.notifications.models import Notification 
 from courses.models import Lesson, Exercise, Course
-from rewards.models import BlockchainTransaction
-from notifications.serializers import NotificationSerializer
+from backend.rewards.models import BlockchainTransaction
+from backend.notifications.serializers import NotificationSerializer
 from courses.serializers import LessonSerializer, TeacherCourseSerializer, CourseSerializer
 from core.serializers import BlockchainTransactionSerializer
 from rest_framework.permissions import IsAuthenticated
@@ -19,7 +19,7 @@ from datetime import timedelta
 from django.core.cache import cache
 from django.views.decorators.cache import cache_page
 from decimal import Decimal
-from services.db_teocoin_service import db_teocoin_service
+from backend.services.db_teocoin_service import db_teocoin_service
 
 
 class StudentDashboardView(APIView):
@@ -258,7 +258,7 @@ class AdminDashboardAPI(APIView):
         from users.models import User
         from courses.models import Course
         from courses.models import CourseApprovalRequest
-        from rewards.models import BlockchainTransaction
+        from backend.rewards.models import BlockchainTransaction
         from django.db.models import Sum
         user = request.user
 

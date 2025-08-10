@@ -3,8 +3,8 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework import status
 from decimal import Decimal
-from services.payment_service import payment_service
-from services.exceptions import (
+from backend.services.payment_service import payment_service
+from backend.services.exceptions import (
     TeoArtServiceException, 
     UserNotFoundError, 
     CourseNotFoundError,

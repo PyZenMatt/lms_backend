@@ -14,7 +14,7 @@ django.setup()
 
 from users.models import User
 from courses.models import ExerciseSubmission
-from rewards.models import BlockchainTransaction
+from backend.rewards.models import BlockchainTransaction
 from decimal import Decimal
 
 def create_missing_exercise_reward():

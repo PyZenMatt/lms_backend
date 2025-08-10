@@ -9,7 +9,7 @@ from django.http import JsonResponse
 from rest_framework.response import Response
 from rest_framework import status
 
-from services.teocoin_discount_service import teocoin_discount_service
+from backend.services.teocoin_discount_service import teocoin_discount_service
 
 logger = logging.getLogger(__name__)
 
@@ -222,7 +222,7 @@ def handle_teocoin_discount_completion(payment_intent_metadata):
         
         # ✅ Send notification to teacher about EUR vs TEO choice
         try:
-            from notifications.services import send_teacher_discount_notification
+            from backend.notifications.services import send_teacher_discount_notification
             send_teacher_discount_notification(
                 teacher=course.teacher,
                 student=user,

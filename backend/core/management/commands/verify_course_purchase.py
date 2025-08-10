@@ -14,7 +14,7 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'schoolplatform.settings')
 django.setup()
 
 from django.contrib.auth import get_user_model
-from rewards.models import BlockchainTransaction
+from backend.rewards.models import BlockchainTransaction
 from courses.models import CourseEnrollment, Course
 from blockchain.blockchain import teocoin_service
 

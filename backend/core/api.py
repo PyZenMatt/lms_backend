@@ -1,9 +1,9 @@
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-from rewards.models import BlockchainTransaction 
-from notifications.models import Notification
-from notifications.serializers import NotificationSerializer
+from backend.rewards.models import BlockchainTransaction 
+from backend.notifications.models import Notification
+from backend.notifications.serializers import NotificationSerializer
 from core.serializers import BlockchainTransactionSerializer
 from courses.models import Lesson 
 from courses.serializers import LessonSerializer

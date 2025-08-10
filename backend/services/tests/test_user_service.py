@@ -7,7 +7,7 @@ Quick tests to verify UserService functionality during development.
 from django.test import TestCase
 from django.contrib.auth import get_user_model
 from services import UserService
-from services.exceptions import UserNotFoundError
+from backend.services.exceptions import UserNotFoundError
 
 User = get_user_model()
 

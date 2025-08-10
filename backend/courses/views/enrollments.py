@@ -11,19 +11,19 @@ import uuid
 import logging
 
 from courses.models import Course, CourseEnrollment
-from rewards.models import BlockchainTransaction
+from backend.rewards.models import BlockchainTransaction
 from courses.serializers import StudentCourseSerializer
 from users.permissions import IsTeacher
 
 # Service Layer imports
-from services.payment_service import payment_service
-from services.exceptions import (
+from backend.services.payment_service import payment_service
+from backend.services.exceptions import (
     TeoArtServiceException, 
     UserNotFoundError, 
     CourseNotFoundError,
     InsufficientTeoCoinsError
 )
-from services.db_teocoin_service import DBTeoCoinService
+from backend.services.db_teocoin_service import DBTeoCoinService
 from blockchain.models import DBTeoCoinTransaction
 
 logger = logging.getLogger(__name__)
@@ -119,7 +119,7 @@ class PurchaseCourseView(APIView):
         - Verifica che la reward pool abbia ricevuto la commissione
         """
         try:
-            from rewards.models import BlockchainTransaction
+            from backend.rewards.models import BlockchainTransaction
             from decimal import Decimal
             
             # Cerca transazioni correlate al transaction hash principale
@@ -150,7 +150,7 @@ class PurchaseCourseView(APIView):
             # Check if this is a simulated transaction hash (for testing)
             if tx_hash.startswith("0x") and len(tx_hash) == 66:
                 # Check if this is a simulated transaction in our database
-                from rewards.models import BlockchainTransaction
+                from backend.rewards.models import BlockchainTransaction
                 simulated_tx = BlockchainTransaction.objects.filter(
                     transaction_hash=tx_hash,
                     transaction_type='simulated_payment',
@@ -411,7 +411,7 @@ class CourseEnrollmentView(APIView):
                 if discount_applied and discount_info and course.teacher:
                     debug_messages.append("💰 Creating discount absorption opportunity")
                     try:
-                        from services.teacher_discount_absorption_service import TeacherDiscountAbsorptionService
+                        from backend.services.teacher_discount_absorption_service import TeacherDiscountAbsorptionService
                         
                         absorption_data = {
                             'course_price_eur': float(course.price_eur),

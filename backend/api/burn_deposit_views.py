@@ -12,7 +12,7 @@ import logging
 from web3 import Web3
 
 from blockchain.blockchain import teocoin_service
-from services.db_teocoin_service import DBTeoCoinService
+from backend.services.db_teocoin_service import DBTeoCoinService
 
 logger = logging.getLogger(__name__)
 

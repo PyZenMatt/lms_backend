@@ -5,8 +5,8 @@ Enhanced signal handlers for automated reward system
 
 from django.db.models.signals import post_save
 from django.dispatch import receiver
-from notifications.models import Notification
-from rewards.models import BlockchainTransaction
+from backend.notifications.models import Notification
+from backend.rewards.models import BlockchainTransaction
 from courses.models import LessonCompletion, CourseEnrollment
 import logging
 
@@ -22,7 +22,7 @@ def handle_lesson_completion_reward(sender, instance, created, **kwargs):
         return
         
     try:
-        from rewards.automation import reward_system
+        from backend.rewards.automation import reward_system
         
         lesson = instance.lesson
         student = instance.student
@@ -56,7 +56,7 @@ def handle_course_enrollment_update(sender, instance, created, **kwargs):
     """
     if not created and instance.completed:
         try:
-            from rewards.automation import reward_system
+            from backend.rewards.automation import reward_system
             
             # This is triggered when enrollment.completed is set to True
             # The completion bonus is already handled in the automation system

@@ -9,7 +9,7 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'schoolplatform.settings')
 django.setup()
 
 from courses.models import ExerciseSubmission, ExerciseReview
-from rewards.models import BlockchainTransaction
+from backend.rewards.models import BlockchainTransaction
 from users.models import User
 
 def create_reward_transaction(user, amount, transaction_type, submission_id):

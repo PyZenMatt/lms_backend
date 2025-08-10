@@ -23,9 +23,9 @@ import json
 import logging
 import time
 
-from services.consolidated_teocoin_service import teocoin_service
-from services.blockchain_service import blockchain_service
-from rewards.models import BlockchainTransaction, TokenBalance
+from backend.services.consolidated_teocoin_service import teocoin_service
+from backend.services.blockchain_service import blockchain_service
+from backend.rewards.models import BlockchainTransaction, TokenBalance
 
 logger = logging.getLogger(__name__)
 

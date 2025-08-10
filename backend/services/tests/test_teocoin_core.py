@@ -17,9 +17,9 @@ from django.contrib.auth import get_user_model
 from django.utils import timezone
 
 from courses.models import Course, CourseEnrollment
-from notifications.models import Notification
-from services.teocoin_discount_service import TeoCoinDiscountService
-from notifications.services import TeoCoinDiscountNotificationService
+from backend.notifications.models import Notification
+from backend.services.teocoin_discount_service import TeoCoinDiscountService
+from backend.notifications.services import TeoCoinDiscountNotificationService
 
 User = get_user_model()
 

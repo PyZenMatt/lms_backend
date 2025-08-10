@@ -23,8 +23,8 @@ def test_withdrawal_integration():
     try:
         # Test 1: Import services
         print("Test 1: Importing withdrawal and blockchain services...")
-        from services.teocoin_withdrawal_service import teocoin_withdrawal_service
-        from services.consolidated_teocoin_service import teocoin_service
+        from backend.services.teocoin_withdrawal_service import teocoin_withdrawal_service
+        from backend.services.consolidated_teocoin_service import teocoin_service
         print("✅ Services imported successfully")
         
         # Test 2: Test service initialization

@@ -9,7 +9,7 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'schoolplatform.settings')
 django.setup()
 
 from courses.models import Exercise, ExerciseSubmission, ExerciseReview
-from rewards.models import BlockchainTransaction
+from backend.rewards.models import BlockchainTransaction
 from users.models import User
 
 def test_new_review_system():

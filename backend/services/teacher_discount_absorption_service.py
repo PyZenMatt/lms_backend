@@ -5,8 +5,8 @@ Handles the business logic for teachers choosing between EUR vs TEO compensation
 from decimal import Decimal
 from django.utils import timezone
 from datetime import timedelta
-from rewards.models import TeacherDiscountAbsorption
-from services.db_teocoin_service import DBTeoCoinService
+from backend.rewards.models import TeacherDiscountAbsorption
+from backend.services.db_teocoin_service import DBTeoCoinService
 
 
 class TeacherDiscountAbsorptionService:
@@ -87,7 +87,7 @@ class TeacherDiscountAbsorptionService:
         
         # Send notification to teacher about the new absorption opportunity
         try:
-            from notifications.services import teocoin_notification_service
+            from backend.notifications.services import teocoin_notification_service
             
             teocoin_notification_service.notify_teacher_discount_pending(
                 teacher=teacher,
@@ -145,7 +145,7 @@ class TeacherDiscountAbsorptionService:
         
         # Send notification to student about teacher's decision
         try:
-            from notifications.services import teocoin_notification_service
+            from backend.notifications.services import teocoin_notification_service
             
             decision = 'accepted' if choice == 'absorb' else 'declined'
             teo_amount = float(absorption.final_teacher_teo) if choice == 'absorb' else None
@@ -253,7 +253,7 @@ class TeacherDiscountAbsorptionService:
             
             # Send expiration notification
             try:
-                from notifications.services import teocoin_notification_service
+                from backend.notifications.services import teocoin_notification_service
                 
                 teocoin_notification_service.notify_request_expired(
                     teacher=absorption.teacher,

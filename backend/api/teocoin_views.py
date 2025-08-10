@@ -11,8 +11,8 @@ from decimal import Decimal
 from django.db.models import Sum, Count
 import logging
 
-from services.teocoin_withdrawal_service import teocoin_withdrawal_service
-from services.hybrid_teocoin_service import hybrid_teocoin_service
+from backend.services.teocoin_withdrawal_service import teocoin_withdrawal_service
+from backend.services.hybrid_teocoin_service import hybrid_teocoin_service
 from blockchain.models import DBTeoCoinTransaction
 
 logger = logging.getLogger(__name__)
@@ -40,7 +40,7 @@ class GetBalanceView(APIView):
         """
         try:
             # Use the db_teocoin_service to get balance
-            from services.db_teocoin_service import db_teocoin_service
+            from backend.services.db_teocoin_service import db_teocoin_service
             result = db_teocoin_service.get_user_balance(request.user)
             
             return Response({

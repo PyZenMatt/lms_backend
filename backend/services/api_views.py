@@ -10,7 +10,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from django.contrib.auth import get_user_model
 
-from services.hybrid_teocoin_service import hybrid_teocoin_service
+from backend.services.hybrid_teocoin_service import hybrid_teocoin_service
 
 User = get_user_model()
 

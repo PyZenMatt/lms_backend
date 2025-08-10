@@ -7,15 +7,15 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAdminUser
 from django.shortcuts import get_object_or_404
-from notifications.models import Notification
+from backend.notifications.models import Notification
 from users.models import User
 from users.serializers import UserSerializer
 from core.api_standards import StandardizedAPIView
 import logging
 
 # Service imports
-from services.user_service import user_service
-from services.exceptions import TeoArtServiceException, UserNotFoundError
+from backend.services.user_service import user_service
+from backend.services.exceptions import TeoArtServiceException, UserNotFoundError
 
 logger = logging.getLogger(__name__)
 

@@ -13,7 +13,7 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'schoolplatform.settings')
 django.setup()
 
 from django.contrib.auth import get_user_model
-from services.db_teocoin_service import DBTeoCoinService
+from backend.services.db_teocoin_service import DBTeoCoinService
 from courses.views.exercises import create_reward_transaction
 
 User = get_user_model()

@@ -15,8 +15,8 @@ django.setup()
 
 from django.contrib.auth import get_user_model
 from courses.models import Course, Lesson, Exercise, ExerciseSubmission, ExerciseReview
-from rewards.models import TeoCoinTransaction, BlockchainTransaction
-from rewards.blockchain_rewards import BlockchainRewardManager
+from backend.rewards.models import TeoCoinTransaction, BlockchainTransaction
+from backend.rewards.blockchain_rewards import BlockchainRewardManager
 from blockchain.blockchain import get_reward_pool_balance
 
 User = get_user_model()

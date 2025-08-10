@@ -5,7 +5,7 @@ from rest_framework.permissions import IsAdminUser
 from courses.models import Course
 from courses.serializers import CourseSerializer
 from django.shortcuts import get_object_or_404
-from notifications.models import Notification
+from backend.notifications.models import Notification
 
 class PendingCoursesView(ListAPIView):
     queryset = Course.objects.filter(is_approved=False)

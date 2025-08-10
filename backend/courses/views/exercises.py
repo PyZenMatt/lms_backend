@@ -14,7 +14,7 @@ from django.utils import timezone
 from datetime import timedelta
 import random
 from users.models import User
-from notifications.models import Notification
+from backend.notifications.models import Notification
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.generics import RetrieveAPIView
 import logging
@@ -28,7 +28,7 @@ def create_reward_transaction(user, amount, transaction_type, submission_id, ref
     Maps specific reward types to DB-allowed transaction types and encodes the
     semantic type in the description for auditing.
     """
-    from services.db_teocoin_service import db_teocoin_service
+    from backend.services.db_teocoin_service import db_teocoin_service
     
     # Convert amount to Decimal for DB service
     from decimal import Decimal

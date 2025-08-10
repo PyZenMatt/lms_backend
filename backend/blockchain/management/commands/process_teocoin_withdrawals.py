@@ -7,7 +7,7 @@ from django.conf import settings
 from decimal import Decimal
 import logging
 
-from services.teocoin_withdrawal_service import teocoin_withdrawal_service
+from backend.services.teocoin_withdrawal_service import teocoin_withdrawal_service
 from blockchain.models import TeoCoinWithdrawalRequest, DBTeoCoinBalance
 
 logger = logging.getLogger(__name__)

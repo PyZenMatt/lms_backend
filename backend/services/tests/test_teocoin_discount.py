@@ -23,9 +23,9 @@ from rest_framework.test import APITestCase, APIClient
 from rest_framework import status
 
 from courses.models import Course, CourseEnrollment
-from notifications.models import Notification
-from services.teocoin_discount_service import TeoCoinDiscountService, DiscountStatus
-from notifications.services import TeoCoinDiscountNotificationService
+from backend.notifications.models import Notification
+from backend.services.teocoin_discount_service import TeoCoinDiscountService, DiscountStatus
+from backend.notifications.services import TeoCoinDiscountNotificationService
 
 User = get_user_model()
 

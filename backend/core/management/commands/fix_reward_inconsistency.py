@@ -14,7 +14,7 @@ django.setup()
 
 from users.models import User
 from courses.models import ExerciseSubmission, Course
-from rewards.models import BlockchainTransaction
+from backend.rewards.models import BlockchainTransaction
 
 def fix_reward_inconsistency():
     """
@@ -79,7 +79,7 @@ def fix_reward_inconsistency():
                         print(f"Amount: {reward_amount} TEO")
                         
                         # Create the reward transaction
-                        from rewards.utils import create_reward_transaction
+                        from backend.rewards.utils import create_reward_transaction
                         exercise_reward = create_reward_transaction(
                             submission.student,
                             reward_amount,

@@ -8,8 +8,8 @@ from courses.models import Course, Lesson, CourseEnrollment, LessonCompletion
 from courses.serializers import CourseSerializer, LessonSerializer
 from users.models import UserProgress
 from users.serializers import UserProgressSerializer
-from notifications.models import Notification
-from notifications.serializers import NotificationSerializer
+from backend.notifications.models import Notification
+from backend.notifications.serializers import NotificationSerializer
 
 
 class StudentBatchDataAPI(APIView):

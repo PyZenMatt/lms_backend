@@ -9,9 +9,9 @@ from typing import Dict, List, Optional, Any
 from django.contrib.auth import get_user_model
 from django.db import transaction
 from courses.models import CourseEnrollment
-from notifications.models import Notification
-from services.base import TransactionalService
-from services.exceptions import (
+from backend.notifications.models import Notification
+from backend.services.base import TransactionalService
+from backend.services.exceptions import (
     TeoArtServiceException,
     UserNotFoundError,
     UserAlreadyExistsError,

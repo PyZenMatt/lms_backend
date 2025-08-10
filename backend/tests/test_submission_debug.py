@@ -13,8 +13,8 @@ def test_submission_reward_debug():
         # Imports
         from courses.models import ExerciseSubmission
         from users.models import User
-        from services.db_teocoin_service import DBTeoCoinService
-        from rewards.blockchain_rewards import BlockchainRewards
+        from backend.services.db_teocoin_service import DBTeoCoinService
+        from backend.rewards.blockchain_rewards import BlockchainRewards
         from blockchain.models import BlockchainTransaction
         from decimal import Decimal
         print("✅ Imports successful")

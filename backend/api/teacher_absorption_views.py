@@ -6,10 +6,10 @@ from rest_framework.response import Response
 from rest_framework import status
 from decimal import Decimal, InvalidOperation
 from rest_framework.permissions import IsAuthenticated
-from services.db_teocoin_service import DBTeoCoinService
+from backend.services.db_teocoin_service import DBTeoCoinService
 from django.shortcuts import get_object_or_404
-from services.teacher_discount_absorption_service import TeacherDiscountAbsorptionService
-from rewards.models import TeacherDiscountAbsorption
+from backend.services.teacher_discount_absorption_service import TeacherDiscountAbsorptionService
+from backend.rewards.models import TeacherDiscountAbsorption
 import logging
 
 logger = logging.getLogger(__name__)
@@ -153,7 +153,7 @@ class TeacherMakeAbsorptionChoiceView(APIView):
 
             # Optionally include balances if needed
             try:
-                from services.db_teocoin_service import DBTeoCoinService
+                from backend.services.db_teocoin_service import DBTeoCoinService
                 db = DBTeoCoinService()
                 data['new_balance'] = float(db.get_balance(request.user))
             except Exception:

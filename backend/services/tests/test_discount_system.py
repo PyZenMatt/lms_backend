@@ -33,7 +33,7 @@ from eth_account import Account
 from eth_account.messages import encode_defunct
 
 from blockchain.blockchain import TeoCoinService
-from services.teocoin_discount_service import teocoin_discount_service
+from backend.services.teocoin_discount_service import teocoin_discount_service
 
 
 class DiscountSystemTester:

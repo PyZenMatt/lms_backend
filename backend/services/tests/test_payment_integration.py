@@ -12,7 +12,7 @@ from decimal import Decimal
 from unittest.mock import patch, MagicMock
 
 from courses.models import Course
-from rewards.models import BlockchainTransaction
+from backend.rewards.models import BlockchainTransaction
 
 User = get_user_model()
 

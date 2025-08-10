@@ -12,8 +12,8 @@ import logging
 from users.permissions import IsAdminOrApprovedTeacherOrReadOnly, IsTeacher
 from courses.models import Course
 from courses.serializers import CourseSerializer
-from services.course_service import course_service
-from services.exceptions import CourseNotFoundError, TeoArtServiceException
+from backend.services.course_service import course_service
+from backend.services.exceptions import CourseNotFoundError, TeoArtServiceException
 
 logger = logging.getLogger(__name__)
 

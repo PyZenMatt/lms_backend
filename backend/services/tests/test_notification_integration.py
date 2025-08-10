@@ -9,7 +9,7 @@ from rest_framework.test import APIClient
 from rest_framework import status
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from notifications.models import Notification
+from backend.notifications.models import Notification
 
 User = get_user_model()
 

@@ -9,7 +9,7 @@ Classes:
     TeacherCourseSerializer: For teacher course management data
 """
 from rest_framework import serializers
-from rewards.models import BlockchainTransaction
+from backend.rewards.models import BlockchainTransaction
 from courses.models import Course
 from users.serializers import UserSerializer
 

@@ -14,7 +14,7 @@ django.setup()
 
 from django.contrib.auth import get_user_model
 from django.test import Client
-from rewards.models import TeacherDiscountAbsorption
+from backend.rewards.models import TeacherDiscountAbsorption
 from rest_framework.test import APIClient
 from rest_framework_simplejwt.tokens import RefreshToken
 

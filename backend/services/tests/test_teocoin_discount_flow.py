@@ -22,8 +22,8 @@ django.setup()
 
 from users.models import User, TeacherProfile
 from courses.models import Course
-from services.gas_treasury_service import gas_treasury_service
-from services.notification_service import notification_service
+from backend.services.gas_treasury_service import gas_treasury_service
+from backend.services.notification_service import notification_service
 from django.test import Client
 from django.urls import reverse
 import json

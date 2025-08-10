@@ -3,7 +3,7 @@ from django.dispatch import receiver
 from django.core.cache import cache
 from django.utils import timezone
 from .models import BlockchainTransaction
-from notifications.models import Notification
+from backend.notifications.models import Notification
 import logging
 
 logger = logging.getLogger(__name__)

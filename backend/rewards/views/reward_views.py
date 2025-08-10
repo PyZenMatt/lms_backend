@@ -10,8 +10,8 @@ from users.models import User
 from ..automation import AutomatedRewardSystem
 
 # Service imports
-from services.reward_service import reward_service
-from services.exceptions import TeoArtServiceException, UserNotFoundError, CourseNotFoundError
+from backend.services.reward_service import reward_service
+from backend.services.exceptions import TeoArtServiceException, UserNotFoundError, CourseNotFoundError
 
 import logging
 

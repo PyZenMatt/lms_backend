@@ -1,6 +1,6 @@
 from django.db.models.signals import post_save
 from django.dispatch import receiver
-from notifications.models import Notification
+from backend.notifications.models import Notification
 from .models import Course, Lesson
 from users.models import User
 

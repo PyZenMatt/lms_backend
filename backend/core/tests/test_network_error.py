@@ -14,8 +14,8 @@ django.setup()
 
 from users.models import User
 from courses.models import ExerciseSubmission, ExerciseReview
-from rewards.models import BlockchainTransaction
-from notifications.models import Notification
+from backend.rewards.models import BlockchainTransaction
+from backend.notifications.models import Notification
 import time
 import logging
 

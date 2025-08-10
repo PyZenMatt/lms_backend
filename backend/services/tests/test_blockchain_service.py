@@ -11,8 +11,8 @@ from unittest.mock import Mock, patch, MagicMock
 from django.test import TestCase
 from django.contrib.auth import get_user_model
 
-from services.blockchain_service import BlockchainService
-from services.exceptions import (
+from backend.services.blockchain_service import BlockchainService
+from backend.services.exceptions import (
     WalletNotFoundError,
     InvalidWalletAddressError,
     TokenTransferError,

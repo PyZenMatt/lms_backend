@@ -16,7 +16,7 @@ django.setup()
 
 from django.test import Client
 from django.contrib.auth.models import User
-from services.teocoin_staking_service import TeoCoinStakingService
+from backend.services.teocoin_staking_service import TeoCoinStakingService
 
 def main():
     print("🚀 Quick Staking System Test")

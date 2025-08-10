@@ -11,7 +11,7 @@ from django.urls import reverse
 from django.utils.safestring import mark_safe
 from decimal import Decimal
 from .models import UserWallet, DBTeoCoinBalance, DBTeoCoinTransaction, TeoCoinWithdrawalRequest
-from services.db_teocoin_service import DBTeoCoinService
+from backend.services.db_teocoin_service import DBTeoCoinService
 
 User = get_user_model()
 

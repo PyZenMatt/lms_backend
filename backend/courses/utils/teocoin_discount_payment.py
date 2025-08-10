@@ -7,7 +7,7 @@ from decimal import Decimal
 import logging
 from rest_framework.response import Response
 from rest_framework import status
-from services.teocoin_discount_service import teocoin_discount_service
+from backend.services.teocoin_discount_service import teocoin_discount_service
 from courses.models import Course, CourseEnrollment
 
 logger = logging.getLogger(__name__)
@@ -129,7 +129,7 @@ def process_teocoin_discount_payment(request, course_id, amount_eur, teocoin_dis
             logger.info(f"✅ Student enrolled immediately with discount: {enrollment.id}")
             
             # ✅ CRITICAL FIX: Deduct TeoCoin from student's database balance
-            from services.db_teocoin_service import db_teocoin_service
+            from backend.services.db_teocoin_service import db_teocoin_service
             
             teo_required = Decimal(str(discount_value_eur))  # 1 EUR = 1 TEO for discount
             

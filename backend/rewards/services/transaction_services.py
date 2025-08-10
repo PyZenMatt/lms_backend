@@ -2,10 +2,10 @@ from django.db import transaction
 from django.core.exceptions import ValidationError
 from users.models import User
 from courses.models import Course
-from rewards.models import BlockchainTransaction
+from backend.rewards.models import BlockchainTransaction
 
 # Import BlockchainService for new architecture
-from services.blockchain_service import blockchain_service
+from backend.services.blockchain_service import blockchain_service
 
 class TransactionService:
     @classmethod

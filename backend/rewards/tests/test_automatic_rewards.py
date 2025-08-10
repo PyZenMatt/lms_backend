@@ -10,7 +10,7 @@ django.setup()
 
 from courses.models import ExerciseSubmission, ExerciseReview
 from users.models import User
-from rewards.models import BlockchainTransaction
+from backend.rewards.models import BlockchainTransaction
 from django.utils import timezone
 from datetime import timedelta
 

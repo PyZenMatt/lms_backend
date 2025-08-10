@@ -10,7 +10,7 @@ Signal Handlers:
 """
 from django.db.models.signals import post_save
 from django.dispatch import receiver
-from notifications.models import Notification
+from backend.notifications.models import Notification
 from courses.models import Exercise
 import logging
 

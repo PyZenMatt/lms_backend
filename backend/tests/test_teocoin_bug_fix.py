@@ -16,7 +16,7 @@ django.setup()
 
 from django.contrib.auth import get_user_model
 from courses.models import Course
-from services.db_teocoin_service import DBTeoCoinService
+from backend.services.db_teocoin_service import DBTeoCoinService
 from blockchain.models import DBTeoCoinBalance, DBTeoCoinTransaction
 
 User = get_user_model()
