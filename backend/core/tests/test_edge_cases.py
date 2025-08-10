@@ -1,6 +1,9 @@
 from django.test import TestCase
 from django.core.exceptions import ValidationError
-from core.models import User, Course, Lesson, Notification, Exercise, TeoCoinTransaction
+from users.models import User
+from courses.models import Course, Lesson, Exercise
+from notifications.models import Notification
+from rewards.models import BlockchainTransaction
 
 class EdgeCasesTests(TestCase):
     def test_course_without_lessons(self):
@@ -56,8 +59,8 @@ class EdgeCasesTests(TestCase):
         )
 
     def test_user_deletion_cascade(self):
-        user = User.objects.create(teo_coins=100)
-        TeoCoinTransaction.objects.create(user=user, amount=50)
-        user_pk = user.pk
-        user.delete()
-        self.assertFalse(TeoCoinTransaction.objects.filter(user_id=user_pk).exists())
+    user = User.objects.create(email='test@example.com', role='student')
+    tx = BlockchainTransaction.objects.create(user=user, amount=50, transaction_type='mint', status='completed')
+    user_pk = user.pk
+    user.delete()
+    self.assertFalse(BlockchainTransaction.objects.filter(user_id=user_pk).exists())

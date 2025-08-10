@@ -1,0 +1,14 @@
+name: Feature Request
+description: Proponi una nuova funzionalità
+labels: [feature]
+body:
+  - type: textarea
+    id: descrizione
+    attributes:
+      label: Descrizione
+      description: Descrivi la feature richiesta
+  - type: textarea
+    id: motivazione
+    attributes:
+      label: Motivazione
+      description: Perché è utile?

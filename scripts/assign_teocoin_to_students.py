@@ -9,9 +9,10 @@ import django
 from decimal import Decimal
 from datetime import datetime, timezone
 
-# Add project root to path
+
+# Add backend/ to path for Django module resolution
 project_root = os.path.dirname(os.path.abspath(__file__))
-sys.path.insert(0, project_root)
+sys.path.insert(0, os.path.abspath(os.path.join(project_root, '../backend')))
 
 # Set up Django environment - Use dev for local testing, prod for production
 # Check if we're in development (has sqlite) or production (needs DATABASE_URL)

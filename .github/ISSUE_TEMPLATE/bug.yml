@@ -1,0 +1,24 @@
+name: Bug Report
+description: Segnala un bug
+labels: [bug]
+body:
+  - type: textarea
+    id: descrizione
+    attributes:
+      label: Descrizione
+      description: Descrivi il bug
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: Passaggi per riprodurre il bug
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+      description: Comportamento atteso
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+      description: Comportamento effettivo

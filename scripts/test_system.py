@@ -2,9 +2,11 @@
 """
 Test rapido del sistema Teacher Absorption senza dipendenze Django esterne
 """
+
 import subprocess
 import sys
 import os
+sys.path.insert(0, os.path.abspath(os.path.dirname(__file__) + '/../backend'))
 
 def run_django_command(command):
     """Esegue un comando Django e restituisce output e status"""

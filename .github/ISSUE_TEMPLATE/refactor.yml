@@ -1,0 +1,14 @@
+name: Refactor
+description: Proponi un refactoring
+labels: [refactor]
+body:
+  - type: textarea
+    id: descrizione
+    attributes:
+      label: Descrizione
+      description: Cosa va refactorizzato?
+  - type: textarea
+    id: motivazione
+    attributes:
+      label: Motivazione
+      description: Perché è necessario?
