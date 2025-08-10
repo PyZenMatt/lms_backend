@@ -1,35 +1,35 @@
 import React from 'react';
 import { render, screen, waitFor, fireEvent } from '@testing-library/react';
-import UnifiedTeacherNotifications from '../UnifiedTeacherNotifications';
-import axiosClient from '../../../services/core/axiosClient';
+import UnifiedTeacherNotifications from '../../src/components/teacher/UnifiedTeacherNotifications';
+import axiosClient from '../../src/services/core/axiosClient';
 
 // Mock axios client used by the component
-jest.mock('../../../services/core/axiosClient', () => {
+vi.mock('../../src/services/core/axiosClient', () => {
   const mock = {
-    get: jest.fn(),
-    post: jest.fn(),
-    patch: jest.fn(),
-    interceptors: { request: { use: jest.fn() }, response: { use: jest.fn() } }
+    get: vi.fn(),
+    post: vi.fn(),
+    patch: vi.fn(),
+    interceptors: { request: { use: vi.fn() }, response: { use: vi.fn() } }
   };
   return { __esModule: true, default: mock };
 });
 
 describe('UnifiedTeacherNotifications', () => {
   beforeEach(() => {
-    jest.useFakeTimers();
-  jest.spyOn(global, 'setInterval').mockImplementation(() => {
+    vi.useFakeTimers();
+    vi.spyOn(global, 'setInterval').mockImplementation(() => {
       // Don't auto-run interval in tests
       return 1;
     });
-    window.showToast = jest.fn();
+    window.showToast = vi.fn();
     axiosClient.get.mockReset();
     axiosClient.post.mockReset();
     axiosClient.patch.mockReset();
   });
 
   afterEach(() => {
-    jest.clearAllTimers();
-    jest.useRealTimers();
+    vi.clearAllTimers();
+    vi.useRealTimers();
   });
 
   it('posts choice using related_object_id as absorption_id', async () => {

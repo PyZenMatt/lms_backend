@@ -14,23 +14,23 @@ import {
   fetchCourseDetail,
   fetchLessonDetail,
   fetchExerciseDetail
-} from '../courses';
-import api from '../../core/axiosClient';
+} from '../../src/services/api/courses';
+import api from '../../src/services/core/axiosClient';
 
 // Mock the apiClient
-jest.mock('../../core/apiClient', () => ({
+vi.mock('../../core/apiClient', () => ({
   __esModule: true,
   default: {
-    get: jest.fn(),
-    post: jest.fn(),
-    put: jest.fn(),
-    delete: jest.fn(),
+    get: vi.fn(),
+    post: vi.fn(),
+    put: vi.fn(),
+  delete: vi.fn()
   },
 }));
 
 describe('Courses Service', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+  vi.clearAllMocks();
   });
 
   describe('fetchCourses', () => {
