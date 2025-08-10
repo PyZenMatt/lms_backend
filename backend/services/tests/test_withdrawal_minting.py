@@ -14,7 +14,7 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'schoolplatform.settings.dev')
 django.setup()
 
 from blockchain.models import TeoCoinWithdrawalRequest, DBTeoCoinBalance
-from backend.services.teocoin_withdrawal_service import teocoin_withdrawal_service
+from services.teocoin_withdrawal_service import teocoin_withdrawal_service
 from django.conf import settings
 from decimal import Decimal
 

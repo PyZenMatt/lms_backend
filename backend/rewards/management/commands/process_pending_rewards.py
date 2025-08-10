@@ -3,7 +3,7 @@ Management command to process pending reward transactions
 """
 from django.core.management.base import BaseCommand
 from django.utils import timezone
-from backend.rewards.models import BlockchainTransaction
+from rewards.models import BlockchainTransaction
 import logging
 
 logger = logging.getLogger(__name__)

@@ -9,10 +9,10 @@ from decimal import Decimal
 from unittest.mock import patch, MagicMock
 
 from courses.models import Course, Lesson, LessonCompletion
-from backend.rewards.models import BlockchainTransaction, TokenBalance
-from backend.notifications.models import Notification
-from backend.services.reward_service import reward_service
-from backend.services.exceptions import (
+from rewards.models import BlockchainTransaction, TokenBalance
+from notifications.models import Notification
+from services.reward_service import reward_service
+from services.exceptions import (
     UserNotFoundError, 
     CourseNotFoundError,
     TeoArtServiceException

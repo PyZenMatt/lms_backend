@@ -18,7 +18,7 @@ from rest_framework.permissions import IsAuthenticated
 from django.utils import timezone
 import json
 
-from backend.services.teocoin_discount_service import teocoin_discount_service
+from services.teocoin_discount_service import teocoin_discount_service
 from blockchain.blockchain import TeoCoinService
 
 
@@ -196,7 +196,7 @@ class CreateDiscountRequestView(BaseDiscountView):
                     try:
                         from courses.models import Course
                         from users.models import User
-                        from backend.notifications.models import Notification
+                        from notifications.models import Notification
                         
                         course = Course.objects.get(id=course_id_int)
                         teacher = course.teacher

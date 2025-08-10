@@ -11,7 +11,7 @@ sys.path.append('/home/teo/Project/school/schoolplatform')
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'schoolplatform.settings')
 django.setup()
 
-from backend.services.teocoin_discount_service import teocoin_discount_service
+from services.teocoin_discount_service import teocoin_discount_service
 from decimal import Decimal
 
 def test_signature_generation():

@@ -14,8 +14,8 @@ import logging
 import time
 import uuid
 
-from backend.services.base import TransactionalService
-from backend.services.exceptions import (
+from services.base import TransactionalService
+from services.exceptions import (
     TeoArtServiceException,
     WalletNotFoundError,
     InvalidWalletAddressError, 
@@ -26,7 +26,7 @@ from backend.services.exceptions import (
 )
 
 # Import blockchain models
-from backend.rewards.models import BlockchainTransaction, TokenBalance
+from rewards.models import BlockchainTransaction, TokenBalance
 from blockchain.blockchain import TeoCoinService
 
 User = get_user_model()

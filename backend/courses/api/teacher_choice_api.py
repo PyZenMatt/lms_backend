@@ -19,8 +19,8 @@ from decimal import Decimal
 from courses.models import TeacherDiscountDecision, TeacherChoicePreference
 from courses.serializers import TeacherDiscountDecisionSerializer, TeacherChoicePreferenceSerializer
 from users.permissions import IsTeacher
-from backend.services.teocoin_discount_service import teocoin_discount_service
-from backend.services.payment_service import payment_service
+from services.teocoin_discount_service import teocoin_discount_service
+from services.payment_service import payment_service
 
 
 class TeacherChoiceViewSet(viewsets.ModelViewSet):

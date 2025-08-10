@@ -15,7 +15,7 @@ from decimal import Decimal
 import logging
 
 from blockchain.models import TeoCoinWithdrawalRequest, DBTeoCoinBalance
-from backend.services.teocoin_withdrawal_service import teocoin_withdrawal_service
+from services.teocoin_withdrawal_service import teocoin_withdrawal_service
 
 logger = logging.getLogger(__name__)
 
@@ -260,7 +260,7 @@ class Command(BaseCommand):
             balance_obj.save()
             
             # Record refund transaction
-            from backend.services.db_teocoin_service import db_teocoin_service
+            from services.db_teocoin_service import db_teocoin_service
             db_teocoin_service.add_balance(
                 user=withdrawal.user,
                 amount=withdrawal.amount,

@@ -20,7 +20,7 @@ import os
 from web3 import Web3
 from web3.exceptions import TransactionNotFound, BlockNotFound
 
-from backend.services.db_teocoin_service import db_teocoin_service
+from services.db_teocoin_service import db_teocoin_service
 from blockchain.models import TeoCoinWithdrawalRequest, DBTeoCoinBalance
 
 User = get_user_model()

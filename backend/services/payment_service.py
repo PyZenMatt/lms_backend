@@ -24,7 +24,7 @@ from .exceptions import (
 
 # Models
 from courses.models import Course
-from backend.rewards.models import BlockchainTransaction
+from rewards.models import BlockchainTransaction
 
 # User is now imported directly above
 
@@ -272,7 +272,7 @@ class PaymentService(TransactionalService):
 
             # Send notifications (reuse logic)
             try:
-                from backend.notifications.models import Notification
+                from notifications.models import Notification
                 if reward_status == 'distributed':
                     message = f"🎉 Successfully enrolled in '{course.title}' via hybrid payment! Received {teocoin_reward_given} TEO reward in your wallet."
                 elif reward_status == 'pending_wallet':
@@ -383,7 +383,7 @@ class PaymentService(TransactionalService):
                 return False
             
             # Get staking service and current staking info
-            from backend.services.teocoin_staking_service import teocoin_staking_service
+            from services.teocoin_staking_service import teocoin_staking_service
             
             if not teacher_user.wallet_address:
                 self.log_warning(f"Teacher {teacher_user.email} has no wallet address for staking lookup")
@@ -1042,7 +1042,7 @@ class PaymentService(TransactionalService):
                         teo_required = Decimal(str(discount_amount_eur))  # 1 EUR = 1 TEO for discount
                         
                         # ✅ CRITICAL FIX: Deduct TeoCoin from student's database balance
-                        from backend.services.db_teocoin_service import db_teocoin_service
+                        from services.db_teocoin_service import db_teocoin_service
                         
                         teocoin_deduction_success = db_teocoin_service.deduct_balance(
                             user=user,
@@ -1221,7 +1221,7 @@ class PaymentService(TransactionalService):
             
             # Send notifications
             try:
-                from backend.notifications.models import Notification
+                from notifications.models import Notification
                 
                 # Create appropriate message based on reward status
                 if reward_status == 'distributed':

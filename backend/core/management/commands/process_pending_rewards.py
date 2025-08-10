@@ -8,7 +8,7 @@ import django
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'schoolplatform.settings')
 django.setup()
 
-from backend.rewards.models import BlockchainTransaction
+from rewards.models import BlockchainTransaction
 from blockchain.views import mint_tokens  # Use the wrapper function
 from django.utils import timezone
 from decimal import Decimal

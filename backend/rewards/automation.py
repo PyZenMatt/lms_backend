@@ -13,8 +13,8 @@ from datetime import timedelta
 
 from users.models import User
 from courses.models import Course, Lesson, LessonCompletion, CourseEnrollment
-from backend.rewards.models import TokenBalance, BlockchainTransaction
-from backend.notifications.models import Notification
+from rewards.models import TokenBalance, BlockchainTransaction
+from notifications.models import Notification
 
 logger = logging.getLogger(__name__)
 

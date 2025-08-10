@@ -13,8 +13,8 @@ from rest_framework import status
 from decimal import Decimal
 import logging
 
-from backend.services.teocoin_withdrawal_service import teocoin_withdrawal_service
-from backend.services.db_teocoin_service import db_teocoin_service
+from services.teocoin_withdrawal_service import teocoin_withdrawal_service
+from services.db_teocoin_service import db_teocoin_service
 
 logger = logging.getLogger(__name__)
 

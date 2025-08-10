@@ -3,8 +3,8 @@ from django.db.models.signals import post_save, post_delete, m2m_changed
 from django.dispatch import receiver
 from django.core.cache import cache
 from courses.models import Course, Lesson, LessonCompletion, CourseEnrollment
-from backend.rewards.models import BlockchainTransaction
-from backend.notifications.models import Notification
+from rewards.models import BlockchainTransaction
+from notifications.models import Notification
 from users.models import UserProgress
 
 

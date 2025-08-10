@@ -25,7 +25,7 @@ from django.core.cache import cache
 from django.utils import timezone
 
 from blockchain.blockchain import TeoCoinService
-from backend.notifications.services import teocoin_notification_service
+from notifications.services import teocoin_notification_service
 from users.models import User
 
 
@@ -370,7 +370,7 @@ class TeoCoinDiscountService:
                     # Create TeacherDiscountDecision record for choice tracking
                     try:
                         from courses.models import TeacherDiscountDecision, TeacherChoicePreference
-                        from backend.services.payment_service import payment_service
+                        from services.payment_service import payment_service
                         
                         # Get teacher's current commission rate and staking tier
                         commission_rate = payment_service.get_teacher_commission_rate(teacher_user) * 100  # Convert to percentage

@@ -75,7 +75,7 @@ def calculate_teacher_statistics(self, teacher_id):
     try:
         from users.models import User
         from courses.models import Course, CourseEnrollment
-        from backend.rewards.models import TeoCoinTransaction
+        from rewards.models import TeoCoinTransaction
         
         teacher = User.objects.get(id=teacher_id, role='teacher')
         
@@ -200,7 +200,7 @@ def send_progress_notification(self, user_id, achievement_type, details):
     """
     try:
         from users.models import User
-        from backend.notifications.models import Notification
+        from notifications.models import Notification
         
         user = User.objects.get(id=user_id)
         

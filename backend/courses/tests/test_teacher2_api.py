@@ -14,7 +14,7 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'schoolplatform.settings')
 django.setup()
 
 from users.models import User
-from backend.services.db_teocoin_service import DBTeoCoinService
+from services.db_teocoin_service import DBTeoCoinService
 from rest_framework.test import APIClient
 from rest_framework_simplejwt.tokens import RefreshToken
 

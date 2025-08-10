@@ -11,7 +11,7 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'schoolplatform.settings')
 django.setup()
 
 from django.db import connection
-from backend.rewards.models import BlockchainTransaction
+from rewards.models import BlockchainTransaction
 from courses.models import Course
 
 def check_database_constraints():

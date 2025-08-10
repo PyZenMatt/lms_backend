@@ -9,14 +9,14 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.parsers import MultiPartParser, FormParser
 from django.shortcuts import get_object_or_404
 from courses.models import CourseEnrollment
-from backend.authentication.serializers import RegisterSerializer
+from authentication.serializers import RegisterSerializer
 from users.models import User
 from ..serializers import UserProfileSerializer
 import logging
 
 # Service imports
-from backend.services.user_service import user_service
-from backend.services.exceptions import TeoArtServiceException, UserNotFoundError
+from services.user_service import user_service
+from services.exceptions import TeoArtServiceException, UserNotFoundError
 
 logger = logging.getLogger(__name__)
 

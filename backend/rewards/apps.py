@@ -8,4 +8,4 @@ class RewardsConfig(AppConfig):
     
     def ready(self):
         # importa i signal handlers per invalidare la cache e reward automation
-        import backend.rewards.signals  # noqa
+        import rewards.signals  # noqa

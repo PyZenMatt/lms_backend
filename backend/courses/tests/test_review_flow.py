@@ -12,7 +12,7 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'schoolplatform.settings')
 django.setup()
 
 from courses.models import ExerciseSubmission, ExerciseReview, Exercise, Lesson, Course
-from backend.rewards.models import BlockchainTransaction
+from rewards.models import BlockchainTransaction
 from users.models import User
 from django.utils import timezone
 import logging

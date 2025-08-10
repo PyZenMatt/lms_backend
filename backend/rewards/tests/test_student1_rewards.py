@@ -14,7 +14,7 @@ django.setup()
 
 from users.models import User
 from courses.models import ExerciseSubmission, Course, Exercise
-from backend.rewards.models import BlockchainTransaction
+from rewards.models import BlockchainTransaction
 from django.utils import timezone
 from datetime import timedelta
 

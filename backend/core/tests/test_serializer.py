@@ -2,10 +2,10 @@ from django.test import TestCase
 from django.core.exceptions import ValidationError
 from users.models import User
 from courses.models import Lesson, Course
-from backend.notifications.models import Notification, Exercise
+from notifications.models import Notification, Exercise
 from users.serializers import RegisterSerializer
 from courses.serializers import LessonSerializer, CourseSerializer
-from backend.notifications.serializers import NotificationSerializer
+from notifications.serializers import NotificationSerializer
 
 class RegisterSerializerTests(TestCase):
     def test_password_validation(self):

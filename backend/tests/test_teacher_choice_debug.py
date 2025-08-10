@@ -13,7 +13,7 @@ sys.path.insert(0, '/home/teo/Project/school/schoolplatform')
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'schoolplatform.settings')
 django.setup()
 
-from backend.api.teacher_absorption_views import TeacherMakeAbsorptionChoiceView
+from api.teacher_absorption_views import TeacherMakeAbsorptionChoiceView
 from django.contrib.auth import get_user_model
 from rest_framework.test import APIRequestFactory
 import json

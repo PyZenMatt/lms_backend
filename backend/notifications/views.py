@@ -10,8 +10,8 @@ from django_filters import rest_framework as df_filters
 from rest_framework.generics import UpdateAPIView
 
 # Service Layer imports
-from backend.services.notification_service import notification_service
-from backend.services.exceptions import TeoArtServiceException, UserNotFoundError
+from services.notification_service import notification_service
+from services.exceptions import TeoArtServiceException, UserNotFoundError
 import logging
 
 logger = logging.getLogger(__name__)

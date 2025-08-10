@@ -3,7 +3,7 @@ from django.core.exceptions import ValidationError
 from django.db import transaction
 from users.models import User
 from courses.models import Lesson, Exercise
-from backend.rewards.models import TeoCoinTransaction
+from rewards.models import TeoCoinTransaction
 import time
 from django.db.models import F
 

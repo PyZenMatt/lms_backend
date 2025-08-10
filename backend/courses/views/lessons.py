@@ -77,7 +77,7 @@ class LessonViewSet(viewsets.ModelViewSet):
 
         # Import here to avoid circular imports
         try:
-            from backend.rewards.automation import reward_system
+            from rewards.automation import reward_system
             
             # The automated reward system will be triggered by the signal
             # But we can also check course completion here for immediate feedback

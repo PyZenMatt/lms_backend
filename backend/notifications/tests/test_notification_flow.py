@@ -18,9 +18,9 @@ def test_complete_flow():
     try:
         from django.contrib.auth import get_user_model
         from courses.models import Course, CourseEnrollment
-        from backend.services.teacher_discount_absorption_service import TeacherDiscountAbsorptionService
-        from backend.services.db_teocoin_service import DBTeoCoinService
-        from backend.rewards.models import TeacherDiscountAbsorption
+        from services.teacher_discount_absorption_service import TeacherDiscountAbsorptionService
+        from services.db_teocoin_service import DBTeoCoinService
+        from rewards.models import TeacherDiscountAbsorption
         from decimal import Decimal
         
         User = get_user_model()
@@ -162,7 +162,7 @@ def test_complete_flow():
         print(f"🔄 Step 5: Testing teacher dashboard API...")
         
         # This is what the frontend calls to get absorption opportunities
-        from backend.api.teacher_absorption_views import TeacherPendingAbsorptionsView
+        from api.teacher_absorption_views import TeacherPendingAbsorptionsView
         from rest_framework.test import APIRequestFactory
         from django.contrib.auth import get_user_model
         
@@ -245,16 +245,16 @@ def check_frontend_api_endpoints():
                 
                 # Import and test the view
                 if 'absorptions' in endpoint:
-                    from backend.api.teacher_absorption_views import TeacherPendingAbsorptionsView
+                    from api.teacher_absorption_views import TeacherPendingAbsorptionsView
                     view = TeacherPendingAbsorptionsView()
                 elif 'balance' in endpoint:
-                    from backend.api.db_teocoin_views import TeoCoinBalanceView
+                    from api.db_teocoin_views import TeoCoinBalanceView
                     view = TeoCoinBalanceView()
                 elif 'transactions' in endpoint:
-                    from backend.api.db_teocoin_views import TransactionHistoryView
+                    from api.db_teocoin_views import TransactionHistoryView
                     view = TransactionHistoryView()
                 elif 'statistics' in endpoint:
-                    from backend.api.db_teocoin_views import PlatformStatisticsView
+                    from api.db_teocoin_views import PlatformStatisticsView
                     view = PlatformStatisticsView()
                 
                 response = view.get(request)
@@ -293,12 +293,12 @@ def check_notification_system():
     
     try:
         # Check if notifications model works
-        from backend.notifications.models import Notification
+        from notifications.models import Notification
         notification_count = Notification.objects.count()
         print(f"✅ Notifications model accessible, total notifications: {notification_count}")
         
         # Check if notification service works
-        from backend.notifications.services import teocoin_notification_service
+        from notifications.services import teocoin_notification_service
         print(f"✅ TeoCoin notification service accessible")
         
         # Test notification creation with a teacher

@@ -11,7 +11,7 @@ from decimal import Decimal
 from django.db import transaction
 import logging
 
-from backend.services.db_teocoin_service import DBTeoCoinService
+from services.db_teocoin_service import DBTeoCoinService
 from blockchain.models import DBTeoCoinBalance, TeoCoinWithdrawalRequest
 
 logger = logging.getLogger(__name__)
@@ -365,7 +365,7 @@ class WithdrawTokensView(APIView):
                 }, status=status.HTTP_400_BAD_REQUEST)
 
             # Import services
-            from backend.services.teocoin_withdrawal_service import teocoin_withdrawal_service
+            from services.teocoin_withdrawal_service import teocoin_withdrawal_service
             from decimal import Decimal
             
             try:

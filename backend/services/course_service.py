@@ -11,8 +11,8 @@ from django.contrib.auth import get_user_model
 from django.utils import timezone
 
 from courses.models import Course, CourseEnrollment, Lesson, LessonCompletion
-from backend.services.base import TransactionalService
-from backend.services.exceptions import (
+from services.base import TransactionalService
+from services.exceptions import (
     TeoArtServiceException,
     CourseNotFoundError,
     UserNotFoundError,

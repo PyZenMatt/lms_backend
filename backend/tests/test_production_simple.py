@@ -11,7 +11,7 @@ def test_basic_functionality():
     
     # Test 1: Import check
     try:
-        from backend.services.db_teocoin_service import DBTeoCoinService
+        from services.db_teocoin_service import DBTeoCoinService
         print("✅ 1. DBTeoCoinService import: SUCCESS")
     except Exception as e:
         print(f"❌ 1. DBTeoCoinService import: FAILED - {e}")

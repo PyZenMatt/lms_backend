@@ -15,8 +15,8 @@ from django.test import TestCase
 from django.utils import timezone
 from users.models import User
 from courses.models import Course, Lesson, LessonCompletion
-from backend.rewards.automation import AutomatedRewardSystem
-from backend.rewards.models import TeoCoinTransaction
+from rewards.automation import AutomatedRewardSystem
+from rewards.models import TeoCoinTransaction
 import logging
 
 # Configure logging

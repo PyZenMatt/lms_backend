@@ -8,8 +8,8 @@ from django.utils import timezone
 from decimal import Decimal
 
 from courses.models import Course, CourseEnrollment, Lesson, LessonCompletion
-from backend.services.course_service import course_service
-from backend.services.exceptions import CourseNotFoundError, UserNotFoundError
+from services.course_service import course_service
+from services.exceptions import CourseNotFoundError, UserNotFoundError
 
 User = get_user_model()
 

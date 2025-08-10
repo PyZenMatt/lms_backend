@@ -4,8 +4,8 @@ from django.db import transaction
 from django.core.validators import MinValueValidator
 from decimal import Decimal
 from users.models import User
-from backend.notifications.models import Notification
-from backend.rewards.models import BlockchainTransaction
+from notifications.models import Notification
+from rewards.models import BlockchainTransaction
 from django.conf import settings
 from PIL import Image
 from .validators import validate_video_file

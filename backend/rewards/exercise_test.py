@@ -5,10 +5,10 @@
 print("🚀 STARTING COMPLETE EXERCISE SYSTEM TEST")
 print("=" * 60)
 
-from backend.services.db_teocoin_service import DBTeoCoinService
+from services.db_teocoin_service import DBTeoCoinService
 from users.models import User
 from courses.models import Course, Lesson, Exercise, ExerciseSubmission, ExerciseReview
-from backend.rewards.blockchain_rewards import BlockchainRewards, BlockchainRewardManager
+from rewards.blockchain_rewards import BlockchainRewards, BlockchainRewardManager
 from decimal import Decimal
 from django.utils import timezone
 import random
@@ -73,7 +73,7 @@ print("-" * 40)
 
 # Test calcolo reward per il corso
 try:
-    from backend.rewards.blockchain_rewards import BlockchainRewardCalculator
+    from rewards.blockchain_rewards import BlockchainRewardCalculator
     
     # Calcola pool reward totale del corso
     total_pool = BlockchainRewardCalculator.calculate_course_reward_pool(course)
@@ -171,7 +171,7 @@ print("-" * 40)
 if submission:
     try:
         # Verifica se già premiato
-        from backend.rewards.models import BlockchainTransaction
+        from rewards.models import BlockchainTransaction
         existing_reward = BlockchainTransaction.objects.filter(
             user=student,
             transaction_type='exercise_reward',

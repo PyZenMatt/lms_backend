@@ -2,7 +2,7 @@ from django.contrib import admin
 from django.contrib.auth.mixins import PermissionRequiredMixin
 from .models import ExerciseSubmission, ExerciseReview, User, Lesson, Exercise, Course
 from django import forms
-from backend.notifications.models import Notification
+from notifications.models import Notification
 
 class CourseAdminForm(forms.ModelForm):
     class Meta:

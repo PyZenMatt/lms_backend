@@ -11,11 +11,11 @@ import django
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'schoolplatform.settings')
 django.setup()
 
-from backend.services.db_teocoin_service import DBTeoCoinService
+from services.db_teocoin_service import DBTeoCoinService
 from users.models import User
 from decimal import Decimal
 from rest_framework.test import APIRequestFactory
-from backend.api.teacher_absorption_views import TeacherMakeAbsorptionChoiceView
+from api.teacher_absorption_views import TeacherMakeAbsorptionChoiceView
 import json
 
 def test_teacher_teocoin_acceptance():

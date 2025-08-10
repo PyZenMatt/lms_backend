@@ -4,7 +4,7 @@ Management command to create test data for Teacher Discount Absorption system
 from django.core.management.base import BaseCommand
 from django.contrib.auth import get_user_model
 from courses.models import Course
-from backend.services.teacher_discount_absorption_service import TeacherDiscountAbsorptionService
+from services.teacher_discount_absorption_service import TeacherDiscountAbsorptionService
 from decimal import Decimal
 
 User = get_user_model()

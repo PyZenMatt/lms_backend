@@ -9,9 +9,9 @@ from decimal import Decimal
 from unittest.mock import patch, MagicMock
 
 from courses.models import Course
-from backend.rewards.models import BlockchainTransaction
-from backend.services.payment_service import payment_service
-from backend.services.exceptions import (
+from rewards.models import BlockchainTransaction
+from services.payment_service import payment_service
+from services.exceptions import (
     UserNotFoundError, 
     CourseNotFoundError,
     InsufficientTeoCoinsError,

@@ -11,10 +11,10 @@ def test_teacher_choice_endpoint():
     
     # Test 1: Import dependencies
     try:
-        from backend.api.teacher_absorption_views import TeacherMakeAbsorptionChoiceView
+        from api.teacher_absorption_views import TeacherMakeAbsorptionChoiceView
         from rest_framework.test import APIRequestFactory
         from users.models import User
-        from backend.services.db_teocoin_service import DBTeoCoinService
+        from services.db_teocoin_service import DBTeoCoinService
         from decimal import Decimal
         print("✅ 1. Imports: SUCCESS")
     except Exception as e:

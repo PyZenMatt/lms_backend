@@ -4,7 +4,7 @@ Simplified wrapper around DB TeoCoin Service.
 After cleanup, this just provides a clean interface to database operations.
 """
 
-from backend.services.db_teocoin_service import db_teocoin_service
+from services.db_teocoin_service import db_teocoin_service
 
 
 class HybridTeoCoinService:

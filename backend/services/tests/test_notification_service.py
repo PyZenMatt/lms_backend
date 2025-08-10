@@ -6,9 +6,9 @@ from django.test import TestCase
 from django.contrib.auth import get_user_model
 from django.utils import timezone
 
-from backend.notifications.models import Notification
-from backend.services.notification_service import notification_service
-from backend.services.exceptions import UserNotFoundError, TeoArtServiceException
+from notifications.models import Notification
+from services.notification_service import notification_service
+from services.exceptions import UserNotFoundError, TeoArtServiceException
 
 User = get_user_model()
 

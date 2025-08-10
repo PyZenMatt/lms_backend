@@ -13,7 +13,7 @@ from .models import BlockchainTransaction
 from courses.models import Course, Exercise, ExerciseSubmission, ExerciseReview
 
 # Import BlockchainService for new architecture
-from backend.services.blockchain_service import blockchain_service
+from services.blockchain_service import blockchain_service
 
 
 logger = logging.getLogger(__name__)
@@ -163,7 +163,7 @@ class BlockchainRewardManager:
         🚨 SISTEMA SEMPLIFICATO: Reward fisso dal database (NO reward pool)
         """
         try:
-            from backend.services.db_teocoin_service import DBTeoCoinService
+            from services.db_teocoin_service import DBTeoCoinService
             db_service = DBTeoCoinService()
             
             # Verifica che non sia già stato premiato nel database TeoCoin
@@ -211,7 +211,7 @@ class BlockchainRewardManager:
         🚨 SISTEMA SEMPLIFICATO: Reward fisso dal database per review (NO calcoli complessi)
         """
         try:
-            from backend.services.db_teocoin_service import DBTeoCoinService
+            from services.db_teocoin_service import DBTeoCoinService
             db_service = DBTeoCoinService()
             
             # Verifica che non sia già stato premiato nel database TeoCoin

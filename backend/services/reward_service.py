@@ -23,8 +23,8 @@ from .exceptions import (
 
 # Models
 from courses.models import Course, Lesson, LessonCompletion
-from backend.rewards.models import BlockchainTransaction, TokenBalance
-from backend.notifications.models import Notification
+from rewards.models import BlockchainTransaction, TokenBalance
+from notifications.models import Notification
 
 User = get_user_model()
 
