@@ -18,7 +18,7 @@ const TeacherAbsorptionDashboard = () => {
       const teoMatch = message.match(/Accept TEO: ([\d.]+) TEO/);
       const bonusMatch = message.match(/\+ ([\d.]+) bonus/);
       const hoursMatch = message.match(/within (\d+) hours/);
-      
+
       return {
         student: studentMatch ? studentMatch[1] : 'Unknown',
         discount_percent: discountMatch ? parseInt(discountMatch[1]) : 0,
@@ -38,13 +38,13 @@ const TeacherAbsorptionDashboard = () => {
     try {
       setLoading(true);
       const response = await axiosClient.get('/notifications/');
-      
+
       if (response.data && Array.isArray(response.data)) {
         // Filter for TeoCoin discount notifications
         const discountNotifications = response.data.filter(
           (notification) => notification.notification_type === 'teocoin_discount_pending' && !notification.read
         );
-        
+
         // Convert notifications to absorption format for backward compatibility
         const absorptions = discountNotifications.map((notification) => ({
           id: notification.related_object_id || notification.id,
@@ -54,7 +54,7 @@ const TeacherAbsorptionDashboard = () => {
           // Parse absorption data from notification message
           ...parseNotificationData(notification.message)
         }));
-        
+
         setPendingAbsorptions(absorptions);
         setError(null);
       } else {
@@ -88,7 +88,7 @@ const TeacherAbsorptionDashboard = () => {
 
       // Map frontend choice to API expected values
       const apiChoice = choice === 'A' ? 'refuse' : 'absorb'; // A = EUR (refuse discount), B = TEO (absorb discount)
-      
+
       const response = await axiosClient.post('/teocoin/teacher/choice/', {
         absorption_id: absorptionId,
         choice: apiChoice
@@ -103,7 +103,7 @@ const TeacherAbsorptionDashboard = () => {
             console.warn('Could not mark notification as read:', notifErr);
           }
         }
-        
+
         await fetchPendingAbsorptions();
         setError(null);
       } else {
@@ -147,7 +147,7 @@ const TeacherAbsorptionDashboard = () => {
                   <h6>Corso: {absorption.course?.title || absorption.course_title || `Corso ID: ${absorption.course?.id}`}</h6>
                   <p>Studente: {absorption.student?.username || absorption.student_name}</p>
                   <p>Sconto: {absorption.discount?.percentage || absorption.discount_percentage}%</p>
-                  
+
                   <Row className="mt-3">
                     <Col sm={6}>
                       <div className="p-2 bg-light rounded">
@@ -165,7 +165,7 @@ const TeacherAbsorptionDashboard = () => {
                     </Col>
                   </Row>
                 </Col>
-                
+
                 <Col md={4}>
                   <div className="d-grid gap-2">
                     <Button variant="primary" size="sm" onClick={() => handleChoice(absorption.id, 'A')}>
@@ -210,7 +210,7 @@ const TeacherAbsorptionDashboard = () => {
                 >
                   {renderContent()}
                 </Tab>
-                
+
                 <Tab eventKey="history" title="Storico">
                   <Alert variant="info">Storico in arrivo...</Alert>
                 </Tab>

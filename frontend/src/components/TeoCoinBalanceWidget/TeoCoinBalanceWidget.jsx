@@ -1,9 +1,9 @@
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 import React, { useState, useEffect } from 'react';
 import { Card, Button, Alert, Spinner, Badge } from 'react-bootstrap';
 import stakingService from '../../services/stakingService';
 import { useAuth } from '../../contexts/AuthContext';
 import './TeoCoinBalanceWidget.scss';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 const TeoCoinBalanceWidget = ({ variant = 'default', onWithdrawalClick }) => {
   const { user } = useAuth();
@@ -21,31 +21,31 @@ const TeoCoinBalanceWidget = ({ variant = 'default', onWithdrawalClick }) => {
     try {
       setLoading(true);
       setError('');
-      
+
       const token = localStorage.getItem('accessToken');
       if (!token) {
         throw new Error('No authentication token found');
       }
-      
+
       if (isTeacher) {
         // Use the staking service to get balance data for teachers only
         console.log('🔄 TeoCoinBalanceWidget: Fetching staking info for teacher');
         const response = await stakingService.getStakingInfo();
         setStakingInfo(response);
-        
+
         // Get pending withdrawals for teachers and admins too
         try {
           const withdrawalResponse = await fetch(`${API_BASE_URL}/api/v1/teocoin/withdrawals/history/`, {
             headers: {
-              'Authorization': `Bearer ${token}`,
-              'Content-Type': 'application/json',
-            },
+              Authorization: `Bearer ${token}`,
+              'Content-Type': 'application/json'
+            }
           });
 
           if (withdrawalResponse.ok) {
             const withdrawalData = await withdrawalResponse.json();
             if (withdrawalData.success) {
-              const pending = withdrawalData.withdrawals?.filter(w => w.status === 'pending' || w.status === 'processing').length || 0;
+              const pending = withdrawalData.withdrawals?.filter((w) => w.status === 'pending' || w.status === 'processing').length || 0;
               setPendingWithdrawals(pending);
             }
           }
@@ -57,9 +57,9 @@ const TeoCoinBalanceWidget = ({ variant = 'default', onWithdrawalClick }) => {
         console.log('🔄 TeoCoinBalanceWidget: Fetching balance for admin (using student endpoint)');
         const balanceResponse = await fetch(`${API_BASE_URL}/api/v1/teocoin/student/balance/`, {
           headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json',
-          },
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
         });
 
         if (!balanceResponse.ok) {
@@ -67,15 +67,13 @@ const TeoCoinBalanceWidget = ({ variant = 'default', onWithdrawalClick }) => {
         }
 
         const balanceData = await balanceResponse.json();
-        
+
         // Extract balance data correctly for admins (similar to students)
-        const adminBalance = balanceData.success && balanceData.balance 
-          ? parseFloat(balanceData.balance.available || 0)
-          : 0;
+        const adminBalance = balanceData.success && balanceData.balance ? parseFloat(balanceData.balance.available || 0) : 0;
 
         setStakingInfo({
           current_balance: adminBalance,
-          staked_amount: 0,   // Admins can't stake  
+          staked_amount: 0, // Admins can't stake
           tier: 'Admin',
           commission_rate: null,
           teacher_earnings_percentage: null
@@ -85,15 +83,15 @@ const TeoCoinBalanceWidget = ({ variant = 'default', onWithdrawalClick }) => {
         try {
           const withdrawalResponse = await fetch(`${API_BASE_URL}/api/v1/teocoin/withdrawals/history/`, {
             headers: {
-              'Authorization': `Bearer ${token}`,
-              'Content-Type': 'application/json',
-            },
+              Authorization: `Bearer ${token}`,
+              'Content-Type': 'application/json'
+            }
           });
 
           if (withdrawalResponse.ok) {
             const withdrawalData = await withdrawalResponse.json();
             if (withdrawalData.success) {
-              const pending = withdrawalData.withdrawals?.filter(w => w.status === 'pending' || w.status === 'processing').length || 0;
+              const pending = withdrawalData.withdrawals?.filter((w) => w.status === 'pending' || w.status === 'processing').length || 0;
               setPendingWithdrawals(pending);
             }
           }
@@ -104,9 +102,9 @@ const TeoCoinBalanceWidget = ({ variant = 'default', onWithdrawalClick }) => {
         // For students, use the new student balance API
         const balanceResponse = await fetch(`${API_BASE_URL}/api/v1/teocoin/student/balance/`, {
           headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json',
-          },
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
         });
 
         if (!balanceResponse.ok) {
@@ -114,15 +112,13 @@ const TeoCoinBalanceWidget = ({ variant = 'default', onWithdrawalClick }) => {
         }
 
         const balanceData = await balanceResponse.json();
-        
+
         // Extract balance data correctly for students
-        const studentBalance = balanceData.success && balanceData.balance 
-          ? parseFloat(balanceData.balance.available || 0)
-          : 0;
+        const studentBalance = balanceData.success && balanceData.balance ? parseFloat(balanceData.balance.available || 0) : 0;
 
         setStakingInfo({
           current_balance: studentBalance,
-          staked_amount: 0,   // Students can't stake
+          staked_amount: 0, // Students can't stake
           tier: null,
           commission_rate: null,
           teacher_earnings_percentage: null
@@ -132,15 +128,15 @@ const TeoCoinBalanceWidget = ({ variant = 'default', onWithdrawalClick }) => {
         try {
           const withdrawalResponse = await fetch(`${API_BASE_URL}/api/v1/teocoin/withdrawals/history/`, {
             headers: {
-              'Authorization': `Bearer ${token}`,
-              'Content-Type': 'application/json',
-            },
+              Authorization: `Bearer ${token}`,
+              'Content-Type': 'application/json'
+            }
           });
 
           if (withdrawalResponse.ok) {
             const withdrawalData = await withdrawalResponse.json();
             if (withdrawalData.success) {
-              const pending = withdrawalData.withdrawals?.filter(w => w.status === 'pending' || w.status === 'processing').length || 0;
+              const pending = withdrawalData.withdrawals?.filter((w) => w.status === 'pending' || w.status === 'processing').length || 0;
               setPendingWithdrawals(pending);
             }
           }
@@ -148,7 +144,6 @@ const TeoCoinBalanceWidget = ({ variant = 'default', onWithdrawalClick }) => {
           console.warn('Failed to load pending withdrawals:', withdrawalErr);
         }
       }
-      
     } catch (err) {
       console.error('Failed to fetch balance:', err);
       if (err.message.includes('only available for teachers')) {
@@ -157,16 +152,14 @@ const TeoCoinBalanceWidget = ({ variant = 'default', onWithdrawalClick }) => {
           const token = localStorage.getItem('accessToken');
           const balanceResponse = await fetch(`${API_BASE_URL}/api/v1/teocoin/student/balance/`, {
             headers: {
-              'Authorization': `Bearer ${token}`,
-              'Content-Type': 'application/json',
-            },
+              Authorization: `Bearer ${token}`,
+              'Content-Type': 'application/json'
+            }
           });
 
           if (balanceResponse.ok) {
             const balanceData = await balanceResponse.json();
-            const studentBalance = balanceData.success && balanceData.balance 
-              ? parseFloat(balanceData.balance.available || 0)
-              : 0;
+            const studentBalance = balanceData.success && balanceData.balance ? parseFloat(balanceData.balance.available || 0) : 0;
 
             setStakingInfo({
               current_balance: studentBalance,
@@ -251,18 +244,8 @@ const TeoCoinBalanceWidget = ({ variant = 'default', onWithdrawalClick }) => {
               <i className="feather icon-dollar-sign me-2" style={{ fontSize: '1.5rem' }}></i>
               <h5 className="mb-0">TeoCoin Wallet</h5>
             </div>
-            <Button
-              variant="outline-light"
-              size="sm"
-              onClick={fetchBalance}
-              disabled={loading}
-              title="Refresh balance"
-            >
-              {loading ? (
-                <Spinner animation="border" size="sm" />
-              ) : (
-                <i className="feather icon-refresh-cw"></i>
-              )}
+            <Button variant="outline-light" size="sm" onClick={fetchBalance} disabled={loading} title="Refresh balance">
+              {loading ? <Spinner animation="border" size="sm" /> : <i className="feather icon-refresh-cw"></i>}
             </Button>
           </div>
         </Card.Header>
@@ -343,9 +326,12 @@ const TeoCoinBalanceWidget = ({ variant = 'default', onWithdrawalClick }) => {
 
           {/* Current Tier Display - Teachers only */}
           {stakingInfo && isTeacher && (
-            <div className="text-center p-3 rounded mb-4" style={{
-              background: 'linear-gradient(135deg, rgba(40, 167, 69, 0.1) 0%, rgba(40, 167, 69, 0.05) 100%)'
-            }}>
+            <div
+              className="text-center p-3 rounded mb-4"
+              style={{
+                background: 'linear-gradient(135deg, rgba(40, 167, 69, 0.1) 0%, rgba(40, 167, 69, 0.05) 100%)'
+              }}
+            >
               <div className="d-flex align-items-center justify-content-center mb-2">
                 <i className="feather icon-award text-success me-2" style={{ fontSize: '1.5rem' }}></i>
                 <h5 className="text-success mb-0">{stakingInfo.tier} Tier</h5>
@@ -358,31 +344,33 @@ const TeoCoinBalanceWidget = ({ variant = 'default', onWithdrawalClick }) => {
 
           {/* Admin Information */}
           {isAdmin && (
-            <div className="text-center p-3 rounded mb-4" style={{
-              background: 'linear-gradient(135deg, rgba(255, 193, 7, 0.1) 0%, rgba(255, 193, 7, 0.05) 100%)'
-            }}>
+            <div
+              className="text-center p-3 rounded mb-4"
+              style={{
+                background: 'linear-gradient(135deg, rgba(255, 193, 7, 0.1) 0%, rgba(255, 193, 7, 0.05) 100%)'
+              }}
+            >
               <div className="d-flex align-items-center justify-content-center mb-2">
                 <i className="feather icon-shield text-warning me-2" style={{ fontSize: '1.5rem' }}></i>
                 <h5 className="text-warning mb-0">Administrator Access</h5>
               </div>
-              <p className="text-muted small mb-0">
-                Manage platform withdrawals and oversee all TeoCoin operations
-              </p>
+              <p className="text-muted small mb-0">Manage platform withdrawals and oversee all TeoCoin operations</p>
             </div>
           )}
 
           {/* Student Information */}
           {!(isTeacher || isAdmin) && (
-            <div className="text-center p-3 rounded mb-4" style={{
-              background: 'linear-gradient(135deg, rgba(23, 162, 184, 0.1) 0%, rgba(23, 162, 184, 0.05) 100%)'
-            }}>
+            <div
+              className="text-center p-3 rounded mb-4"
+              style={{
+                background: 'linear-gradient(135deg, rgba(23, 162, 184, 0.1) 0%, rgba(23, 162, 184, 0.05) 100%)'
+              }}
+            >
               <div className="d-flex align-items-center justify-content-center mb-2">
                 <i className="feather icon-percent text-info me-2" style={{ fontSize: '1.5rem' }}></i>
                 <h5 className="text-info mb-0">Student Account</h5>
               </div>
-              <p className="text-muted small mb-0">
-                Use your TEO tokens to get discounts on course purchases
-              </p>
+              <p className="text-muted small mb-0">Use your TEO tokens to get discounts on course purchases</p>
             </div>
           )}
 
@@ -429,8 +417,7 @@ const TeoCoinBalanceWidget = ({ variant = 'default', onWithdrawalClick }) => {
                 ? 'Manage your TeoCoin: withdraw to MetaMask, stake for higher commissions, or deposit from MetaMask'
                 : isAdmin
                   ? 'Manage your TeoCoin: withdraw to MetaMask, process withdrawals, or deposit from MetaMask'
-                  : 'Manage your TeoCoin: withdraw to MetaMask, use for course discounts, or deposit from MetaMask'
-              }
+                  : 'Manage your TeoCoin: withdraw to MetaMask, use for course discounts, or deposit from MetaMask'}
             </small>
           </div>
         </Card.Body>

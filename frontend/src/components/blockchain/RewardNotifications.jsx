@@ -16,16 +16,16 @@ const RewardNotifications = () => {
         // Temporaneamente disabilitato - la funzione getWalletBalance non esiste
         console.log('🔍 Check rewards temporaneamente disabilitato');
         return;
-        
+
         // TODO: Implementare controllo rewards corretto
         // const response = await blockchainAPI.getWalletBalance();
         // const currentBalance = parseFloat(response.data?.balance) || 0;
-        
+
         // if (lastCheckedBalance > 0 && currentBalance > lastCheckedBalance) {
         //   const rewardAmount = currentBalance - lastCheckedBalance;
         //   addRewardNotification(rewardAmount);
         // }
-        
+
         // setLastCheckedBalance(currentBalance);
       } catch (error) {
         console.error('Error checking for new rewards:', error);
@@ -34,10 +34,10 @@ const RewardNotifications = () => {
 
     // Initial check
     checkForNewRewards();
-    
+
     // Set up interval
     const interval = setInterval(checkForNewRewards, 30000);
-    
+
     return () => clearInterval(interval);
   }, [lastCheckedBalance]);
 
@@ -49,9 +49,9 @@ const RewardNotifications = () => {
       timestamp: new Date(),
       show: true
     };
-    
-    setNotifications(prev => [...prev, notification]);
-    
+
+    setNotifications((prev) => [...prev, notification]);
+
     // Auto-hide after 8 seconds
     setTimeout(() => {
       removeNotification(notification.id);
@@ -59,7 +59,7 @@ const RewardNotifications = () => {
   };
 
   const removeNotification = (id) => {
-    setNotifications(prev => prev.filter(notif => notif.id !== id));
+    setNotifications((prev) => prev.filter((notif) => notif.id !== id));
   };
 
   const formatAmount = (amount) => {
@@ -90,9 +90,7 @@ const RewardNotifications = () => {
           autohide={false}
         >
           <Toast.Header className="reward-toast-header">
-            <div className="reward-icon me-2">
-              {getRewardIcon(notification.type)}
-            </div>
+            <div className="reward-icon me-2">{getRewardIcon(notification.type)}</div>
             <strong className="me-auto">Nuovo Reward!</strong>
             <small className="text-muted">
               {notification.timestamp.toLocaleTimeString('it-IT', {

@@ -28,10 +28,10 @@ const StudentExerciseDetailNew = () => {
         const data = await res.json();
         setExercise(data);
       } else {
-        setError("Errore nel caricamento esercizio");
+        setError('Errore nel caricamento esercizio');
       }
     } catch (err) {
-      setError("Errore nel caricamento esercizio");
+      setError('Errore nel caricamento esercizio');
     }
   };
 
@@ -105,7 +105,7 @@ const StudentExerciseDetailNew = () => {
     setError('');
     setSubmitting(true);
     const token = localStorage.getItem('token') || localStorage.getItem('access');
-    
+
     try {
       const res = await fetch(`${API_BASE_URL}/api/v1/exercises/${exerciseId}/submit/`, {
         method: 'POST',
@@ -115,7 +115,7 @@ const StudentExerciseDetailNew = () => {
         },
         body: JSON.stringify({ content: solution })
       });
-      
+
       if (res.ok) {
         // Refresha i dati reali dal backend
         await fetchSubmissionSafe();
@@ -156,7 +156,7 @@ const StudentExerciseDetailNew = () => {
       </Container>
     );
   }
-  
+
   if (error) {
     return (
       <Container>
@@ -171,7 +171,7 @@ const StudentExerciseDetailNew = () => {
       </Container>
     );
   }
-  
+
   if (!exercise) {
     return (
       <Container>
@@ -202,25 +202,32 @@ const StudentExerciseDetailNew = () => {
                   {exercise.title}
                 </h1>
                 <p className="text-muted mb-3">{exercise.description}</p>
-                <Badge 
-                  bg={statusBadge.variant} 
-                  className="p-2"
-                >
+                <Badge bg={statusBadge.variant} className="p-2">
                   <i className={`feather icon-${statusBadge.icon} mr-1`}></i>
                   {statusBadge.text}
                 </Badge>
               </div>
-              
-              <Link 
-                to={exercise.lesson ? `/lezioni/${exercise.lesson}` : 
-                    userRole === 'admin' ? "/dashboard/admin" : 
-                    userRole === 'teacher' ? "/dashboard/teacher" : "/dashboard/student"} 
+
+              <Link
+                to={
+                  exercise.lesson
+                    ? `/lezioni/${exercise.lesson}`
+                    : userRole === 'admin'
+                      ? '/dashboard/admin'
+                      : userRole === 'teacher'
+                        ? '/dashboard/teacher'
+                        : '/dashboard/student'
+                }
                 className="btn btn-outline-primary d-flex align-items-center"
               >
                 <i className="feather icon-arrow-left mr-2"></i>
-                {exercise.lesson ? 'Torna alla lezione' : 
-                 userRole === 'admin' ? 'Torna alla dashboard admin' : 
-                 userRole === 'teacher' ? 'Torna alla dashboard docente' : 'Torna alla dashboard studente'}
+                {exercise.lesson
+                  ? 'Torna alla lezione'
+                  : userRole === 'admin'
+                    ? 'Torna alla dashboard admin'
+                    : userRole === 'teacher'
+                      ? 'Torna alla dashboard docente'
+                      : 'Torna alla dashboard studente'}
               </Link>
             </div>
           </MainCard>
@@ -247,12 +254,12 @@ const StudentExerciseDetailNew = () => {
                     {statusBadge.text}
                   </Badge>
                 </div>
-                
+
                 <div className="bg-light p-3 rounded">
                   <strong className="d-block mb-2">Soluzione inviata:</strong>
                   <pre className="mb-0 text-wrap">{submission.content}</pre>
                 </div>
-                
+
                 {submission.feedback && (
                   <Alert variant="info" className="mt-3">
                     <strong>Feedback del docente:</strong>
@@ -283,25 +290,16 @@ const StudentExerciseDetailNew = () => {
                       as="textarea"
                       rows={10}
                       value={solution}
-                      onChange={e => setSolution(e.target.value)}
+                      onChange={(e) => setSolution(e.target.value)}
                       placeholder="Scrivi qui la tua soluzione..."
                       required
                       style={{ fontFamily: 'Monaco, Consolas, "Courier New", monospace' }}
                     />
                   </Form.Group>
-                  
+
                   <div className="d-flex justify-content-end">
-                    <Button 
-                      type="submit" 
-                      variant="primary"
-                      disabled={submitting || !solution.trim()}
-                      className="d-flex align-items-center"
-                    >
-                      {submitting ? (
-                        <Spinner animation="border" size="sm" className="mr-2" />
-                      ) : (
-                        <i className="feather icon-send mr-2"></i>
-                      )}
+                    <Button type="submit" variant="primary" disabled={submitting || !solution.trim()} className="d-flex align-items-center">
+                      {submitting ? <Spinner animation="border" size="sm" className="mr-2" /> : <i className="feather icon-send mr-2"></i>}
                       {submitting ? 'Invio in corso...' : 'Invia soluzione'}
                     </Button>
                   </div>

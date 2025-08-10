@@ -12,12 +12,12 @@ const StudentTeoCoinStats = () => {
     try {
       setLoading(true);
       const token = localStorage.getItem('accessToken');
-      
+
       const response = await fetch(`${API_BASE_URL}/api/v1/teocoin/student/stats/`, {
         headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
       });
 
       if (!response.ok) {
@@ -84,36 +84,48 @@ const StudentTeoCoinStats = () => {
       <Card.Body>
         <Row>
           <Col md={3}>
-            <div className="text-center p-3 rounded" style={{
-              background: 'linear-gradient(135deg, rgba(40, 167, 69, 0.1) 0%, rgba(40, 167, 69, 0.05) 100%)'
-            }}>
+            <div
+              className="text-center p-3 rounded"
+              style={{
+                background: 'linear-gradient(135deg, rgba(40, 167, 69, 0.1) 0%, rgba(40, 167, 69, 0.05) 100%)'
+              }}
+            >
               <i className="feather icon-award text-success" style={{ fontSize: '2rem' }}></i>
               <h4 className="text-success mt-2 mb-1">{formatAmount(stats?.total_earned || 0)}</h4>
               <p className="text-muted small mb-0">Total Earned</p>
             </div>
           </Col>
           <Col md={3}>
-            <div className="text-center p-3 rounded" style={{
-              background: 'linear-gradient(135deg, rgba(23, 162, 184, 0.1) 0%, rgba(23, 162, 184, 0.05) 100%)'
-            }}>
+            <div
+              className="text-center p-3 rounded"
+              style={{
+                background: 'linear-gradient(135deg, rgba(23, 162, 184, 0.1) 0%, rgba(23, 162, 184, 0.05) 100%)'
+              }}
+            >
               <i className="feather icon-percent text-info" style={{ fontSize: '2rem' }}></i>
               <h4 className="text-info mt-2 mb-1">{formatAmount(stats?.total_used_discounts || 0)}</h4>
               <p className="text-muted small mb-0">Used for Discounts</p>
             </div>
           </Col>
           <Col md={3}>
-            <div className="text-center p-3 rounded" style={{
-              background: 'linear-gradient(135deg, rgba(255, 193, 7, 0.1) 0%, rgba(255, 193, 7, 0.05) 100%)'
-            }}>
+            <div
+              className="text-center p-3 rounded"
+              style={{
+                background: 'linear-gradient(135deg, rgba(255, 193, 7, 0.1) 0%, rgba(255, 193, 7, 0.05) 100%)'
+              }}
+            >
               <i className="feather icon-send text-warning" style={{ fontSize: '2rem' }}></i>
               <h4 className="text-warning mt-2 mb-1">{formatAmount(stats?.total_withdrawn || 0)}</h4>
               <p className="text-muted small mb-0">Withdrawn</p>
             </div>
           </Col>
           <Col md={3}>
-            <div className="text-center p-3 rounded" style={{
-              background: 'linear-gradient(135deg, rgba(108, 117, 125, 0.1) 0%, rgba(108, 117, 125, 0.05) 100%)'
-            }}>
+            <div
+              className="text-center p-3 rounded"
+              style={{
+                background: 'linear-gradient(135deg, rgba(108, 117, 125, 0.1) 0%, rgba(108, 117, 125, 0.05) 100%)'
+              }}
+            >
               <i className="feather icon-activity text-secondary" style={{ fontSize: '2rem' }}></i>
               <h4 className="text-secondary mt-2 mb-1">{stats?.total_transactions || 0}</h4>
               <p className="text-muted small mb-0">Total Transactions</p>
@@ -123,16 +135,17 @@ const StudentTeoCoinStats = () => {
 
         {/* Achievement level */}
         <div className="mt-4 text-center">
-          <div className="p-3 rounded" style={{
-            background: 'linear-gradient(135deg, rgba(220, 53, 69, 0.1) 0%, rgba(220, 53, 69, 0.05) 100%)'
-          }}>
+          <div
+            className="p-3 rounded"
+            style={{
+              background: 'linear-gradient(135deg, rgba(220, 53, 69, 0.1) 0%, rgba(220, 53, 69, 0.05) 100%)'
+            }}
+          >
             <h5 className="text-danger mb-2">
               <i className="feather icon-star me-2"></i>
               {stats?.achievement_level || 'Beginner'} Student
             </h5>
-            <p className="text-muted small mb-0">
-              {stats?.next_level_info || 'Complete more exercises to earn more TeoCoin!'}
-            </p>
+            <p className="text-muted small mb-0">{stats?.next_level_info || 'Complete more exercises to earn more TeoCoin!'}</p>
           </div>
         </div>
 

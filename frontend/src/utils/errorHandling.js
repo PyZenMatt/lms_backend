@@ -1,6 +1,6 @@
 /**
  * 🔧 Error Suppression Utility
- * 
+ *
  * Suppresses common development errors and provides fallbacks
  */
 
@@ -8,10 +8,10 @@
 export const setupDevelopmentErrorHandling = () => {
   // Suppress WebSocket connection errors in development
   const originalConsoleError = console.error;
-  
+
   console.error = (...args) => {
     const message = args.join(' ');
-    
+
     // Filter out common development errors
     const suppressedErrors = [
       'WebSocket connection',
@@ -20,11 +20,9 @@ export const setupDevelopmentErrorHandling = () => {
       'ERR_CONNECTION_REFUSED',
       'websocket connection failed'
     ];
-    
-    const shouldSuppress = suppressedErrors.some(error => 
-      (message || '').toLowerCase().includes((error || '').toLowerCase())
-    );
-    
+
+    const shouldSuppress = suppressedErrors.some((error) => (message || '').toLowerCase().includes((error || '').toLowerCase()));
+
     if (!shouldSuppress) {
       originalConsoleError.apply(console, args);
     } else {
@@ -36,21 +34,17 @@ export const setupDevelopmentErrorHandling = () => {
   // Handle unhandled promise rejections
   window.addEventListener('unhandledrejection', (event) => {
     const error = event.reason;
-    
+
     if (error && error.message) {
       const message = (error.message || '').toLowerCase();
-      
-      if (message.includes('fetch') || 
-          message.includes('websocket') || 
-          message.includes('network') ||
-          message.includes('connection')) {
-        
+
+      if (message.includes('fetch') || message.includes('websocket') || message.includes('network') || message.includes('connection')) {
         console.log('🎭 Demo Mode: API service unavailable, continuing with mock data');
         event.preventDefault(); // Prevent error from being thrown
         return;
       }
     }
-    
+
     // For other errors, log them normally
     console.error('Unhandled promise rejection:', error);
   });

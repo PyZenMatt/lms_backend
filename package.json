@@ -1,5 +1,14 @@
 {
   "devDependencies": {
-    "@babel/preset-react": "^7.27.1"
+    "@babel/preset-react": "^7.27.1",
+    "lint-staged": "^15.0.0"
+  },
+  "lint-staged": {
+    "frontend/src/**/*.{js,jsx,ts,tsx}": [
+      "cd frontend && eslint \"src/**/*.{js,jsx,ts,tsx}\" --fix"
+    ],
+    "**/*.{md,json,yml,yaml}": [
+      "prettier --write"
+    ]
   }
 }

@@ -20,7 +20,7 @@ const UserProfileNew = () => {
     address: '',
     bio: '',
     profession: '',
-    artistic_aspirations: '',
+    artistic_aspirations: ''
   });
   const [avatarFile, setAvatarFile] = useState(null);
   const [avatarPreview, setAvatarPreview] = useState(null);
@@ -32,12 +32,14 @@ const UserProfileNew = () => {
       try {
         const res = await fetchUserProfile();
         setProfile(res.data);
-        
+
         // Costruisci l'URL completo dell'avatar se presente
-        const avatarUrl = res.data.avatar ? 
-          (res.data.avatar.startsWith('http') ? res.data.avatar : `http://127.0.0.1:8000${res.data.avatar}`) 
+        const avatarUrl = res.data.avatar
+          ? res.data.avatar.startsWith('http')
+            ? res.data.avatar
+            : `http://127.0.0.1:8000${res.data.avatar}`
           : null;
-        
+
         setForm({
           first_name: res.data.first_name || '',
           last_name: res.data.last_name || '',
@@ -45,9 +47,9 @@ const UserProfileNew = () => {
           address: res.data.address || '',
           bio: res.data.bio || '',
           profession: res.data.profession || '',
-          artistic_aspirations: res.data.artistic_aspirations || '',
+          artistic_aspirations: res.data.artistic_aspirations || ''
         });
-        
+
         if (avatarUrl) {
           setAvatarPreview(avatarUrl);
         }
@@ -73,7 +75,7 @@ const UserProfileNew = () => {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setForm(prev => ({
+    setForm((prev) => ({
       ...prev,
       [name]: value
     }));
@@ -95,25 +97,25 @@ const UserProfileNew = () => {
     e.preventDefault();
     setError('');
     setSuccess('');
-    
+
     try {
       const formData = new FormData();
-      Object.keys(form).forEach(key => {
+      Object.keys(form).forEach((key) => {
         formData.append(key, form[key]);
       });
-      
+
       if (avatarFile) {
         formData.append('avatar', avatarFile);
       }
-      
+
       await updateUserProfile(formData);
       setSuccess('Profilo aggiornato con successo!');
-      
+
       // Ricarica il profilo per avere i dati aggiornati
       const res = await fetchUserProfile();
       setProfile(res.data);
     } catch (err) {
-      setError('Errore nell\'aggiornamento del profilo');
+      setError("Errore nell'aggiornamento del profilo");
     }
   };
 
@@ -192,21 +194,21 @@ const UserProfileNew = () => {
               <div className="d-flex align-items-center">
                 {/* Avatar */}
                 <div className="me-4">
-                  {(avatarPreview || profile?.avatar) ? (
-                    <img 
-                      src={avatarPreview || (profile?.avatar?.startsWith('http') ? profile.avatar : `http://127.0.0.1:8000${profile.avatar}`)}
-                      alt="Avatar" 
+                  {avatarPreview || profile?.avatar ? (
+                    <img
+                      src={
+                        avatarPreview || (profile?.avatar?.startsWith('http') ? profile.avatar : `http://127.0.0.1:8000${profile.avatar}`)
+                      }
+                      alt="Avatar"
                       className="rounded-circle profile-avatar-image"
                     />
                   ) : (
-                    <div 
-                      className="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center profile-avatar-placeholder"
-                    >
+                    <div className="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center profile-avatar-placeholder">
                       {getUserInitials()}
                     </div>
                   )}
                 </div>
-                
+
                 {/* Profile Info */}
                 <div>
                   <h2 className="mb-1">{getFullName()}</h2>
@@ -232,7 +234,7 @@ const UserProfileNew = () => {
                   </p>
                 </div>
               </div>
-              
+
               {/* TeoCoin Balance - now using blockchain component */}
               <div className="text-end">
                 <div className="d-flex align-items-center">
@@ -273,12 +275,14 @@ const UserProfileNew = () => {
       {/* Profile Form */}
       <Row>
         <Col md={12}>
-          <MainCard title={
-            <span>
-              <i className="feather icon-edit text-primary me-2"></i>
-              Modifica Profilo
-            </span>
-          }>
+          <MainCard
+            title={
+              <span>
+                <i className="feather icon-edit text-primary me-2"></i>
+                Modifica Profilo
+              </span>
+            }
+          >
             <Form onSubmit={handleSubmit}>
               {/* Avatar Upload */}
               <Row className="mb-4">
@@ -288,15 +292,8 @@ const UserProfileNew = () => {
                       <i className="feather icon-camera me-2"></i>
                       Foto Profilo
                     </Form.Label>
-                    <Form.Control
-                      type="file"
-                      accept="image/*"
-                      onChange={handleAvatarChange}
-                      className="mb-2"
-                    />
-                    <Form.Text className="text-muted">
-                      Carica una nuova foto profilo (formato: JPG, PNG, GIF)
-                    </Form.Text>
+                    <Form.Control type="file" accept="image/*" onChange={handleAvatarChange} className="mb-2" />
+                    <Form.Text className="text-muted">Carica una nuova foto profilo (formato: JPG, PNG, GIF)</Form.Text>
                   </Form.Group>
                 </Col>
               </Row>
@@ -428,18 +425,11 @@ const UserProfileNew = () => {
               <Row>
                 <Col md={12}>
                   <div className="d-flex justify-content-between align-items-center">
-                    <Link 
-                      to={getDashboardLink()} 
-                      className="btn btn-outline-secondary d-flex align-items-center"
-                    >
+                    <Link to={getDashboardLink()} className="btn btn-outline-secondary d-flex align-items-center">
                       <i className="feather icon-arrow-left me-2"></i>
                       Torna alla dashboard
                     </Link>
-                    <Button 
-                      type="submit" 
-                      variant="primary"
-                      className="d-flex align-items-center"
-                    >
+                    <Button type="submit" variant="primary" className="d-flex align-items-center">
                       <i className="feather icon-save me-2"></i>
                       Salva Modifiche
                     </Button>

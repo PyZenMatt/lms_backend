@@ -17,7 +17,7 @@ const BurnDepositInterface = ({ onTransactionComplete }) => {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [lastTxHash, setLastTxHash] = useState('');
-  
+
   // MetaMask connection
   const [isConnected, setIsConnected] = useState(false);
   const [account, setAccount] = useState('');
@@ -66,7 +66,7 @@ const BurnDepositInterface = ({ onTransactionComplete }) => {
       if (!window.ethereum) return;
 
       const provider = new ethers.BrowserProvider(window.ethereum);
-      
+
       // TeoCoin contract configuration
       const TEO_CONTRACT_ADDRESS = '0x20D6656A31297ab3b8A87291Ed562D4228Be9ff8';
       const TEO_ABI = [
@@ -113,7 +113,7 @@ const BurnDepositInterface = ({ onTransactionComplete }) => {
       const contract = new ethers.Contract(TEO_CONTRACT_ADDRESS, TEO_ABI, provider);
       const balance = await contract.balanceOf(userAccount);
       const balanceInTEO = ethers.formatEther(balance);
-      
+
       setMetamaskBalance(parseFloat(balanceInTEO).toFixed(6));
     } catch (error) {
       console.error('Error loading MetaMask balance:', error);
@@ -148,7 +148,7 @@ const BurnDepositInterface = ({ onTransactionComplete }) => {
       } catch (e) {
         console.warn('Network check failed', e);
       }
-      
+
       // Contract setup
       const TEO_CONTRACT_ADDRESS = '0x20D6656A31297ab3b8A87291Ed562D4228Be9ff8';
       const TEO_ABI = [
@@ -253,21 +253,20 @@ const BurnDepositInterface = ({ onTransactionComplete }) => {
         setSuccess(`🎉 Successfully deposited ${burnAmount} TEO to your platform balance! TX: ${txHash.substring(0, 10)}...`);
         setBurnAmount('');
         setShowModal(false);
-        
+
         // Refresh MetaMask balance
         await loadMetaMaskBalance(account);
-        
+
         // Trigger parent component refresh
         if (onTransactionComplete) {
           onTransactionComplete(data);
         }
-        
+
         // Also trigger event for other listeners
         window.dispatchEvent(new Event('teocoin-balance-updated'));
       } else {
         throw new Error(data?.error || 'Failed to process burn deposit');
       }
-
     } catch (error) {
       console.error('Burn deposit error:', error);
       // Show only the original provider/MetaMask message without custom prefixes
@@ -292,20 +291,22 @@ const BurnDepositInterface = ({ onTransactionComplete }) => {
             <div className="text-center py-3">
               <i className="fab fa-ethereum fa-3x text-primary mb-3"></i>
               <p className="text-muted mb-3">Connect your MetaMask wallet to deposit TEO tokens</p>
-              
+
               {/* Debug Info */}
               <div className="alert alert-info small text-start mb-3">
-                <div><strong>Debug Info:</strong></div>
+                <div>
+                  <strong>Debug Info:</strong>
+                </div>
                 <div>MetaMask Available: {typeof window.ethereum !== 'undefined' ? 'Yes' : 'No'}</div>
                 <div>Current Status: Not Connected</div>
               </div>
-              
-              <Button 
-                variant="primary" 
+
+              <Button
+                variant="primary"
                 onClick={connectMetaMask}
-                style={{ 
-                  backgroundColor: '#007bff', 
-                  borderColor: '#007bff', 
+                style={{
+                  backgroundColor: '#007bff',
+                  borderColor: '#007bff',
                   color: 'white',
                   fontWeight: 'bold'
                 }}
@@ -318,7 +319,9 @@ const BurnDepositInterface = ({ onTransactionComplete }) => {
             <div>
               {/* Debug Info for Connected State */}
               <div className="alert alert-info small mb-3">
-                <div><strong>Debug Info:</strong></div>
+                <div>
+                  <strong>Debug Info:</strong>
+                </div>
                 <div>Connected: Yes</div>
                 <div>Account: {account}</div>
                 <div>Balance: {metamaskBalance} TEO</div>
@@ -326,7 +329,7 @@ const BurnDepositInterface = ({ onTransactionComplete }) => {
                 {error && <div className="text-danger">Error: {error}</div>}
                 {success && <div className="text-success">Success: {success}</div>}
               </div>
-              
+
               <div className="d-flex justify-content-between align-items-center mb-3">
                 <div>
                   <strong>MetaMask Balance:</strong>
@@ -361,9 +364,9 @@ const BurnDepositInterface = ({ onTransactionComplete }) => {
                   }}
                   disabled={parseFloat(metamaskBalance) <= 0}
                   className="btn-success"
-                  style={{ 
-                    backgroundColor: '#28a745', 
-                    borderColor: '#28a745', 
+                  style={{
+                    backgroundColor: '#28a745',
+                    borderColor: '#28a745',
                     color: 'white',
                     fontWeight: 'bold'
                   }}
@@ -371,7 +374,7 @@ const BurnDepositInterface = ({ onTransactionComplete }) => {
                   <i className="fas fa-fire me-2"></i>
                   Burn & Deposit TEO
                 </Button>
-                
+
                 <Button
                   variant="outline-primary"
                   size="sm"
@@ -381,8 +384,8 @@ const BurnDepositInterface = ({ onTransactionComplete }) => {
                   }}
                   disabled={processing}
                   className="btn-outline-primary"
-                  style={{ 
-                    borderColor: '#007bff', 
+                  style={{
+                    borderColor: '#007bff',
                     color: '#007bff',
                     fontWeight: '500'
                   }}
@@ -418,7 +421,8 @@ const BurnDepositInterface = ({ onTransactionComplete }) => {
         <Modal.Body>
           <div className="alert alert-warning">
             <i className="fas fa-exclamation-triangle me-2"></i>
-            <strong>Warning:</strong> Burning tokens is permanent! TEO will be removed from your MetaMask and added to your platform balance.
+            <strong>Warning:</strong> Burning tokens is permanent! TEO will be removed from your MetaMask and added to your platform
+            balance.
           </div>
 
           <Form>
@@ -434,9 +438,7 @@ const BurnDepositInterface = ({ onTransactionComplete }) => {
                 placeholder="Enter amount to burn"
                 disabled={processing}
               />
-              <Form.Text className="text-muted">
-                Available in MetaMask: {metamaskBalance} TEO
-              </Form.Text>
+              <Form.Text className="text-muted">Available in MetaMask: {metamaskBalance} TEO</Form.Text>
             </Form.Group>
 
             <div className="bg-light p-3 rounded mb-3">
@@ -456,11 +458,7 @@ const BurnDepositInterface = ({ onTransactionComplete }) => {
           <Button variant="secondary" onClick={() => setShowModal(false)} disabled={processing}>
             Cancel
           </Button>
-          <Button
-            variant="danger"
-            onClick={handleBurnDeposit}
-            disabled={processing || !burnAmount || parseFloat(burnAmount) <= 0}
-          >
+          <Button variant="danger" onClick={handleBurnDeposit} disabled={processing || !burnAmount || parseFloat(burnAmount) <= 0}>
             {processing ? (
               <>
                 <Spinner animation="border" size="sm" className="me-2" />

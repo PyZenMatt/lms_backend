@@ -4,16 +4,10 @@ import { useAuth } from '../../contexts/AuthContext';
 import { getTeoCoinBalance } from '../../services/api/teocoin';
 import api from '../../services/core/axiosClient';
 import { loadStripe } from '@stripe/stripe-js';
-import {
-    Elements,
-    CardElement,
-    useStripe,
-    useElements
-} from '@stripe/react-stripe-js';
+import { Elements, CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
 
 // Initialize Stripe with debugging
-const STRIPE_PUBLISHABLE_KEY = process.env.REACT_APP_STRIPE_PUBLISHABLE_KEY || 
-                                import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY;
+const STRIPE_PUBLISHABLE_KEY = process.env.REACT_APP_STRIPE_PUBLISHABLE_KEY || import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY;
 
 console.log('🔑 Stripe Key Debug:', {
   react_env: process.env.REACT_APP_STRIPE_PUBLISHABLE_KEY?.substring(0, 15) + '...',
@@ -24,14 +18,17 @@ console.log('🔑 Stripe Key Debug:', {
 
 if (!STRIPE_PUBLISHABLE_KEY) {
   console.error('❌ No Stripe publishable key found!');
-  console.log('Available env vars:', Object.keys(import.meta.env).filter(k => k.includes('STRIPE')));
+  console.log(
+    'Available env vars:',
+    Object.keys(import.meta.env).filter((k) => k.includes('STRIPE'))
+  );
 }
 
 const stripePromise = loadStripe(STRIPE_PUBLISHABLE_KEY);
 
 /**
  * DB-based CourseCheckoutModal - Uses database TeoCoin system
- * 
+ *
  * This component provides two payment options:
  * 1. Fiat payment via Stripe (EUR) with TeoCoin rewards
  * 2. TeoCoin payment with discount (uses DB-based system)
@@ -39,7 +36,7 @@ const stripePromise = loadStripe(STRIPE_PUBLISHABLE_KEY);
 const DBCourseCheckoutModal = ({ course, show, handleClose, onPurchaseComplete }) => {
   const { user } = useAuth();
   console.log('🔥 DBCourseCheckoutModal RENDER:', { course: course?.id, show });
-  
+
   const [activeTab, setActiveTab] = useState('fiat'); // 'fiat' or 'teocoin'
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -55,28 +52,28 @@ const DBCourseCheckoutModal = ({ course, show, handleClose, onPurchaseComplete }
   }
   const fiatPrice = parseFloat(course?.price_eur ?? 0);
   const teoReward = parseFloat(course?.teocoin_reward || 0);
-  
+
   // Use selected discount percentage
   const teoDiscount = selectedDiscount;
-  
+
   // Use 1 EUR = 1 TEO ratio
-  const teoNeeded = Math.floor(fiatPrice * teoDiscount / 100);
-  const discountAmount = (fiatPrice * teoDiscount / 100);
+  const teoNeeded = Math.floor((fiatPrice * teoDiscount) / 100);
+  const discountAmount = (fiatPrice * teoDiscount) / 100;
   const finalPrice = fiatPrice - discountAmount;
-  
+
   console.log(`💰 DB Pricing: €${fiatPrice}, need ${teoNeeded} TEO for ${teoDiscount}% discount, final: €${finalPrice.toFixed(2)}`);
 
   // Load DB balance when modal opens
   useEffect(() => {
     const loadDbBalance = async () => {
       if (!show || !user) return;
-      
+
       try {
         console.log('💰 Loading DB balance for user:', user.id);
-        
+
         const data = await getTeoCoinBalance();
         console.log('🔍 Checkout Balance API Response:', data);
-        
+
         if (data.success && data.balance) {
           // Convert withdrawal API format
           const availableBalance = parseFloat(data.balance.available || 0);
@@ -87,13 +84,12 @@ const DBCourseCheckoutModal = ({ course, show, handleClose, onPurchaseComplete }
           setDbBalance(0);
           setError('Failed to load TeoCoin balance');
         }
-        
       } catch (err) {
         console.error('Error loading DB balance:', err);
         setError('Errore di connessione durante il caricamento del saldo');
       }
     };
-    
+
     if (show) {
       setError('');
       setStep('confirm');
@@ -126,7 +122,7 @@ const DBCourseCheckoutModal = ({ course, show, handleClose, onPurchaseComplete }
     }
   };
 
-  // Handle Stripe payment error  
+  // Handle Stripe payment error
   const handleStripeError = (error) => {
     console.error('❌ Payment error handler called:', error);
     setError(error);
@@ -147,7 +143,7 @@ const DBCourseCheckoutModal = ({ course, show, handleClose, onPurchaseComplete }
       currentBalance: dbBalance,
       selectedDiscount
     });
-    
+
     if (dbBalance < teoNeeded) {
       setError(`Saldo insufficiente. Necessari ${teoNeeded} TEO, disponibili ${dbBalance.toFixed(2)} TEO`);
       return;
@@ -155,26 +151,25 @@ const DBCourseCheckoutModal = ({ course, show, handleClose, onPurchaseComplete }
 
     setLoading(true);
     setError('');
-    
+
     try {
       console.log('✅ DB TeoCoin discount will be applied after payment confirmation');
-      
+
       // Store discount info and switch to Stripe payment
       // TeoCoin will be deducted after successful Stripe payment
       const discountInfo = {
         teo_used: teoNeeded,
         discount_amount_eur: discountAmount,
         discount_percentage: selectedDiscount,
-        final_price: finalPrice,
+        final_price: finalPrice
         // transaction_id will be created after payment
       };
-      
+
       setPaymentResult({ type: 'discount_applied', discountInfo });
       setDiscountApplied(true);
       setActiveTab('fiat');
-      
+
       console.log('💳 Switched to card payment with TeoCoin discount info:', discountInfo);
-      
     } catch (error) {
       console.error('❌ DB TeoCoin discount preparation error:', error);
       setError('Errore durante la preparazione dello sconto TeoCoin');
@@ -190,8 +185,8 @@ const DBCourseCheckoutModal = ({ course, show, handleClose, onPurchaseComplete }
     try {
       const response = await fetch('/teocoin/withdrawals/balance/', {
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('accessToken')}`,
-        },
+          Authorization: `Bearer ${localStorage.getItem('accessToken')}`
+        }
       });
       const data = await response.json();
       console.log('🔍 Checkout Refresh Balance API Response:', data);
@@ -249,9 +244,7 @@ const DBCourseCheckoutModal = ({ course, show, handleClose, onPurchaseComplete }
     }
 
     // Ensure effectivePrice is always a number
-    const effectivePrice = paymentResult?.discountInfo 
-      ? parseFloat(paymentResult.discountInfo.final_price) 
-      : parseFloat(fiatPrice || 0);
+    const effectivePrice = paymentResult?.discountInfo ? parseFloat(paymentResult.discountInfo.final_price) : parseFloat(fiatPrice || 0);
 
     return (
       <div className="p-3">
@@ -259,11 +252,15 @@ const DBCourseCheckoutModal = ({ course, show, handleClose, onPurchaseComplete }
           <Alert variant="success" className="mb-3">
             <strong>✅ Sconto TeoCoin applicato!</strong>
             <br />
-            Usati {paymentResult.discountInfo.teo_used} TEO per €{parseFloat(paymentResult.discountInfo.discount_amount_eur || 0).toFixed(2)} di sconto
+            Usati {paymentResult.discountInfo.teo_used} TEO per €
+            {parseFloat(paymentResult.discountInfo.discount_amount_eur || 0).toFixed(2)} di sconto
           </Alert>
         )}
-        
-        <div className="payment-option-card mb-4 p-3" style={{ border: '2px solid #007bff', borderRadius: '8px', backgroundColor: '#f8f9ff' }}>
+
+        <div
+          className="payment-option-card mb-4 p-3"
+          style={{ border: '2px solid #007bff', borderRadius: '8px', backgroundColor: '#f8f9ff' }}
+        >
           <div className="d-flex justify-content-between align-items-center mb-2">
             <h5 className="mb-0 text-primary">💳 Pagamento con Carta</h5>
             <span className="badge badge-primary">Consigliato</span>
@@ -272,7 +269,9 @@ const DBCourseCheckoutModal = ({ course, show, handleClose, onPurchaseComplete }
             <div className="col-6">
               <strong>Prezzo: €{effectivePrice.toFixed(2)}</strong>
               {paymentResult?.discountInfo && (
-                <div><small className="text-muted">Originale: €{parseFloat(fiatPrice || 0).toFixed(2)}</small></div>
+                <div>
+                  <small className="text-muted">Originale: €{parseFloat(fiatPrice || 0).toFixed(2)}</small>
+                </div>
               )}
             </div>
             <div className="col-6 text-end">
@@ -293,7 +292,7 @@ const DBCourseCheckoutModal = ({ course, show, handleClose, onPurchaseComplete }
         {/* Stripe Card Payment */}
         <div className="stripe-payment-container">
           <Elements stripe={stripePromise}>
-            <StripeCardForm 
+            <StripeCardForm
               course={course}
               finalPrice={effectivePrice}
               fiatPrice={fiatPrice}
@@ -362,15 +361,15 @@ const DBCourseCheckoutModal = ({ course, show, handleClose, onPurchaseComplete }
           </Card.Header>
           <Card.Body>
             <div className="row">
-              {[5, 10, 15].map(percentage => {
-                const teoRequired = Math.floor(fiatPrice * percentage / 100);
-                const discount = (fiatPrice * percentage / 100);
+              {[5, 10, 15].map((percentage) => {
+                const teoRequired = Math.floor((fiatPrice * percentage) / 100);
+                const discount = (fiatPrice * percentage) / 100;
                 const final = fiatPrice - discount;
                 const canAfford = dbBalance >= teoRequired;
-                
+
                 return (
                   <div key={percentage} className="col-md-4 mb-3">
-                    <div 
+                    <div
                       className={`discount-option p-3 text-center border rounded ${
                         selectedDiscount === percentage ? 'border-success bg-light' : 'border-secondary'
                       } ${canAfford ? 'cursor-pointer' : 'opacity-50'}`}
@@ -378,19 +377,19 @@ const DBCourseCheckoutModal = ({ course, show, handleClose, onPurchaseComplete }
                       style={{ cursor: canAfford && !discountApplied ? 'pointer' : 'not-allowed' }}
                     >
                       <h5 className="text-success">{percentage}% Sconto</h5>
-                      <div><strong>{teoRequired} TEO</strong></div>
+                      <div>
+                        <strong>{teoRequired} TEO</strong>
+                      </div>
                       <small className="text-muted">€{discount.toFixed(2)} risparmiati</small>
                       <div className="mt-2">
-                        <Badge bg={canAfford ? 'success' : 'danger'}>
-                          {canAfford ? 'Disponibile' : 'TEO insufficienti'}
-                        </Badge>
+                        <Badge bg={canAfford ? 'success' : 'danger'}>{canAfford ? 'Disponibile' : 'TEO insufficienti'}</Badge>
                       </div>
                     </div>
                   </div>
                 );
               })}
             </div>
-            
+
             <div className="mt-3">
               <Button
                 variant="success"
@@ -428,11 +427,9 @@ const DBCourseCheckoutModal = ({ course, show, handleClose, onPurchaseComplete }
   return (
     <Modal show={show} onHide={handleClose} size="lg" centered>
       <Modal.Header closeButton>
-        <Modal.Title>
-          💳 Acquista Corso: {course?.title}
-        </Modal.Title>
+        <Modal.Title>💳 Acquista Corso: {course?.title}</Modal.Title>
       </Modal.Header>
-      
+
       <Modal.Body>
         <Tab.Container activeKey={activeTab} onSelect={setActiveTab}>
           <Nav variant="pills" className="justify-content-center mb-4">
@@ -449,17 +446,13 @@ const DBCourseCheckoutModal = ({ course, show, handleClose, onPurchaseComplete }
           </Nav>
 
           <Tab.Content>
-            <Tab.Pane eventKey="fiat">
-              {renderFiatPaymentTab()}
-            </Tab.Pane>
-            
-            <Tab.Pane eventKey="teocoin">
-              {renderTeoCoinPaymentTab()}
-            </Tab.Pane>
+            <Tab.Pane eventKey="fiat">{renderFiatPaymentTab()}</Tab.Pane>
+
+            <Tab.Pane eventKey="teocoin">{renderTeoCoinPaymentTab()}</Tab.Pane>
           </Tab.Content>
         </Tab.Container>
       </Modal.Body>
-      
+
       {step === 'confirm' && (
         <Modal.Footer>
           <Button variant="secondary" onClick={handleClose}>
@@ -479,13 +472,13 @@ const StripeCardForm = ({ course, finalPrice, fiatPrice, paymentResult, onPaymen
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-    
+
     console.log('💳 Stripe validation:', {
       stripe_available: !!stripe,
       elements_available: !!elements,
       stripe_key_loaded: STRIPE_PUBLISHABLE_KEY?.substring(0, 15) + '...'
     });
-    
+
     if (!stripe || !elements) {
       console.error('❌ Stripe or Elements not available:', { stripe: !!stripe, elements: !!elements });
       onPaymentError('Stripe not loaded. Please refresh the page.');
@@ -497,24 +490,24 @@ const StripeCardForm = ({ course, finalPrice, fiatPrice, paymentResult, onPaymen
 
     try {
       console.log('💳 Starting Stripe payment process...');
-      
+
       const cardElement = elements.getElement(CardElement);
-      
+
       if (!cardElement) {
         throw new Error('Card element not found');
       }
-      
+
       console.log('💳 Card element found, validating...');
-      
+
       // Validate card element before proceeding
-      const {error: cardError} = await stripe.createPaymentMethod({
+      const { error: cardError } = await stripe.createPaymentMethod({
         type: 'card',
-        card: cardElement,
+        card: cardElement
       });
 
       if (cardError) {
         console.error('❌ Card validation error:', cardError);
-        
+
         // Handle specific Stripe error types
         if (cardError.type === 'api_connection_error') {
           throw new Error('Connection problem with payment service. Please check your internet connection and try again.');
@@ -533,21 +526,21 @@ const StripeCardForm = ({ course, finalPrice, fiatPrice, paymentResult, onPaymen
 
       // Create payment intent with retry mechanism
       console.log('🔄 Creating payment intent for course:', course.id);
-      
+
       const paymentData = {
-  use_teocoin_discount: paymentResult?.discountInfo ? true : false,
-  discount_amount: paymentResult?.discountInfo?.discount_amount_eur || 0,
-  original_price: fiatPrice,
-  discount_percent: paymentResult?.discountInfo?.discount_percentage || 0,
-  payment_method: 'stripe',
-  final_amount: finalPrice,
-  discount_info: paymentResult?.discountInfo
+        use_teocoin_discount: paymentResult?.discountInfo ? true : false,
+        discount_amount: paymentResult?.discountInfo?.discount_amount_eur || 0,
+        original_price: fiatPrice,
+        discount_percent: paymentResult?.discountInfo?.discount_percentage || 0,
+        payment_method: 'stripe',
+        final_amount: finalPrice,
+        discount_info: paymentResult?.discountInfo
       };
-      
+
       console.log('💳 Payment data:', paymentData);
-      
+
       const response = await api.post(`/courses/${course.id}/create-payment-intent/`, paymentData);
-      
+
       console.log('📡 Payment intent response status:', response.status);
       console.log('� Payment intent response:', response.data);
 
@@ -565,7 +558,7 @@ const StripeCardForm = ({ course, finalPrice, fiatPrice, paymentResult, onPaymen
         // Confirm payment with Stripe
         const result = await stripe.confirmCardPayment(client_secret, {
           payment_method: {
-            card: cardElement,
+            card: cardElement
           }
         });
 
@@ -576,7 +569,7 @@ const StripeCardForm = ({ course, finalPrice, fiatPrice, paymentResult, onPaymen
           throw new Error(result.error.message);
         } else {
           console.log('✅ Payment successful!', result.paymentIntent);
-          
+
           // Now enroll the student after successful payment
           const enrollResponse = await api.post(`/courses/${course.id}/enroll/`, {
             payment_method: 'stripe',
@@ -585,22 +578,22 @@ const StripeCardForm = ({ course, finalPrice, fiatPrice, paymentResult, onPaymen
             discount_info: paymentResult?.discountInfo,
             stripe_payment_intent: result.paymentIntent.id
           });
-          
+
           console.log('📨 Enroll response status:', enrollResponse.status);
           console.log('📨 Enroll response data:', enrollResponse.data);
-          
+
           const enrollData = enrollResponse.data;
-          
+
           // Log debug messages from backend
           if (enrollData.debug) {
             console.log('🔍 Backend Debug Messages:');
-            enrollData.debug.forEach(msg => console.log('  ', msg));
+            enrollData.debug.forEach((msg) => console.log('  ', msg));
           }
           console.log('📨 Course enrollment response:', enrollData);
-          
+
           if (enrollData.success) {
             console.log('✅ Course enrollment successful!');
-            
+
             onPaymentSuccess({
               success: true,
               discountInfo: paymentResult?.discountInfo,
@@ -608,7 +601,7 @@ const StripeCardForm = ({ course, finalPrice, fiatPrice, paymentResult, onPaymen
               stripe_payment: result.paymentIntent
             });
           } else {
-            throw new Error(enrollData.error || 'Errore durante l\'iscrizione al corso');
+            throw new Error(enrollData.error || "Errore durante l'iscrizione al corso");
           }
         }
       } else {
@@ -625,25 +618,28 @@ const StripeCardForm = ({ course, finalPrice, fiatPrice, paymentResult, onPaymen
 
   return (
     <form onSubmit={handleSubmit} className="stripe-card-form">
-      <div className="card-element-container mb-3" style={{
-        border: '2px solid #007bff',
-        borderRadius: '8px',
-        padding: '15px',
-        background: '#fff',
-        boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
-      }}>
-        <CardElement 
+      <div
+        className="card-element-container mb-3"
+        style={{
+          border: '2px solid #007bff',
+          borderRadius: '8px',
+          padding: '15px',
+          background: '#fff',
+          boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+        }}
+      >
+        <CardElement
           options={{
             style: {
               base: {
                 fontSize: '16px',
                 color: '#424770',
                 '::placeholder': {
-                  color: '#aab7c4',
+                  color: '#aab7c4'
                 },
                 fontFamily: 'Arial, sans-serif',
                 fontSmoothing: 'antialiased',
-                padding: '12px',
+                padding: '12px'
               },
               invalid: {
                 color: '#fa755a',
@@ -651,28 +647,25 @@ const StripeCardForm = ({ course, finalPrice, fiatPrice, paymentResult, onPaymen
               }
             },
             hidePostalCode: false,
-            disabled: false,
+            disabled: false
           }}
         />
       </div>
-      
+
       <Alert variant="warning" className="mb-3">
         <small>
-          <strong>🧪 Test Mode:</strong><br/>
-          • Card: <code>4242 4242 4242 4242</code><br/>
-          • Expiry: Any future date (e.g., 12/28)<br/>
-          • CVC: Any 3 digits (e.g., 123)<br/>
-          • ZIP: <strong>12345</strong> (must be 5 digits)
+          <strong>🧪 Test Mode:</strong>
+          <br />• Card: <code>4242 4242 4242 4242</code>
+          <br />
+          • Expiry: Any future date (e.g., 12/28)
+          <br />
+          • CVC: Any 3 digits (e.g., 123)
+          <br />• ZIP: <strong>12345</strong> (must be 5 digits)
         </small>
       </Alert>
-      
+
       <div className="d-grid">
-        <Button 
-          type="submit" 
-          variant="primary" 
-          size="lg"
-          disabled={!stripe || processing || loading}
-        >
+        <Button type="submit" variant="primary" size="lg" disabled={!stripe || processing || loading}>
           {processing || loading ? (
             <>
               <Spinner animation="border" size="sm" className="me-2" />

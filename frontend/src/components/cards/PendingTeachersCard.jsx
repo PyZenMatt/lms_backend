@@ -17,11 +17,11 @@ const PendingTeachersCard = () => {
       console.log('🔄 Loading pending teachers...');
       const res = await fetchPendingTeachers();
       console.log('📊 Pending teachers response:', res.data);
-      
+
       // Handle different response structures
       const teachersData = res.data?.data || res.data || res || [];
       const teachersList = Array.isArray(teachersData) ? teachersData : [];
-      
+
       console.log(`✅ Found ${teachersList.length} pending teachers`);
       setTeachers(teachersList.slice(0, 5)); // Limit to 5 for dashboard card
       setError(''); // Clear any previous errors on success
@@ -29,7 +29,7 @@ const PendingTeachersCard = () => {
       console.error('❌ Error loading pending teachers:', err);
       console.error('Response data:', err?.response?.data);
       console.error('Response status:', err?.response?.status);
-      
+
       // If the error is a 404 or no content, treat as empty, not error
       if (err?.response?.status === 404 || err?.response?.status === 204) {
         console.log('ℹ️ No pending teachers found (404/204)');
@@ -62,7 +62,7 @@ const PendingTeachersCard = () => {
       setSuccess('Teacher approvato!');
       loadTeachers();
     } catch {
-      setError('Errore durante l\'approvazione');
+      setError("Errore durante l'approvazione");
     } finally {
       setActionLoading((prev) => ({ ...prev, [id]: false }));
     }
@@ -87,9 +87,11 @@ const PendingTeachersCard = () => {
     <Card className="widget-focus-lg">
       <Card.Header>
         <Card.Title as="h5">
-          Teacher in Attesa 
+          Teacher in Attesa
           {teachers.length > 0 && (
-            <Badge bg="warning" className="ms-2">{teachers.length}</Badge>
+            <Badge bg="warning" className="ms-2">
+              {teachers.length}
+            </Badge>
           )}
         </Card.Title>
       </Card.Header>
@@ -100,9 +102,15 @@ const PendingTeachersCard = () => {
           </div>
         )}
         {error && !loading && (
-          <Alert variant="danger" className="m-3">{error}</Alert>
+          <Alert variant="danger" className="m-3">
+            {error}
+          </Alert>
         )}
-        {success && <Alert variant="success" className="m-3">{success}</Alert>}
+        {success && (
+          <Alert variant="success" className="m-3">
+            {success}
+          </Alert>
+        )}
         {!loading && !error && teachers.length === 0 && (
           <div className="text-center p-3 text-muted">
             <i className="feather icon-check-circle f-40 mb-2 text-success"></i>
@@ -117,7 +125,7 @@ const PendingTeachersCard = () => {
                   <td>
                     <div className="d-flex align-items-center">
                       <div className="me-3">
-                        <div 
+                        <div
                           className="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center"
                           style={{ width: '40px', height: '40px' }}
                         >
@@ -125,7 +133,9 @@ const PendingTeachersCard = () => {
                         </div>
                       </div>
                       <div>
-                        <h6 className="mb-1">{teacher.first_name} {teacher.last_name}</h6>
+                        <h6 className="mb-1">
+                          {teacher.first_name} {teacher.last_name}
+                        </h6>
                         <p className="text-muted mb-0">{teacher.email}</p>
                       </div>
                     </div>
@@ -138,11 +148,7 @@ const PendingTeachersCard = () => {
                       disabled={actionLoading[teacher.id]}
                       onClick={() => handleApprove(teacher.id)}
                     >
-                      {actionLoading[teacher.id] ? (
-                        <Spinner size="sm" animation="border" />
-                      ) : (
-                        <i className="feather icon-check"></i>
-                      )}
+                      {actionLoading[teacher.id] ? <Spinner size="sm" animation="border" /> : <i className="feather icon-check"></i>}
                     </Button>
                     <Button
                       variant="outline-danger"
@@ -150,11 +156,7 @@ const PendingTeachersCard = () => {
                       disabled={actionLoading[teacher.id]}
                       onClick={() => handleReject(teacher.id)}
                     >
-                      {actionLoading[teacher.id] ? (
-                        <Spinner size="sm" animation="border" />
-                      ) : (
-                        <i className="feather icon-x"></i>
-                      )}
+                      {actionLoading[teacher.id] ? <Spinner size="sm" animation="border" /> : <i className="feather icon-x"></i>}
                     </Button>
                   </td>
                 </tr>

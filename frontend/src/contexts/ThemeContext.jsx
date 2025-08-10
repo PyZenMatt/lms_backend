@@ -1,6 +1,6 @@
 /**
  * 🌙 Dark Theme Context for SchoolPlatform
- * 
+ *
  * Provides comprehensive dark theme support with:
  * - System preference detection
  * - Manual theme switching
@@ -41,11 +41,11 @@ export const ThemeProvider = ({ children }) => {
   const initializeTheme = () => {
     // Check for saved theme preference
     const savedTheme = localStorage.getItem('schoolplatform-theme');
-    
+
     // Detect system preference
     const systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
     setSystemPreference(systemDark ? 'dark' : 'light');
-    
+
     if (savedTheme) {
       setIsDark(savedTheme === 'dark');
     } else {
@@ -59,10 +59,10 @@ export const ThemeProvider = ({ children }) => {
    */
   const setupSystemPreferenceListener = () => {
     const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-    
+
     const handleChange = (e) => {
       setSystemPreference(e.matches ? 'dark' : 'light');
-      
+
       // Only auto-switch if user hasn't manually set a preference
       if (!localStorage.getItem('schoolplatform-theme')) {
         setIsDark(e.matches);
@@ -70,7 +70,7 @@ export const ThemeProvider = ({ children }) => {
     };
 
     mediaQuery.addEventListener('change', handleChange);
-    
+
     return () => mediaQuery.removeEventListener('change', handleChange);
   };
 
@@ -80,12 +80,12 @@ export const ThemeProvider = ({ children }) => {
   const applyTheme = (dark) => {
     const root = document.documentElement;
     const body = document.body;
-    
+
     if (dark) {
       // Add dark mode classes
       body.classList.add('dark-mode', 'dark-layout');
       body.classList.remove('light-mode');
-      
+
       // Set CSS custom properties for dark theme
       root.style.setProperty('--bs-body-bg', '#1a1d21');
       root.style.setProperty('--bs-body-color', '#adb7be');
@@ -102,15 +102,14 @@ export const ThemeProvider = ({ children }) => {
       root.style.setProperty('--bs-dark', '#e2e8f0');
       root.style.setProperty('--bs-border-color', 'rgba(255, 255, 255, 0.125)');
       root.style.setProperty('--bs-text-muted', '#a0aec0');
-      
+
       // Update meta theme-color for mobile browsers
       updateMetaThemeColor('#1a1d21');
-      
     } else {
       // Add light mode classes
       body.classList.add('light-mode');
       body.classList.remove('dark-mode', 'dark-layout');
-      
+
       // Reset CSS custom properties to default light theme
       root.style.setProperty('--bs-body-bg', '#ffffff');
       root.style.setProperty('--bs-body-color', '#888');
@@ -127,7 +126,7 @@ export const ThemeProvider = ({ children }) => {
       root.style.setProperty('--bs-dark', '#37474f');
       root.style.setProperty('--bs-border-color', '#eaeaea');
       root.style.setProperty('--bs-text-muted', '#888');
-      
+
       // Update meta theme-color for mobile browsers
       updateMetaThemeColor('#ffffff');
     }
@@ -233,11 +232,7 @@ export const ThemeProvider = ({ children }) => {
     getThemeColors
   };
 
-  return (
-    <ThemeContext.Provider value={value}>
-      {children}
-    </ThemeContext.Provider>
-  );
+  return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;
 };
 
 export default ThemeContext;

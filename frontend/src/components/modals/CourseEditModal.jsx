@@ -8,7 +8,7 @@ const CourseEditModal = ({ show, onHide, courseId, onCourseUpdated }) => {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
-  
+
   // Form fields
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
@@ -37,7 +37,7 @@ const CourseEditModal = ({ show, onHide, courseId, onCourseUpdated }) => {
     setError('');
     try {
       const course = await fetchCourseDetail(courseId);
-      
+
       setTitle(course.title || '');
       setDescription(course.description || '');
       setPrice(course.price || course.price_eur || '');
@@ -69,19 +69,19 @@ const CourseEditModal = ({ show, onHide, courseId, onCourseUpdated }) => {
 
   const validateForm = () => {
     const errors = {};
-    
+
     if (!title.trim()) {
       errors.title = 'Il titolo è obbligatorio';
     }
-    
+
     if (!description.trim()) {
       errors.description = 'La descrizione è obbligatoria';
     }
-    
+
     if (!price || parseFloat(price) < 0) {
       errors.price = 'Il prezzo deve essere un numero positivo';
     }
-    
+
     if (!category) {
       errors.category = 'La categoria è obbligatoria';
     }
@@ -92,14 +92,14 @@ const CourseEditModal = ({ show, onHide, courseId, onCourseUpdated }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     if (!validateForm()) {
       return;
     }
 
     setSaving(true);
     setError('');
-    
+
     try {
       const formData = new FormData();
       formData.append('title', title.trim());
@@ -108,27 +108,26 @@ const CourseEditModal = ({ show, onHide, courseId, onCourseUpdated }) => {
       formData.append('category', category);
       formData.append('teocoin_discount_percent', teocoinDiscountPercent);
       formData.append('teocoin_reward', teocoinReward);
-      
+
       if (coverImage) {
         formData.append('cover_image', coverImage);
       }
 
       await updateCourse(courseId, formData);
-      
+
       setSuccess(true);
-      
+
       // Notify parent component
       if (onCourseUpdated) {
         onCourseUpdated(courseId);
       }
-      
+
       // Close modal after 1 second
       setTimeout(() => {
         onHide();
       }, 1000);
-      
     } catch (err) {
-      setError(err.response?.data?.message || 'Errore nell\'aggiornamento del corso');
+      setError(err.response?.data?.message || "Errore nell'aggiornamento del corso");
       console.error('Error updating course:', err);
     } finally {
       setSaving(false);
@@ -152,7 +151,7 @@ const CourseEditModal = ({ show, onHide, courseId, onCourseUpdated }) => {
           Modifica Corso
         </Modal.Title>
       </Modal.Header>
-      
+
       <Modal.Body>
         {loading ? (
           <div className="text-center py-4">
@@ -167,7 +166,7 @@ const CourseEditModal = ({ show, onHide, courseId, onCourseUpdated }) => {
                 {error}
               </Alert>
             )}
-            
+
             {success && (
               <Alert variant="success" className="mb-3">
                 <i className="feather icon-check-circle me-2"></i>
@@ -188,31 +187,23 @@ const CourseEditModal = ({ show, onHide, courseId, onCourseUpdated }) => {
                     onChange={(e) => setTitle(e.target.value)}
                     isInvalid={!!validationErrors.title}
                   />
-                  <Form.Control.Feedback type="invalid">
-                    {validationErrors.title}
-                  </Form.Control.Feedback>
+                  <Form.Control.Feedback type="invalid">{validationErrors.title}</Form.Control.Feedback>
                 </Form.Group>
               </Col>
-              
+
               <Col md={6}>
                 <Form.Group className="mb-3">
                   <Form.Label>
                     <i className="feather icon-tag me-2"></i>Categoria
                   </Form.Label>
-                  <Form.Select
-                    value={category}
-                    onChange={(e) => setCategory(e.target.value)}
-                    isInvalid={!!validationErrors.category}
-                  >
+                  <Form.Select value={category} onChange={(e) => setCategory(e.target.value)} isInvalid={!!validationErrors.category}>
                     {categoryOptions.map((option) => (
                       <option key={option.value} value={option.value}>
                         {option.label}
                       </option>
                     ))}
                   </Form.Select>
-                  <Form.Control.Feedback type="invalid">
-                    {validationErrors.category}
-                  </Form.Control.Feedback>
+                  <Form.Control.Feedback type="invalid">{validationErrors.category}</Form.Control.Feedback>
                 </Form.Group>
               </Col>
             </Row>
@@ -229,9 +220,7 @@ const CourseEditModal = ({ show, onHide, courseId, onCourseUpdated }) => {
                 onChange={(e) => setDescription(e.target.value)}
                 isInvalid={!!validationErrors.description}
               />
-              <Form.Control.Feedback type="invalid">
-                {validationErrors.description}
-              </Form.Control.Feedback>
+              <Form.Control.Feedback type="invalid">{validationErrors.description}</Form.Control.Feedback>
             </Form.Group>
 
             <Row>
@@ -249,12 +238,10 @@ const CourseEditModal = ({ show, onHide, courseId, onCourseUpdated }) => {
                     onChange={(e) => setPrice(e.target.value)}
                     isInvalid={!!validationErrors.price}
                   />
-                  <Form.Control.Feedback type="invalid">
-                    {validationErrors.price}
-                  </Form.Control.Feedback>
+                  <Form.Control.Feedback type="invalid">{validationErrors.price}</Form.Control.Feedback>
                 </Form.Group>
               </Col>
-              
+
               <Col md={4}>
                 <Form.Group className="mb-3">
                   <Form.Label>
@@ -269,19 +256,13 @@ const CourseEditModal = ({ show, onHide, courseId, onCourseUpdated }) => {
                   />
                 </Form.Group>
               </Col>
-              
+
               <Col md={4}>
                 <Form.Group className="mb-3">
                   <Form.Label>
                     <i className="feather icon-award me-2"></i>Ricompensa TeoCoin
                   </Form.Label>
-                  <Form.Control
-                    type="number"
-                    min="0"
-                    max="100"
-                    value={teocoinReward}
-                    onChange={(e) => setTeocoinReward(e.target.value)}
-                  />
+                  <Form.Control type="number" min="0" max="100" value={teocoinReward} onChange={(e) => setTeocoinReward(e.target.value)} />
                 </Form.Group>
               </Col>
             </Row>
@@ -292,50 +273,30 @@ const CourseEditModal = ({ show, onHide, courseId, onCourseUpdated }) => {
               </Form.Label>
               {currentCoverImageUrl && (
                 <div className="mb-2">
-                  <img 
-                    src={currentCoverImageUrl} 
-                    alt="Cover attuale" 
+                  <img
+                    src={currentCoverImageUrl}
+                    alt="Cover attuale"
                     style={{ maxWidth: '200px', maxHeight: '100px', objectFit: 'cover' }}
                     className="rounded"
                   />
                   <p className="text-muted small mt-1">Immagine attuale</p>
                 </div>
               )}
-              <Form.Control
-                type="file"
-                accept="image/*"
-                onChange={(e) => setCoverImage(e.target.files[0])}
-              />
-              <Form.Text className="text-muted">
-                Carica una nuova immagine se vuoi sostituire quella attuale
-              </Form.Text>
+              <Form.Control type="file" accept="image/*" onChange={(e) => setCoverImage(e.target.files[0])} />
+              <Form.Text className="text-muted">Carica una nuova immagine se vuoi sostituire quella attuale</Form.Text>
             </Form.Group>
           </Form>
         )}
       </Modal.Body>
-      
+
       <Modal.Footer>
-        <Button 
-          variant="secondary" 
-          onClick={onHide}
-          disabled={saving}
-        >
+        <Button variant="secondary" onClick={onHide} disabled={saving}>
           Annulla
         </Button>
-        <Button 
-          variant="primary" 
-          onClick={handleSubmit}
-          disabled={saving || loading}
-        >
+        <Button variant="primary" onClick={handleSubmit} disabled={saving || loading}>
           {saving ? (
             <>
-              <Spinner
-                as="span"
-                animation="border"
-                size="sm"
-                role="status"
-                className="me-2"
-              />
+              <Spinner as="span" animation="border" size="sm" role="status" className="me-2" />
               Salvando...
             </>
           ) : (

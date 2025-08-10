@@ -60,21 +60,14 @@ const NavItem = ({ item }) => {
     );
   } else {
     subContent = (
-      <NavLink
-        to={item.url || '#'}
-        className="nav-link"
-        activeClassName="active"
-        target={itemTarget}
-        onClick={handleClick}
-        exact
-      >
+      <NavLink to={item.url || '#'} className="nav-link" activeClassName="active" target={itemTarget} onClick={handleClick} exact>
         <NavIcon items={item} />
         {itemTitle}
         <NavBadge items={item} />
       </NavLink>
     );
   }
-  
+
   let mainContent = '';
 
   if (windowSize.width < 992) {

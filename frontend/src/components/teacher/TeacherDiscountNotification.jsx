@@ -15,7 +15,7 @@ const TeacherDiscountNotification = () => {
     try {
       setLoading(true);
       const response = await axiosClient.get('/teocoin/teacher/absorptions/pending/');
-      
+
       if (response.data.success) {
         setPendingAbsorptions(response.data.pending_absorptions || []);
         setError(null);
@@ -32,10 +32,10 @@ const TeacherDiscountNotification = () => {
 
   useEffect(() => {
     fetchPendingAbsorptions();
-    
+
     // Refresh ogni 30 secondi per notifiche real-time
     const interval = setInterval(fetchPendingAbsorptions, 30000);
-    
+
     return () => clearInterval(interval);
   }, []);
 
@@ -44,10 +44,10 @@ const TeacherDiscountNotification = () => {
       absorptionId,
       choice
     });
-    
+
     try {
-      setProcessing(prev => ({ ...prev, [absorptionId]: true }));
-      
+      setProcessing((prev) => ({ ...prev, [absorptionId]: true }));
+
       console.log('📤 Calling navbar teacher choice endpoint:', {
         endpoint: '/teocoin/teacher/choice/',
         data: {
@@ -55,7 +55,7 @@ const TeacherDiscountNotification = () => {
           choice: choice
         }
       });
-      
+
       const response = await axiosClient.post('/teocoin/teacher/choice/', {
         absorption_id: absorptionId,
         choice: choice
@@ -66,18 +66,11 @@ const TeacherDiscountNotification = () => {
       if (response.data.success) {
         console.log('✅ Navbar teacher choice successful');
         // Rimuovi dalla lista locale
-        setPendingAbsorptions(prev => 
-          prev.filter(absorption => absorption.id !== absorptionId)
-        );
-        
+        setPendingAbsorptions((prev) => prev.filter((absorption) => absorption.id !== absorptionId));
+
         // Mostra messaggio di successo
         if (window.showToast) {
-          window.showToast(
-            choice === 'absorb' 
-              ? '✅ Sconto assorbito! TEO aggiunti al tuo saldo' 
-              : '💰 Scelta EUR confermata',
-            'success'
-          );
+          window.showToast(choice === 'absorb' ? '✅ Sconto assorbito! TEO aggiunti al tuo saldo' : '💰 Scelta EUR confermata', 'success');
         }
       } else {
         console.error('❌ Navbar teacher choice failed:', response.data);
@@ -94,7 +87,7 @@ const TeacherDiscountNotification = () => {
         window.showToast('❌ Errore nella scelta: ' + err.message, 'error');
       }
     } finally {
-      setProcessing(prev => ({ ...prev, [absorptionId]: false }));
+      setProcessing((prev) => ({ ...prev, [absorptionId]: false }));
     }
   };
 
@@ -115,12 +108,7 @@ const TeacherDiscountNotification = () => {
       >
         <CurrencyExchange size={20} className="text-warning" />
         {notificationCount > 0 && (
-          <Badge 
-            bg="danger" 
-            pill 
-            className="position-absolute top-0 start-100 translate-middle"
-            style={{ fontSize: '0.7rem' }}
-          >
+          <Badge bg="danger" pill className="position-absolute top-0 start-100 translate-middle" style={{ fontSize: '0.7rem' }}>
             {notificationCount}
           </Badge>
         )}
@@ -156,14 +144,9 @@ const TeacherDiscountNotification = () => {
                   <div>
                     <strong className="text-primary">{absorption.course.title}</strong>
                     <br />
-                    <small className="text-muted">
-                      Studente: {absorption.student.username}
-                    </small>
+                    <small className="text-muted">Studente: {absorption.student.username}</small>
                   </div>
-                  <Badge 
-                    bg={absorption.timing.hours_remaining > 2 ? "success" : "warning"}
-                    className="ms-2"
-                  >
+                  <Badge bg={absorption.timing.hours_remaining > 2 ? 'success' : 'warning'} className="ms-2">
                     <Clock size={12} className="me-1" />
                     {formatTimeRemaining(absorption.timing.hours_remaining)}
                   </Badge>
@@ -247,10 +230,7 @@ const TeacherDiscountNotification = () => {
         ))}
 
         {notificationCount > 0 && (
-          <Dropdown.Item 
-            className="text-center text-primary"
-            onClick={fetchPendingAbsorptions}
-          >
+          <Dropdown.Item className="text-center text-primary" onClick={fetchPendingAbsorptions}>
             🔄 Aggiorna notifiche
           </Dropdown.Item>
         )}

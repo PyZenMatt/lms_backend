@@ -3,10 +3,10 @@ import { Card, Badge, Button, Row, Col, Collapse, ProgressBar, InputGroup } from
 import { Link, useNavigate } from 'react-router-dom';
 import './CoursesTable.scss';
 
-const CoursesTable = ({ 
-  courses = [], 
-  showActions = true, 
-  onCreateLesson, 
+const CoursesTable = ({
+  courses = [],
+  showActions = true,
+  onCreateLesson,
   showCreateCourse = false,
   onCreateCourse,
   expandedCourse,
@@ -74,9 +74,9 @@ const CoursesTable = ({
     }
   };
   const [expandedLessons, setExpandedLessons] = useState({});
-  
+
   const handleToggleLesson = (lessonId) => {
-    setExpandedLessons(prev => ({
+    setExpandedLessons((prev) => ({
       ...prev,
       [lessonId]: !prev[lessonId]
     }));
@@ -103,16 +103,16 @@ const CoursesTable = ({
 
   const getCategoryColor = (category) => {
     const categoryColors = {
-      'Programmazione': '#007bff',
-      'Design': '#28a745',
-      'Marketing': '#dc3545',
-      'Business': '#ffc107',
-      'Lingue': '#17a2b8',
-      'Arte': '#6f42c1',
-      'Musica': '#fd7e14',
-      'Salute': '#20c997',
-      'Sport': '#e83e8c',
-      'Cucina': '#6c757d'
+      Programmazione: '#007bff',
+      Design: '#28a745',
+      Marketing: '#dc3545',
+      Business: '#ffc107',
+      Lingue: '#17a2b8',
+      Arte: '#6f42c1',
+      Musica: '#fd7e14',
+      Salute: '#20c997',
+      Sport: '#e83e8c',
+      Cucina: '#6c757d'
     };
     return categoryColors[category] || '#6c757d';
   };
@@ -120,9 +120,7 @@ const CoursesTable = ({
   const getCompletionPercentage = (course) => {
     if (!course.lessons || course.lessons.length === 0) return 0;
     const totalLessons = course.lessons.length;
-    const completedLessons = course.lessons.filter(lesson => 
-      lesson.exercises && lesson.exercises.length > 0
-    ).length;
+    const completedLessons = course.lessons.filter((lesson) => lesson.exercises && lesson.exercises.length > 0).length;
     return Math.round((completedLessons / totalLessons) * 100);
   };
 
@@ -136,8 +134,8 @@ const CoursesTable = ({
           <h4 className="mb-3 text-muted">Nessun corso trovato</h4>
           <p className="text-muted mb-4">Inizia creando il tuo primo corso per condividere le tue conoscenze!</p>
           {showCreateCourse && (
-            <Button 
-              variant="primary" 
+            <Button
+              variant="primary"
               size="lg"
               className="px-4 py-2"
               onClick={onCreateCourse}
@@ -161,23 +159,27 @@ const CoursesTable = ({
     <div className="courses-grid-modern">
       {showCreateCourse && (
         <Card className="create-course-card mb-4 border-0 shadow-sm">
-          <Card.Body className="text-center py-5" 
+          <Card.Body
+            className="text-center py-5"
             style={{
               background: 'linear-gradient(135deg, rgba(4, 169, 245, 0.05) 0%, rgba(29, 233, 182, 0.05) 100%)',
               borderRadius: '15px'
             }}
           >
             <div className="mb-4">
-              <i className="feather icon-plus-circle" style={{ 
-                fontSize: '3rem', 
-                color: '#04a9f5',
-                filter: 'drop-shadow(0 4px 8px rgba(4, 169, 245, 0.3))'
-              }}></i>
+              <i
+                className="feather icon-plus-circle"
+                style={{
+                  fontSize: '3rem',
+                  color: '#04a9f5',
+                  filter: 'drop-shadow(0 4px 8px rgba(4, 169, 245, 0.3))'
+                }}
+              ></i>
             </div>
             <h5 className="mb-3 fw-bold">Crea Nuovo Corso</h5>
             <p className="text-muted mb-4">Condividi le tue conoscenze creando un corso professionale</p>
-            <Button 
-              variant="success" 
+            <Button
+              variant="success"
               size="lg"
               className="px-4 py-2"
               onClick={onCreateCourse}
@@ -196,31 +198,30 @@ const CoursesTable = ({
       )}
 
       <Row>
-        {courses.map(course => {
+        {courses.map((course) => {
           const completionRate = getCompletionPercentage(course);
           const isExpanded = expandedCourse === course.id;
-          
+
           return (
             <Col lg={6} xl={4} key={course.id} className="mb-4">
               <Card className="course-card h-100 border-0 shadow-sm">
                 {/* Course Image/Header */}
                 <div className="course-image-container position-relative">
                   {course.image ? (
-                    <img 
-                      src={course.image} 
-                      alt={course.title}
-                      className="course-image"
-                    />
+                    <img src={course.image} alt={course.title} className="course-image" />
                   ) : (
-                    <div className="course-placeholder" style={{
-                      background: `linear-gradient(135deg, ${getCategoryColor(course.category)} 0%, ${getCategoryColor(course.category)}99 100%)`
-                    }}>
+                    <div
+                      className="course-placeholder"
+                      style={{
+                        background: `linear-gradient(135deg, ${getCategoryColor(course.category)} 0%, ${getCategoryColor(course.category)}99 100%)`
+                      }}
+                    >
                       <i className="feather icon-book-open"></i>
                     </div>
                   )}
-                  
+
                   <div className="position-absolute top-0 start-0 m-3">
-                    <Badge 
+                    <Badge
                       className="category-badge px-3 py-2"
                       style={{
                         background: `${getCategoryColor(course.category)}dd`,
@@ -231,30 +232,24 @@ const CoursesTable = ({
                       {course.category || 'Generale'}
                     </Badge>
                   </div>
-                  
+
                   <div className="position-absolute top-0 end-0 m-3">
                     <Button
                       className="expand-btn"
                       size="sm"
-                      onClick={() => onExpandCourse && onExpandCourse(
-                        isExpanded ? null : course.id
-                      )}
+                      onClick={() => onExpandCourse && onExpandCourse(isExpanded ? null : course.id)}
                     >
                       <i className={`feather icon-chevron-${isExpanded ? 'up' : 'down'}`}></i>
                     </Button>
                   </div>
                 </div>
-                
+
                 <Card.Body className="course-header">
                   <div className="d-flex justify-content-between align-items-start mb-3">
                     <div className="flex-grow-1">
                       <h6 className="course-title mb-2">{course.title}</h6>
                       <div className="d-flex align-items-center gap-2 mb-2">
-                        <Badge 
-                          variant={getBadgeVariant(course.status)} 
-                          className="course-type-badge"
-                          style={{ borderRadius: '10px' }}
-                        >
+                        <Badge variant={getBadgeVariant(course.status)} className="course-type-badge" style={{ borderRadius: '10px' }}>
                           {course.status || 'Draft'}
                         </Badge>
                         <button
@@ -284,42 +279,41 @@ const CoursesTable = ({
                     </div>
                     <div className="text-end">
                       <div className="price-info">
-                        <div className="price-tag text-primary fw-bold">
-                          €{formatPrice(course.price_eur || course.price)} EUR
-                        </div>
+                        <div className="price-tag text-primary fw-bold">€{formatPrice(course.price_eur || course.price)} EUR</div>
                         {course.teocoin_price && (
-                          <div className="teocoin-price text-success small">
-                            {formatPrice(course.teocoin_price)} TEO
-                          </div>
+                          <div className="teocoin-price text-success small">{formatPrice(course.teocoin_price)} TEO</div>
                         )}
                       </div>
                     </div>
                   </div>
-                  
+
                   {course.description && (
-                    <p className="course-description mb-3" style={{
-                      display: '-webkit-box',
-                      WebkitLineClamp: 2,
-                      WebkitBoxOrient: 'vertical',
-                      overflow: 'hidden'
-                    }}>
+                    <p
+                      className="course-description mb-3"
+                      style={{
+                        display: '-webkit-box',
+                        WebkitLineClamp: 2,
+                        WebkitBoxOrient: 'vertical',
+                        overflow: 'hidden'
+                      }}
+                    >
                       {course.description}
                     </p>
                   )}
-                  
+
                   {/* Course Progress */}
                   <div className="mb-3">
                     <div className="d-flex justify-content-between align-items-center mb-1">
                       <small className="text-muted fw-semibold">Completamento Corso</small>
                       <small className="text-primary fw-bold">{completionRate}%</small>
                     </div>
-                    <ProgressBar 
-                      now={completionRate} 
+                    <ProgressBar
+                      now={completionRate}
                       style={{ height: '6px', borderRadius: '3px' }}
                       variant={completionRate > 70 ? 'success' : completionRate > 40 ? 'warning' : 'danger'}
                     />
                   </div>
-                  
+
                   <div className="course-stats mb-3">
                     <Row className="text-center g-2">
                       <Col>
@@ -342,17 +336,13 @@ const CoursesTable = ({
                           }}
                           title={`Clicca per vedere le ${course.lessons?.length || 0} lezioni`}
                         >
-                          <div className="stat-value text-primary fw-bold">
-                            {course.lessons?.length || 0}
-                          </div>
+                          <div className="stat-value text-primary fw-bold">{course.lessons?.length || 0}</div>
                           <small className="stat-label text-muted d-block">Lezioni</small>
                         </button>
                       </Col>
                       <Col>
                         <div className="stat-item p-2 bg-light rounded">
-                          <div className="stat-value text-success fw-bold">
-                            {course.students_count || 0}
-                          </div>
+                          <div className="stat-value text-success fw-bold">{course.students_count || 0}</div>
                           <small className="stat-label text-muted d-block">Studenti</small>
                         </div>
                       </Col>
@@ -372,12 +362,7 @@ const CoursesTable = ({
                       Modifica
                     </Button>
                     {onCreateLesson && (
-                      <Button
-                        variant="success"
-                        size="sm"
-                        onClick={() => handleCreateLesson(course.id)}
-                        title="Crea nuova lezione"
-                      >
+                      <Button variant="success" size="sm" onClick={() => handleCreateLesson(course.id)} title="Crea nuova lezione">
                         <i className="feather icon-plus"></i>
                       </Button>
                     )}
@@ -397,7 +382,7 @@ const CoursesTable = ({
                           <Button
                             variant="primary"
                             size="sm"
-                        onClick={() => handleCreateLesson(course.id)}
+                            onClick={() => handleCreateLesson(course.id)}
                             style={{
                               background: 'linear-gradient(135deg, #04a9f5, #1de9b6)',
                               border: 'none',
@@ -409,20 +394,28 @@ const CoursesTable = ({
                           </Button>
                         )}
                       </div>
-                      
+
                       {course.lessons && course.lessons.length > 0 ? (
                         <div className="lessons-grid">
                           {course.lessons.map((lesson, lessonIndex) => (
                             <Card key={lesson.id} className="lesson-card mb-3 border-0 shadow-sm">
                               <Card.Body className="p-3">
-                                <div 
+                                <div
                                   className="lesson-header cursor-pointer"
+                                  role="button"
+                                  tabIndex={0}
+                                  onKeyDown={(e) => {
+                                    if (e.key === 'Enter' || e.key === ' ') {
+                                      e.preventDefault();
+                                      handleToggleLesson(lesson.id);
+                                    }
+                                  }}
                                   onClick={() => handleToggleLesson(lesson.id)}
                                 >
                                   <div className="d-flex justify-content-between align-items-center">
                                     <div className="flex-grow-1">
                                       <div className="d-flex align-items-center mb-2">
-                                        <Badge 
+                                        <Badge
                                           className="me-2 px-2 py-1"
                                           style={{
                                             background: 'linear-gradient(135deg, #28a745, #20c997)',
@@ -442,7 +435,7 @@ const CoursesTable = ({
                                           <i className="feather icon-target me-1"></i>
                                           {lesson.exercises?.length || 0} esercizi
                                         </small>
-                                        <Badge 
+                                        <Badge
                                           variant={lesson.lesson_type === 'video' ? 'warning' : 'info'}
                                           className="px-2 py-1"
                                           style={{ fontSize: '0.7rem', borderRadius: '8px' }}
@@ -480,12 +473,15 @@ const CoursesTable = ({
                                     </div>
                                   </div>
                                 </div>
-                                
+
                                 <Collapse in={expandedLessons[lesson.id]}>
-                                  <div className="exercises-section mt-3 p-3 rounded" style={{
-                                    background: 'linear-gradient(135deg, rgba(255, 193, 7, 0.1) 0%, rgba(255, 193, 7, 0.05) 100%)',
-                                    border: '2px solid rgba(255, 193, 7, 0.2)'
-                                  }}>
+                                  <div
+                                    className="exercises-section mt-3 p-3 rounded"
+                                    style={{
+                                      background: 'linear-gradient(135deg, rgba(255, 193, 7, 0.1) 0%, rgba(255, 193, 7, 0.05) 100%)',
+                                      border: '2px solid rgba(255, 193, 7, 0.2)'
+                                    }}
+                                  >
                                     <div className="d-flex justify-content-between align-items-center mb-3">
                                       <h6 className="mb-0 fw-bold text-dark">
                                         <i className="feather icon-target me-2 text-warning"></i>
@@ -494,29 +490,31 @@ const CoursesTable = ({
                                       <Button
                                         variant="warning"
                                         size="sm"
-                                        onClick={() => handleCreateExercise({
-                                          ...lesson,
-                                          course_id: course.id,
-                                          course: course.id
-                                        })}
+                                        onClick={() =>
+                                          handleCreateExercise({
+                                            ...lesson,
+                                            course_id: course.id,
+                                            course: course.id
+                                          })
+                                        }
                                         style={{ borderRadius: '15px' }}
                                       >
                                         <i className="feather icon-plus me-1"></i>
                                         {lesson.exercises?.length === 0 ? 'Primo Esercizio' : 'Aggiungi'}
                                       </Button>
                                     </div>
-                                    
+
                                     {lesson.exercises && lesson.exercises.length > 0 ? (
                                       <div className="exercises-list">
                                         {lesson.exercises.map((exercise, exerciseIndex) => (
-                                          <div 
-                                            key={exercise.id} 
+                                          <div
+                                            key={exercise.id}
                                             className="exercise-item d-flex justify-content-between align-items-center p-2 mb-2 rounded"
                                             style={{ background: 'rgba(255, 255, 255, 0.7)' }}
                                           >
                                             <div className="flex-grow-1">
                                               <div className="d-flex align-items-center mb-1">
-                                                <Badge 
+                                                <Badge
                                                   className="me-2 px-2 py-1"
                                                   style={{
                                                     background: 'linear-gradient(135deg, #ffc107, #fd7e14)',
@@ -531,16 +529,10 @@ const CoursesTable = ({
                                                 </h6>
                                               </div>
                                               <div className="d-flex gap-2">
-                                                <Badge 
-                                                  variant="secondary" 
-                                                  style={{ fontSize: '0.7rem', borderRadius: '8px' }}
-                                                >
+                                                <Badge variant="secondary" style={{ fontSize: '0.7rem', borderRadius: '8px' }}>
                                                   {exercise.exercise_type || 'practical'}
                                                 </Badge>
-                                                <Badge 
-                                                  variant="info" 
-                                                  style={{ fontSize: '0.7rem', borderRadius: '8px' }}
-                                                >
+                                                <Badge variant="info" style={{ fontSize: '0.7rem', borderRadius: '8px' }}>
                                                   {exercise.difficulty || 'beginner'}
                                                 </Badge>
                                               </div>
@@ -574,11 +566,13 @@ const CoursesTable = ({
                                           <Button
                                             variant="warning"
                                             size="sm"
-                                            onClick={() => onCreateExercise({
-                                              ...lesson,
-                                              course_id: course.id,
-                                              course: course.id
-                                            })}
+                                            onClick={() =>
+                                              onCreateExercise({
+                                                ...lesson,
+                                                course_id: course.id,
+                                                course: course.id
+                                              })
+                                            }
                                             style={{ borderRadius: '15px' }}
                                           >
                                             <i className="feather icon-plus me-1"></i>

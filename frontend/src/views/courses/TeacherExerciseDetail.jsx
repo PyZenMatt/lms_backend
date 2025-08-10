@@ -1,9 +1,9 @@
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 import React, { useEffect, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { Container, Row, Col, Card, Button, Alert, Spinner, Badge } from 'react-bootstrap';
 import { fetchExerciseDetail } from '../../services/api/courses';
 import MainCard from '../../components/Card/MainCard';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 const TeacherExerciseDetail = () => {
   const { exerciseId } = useParams();
@@ -18,25 +18,24 @@ const TeacherExerciseDetail = () => {
       try {
         setLoading(true);
         setError('');
-        
+
         // Fetch exercise details
         const exerciseData = await fetchExerciseDetail(exerciseId);
         setExercise(exerciseData);
-        
+
         // Fetch submissions for this exercise
         const token = localStorage.getItem('token') || localStorage.getItem('access');
         const submissionsRes = await fetch(`${API_BASE_URL}/api/v1/exercises/${exerciseId}/submissions/`, {
-          headers: token ? { 'Authorization': `Bearer ${token}` } : {}
+          headers: token ? { Authorization: `Bearer ${token}` } : {}
         });
-        
+
         if (submissionsRes.ok) {
           const submissionsData = await submissionsRes.json();
           setSubmissions(Array.isArray(submissionsData) ? submissionsData : []);
         }
-        
       } catch (err) {
         console.error('Error loading exercise data:', err);
-        setError('Errore nel caricamento dell\'esercizio');
+        setError("Errore nel caricamento dell'esercizio");
       } finally {
         setLoading(false);
       }
@@ -129,11 +128,7 @@ const TeacherExerciseDetail = () => {
       {/* Header */}
       <div className="d-flex justify-content-between align-items-center mb-4">
         <div>
-          <Button 
-            variant="outline-secondary" 
-            onClick={handleBackToDashboard}
-            className="mb-2"
-          >
+          <Button variant="outline-secondary" onClick={handleBackToDashboard} className="mb-2">
             <i className="feather icon-arrow-left me-2"></i>
             Torna alla Dashboard
           </Button>
@@ -141,10 +136,7 @@ const TeacherExerciseDetail = () => {
           <p className="text-muted">Gestione esercizio - Vista Teacher</p>
         </div>
         <div>
-          <Button 
-            variant="primary" 
-            onClick={handleEditExercise}
-          >
+          <Button variant="primary" onClick={handleEditExercise}>
             <i className="feather icon-edit me-2"></i>
             Modifica Esercizio
           </Button>
@@ -160,7 +152,7 @@ const TeacherExerciseDetail = () => {
                 <h5>Descrizione</h5>
                 <p>{exercise.description || 'Nessuna descrizione disponibile'}</p>
               </div>
-              
+
               <div className="mb-3">
                 <h5>Istruzioni</h5>
                 <p>{exercise.instructions || 'Nessuna istruzione specificata'}</p>
@@ -176,8 +168,8 @@ const TeacherExerciseDetail = () => {
               {exercise.reference_image && (
                 <div className="mb-3">
                   <h5>Immagine di Riferimento</h5>
-                  <img 
-                    src={exercise.reference_image} 
+                  <img
+                    src={exercise.reference_image}
                     alt="Riferimento esercizio"
                     className="img-fluid rounded"
                     style={{ maxHeight: '300px' }}
@@ -195,26 +187,26 @@ const TeacherExerciseDetail = () => {
               <div className="mb-3">
                 <strong>Tipo:</strong>
                 <Badge bg="info" className="ms-2">
-                  {exercise.exercise_type === 'practical' ? 'Pratico' : 
-                   exercise.exercise_type === 'theory' ? 'Teorico' : 
-                   exercise.exercise_type || 'Non specificato'}
+                  {exercise.exercise_type === 'practical'
+                    ? 'Pratico'
+                    : exercise.exercise_type === 'theory'
+                      ? 'Teorico'
+                      : exercise.exercise_type || 'Non specificato'}
                 </Badge>
               </div>
-              
+
               <div className="mb-3">
                 <strong>Difficoltà:</strong>
-                <div className="mt-1">
-                  {getDifficultyBadge(exercise.difficulty)}
-                </div>
+                <div className="mt-1">{getDifficultyBadge(exercise.difficulty)}</div>
               </div>
-              
+
               {exercise.time_estimate && (
                 <div className="mb-3">
                   <strong>Tempo Stimato:</strong>
                   <p className="mb-0">{exercise.time_estimate} minuti</p>
                 </div>
               )}
-              
+
               <div className="mb-3">
                 <strong>Creato il:</strong>
                 <p className="mb-0">{new Date(exercise.created_at).toLocaleDateString('it-IT')}</p>
@@ -233,17 +225,13 @@ const TeacherExerciseDetail = () => {
               <div className="stat-item mb-3">
                 <div className="d-flex justify-content-between">
                   <span>Da valutare:</span>
-                  <Badge bg="warning">
-                    {submissions.filter(s => s.status === 'submitted').length}
-                  </Badge>
+                  <Badge bg="warning">{submissions.filter((s) => s.status === 'submitted').length}</Badge>
                 </div>
               </div>
               <div className="stat-item mb-3">
                 <div className="d-flex justify-content-between">
                   <span>Valutate:</span>
-                  <Badge bg="success">
-                    {submissions.filter(s => s.status === 'graded').length}
-                  </Badge>
+                  <Badge bg="success">{submissions.filter((s) => s.status === 'graded').length}</Badge>
                 </div>
               </div>
             </div>
@@ -272,9 +260,7 @@ const TeacherExerciseDetail = () => {
                             <i className="feather icon-user-check text-primary" style={{ fontSize: '1.5rem' }}></i>
                           </div>
                           <div>
-                            <h6 className="mb-1">
-                              {submission.student_name || `Studente ${submission.student}`}
-                            </h6>
+                            <h6 className="mb-1">{submission.student_name || `Studente ${submission.student}`}</h6>
                             <p className="text-muted small mb-0">
                               Consegnato il: {new Date(submission.submitted_at).toLocaleDateString('it-IT')}
                             </p>
@@ -286,14 +272,8 @@ const TeacherExerciseDetail = () => {
                           </div>
                         </div>
                         <div className="d-flex align-items-center">
-                          <div className="me-3">
-                            {getStatusBadge(submission.status)}
-                          </div>
-                          <Button 
-                            variant="outline-primary" 
-                            size="sm"
-                            onClick={() => handleViewSubmission(submission.id)}
-                          >
+                          <div className="me-3">{getStatusBadge(submission.status)}</div>
+                          <Button variant="outline-primary" size="sm" onClick={() => handleViewSubmission(submission.id)}>
                             <i className="feather icon-eye me-1"></i>
                             Visualizza
                           </Button>

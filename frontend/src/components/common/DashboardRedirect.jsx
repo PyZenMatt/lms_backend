@@ -9,9 +9,9 @@ const DashboardRedirect = () => {
   useEffect(() => {
     if (!loading && user) {
       const userRole = user.role?.toLowerCase();
-      
+
       console.log('🔄 DashboardRedirect: Redirecting user with role:', userRole);
-      
+
       switch (userRole) {
         case 'admin':
           navigate('/dashboard/admin', { replace: true });

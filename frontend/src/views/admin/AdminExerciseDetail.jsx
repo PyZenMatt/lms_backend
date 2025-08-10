@@ -12,7 +12,7 @@ const AdminExerciseDetail = () => {
     const token = localStorage.getItem('token') || localStorage.getItem('access');
     const fetchExercise = async () => {
       const res = await fetch(`/api/v1/exercises/${exerciseId}/`, {
-        headers: token ? { 'Authorization': `Bearer ${token}` } : {}
+        headers: token ? { Authorization: `Bearer ${token}` } : {}
       });
       if (res.ok) {
         const data = await res.json();
@@ -25,30 +25,33 @@ const AdminExerciseDetail = () => {
     fetchExercise();
   }, [exerciseId]);
 
-  if (loading) return (
-    <div className="admin-loading-container">
-      <div className="admin-loading-spinner"></div>
-    </div>
-  );
-  
-  if (error) return (
-    <div className="admin-exercise-container">
-      <div className="admin-exercise-content">
-        <div className="admin-error-message">
-          <i className="fas fa-exclamation-triangle"></i>
-          {error}
+  if (loading)
+    return (
+      <div className="admin-loading-container">
+        <div className="admin-loading-spinner"></div>
+      </div>
+    );
+
+  if (error)
+    return (
+      <div className="admin-exercise-container">
+        <div className="admin-exercise-content">
+          <div className="admin-error-message">
+            <i className="fas fa-exclamation-triangle"></i>
+            {error}
+          </div>
         </div>
       </div>
-    </div>
-  );
-  
-  if (!exercise) return (
-    <div className="admin-exercise-container">
-      <div className="admin-exercise-content">
-        <div className="admin-no-exercise">Esercizio non trovato.</div>
+    );
+
+  if (!exercise)
+    return (
+      <div className="admin-exercise-container">
+        <div className="admin-exercise-content">
+          <div className="admin-no-exercise">Esercizio non trovato.</div>
+        </div>
       </div>
-    </div>
-  );
+    );
 
   return (
     <div className="admin-exercise-container">
@@ -77,12 +80,32 @@ const AdminExerciseDetail = () => {
             Dettagli Esercizio
           </h2>
           <div className="admin-info-content">
-            <p><strong>Titolo:</strong> {exercise.title}</p>
-            <p><strong>Descrizione:</strong> {exercise.description}</p>
-            {exercise.difficulty && <p><strong>Difficoltà:</strong> {exercise.difficulty}</p>}
-            {exercise.timeEstimate && <p><strong>Tempo stimato:</strong> {exercise.timeEstimate} minuti</p>}
-            {exercise.materials && <p><strong>Materiali:</strong> {exercise.materials}</p>}
-            {exercise.instructions && <p><strong>Istruzioni:</strong> {exercise.instructions}</p>}
+            <p>
+              <strong>Titolo:</strong> {exercise.title}
+            </p>
+            <p>
+              <strong>Descrizione:</strong> {exercise.description}
+            </p>
+            {exercise.difficulty && (
+              <p>
+                <strong>Difficoltà:</strong> {exercise.difficulty}
+              </p>
+            )}
+            {exercise.timeEstimate && (
+              <p>
+                <strong>Tempo stimato:</strong> {exercise.timeEstimate} minuti
+              </p>
+            )}
+            {exercise.materials && (
+              <p>
+                <strong>Materiali:</strong> {exercise.materials}
+              </p>
+            )}
+            {exercise.instructions && (
+              <p>
+                <strong>Istruzioni:</strong> {exercise.instructions}
+              </p>
+            )}
           </div>
         </div>
 

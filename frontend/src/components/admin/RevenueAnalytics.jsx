@@ -1,28 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { Row, Col, Card, Spinner, Alert, ProgressBar } from 'react-bootstrap';
 import { Line } from 'react-chartjs-2';
-import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  Title,
-  Tooltip,
-  Legend,
-} from 'chart.js';
+import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend } from 'chart.js';
 import { getAnalyticsData, getRevenueChartData } from '../../services/api/analytics';
 
 // Register Chart.js components
-ChartJS.register(
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  Title,
-  Tooltip,
-  Legend
-);
+ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
 
 const RevenueAnalytics = () => {
   const [loading, setLoading] = useState(true);
@@ -33,26 +16,23 @@ const RevenueAnalytics = () => {
   const loadAnalyticsData = async () => {
     setLoading(true);
     setError('');
-    
+
     try {
-      const [analyticsRes, chartRes] = await Promise.all([
-        getAnalyticsData(),
-        getRevenueChartData()
-      ]);
-      
+      const [analyticsRes, chartRes] = await Promise.all([getAnalyticsData(), getRevenueChartData()]);
+
       setAnalyticsData(analyticsRes.data);
-      
+
       // Format chart data
       const chart = chartRes.data.chart_data;
       setChartData({
-        labels: chart.map(item => {
+        labels: chart.map((item) => {
           const date = new Date(item.date);
           return date.toLocaleDateString('it-IT', { month: 'short', day: 'numeric' });
         }),
         datasets: [
           {
             label: 'Revenue Daily (€)',
-            data: chart.map(item => item.revenue),
+            data: chart.map((item) => item.revenue),
             borderColor: 'rgb(75, 192, 192)',
             backgroundColor: 'rgba(75, 192, 192, 0.1)',
             tension: 0.1,
@@ -70,7 +50,7 @@ const RevenueAnalytics = () => {
 
   useEffect(() => {
     loadAnalyticsData();
-    
+
     // Auto-refresh every 5 minutes
     const interval = setInterval(loadAnalyticsData, 300000);
     return () => clearInterval(interval);
@@ -102,7 +82,7 @@ const RevenueAnalytics = () => {
     responsive: true,
     plugins: {
       legend: {
-        position: 'top',
+        position: 'top'
       },
       title: {
         display: true,
@@ -113,7 +93,7 @@ const RevenueAnalytics = () => {
       y: {
         beginAtZero: true,
         ticks: {
-          callback: function(value) {
+          callback: function (value) {
             return '€' + value.toLocaleString();
           }
         }
@@ -122,8 +102,8 @@ const RevenueAnalytics = () => {
   };
 
   // Calculate TEO Pool health percentage
-  const poolHealthPercentage = teo_economics.fiat_to_teo_ratio > 0 ? 
-    Math.min((teo_economics.total_rewards_distributed / overview.total_revenue_eur) * 100, 100) : 0;
+  const poolHealthPercentage =
+    teo_economics.fiat_to_teo_ratio > 0 ? Math.min((teo_economics.total_rewards_distributed / overview.total_revenue_eur) * 100, 100) : 0;
 
   return (
     <div className="revenue-analytics">
@@ -142,14 +122,12 @@ const RevenueAnalytics = () => {
                 </div>
               </div>
               <div className="mt-3">
-                <small className="text-white-50">
-                  {overview.total_enrollments} total enrollments
-                </small>
+                <small className="text-white-50">{overview.total_enrollments} total enrollments</small>
               </div>
             </Card.Body>
           </Card>
         </Col>
-        
+
         <Col lg={3} md={6}>
           <Card className="h-100 bg-success text-white">
             <Card.Body>
@@ -163,14 +141,12 @@ const RevenueAnalytics = () => {
                 </div>
               </div>
               <div className="mt-3">
-                <small className="text-white-50">
-                  {overview.conversion_rate}% conversion rate
-                </small>
+                <small className="text-white-50">{overview.conversion_rate}% conversion rate</small>
               </div>
             </Card.Body>
           </Card>
         </Col>
-        
+
         <Col lg={3} md={6}>
           <Card className="h-100 bg-warning text-dark">
             <Card.Body>
@@ -184,14 +160,12 @@ const RevenueAnalytics = () => {
                 </div>
               </div>
               <div className="mt-3">
-                <small className="text-dark opacity-75">
-                  Distributed as rewards
-                </small>
+                <small className="text-dark opacity-75">Distributed as rewards</small>
               </div>
             </Card.Body>
           </Card>
         </Col>
-        
+
         <Col lg={3} md={6}>
           <Card className="h-100 bg-info text-white">
             <Card.Body>
@@ -205,9 +179,7 @@ const RevenueAnalytics = () => {
                 </div>
               </div>
               <div className="mt-3">
-                <small className="text-white-50">
-                  {recent_activity.enrollments_7d} new enrollments
-                </small>
+                <small className="text-white-50">{recent_activity.enrollments_7d} new enrollments</small>
               </div>
             </Card.Body>
           </Card>
@@ -224,14 +196,10 @@ const RevenueAnalytics = () => {
                 Revenue Trend
               </Card.Title>
             </Card.Header>
-            <Card.Body>
-              {chartData && (
-                <Line data={chartData} options={chartOptions} />
-              )}
-            </Card.Body>
+            <Card.Body>{chartData && <Line data={chartData} options={chartOptions} />}</Card.Body>
           </Card>
         </Col>
-        
+
         <Col lg={4}>
           <Card className="h-100">
             <Card.Header>
@@ -244,16 +212,14 @@ const RevenueAnalytics = () => {
               <div className="teo-economics">
                 <div className="mb-4">
                   <h6 className="mb-2">Revenue Pool Health</h6>
-                  <ProgressBar 
+                  <ProgressBar
                     now={Math.min(poolHealthPercentage, 100)}
                     variant={poolHealthPercentage > 80 ? 'success' : poolHealthPercentage > 50 ? 'warning' : 'danger'}
                     className="mb-2"
                   />
-                  <small className="text-muted">
-                    {poolHealthPercentage.toFixed(1)}% sustainable
-                  </small>
+                  <small className="text-muted">{poolHealthPercentage.toFixed(1)}% sustainable</small>
                 </div>
-                
+
                 <div className="row g-2">
                   <div className="col-6">
                     <div className="text-center p-3 bg-light rounded">
@@ -268,7 +234,7 @@ const RevenueAnalytics = () => {
                     </div>
                   </div>
                 </div>
-                
+
                 <div className="mt-3 p-3 bg-primary bg-opacity-10 rounded">
                   <small className="d-block text-dark">
                     <strong>Self-Sustaining Model:</strong>
@@ -325,14 +291,12 @@ const RevenueAnalytics = () => {
                         <td>€{course.price.toLocaleString('it-IT', { minimumFractionDigits: 2 })}</td>
                         <td>
                           <div className="d-flex align-items-center">
-                            <ProgressBar 
+                            <ProgressBar
                               now={(course.revenue / top_courses[0]?.revenue) * 100}
                               style={{ width: '60px', height: '6px' }}
                               className="me-2"
                             />
-                            <small className="text-muted">
-                              {((course.revenue / overview.total_revenue_eur) * 100).toFixed(1)}%
-                            </small>
+                            <small className="text-muted">{((course.revenue / overview.total_revenue_eur) * 100).toFixed(1)}%</small>
                           </div>
                         </td>
                       </tr>

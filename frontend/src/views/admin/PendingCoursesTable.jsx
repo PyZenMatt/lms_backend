@@ -36,7 +36,7 @@ const PendingCoursesTable = () => {
       setSuccess('Corso approvato!');
       loadCourses();
     } catch {
-      setError('Errore durante l\'approvazione');
+      setError("Errore durante l'approvazione");
     } finally {
       setActionLoading((prev) => ({ ...prev, [id]: false }));
     }
@@ -76,7 +76,11 @@ const PendingCoursesTable = () => {
         </thead>
         <tbody>
           {courses.length === 0 ? (
-            <tr><td colSpan={5} className="text-center">Nessun corso in attesa</td></tr>
+            <tr>
+              <td colSpan={5} className="text-center">
+                Nessun corso in attesa
+              </td>
+            </tr>
           ) : (
             courses.map((c, idx) => (
               <tr key={`course-${c.id || idx}`}>
@@ -87,21 +91,10 @@ const PendingCoursesTable = () => {
                 <td>{c.teacher?.username || '-'}</td>
                 <td>{c.price_eur}</td>
                 <td>
-                  <Button
-                    variant="success"
-                    size="sm"
-                    className="me-2"
-                    disabled={actionLoading[c.id]}
-                    onClick={() => handleApprove(c.id)}
-                  >
+                  <Button variant="success" size="sm" className="me-2" disabled={actionLoading[c.id]} onClick={() => handleApprove(c.id)}>
                     Approva
                   </Button>
-                  <Button
-                    variant="danger"
-                    size="sm"
-                    disabled={actionLoading[c.id]}
-                    onClick={() => handleReject(c.id)}
-                  >
+                  <Button variant="danger" size="sm" disabled={actionLoading[c.id]} onClick={() => handleReject(c.id)}>
                     Rifiuta
                   </Button>
                 </td>

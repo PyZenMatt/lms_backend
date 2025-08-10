@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 
@@ -14,7 +13,7 @@ const AdminLessonDetail = () => {
     const token = localStorage.getItem('token') || localStorage.getItem('access');
     const fetchLesson = async () => {
       const res = await fetch(`${API_BASE_URL}/api/v1/lessons/${lessonId}/`, {
-        headers: token ? { 'Authorization': `Bearer ${token}` } : {}
+        headers: token ? { Authorization: `Bearer ${token}` } : {}
       });
       const data = await res.json();
       setLesson(data);
@@ -28,7 +27,7 @@ const AdminLessonDetail = () => {
     const token = localStorage.getItem('token') || localStorage.getItem('access');
     const fetchExercises = async () => {
       const res = await fetch(`${API_BASE_URL}/api/v1/lessons/${lessonId}/exercises/`, {
-        headers: token ? { 'Authorization': `Bearer ${token}` } : {}
+        headers: token ? { Authorization: `Bearer ${token}` } : {}
       });
       const data = await res.json();
       setExercises(Array.isArray(data) ? data : []);
@@ -46,6 +45,7 @@ const AdminLessonDetail = () => {
       {lesson.video_url && (
         <video controls width="100%">
           <source src={lesson.video_url} type="video/mp4" />
+          <track kind="captions" srcLang="en" label="English (auto)" />
           Il tuo browser non supporta il video.
         </video>
       )}
@@ -60,11 +60,12 @@ const AdminLessonDetail = () => {
           <p>Nessun esercizio disponibile per questa lezione.</p>
         ) : (
           <ul>
-            {exercises.map(ex => (
+            {exercises.map((ex) => (
               <li key={ex.id}>
                 <Link to={`/admin/esercizi/${ex.id}`}>
                   <strong>{ex.title}</strong>
-                </Link>: {ex.description}
+                </Link>
+                : {ex.description}
               </li>
             ))}
           </ul>

@@ -70,7 +70,7 @@ const TeacherLessonDetail = () => {
           <p>Nessun esercizio disponibile per questa lezione.</p>
         ) : (
           <ul>
-            {exercises.map(ex => (
+            {exercises.map((ex) => (
               <li key={ex.id}>
                 <strong>{ex.title}</strong>: {ex.description}
               </li>

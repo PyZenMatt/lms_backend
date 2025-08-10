@@ -12,12 +12,12 @@ const TeoCoinTransactionHistory = ({ limit = 5 }) => {
     try {
       setLoading(true);
       const token = localStorage.getItem('accessToken');
-      
+
       const response = await fetch(`${API_BASE_URL}/api/v1/teocoin/transactions/history/?limit=${limit}`, {
         headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
       });
 
       if (!response.ok) {
@@ -76,13 +76,13 @@ const TeoCoinTransactionHistory = ({ limit = 5 }) => {
 
   const getTransactionBadge = (type) => {
     const badges = {
-      'reward': { variant: 'success', text: 'Reward' },
-      'discount': { variant: 'primary', text: 'Discount' },
-      'withdrawal': { variant: 'warning', text: 'Withdrawal' },
-      'deposit': { variant: 'info', text: 'Deposit' },
-      'default': { variant: 'secondary', text: type || 'Transaction' }
+      reward: { variant: 'success', text: 'Reward' },
+      discount: { variant: 'primary', text: 'Discount' },
+      withdrawal: { variant: 'warning', text: 'Withdrawal' },
+      deposit: { variant: 'info', text: 'Deposit' },
+      default: { variant: 'secondary', text: type || 'Transaction' }
     };
-    
+
     const badge = badges[type] || badges.default;
     return <Badge bg={badge.variant}>{badge.text}</Badge>;
   };
@@ -120,37 +120,37 @@ const TeoCoinTransactionHistory = ({ limit = 5 }) => {
               <tr>
                 <th style={{ width: '60px' }}>Type</th>
                 <th>Description</th>
-                <th style={{ width: '100px' }} className="text-end">Amount</th>
+                <th style={{ width: '100px' }} className="text-end">
+                  Amount
+                </th>
                 <th style={{ width: '120px' }}>Date</th>
               </tr>
             </thead>
             <tbody>
               {transactions.map((transaction, index) => (
                 <tr key={transaction.id || index}>
-                  <td className="text-center">
-                    {getTransactionIcon(transaction.type)}
-                  </td>
+                  <td className="text-center">{getTransactionIcon(transaction.type)}</td>
                   <td>
                     <div>
                       <span className="fw-medium">{transaction.description}</span>
-                      <div className="mt-1">
-                        {getTransactionBadge(transaction.type)}
-                      </div>
+                      <div className="mt-1">{getTransactionBadge(transaction.type)}</div>
                     </div>
                   </td>
                   <td className="text-end">
-                    <span className={
-                      transaction.type === 'withdrawal' ? 'text-warning' : 
-                      transaction.type === 'discount' ? 'text-primary' : 
-                      'text-success'
-                    }>
+                    <span
+                      className={
+                        transaction.type === 'withdrawal'
+                          ? 'text-warning'
+                          : transaction.type === 'discount'
+                            ? 'text-primary'
+                            : 'text-success'
+                      }
+                    >
                       {transaction.type === 'withdrawal' ? '-' : '+'}
                       {formatAmount(Math.abs(transaction.amount))} TEO
                     </span>
                   </td>
-                  <td className="text-muted small">
-                    {formatDate(transaction.created_at || transaction.date)}
-                  </td>
+                  <td className="text-muted small">{formatDate(transaction.created_at || transaction.date)}</td>
                 </tr>
               ))}
             </tbody>

@@ -1,6 +1,6 @@
 /**
  * 🌙 Theme Settings Page
- * 
+ *
  * Comprehensive theme management interface with:
  * - Theme selection (Light/Dark/Auto)
  * - Custom color schemes
@@ -14,16 +14,8 @@ import { useTheme } from '../../contexts/ThemeContext';
 import ThemeToggle from '../../components/ui/ThemeToggle';
 
 const ThemeSettings = () => {
-  const { 
-    isDark, 
-    systemPreference, 
-    isManuallySet, 
-    toggleTheme, 
-    setTheme, 
-    resetToSystemPreference,
-    getThemeName,
-    getThemeColors 
-  } = useTheme();
+  const { isDark, systemPreference, isManuallySet, toggleTheme, setTheme, resetToSystemPreference, getThemeName, getThemeColors } =
+    useTheme();
 
   const [showPreview, setShowPreview] = useState(false);
   const themeColors = getThemeColors();
@@ -38,7 +30,7 @@ const ThemeSettings = () => {
     },
     {
       id: 'dark',
-      name: 'Dark Theme', 
+      name: 'Dark Theme',
       description: 'Easy on the eyes for extended use and low-light environments',
       icon: '🌙',
       gradient: 'linear-gradient(135deg, #2c3e50 0%, #4a6741 100%)'
@@ -74,9 +66,7 @@ const ThemeSettings = () => {
               <div className="d-flex align-items-center justify-content-between">
                 <div>
                   <h4 className="mb-1">🎨 Theme Settings</h4>
-                  <p className="text-muted mb-0">
-                    Customize your SchoolPlatform experience with different themes and color schemes
-                  </p>
+                  <p className="text-muted mb-0">Customize your SchoolPlatform experience with different themes and color schemes</p>
                 </div>
                 <ThemeToggle size="lg" showLabel={true} />
               </div>
@@ -91,10 +81,7 @@ const ThemeSettings = () => {
                 <div>
                   <strong>Current Theme: {isDark ? 'Dark' : 'Light'} Mode</strong>
                   <div className="small">
-                    {isManuallySet() 
-                      ? 'Manually selected theme' 
-                      : `Following system preference (${systemPreference})`
-                    }
+                    {isManuallySet() ? 'Manually selected theme' : `Following system preference (${systemPreference})`}
                   </div>
                 </div>
               </Alert>
@@ -105,21 +92,19 @@ const ThemeSettings = () => {
                 <Row>
                   {themeOptions.map((option) => (
                     <Col md={4} key={option.id} className="mb-3">
-                      <Card 
+                      <Card
                         className={`theme-option h-100 cursor-pointer border-2 ${
-                          getCurrentSelection() === option.id 
-                            ? 'border-primary shadow-sm' 
-                            : 'border-light hover-shadow'
+                          getCurrentSelection() === option.id ? 'border-primary shadow-sm' : 'border-light hover-shadow'
                         }`}
                         onClick={() => handleThemeChange(option.id)}
-                        style={{ 
+                        style={{
                           cursor: 'pointer',
                           transition: 'all 0.3s ease',
                           transform: getCurrentSelection() === option.id ? 'translateY(-2px)' : 'none'
                         }}
                       >
                         <Card.Body className="text-center p-4">
-                          <div 
+                          <div
                             className="theme-preview mb-3"
                             style={{
                               width: '60px',
@@ -153,11 +138,7 @@ const ThemeSettings = () => {
               {/* Theme Preview Toggle */}
               <div className="mb-4">
                 <h5 className="mb-3">Theme Preview</h5>
-                <Button
-                  variant={showPreview ? 'primary' : 'outline-primary'}
-                  onClick={() => setShowPreview(!showPreview)}
-                  className="me-2"
-                >
+                <Button variant={showPreview ? 'primary' : 'outline-primary'} onClick={() => setShowPreview(!showPreview)} className="me-2">
                   <i className={`feather icon-${showPreview ? 'eye-off' : 'eye'} me-2`}></i>
                   {showPreview ? 'Hide' : 'Show'} Color Palette
                 </Button>
@@ -186,17 +167,14 @@ const ThemeSettings = () => {
                                 }}
                               ></div>
                               <div>
-                                <div 
-                                  className="small fw-medium"
-                                  style={{ color: themeColors.text }}
-                                >
+                                <div className="small fw-medium" style={{ color: themeColors.text }}>
                                   {name.charAt(0).toUpperCase() + name.slice(1)}
                                 </div>
-                                <div 
+                                <div
                                   className="small"
-                                  style={{ 
+                                  style={{
                                     color: themeColors.textMuted,
-                                    fontFamily: 'monospace' 
+                                    fontFamily: 'monospace'
                                   }}
                                 >
                                   {color}
@@ -215,38 +193,19 @@ const ThemeSettings = () => {
               <div className="mb-4">
                 <h5 className="mb-3">Quick Actions</h5>
                 <div className="d-flex flex-wrap gap-2">
-                  <Button
-                    variant="outline-secondary"
-                    size="sm"
-                    onClick={toggleTheme}
-                  >
+                  <Button variant="outline-secondary" size="sm" onClick={toggleTheme}>
                     <i className="feather icon-refresh-cw me-1"></i>
                     Toggle Theme
                   </Button>
-                  <Button
-                    variant="outline-secondary"
-                    size="sm"
-                    onClick={() => setTheme('light')}
-                    disabled={!isDark}
-                  >
+                  <Button variant="outline-secondary" size="sm" onClick={() => setTheme('light')} disabled={!isDark}>
                     <i className="feather icon-sun me-1"></i>
                     Switch to Light
                   </Button>
-                  <Button
-                    variant="outline-secondary"
-                    size="sm"
-                    onClick={() => setTheme('dark')}
-                    disabled={isDark}
-                  >
+                  <Button variant="outline-secondary" size="sm" onClick={() => setTheme('dark')} disabled={isDark}>
                     <i className="feather icon-moon me-1"></i>
                     Switch to Dark
                   </Button>
-                  <Button
-                    variant="outline-secondary"
-                    size="sm"
-                    onClick={resetToSystemPreference}
-                    disabled={!isManuallySet()}
-                  >
+                  <Button variant="outline-secondary" size="sm" onClick={resetToSystemPreference} disabled={!isManuallySet()}>
                     <i className="feather icon-smartphone me-1"></i>
                     Follow System
                   </Button>
@@ -306,21 +265,15 @@ const ThemeSettings = () => {
             <Card.Body className="small">
               <div className="d-flex justify-content-between mb-2">
                 <span>System Preference:</span>
-                <Badge bg={systemPreference === 'dark' ? 'dark' : 'light'}>
-                  {systemPreference}
-                </Badge>
+                <Badge bg={systemPreference === 'dark' ? 'dark' : 'light'}>{systemPreference}</Badge>
               </div>
               <div className="d-flex justify-content-between mb-2">
                 <span>Current Theme:</span>
-                <Badge bg={isDark ? 'dark' : 'light'}>
-                  {getThemeName()}
-                </Badge>
+                <Badge bg={isDark ? 'dark' : 'light'}>{getThemeName()}</Badge>
               </div>
               <div className="d-flex justify-content-between mb-2">
                 <span>Manual Override:</span>
-                <Badge bg={isManuallySet() ? 'warning' : 'success'}>
-                  {isManuallySet() ? 'Yes' : 'No'}
-                </Badge>
+                <Badge bg={isManuallySet() ? 'warning' : 'success'}>{isManuallySet() ? 'Yes' : 'No'}</Badge>
               </div>
               <div className="d-flex justify-content-between">
                 <span>Theme Support:</span>

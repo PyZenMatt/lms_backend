@@ -1,6 +1,6 @@
 /**
  * TeoCoin Manager Demo Page
- * 
+ *
  * Page to test the new unified TeoCoin component
  */
 
@@ -17,7 +17,7 @@ const TeoCoinManagerDemo = () => {
       <Typography variant="h3" component="h1" gutterBottom align="center">
         🪙 TeoCoin Manager Demo
       </Typography>
-      
+
       <Typography variant="subtitle1" align="center" color="textSecondary" sx={{ mb: 4 }}>
         Unified component for all TeoCoin operations: Withdraw, Burn/Deposit, and Staking
       </Typography>
@@ -26,7 +26,7 @@ const TeoCoinManagerDemo = () => {
         <Typography variant="h5" gutterBottom>
           🎯 Features Demonstration
         </Typography>
-        
+
         <Box component="ul" sx={{ pl: 2, mb: 3 }}>
           <Typography component="li" gutterBottom>
             <strong>Withdrawal:</strong> Database → MetaMask (mints new tokens)
@@ -47,7 +47,7 @@ const TeoCoinManagerDemo = () => {
             variant="contained"
             size="large"
             onClick={() => setManagerOpen(true)}
-            sx={{ 
+            sx={{
               background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
               px: 4,
               py: 1.5,
@@ -80,11 +80,7 @@ const TeoCoinManagerDemo = () => {
         </Box>
       </Paper>
 
-      <TeoCoinManager
-        open={managerOpen}
-        onClose={() => setManagerOpen(false)}
-        userBalance={userBalance}
-      />
+      <TeoCoinManager open={managerOpen} onClose={() => setManagerOpen(false)} userBalance={userBalance} />
     </Container>
   );
 };

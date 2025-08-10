@@ -35,7 +35,7 @@ const PendingCoursesCard = () => {
       setSuccess('Corso approvato!');
       loadCourses();
     } catch {
-      setError('Errore durante l\'approvazione');
+      setError("Errore durante l'approvazione");
     } finally {
       setActionLoading((prev) => ({ ...prev, [id]: false }));
     }
@@ -62,7 +62,9 @@ const PendingCoursesCard = () => {
         <Card.Title as="h5">
           Corsi in Attesa
           {courses.length > 0 && (
-            <Badge bg="warning" className="ms-2">{courses.length}</Badge>
+            <Badge bg="warning" className="ms-2">
+              {courses.length}
+            </Badge>
           )}
         </Card.Title>
       </Card.Header>
@@ -72,8 +74,16 @@ const PendingCoursesCard = () => {
             <Spinner animation="border" size="sm" />
           </div>
         )}
-        {error && <Alert variant="danger" className="m-3">{error}</Alert>}
-        {success && <Alert variant="success" className="m-3">{success}</Alert>}
+        {error && (
+          <Alert variant="danger" className="m-3">
+            {error}
+          </Alert>
+        )}
+        {success && (
+          <Alert variant="success" className="m-3">
+            {success}
+          </Alert>
+        )}
         {!loading && courses.length === 0 && (
           <div className="text-center p-3 text-muted">
             <i className="feather icon-check-circle f-40 mb-2 text-success"></i>
@@ -88,7 +98,7 @@ const PendingCoursesCard = () => {
                   <td>
                     <div className="d-flex align-items-center">
                       <div className="me-3">
-                        <div 
+                        <div
                           className="rounded-circle bg-info text-white d-flex align-items-center justify-content-center"
                           style={{ width: '40px', height: '40px' }}
                         >
@@ -111,23 +121,10 @@ const PendingCoursesCard = () => {
                       disabled={actionLoading[course.id]}
                       onClick={() => handleApprove(course.id)}
                     >
-                      {actionLoading[course.id] ? (
-                        <Spinner size="sm" animation="border" />
-                      ) : (
-                        <i className="feather icon-check"></i>
-                      )}
+                      {actionLoading[course.id] ? <Spinner size="sm" animation="border" /> : <i className="feather icon-check"></i>}
                     </Button>
-                    <Button
-                      variant="outline-danger"
-                      size="sm"
-                      disabled={actionLoading[course.id]}
-                      onClick={() => handleReject(course.id)}
-                    >
-                      {actionLoading[course.id] ? (
-                        <Spinner size="sm" animation="border" />
-                      ) : (
-                        <i className="feather icon-x"></i>
-                      )}
+                    <Button variant="outline-danger" size="sm" disabled={actionLoading[course.id]} onClick={() => handleReject(course.id)}>
+                      {actionLoading[course.id] ? <Spinner size="sm" animation="border" /> : <i className="feather icon-x"></i>}
                     </Button>
                   </td>
                 </tr>

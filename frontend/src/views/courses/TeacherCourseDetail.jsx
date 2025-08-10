@@ -36,7 +36,9 @@ const TeacherCourseDetail = () => {
       }
     };
     loadCourseData();
-    return () => { isMounted = false; };
+    return () => {
+      isMounted = false;
+    };
   }, [courseId]);
 
   return (
@@ -101,12 +103,19 @@ const TeacherCourseDetail = () => {
                     <h5>Dettagli</h5>
                     <Row>
                       <Col md={6}>
-                        <p><strong>Prezzo:</strong> {course.price_eur} EUR</p>
-                        <p><strong>Categoria:</strong> {course.category || 'Non specificata'}</p>
+                        <p>
+                          <strong>Prezzo:</strong> {course.price_eur} EUR
+                        </p>
+                        <p>
+                          <strong>Categoria:</strong> {course.category || 'Non specificata'}
+                        </p>
                       </Col>
                       <Col md={6}>
-                        <p><strong>Creato il:</strong> {course.created_at ? new Date(course.created_at).toLocaleDateString('it-IT') : '-'}</p>
-                        <p><strong>Stato:</strong>
+                        <p>
+                          <strong>Creato il:</strong> {course.created_at ? new Date(course.created_at).toLocaleDateString('it-IT') : '-'}
+                        </p>
+                        <p>
+                          <strong>Stato:</strong>
                           <Badge bg={course.is_active ? 'success' : 'warning'} className="ms-2">
                             {course.is_active ? 'Attivo' : 'Inattivo'}
                           </Badge>

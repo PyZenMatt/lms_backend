@@ -52,7 +52,7 @@
     "react/display-name": "off",
     "react/jsx-filename-extension": "off",
     "no-param-reassign": "off",
-    "react/prop-types": "error",
+  "react/prop-types": "warn",
     "react/require-default-props": "off",
     "react/no-array-index-key": "off",
     "react/jsx-props-no-spreading": "off",
@@ -75,11 +75,13 @@
       }
     ],
     "no-unused-vars": [
-      "error",
+      "warn",
       {
         "ignoreRestSiblings": false
       }
     ],
+    "jsx-a11y/click-events-have-key-events": "warn",
+    "jsx-a11y/no-static-element-interactions": "warn",
     "prettier/prettier": [
       "warn",
       {

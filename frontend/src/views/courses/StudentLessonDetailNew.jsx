@@ -18,11 +18,11 @@ const StudentLessonDetailNew = () => {
     const fetchLesson = async () => {
       try {
         console.log('🔍 StudentLessonDetailNew - lessonId from params:', lessonId, 'type:', typeof lessonId);
-        
+
         // Ensure lessonId is a string/number, not an object
         const cleanLessonId = lessonId?.toString() || lessonId;
         console.log('🔧 Cleaned lessonId:', cleanLessonId);
-        
+
         const response = await api.get(`/lessons/${cleanLessonId}/`);
         const data = response.data;
         console.log('📚 Lesson data received:', data);
@@ -41,11 +41,11 @@ const StudentLessonDetailNew = () => {
     const fetchExercises = async () => {
       try {
         console.log('🏋️ Fetching exercises for lessonId:', lessonId, 'type:', typeof lessonId);
-        
+
         // Ensure lessonId is a string/number, not an object
         const cleanLessonId = lessonId?.toString() || lessonId;
         console.log('🔧 Cleaned lessonId for exercises:', cleanLessonId);
-        
+
         const response = await api.get(`/lessons/${cleanLessonId}/exercises/`);
         const data = response.data;
         console.log('📝 Exercises data received:', data);
@@ -72,20 +72,19 @@ const StudentLessonDetailNew = () => {
 
   const handleComplete = async () => {
     if (completed || actionLoading) return;
-    
+
     try {
       setActionLoading(true);
       await api.post(`/lessons/${lessonId}/mark_complete/`, {});
-      
+
       const response = await api.get(`/lessons/${lessonId}/`);
       const lessonData = response.data;
       setLesson(lessonData);
       setCompleted(lessonData.completed || false);
-      
+
       setTimeout(() => {
         setActionLoading(false);
       }, 500);
-      
     } catch (error) {
       console.error('Error marking lesson complete:', error);
       setActionLoading(false);
@@ -99,7 +98,7 @@ const StudentLessonDetailNew = () => {
       </Container>
     );
   }
-  
+
   if (!lesson) {
     return (
       <Container>
@@ -131,16 +130,13 @@ const StudentLessonDetailNew = () => {
                       {lesson.duration} min
                     </Badge>
                   )}
-                  <Badge 
-                    bg={completed ? 'success' : 'warning'} 
-                    className="p-2"
-                  >
+                  <Badge bg={completed ? 'success' : 'warning'} className="p-2">
                     <i className={`feather ${completed ? 'icon-check-circle' : 'icon-play-circle'} mr-1`}></i>
                     {completed ? 'Completata' : 'In corso'}
                   </Badge>
                 </div>
               </div>
-              
+
               {/* Action Buttons */}
               <div className="d-flex gap-2">
                 {userRole !== 'admin' && (
@@ -158,17 +154,27 @@ const StudentLessonDetailNew = () => {
                     {actionLoading ? 'Completamento...' : completed ? 'Completata' : 'Completa lezione'}
                   </Button>
                 )}
-                
-                <Link 
-                  to={lesson?.course_id ? `/corsi/${lesson.course_id}` : 
-                      userRole === 'admin' ? "/dashboard/admin" : 
-                      userRole === 'teacher' ? "/dashboard/teacher" : "/dashboard/student"} 
+
+                <Link
+                  to={
+                    lesson?.course_id
+                      ? `/corsi/${lesson.course_id}`
+                      : userRole === 'admin'
+                        ? '/dashboard/admin'
+                        : userRole === 'teacher'
+                          ? '/dashboard/teacher'
+                          : '/dashboard/student'
+                  }
                   className="btn btn-outline-primary d-flex align-items-center"
                 >
                   <i className="feather icon-arrow-left mr-2"></i>
-                  {lesson?.course_id ? 'Torna al corso' : 
-                   userRole === 'admin' ? 'Torna alla dashboard admin' : 
-                   userRole === 'teacher' ? 'Torna alla dashboard docente' : 'Torna alla dashboard studente'}
+                  {lesson?.course_id
+                    ? 'Torna al corso'
+                    : userRole === 'admin'
+                      ? 'Torna alla dashboard admin'
+                      : userRole === 'teacher'
+                        ? 'Torna alla dashboard docente'
+                        : 'Torna alla dashboard studente'}
                 </Link>
               </div>
             </div>
@@ -192,6 +198,7 @@ const StudentLessonDetailNew = () => {
                 <div className="ratio ratio-16x9">
                   <video controls className="rounded-bottom">
                     <source src={lesson.video_file_url} type="video/mp4" />
+                    <track kind="captions" srcLang="en" label="English (auto)" />
                     Il tuo browser non supporta il video.
                   </video>
                 </div>
@@ -249,15 +256,12 @@ const StudentLessonDetailNew = () => {
                   </Alert>
                 ) : (
                   <div className="d-grid gap-3">
-                    {exercises.map(ex => (
+                    {exercises.map((ex) => (
                       <Card key={ex.id} className="border">
                         <Card.Body className="p-3">
                           <h6 className="card-title mb-2">{ex.title}</h6>
                           <p className="card-text text-muted mb-3 small">{ex.description}</p>
-                          <Link 
-                            to={`/esercizi/${ex.id}`} 
-                            className="btn btn-sm btn-primary w-100"
-                          >
+                          <Link to={`/esercizi/${ex.id}`} className="btn btn-sm btn-primary w-100">
                             <i className="feather icon-arrow-right mr-1"></i>
                             Vai all'esercizio
                           </Link>
@@ -276,9 +280,7 @@ const StudentLessonDetailNew = () => {
               <Card.Body className="text-center">
                 <i className="feather icon-info text-warning mb-3" style={{ fontSize: '2rem' }}></i>
                 <h6>Completa la lezione</h6>
-                <p className="text-muted small mb-0">
-                  Una volta completata la lezione, potrai accedere agli esercizi
-                </p>
+                <p className="text-muted small mb-0">Una volta completata la lezione, potrai accedere agli esercizi</p>
               </Card.Body>
             </Card>
           )}

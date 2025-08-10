@@ -15,12 +15,12 @@ const PendingWithdrawalsManager = ({ onWithdrawalCancelled }) => {
     try {
       setLoading(true);
       const token = localStorage.getItem('accessToken');
-      
+
       const response = await fetch(`${API_BASE_URL}/api/v1/teocoin/withdrawals/history/`, {
         headers: {
           Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
+          'Content-Type': 'application/json'
+        }
       });
 
       if (!response.ok) {
@@ -29,7 +29,7 @@ const PendingWithdrawalsManager = ({ onWithdrawalCancelled }) => {
 
       const data = await response.json();
       if (data.success) {
-        const pending = data.withdrawals?.filter(w => w.status === 'pending' || w.status === 'processing') || [];
+        const pending = data.withdrawals?.filter((w) => w.status === 'pending' || w.status === 'processing') || [];
         setPendingWithdrawals(pending);
       } else {
         throw new Error(data.error || 'Failed to load pending withdrawals');
@@ -52,13 +52,13 @@ const PendingWithdrawalsManager = ({ onWithdrawalCancelled }) => {
     try {
       setCancelling(withdrawalToCancel.id);
       const token = localStorage.getItem('accessToken');
-      
+
       const response = await fetch(`${API_BASE_URL}/api/v1/teocoin/legacy/withdraw/${withdrawalToCancel.id}/cancel/`, {
         method: 'POST',
         headers: {
           Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
+          'Content-Type': 'application/json'
+        }
       });
 
       if (!response.ok) {
@@ -150,19 +150,11 @@ const PendingWithdrawalsManager = ({ onWithdrawalCancelled }) => {
               <tbody>
                 {pendingWithdrawals.map((withdrawal) => (
                   <tr key={withdrawal.id}>
-                    <td className="fw-medium">
-                      {formatAmount(withdrawal.amount)} TEO
-                    </td>
-                    <td className="font-monospace small">
-                      {withdrawal.wallet_address?.substring(0, 10)}...
-                    </td>
-                    <td className="text-muted small">
-                      {formatDate(withdrawal.created_at)}
-                    </td>
+                    <td className="fw-medium">{formatAmount(withdrawal.amount)} TEO</td>
+                    <td className="font-monospace small">{withdrawal.wallet_address?.substring(0, 10)}...</td>
+                    <td className="text-muted small">{formatDate(withdrawal.created_at)}</td>
                     <td>
-                      <Badge bg={withdrawal.status === 'pending' ? 'warning' : 'info'}>
-                        {withdrawal.status}
-                      </Badge>
+                      <Badge bg={withdrawal.status === 'pending' ? 'warning' : 'info'}>{withdrawal.status}</Badge>
                     </td>
                     <td>
                       {withdrawal.status === 'pending' && (
@@ -175,11 +167,7 @@ const PendingWithdrawalsManager = ({ onWithdrawalCancelled }) => {
                           }}
                           disabled={cancelling === withdrawal.id}
                         >
-                          {cancelling === withdrawal.id ? (
-                            <Spinner animation="border" size="sm" />
-                          ) : (
-                            <i className="feather icon-x"></i>
-                          )}
+                          {cancelling === withdrawal.id ? <Spinner animation="border" size="sm" /> : <i className="feather icon-x"></i>}
                         </Button>
                       )}
                     </td>
@@ -202,15 +190,21 @@ const PendingWithdrawalsManager = ({ onWithdrawalCancelled }) => {
               <p>Are you sure you want to cancel this withdrawal?</p>
               <div className="bg-light p-3 rounded">
                 <div className="row">
-                  <div className="col-sm-4"><strong>Amount:</strong></div>
+                  <div className="col-sm-4">
+                    <strong>Amount:</strong>
+                  </div>
                   <div className="col-sm-8">{formatAmount(withdrawalToCancel.amount)} TEO</div>
                 </div>
                 <div className="row">
-                  <div className="col-sm-4"><strong>To Address:</strong></div>
+                  <div className="col-sm-4">
+                    <strong>To Address:</strong>
+                  </div>
                   <div className="col-sm-8 font-monospace small">{withdrawalToCancel.wallet_address}</div>
                 </div>
                 <div className="row">
-                  <div className="col-sm-4"><strong>Created:</strong></div>
+                  <div className="col-sm-4">
+                    <strong>Created:</strong>
+                  </div>
                   <div className="col-sm-8">{formatDate(withdrawalToCancel.created_at)}</div>
                 </div>
               </div>
