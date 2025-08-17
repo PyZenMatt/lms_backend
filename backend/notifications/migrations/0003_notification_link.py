@@ -13,6 +13,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='notification',
             name='link',
-            field=models.CharField(blank=True, help_text='URL di destinazione per azione diretta', max_length=255, null=True),
+            field=models.CharField(
+                blank=True, help_text='URL di destinazione per azione diretta', max_length=255, null=True),
         ),
     ]

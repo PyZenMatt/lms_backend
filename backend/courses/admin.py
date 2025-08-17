@@ -1,22 +1,27 @@
-from django.contrib import admin
-from django.contrib.auth.mixins import PermissionRequiredMixin
-from .models import ExerciseSubmission, ExerciseReview, User, Lesson, Exercise, Course
 from django import forms
+from django.contrib import admin
 from notifications.models import Notification
+
+from .models import (Course, Exercise, ExerciseReview, ExerciseSubmission,
+                     Lesson, User)
+
 
 class CourseAdminForm(forms.ModelForm):
     class Meta:
         model = Course
         fields = '__all__'
-    
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         # Filtra solo studenti per il campo students
         if 'students' in self.fields:
-            self.fields['students'].queryset = User.objects.filter(role='student')
+            self.fields['students'].queryset = User.objects.filter(
+                role='student')
         # Filtra solo docenti per il campo teacher
         if 'teacher' in self.fields:
-            self.fields['teacher'].queryset = User.objects.filter(role='teacher')
+            self.fields['teacher'].queryset = User.objects.filter(
+                role='teacher')
+
 
 @admin.register(Lesson)
 class LessonAdmin(admin.ModelAdmin):
@@ -41,6 +46,7 @@ class LessonAdmin(admin.ModelAdmin):
             obj.teacher = request.user
         super().save_model(request, obj, form, change)
 
+
 @admin.register(ExerciseSubmission)
 class ExerciseSubmissionAdmin(admin.ModelAdmin):
     list_display = ['exercise', 'student', 'average_score', 'is_approved']
@@ -54,6 +60,7 @@ class ExerciseSubmissionAdmin(admin.ModelAdmin):
         if not request.user.is_superuser:
             return qs.filter(exercise__lesson__course__teacher=request.user)
         return qs
+
 
 @admin.register(Exercise)
 class ExerciseAdmin(admin.ModelAdmin):
@@ -71,15 +78,17 @@ class ExerciseAdmin(admin.ModelAdmin):
         # Mostra il docente associato al corso
         return obj.lesson.course.teacher.username
     get_teacher.short_description = "Docente"
-    
+
     def __str__(self):
         student_username = self.student.username if self.student else "Nessuno studente"
         return f"{student_username} - {self.lesson.title}"
 
+
 @admin.register(Course)
 class CourseAdmin(admin.ModelAdmin):
-    form = CourseAdminForm 
-    list_display = ['id', 'title', 'price_eur', 'teacher', 'total_students', 'is_approved']
+    form = CourseAdminForm
+    list_display = ['id', 'title', 'price_eur',
+                    'teacher', 'total_students', 'is_approved']
     list_filter = ['teacher', 'is_approved']
     search_fields = ['title']
     autocomplete_fields = ['students', 'teacher']
@@ -139,7 +148,9 @@ class CourseAdmin(admin.ModelAdmin):
                     related_object_id=course.pk
                 )
                 updated += 1
-        self.message_user(request, f"{updated} corsi approvati e notifica inviata.")
+        self.message_user(
+            request, f"{updated} corsi approvati e notifica inviata.")
+
 
 @admin.register(ExerciseReview)
 class ExerciseReviewAdmin(admin.ModelAdmin):
@@ -154,5 +165,3 @@ class ExerciseReviewAdmin(admin.ModelAdmin):
         if not request.user.is_superuser:
             return qs.filter(submission__exercise__lesson__course__teacher=request.user)
         return qs
-
-

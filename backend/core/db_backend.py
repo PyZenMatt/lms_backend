@@ -1,7 +1,6 @@
 """
 SQLite database optimizations using Django signals
 """
-from django.db import connection
 from django.db.backends.signals import connection_created
 from django.dispatch import receiver
 
@@ -19,5 +18,5 @@ def set_sqlite_pragma(connection, **kwargs):
             cursor.execute("PRAGMA cache_size=-64000;")
             # Store temp data in memory
             cursor.execute("PRAGMA temp_store=MEMORY;")
-            
+
         print("✅ SQLite optimizations applied (WAL mode, cache, etc.)")

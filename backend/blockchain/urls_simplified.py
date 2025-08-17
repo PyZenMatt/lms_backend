@@ -10,11 +10,8 @@ Core TeoCoin operations use /api/v1/teocoin/ endpoints.
 """
 
 from django.urls import path
-from .views import (
-    get_wallet_balance,
-    get_token_info,
-    check_transaction_status
-)
+
+from .views import check_transaction_status, get_token_info, get_wallet_balance
 
 app_name = 'blockchain'
 

@@ -25,6 +25,7 @@ __all__ = [
     'hybrid_teocoin_service',
 ]
 
+
 def __getattr__(name):
     """Lazy import of services to avoid Django startup issues"""
     if name == 'user_service':

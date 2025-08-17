@@ -1,16 +1,18 @@
 # tests/test_admin.py
-from django.test import TestCase, Client
+from courses.admin import ExerciseAdmin, LessonAdmin
+from courses.models import Exercise, Lesson
 from django.contrib.admin.sites import AdminSite
 from django.contrib.auth import get_user_model
-from django.urls import reverse
 from django.contrib.auth.models import Permission
-from courses.models import Lesson, Exercise
-from courses.admin import LessonAdmin, ExerciseAdmin
+from django.test import Client, TestCase
+from django.urls import reverse
 
 User = get_user_model()
 
+
 class MockRequest:
     pass
+
 
 class LessonAdminTest(TestCase):
     def setUp(self):
@@ -49,14 +51,14 @@ class LessonAdminTest(TestCase):
         request.user = self.admin_user
         form = self.lesson_admin.get_form(request)
         teacher_field = form.base_fields['teacher']
-        
+
         teachers = User.objects.filter(role='teacher').order_by('id')
         self.assertQuerySetEqual(
             teacher_field.queryset.order_by('id'),
             teachers,
             transform=lambda x: x
         )
-    
+
     def test_list_display(self):
         url = reverse('admin:core_lesson_changelist')
         response = self.client.get(url)
@@ -68,6 +70,7 @@ class LessonAdminTest(TestCase):
         url = reverse('admin:core_lesson_changelist') + '?q=Test'
         response = self.client.get(url)
         self.assertContains(response, self.lesson.title)
+
 
 class ExerciseAdminTest(TestCase):
     def setUp(self):
@@ -130,7 +133,7 @@ class ExerciseAdminTest(TestCase):
         url = reverse('admin:core_exercise_changelist') + '?q=Test'
         response = self.client.get(url)
         self.assertContains(response, self.lesson.title)
-        
+
         # Test ricerca per username studente
         url = reverse('admin:core_exercise_changelist') + '?q=student1'
         response = self.client.get(url)
@@ -145,19 +148,19 @@ class ExerciseAdminTest(TestCase):
             is_staff=True,
             is_superuser=False
         )
-        
+
         # Assegna permessi specifici
         view_perm = Permission.objects.get(codename='view_exercise')
         change_perm = Permission.objects.get(codename='change_exercise')
         staff_user.user_permissions.add(view_perm, change_perm)
-        
+
         self.client.force_login(staff_user)
-        
+
         # Verifica accesso alla modifica
         url = reverse('admin:core_exercise_change', args=[self.exercise.id])
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
-        
+
         # Test modifica con permessi
         response = self.client.post(url, {
             'student': self.student.id,

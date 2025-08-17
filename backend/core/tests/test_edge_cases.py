@@ -1,9 +1,10 @@
-from django.test import TestCase
+from courses.models import Course, Exercise, Lesson
 from django.core.exceptions import ValidationError
-from users.models import User
-from courses.models import Course, Lesson, Exercise
+from django.test import TestCase
 from notifications.models import Notification
 from rewards.models import BlockchainTransaction
+from users.models import User
+
 
 class EdgeCasesTests(TestCase):
     def test_course_without_lessons(self):
@@ -27,7 +28,7 @@ class EdgeCasesTests(TestCase):
     def test_max_score_exercise(self):
         # Crea l'utente insegnante
         teacher = User.objects.create(username='teacher1', role='teacher')
-        
+
         # Crea la lezione correttamente
         lesson = Lesson.objects.create(
             title="Test Lesson",
@@ -36,10 +37,10 @@ class EdgeCasesTests(TestCase):
             price=100,
             duration=60
         )
-        
+
         # Crea lo studente
         student = User.objects.create(username='student1', role='student')
-        
+
         # Prova a creare esercizio con punteggio invalido
         exercise = Exercise(
             student=student,
@@ -47,10 +48,10 @@ class EdgeCasesTests(TestCase):
             submission="Test submission",
             score=150  # Valore superiore al massimo consentito
         )
-        
+
         with self.assertRaises(ValidationError) as context:
             exercise.full_clean()  # Esegue la validazione completa
-        
+
         # Verifica che l'errore sia sul campo score
         self.assertIn('score', context.exception.message_dict)
         self.assertEqual(
@@ -60,7 +61,9 @@ class EdgeCasesTests(TestCase):
 
     def test_user_deletion_cascade(self):
     user = User.objects.create(email='test@example.com', role='student')
-    tx = BlockchainTransaction.objects.create(user=user, amount=50, transaction_type='mint', status='completed')
+    tx = BlockchainTransaction.objects.create(
+        user=user, amount=50, transaction_type='mint', status='completed')
     user_pk = user.pk
     user.delete()
-    self.assertFalse(BlockchainTransaction.objects.filter(user_id=user_pk).exists())
+    self.assertFalse(BlockchainTransaction.objects.filter(
+        user_id=user_pk).exists())

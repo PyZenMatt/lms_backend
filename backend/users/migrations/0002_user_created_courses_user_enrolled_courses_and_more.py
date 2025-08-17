@@ -14,16 +14,19 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='user',
             name='created_courses',
-            field=models.ManyToManyField(blank=True, related_name='teachers', to='courses.course'),
+            field=models.ManyToManyField(
+                blank=True, related_name='teachers', to='courses.course'),
         ),
         migrations.AddField(
             model_name='user',
             name='enrolled_courses',
-            field=models.ManyToManyField(blank=True, related_name='enrolled_students', to='courses.course'),
+            field=models.ManyToManyField(
+                blank=True, related_name='enrolled_students', to='courses.course'),
         ),
         migrations.AddField(
             model_name='user',
             name='purchased_lessons',
-            field=models.ManyToManyField(blank=True, related_name='purchasers', to='courses.lesson'),
+            field=models.ManyToManyField(
+                blank=True, related_name='purchasers', to='courses.lesson'),
         ),
     ]

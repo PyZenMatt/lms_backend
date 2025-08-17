@@ -1,7 +1,9 @@
-from rest_framework import generics, filters as drf_filters
+from rest_framework import filters as drf_filters
+from rest_framework import generics
 from rest_framework.permissions import IsAuthenticated
-from ..serializers import BlockchainTransactionSerializer
+
 from ..models import BlockchainTransaction
+from ..serializers import BlockchainTransactionSerializer
 
 
 class TransactionHistoryView(generics.ListAPIView):
@@ -17,15 +19,16 @@ class TransactionHistoryView(generics.ListAPIView):
         """Filter transactions by authenticated user and optional date range"""
         user = self.request.user
         queryset = BlockchainTransaction.objects.filter(user=user)
-        
+
         # Handle date filtering safely for both DRF and regular Django requests
-        query_params = getattr(self.request, 'query_params', getattr(self.request, 'GET', {}))
+        query_params = getattr(self.request, 'query_params',
+                               getattr(self.request, 'GET', {}))
         date_from = query_params.get('from')
         date_to = query_params.get('to')
-        
+
         if date_from:
             queryset = queryset.filter(created_at__gte=date_from)
         if date_to:
             queryset = queryset.filter(created_at__lte=date_to)
-            
+
         return queryset

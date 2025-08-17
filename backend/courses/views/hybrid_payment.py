@@ -1,15 +1,13 @@
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated
-from rest_framework import status
 from decimal import Decimal
+
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+from rest_framework.views import APIView
+from services.exceptions import (CourseNotFoundError,
+                                 InsufficientTeoCoinsError,
+                                 TeoArtServiceException, UserNotFoundError)
 from services.payment_service import payment_service
-from services.exceptions import (
-    TeoArtServiceException, 
-    UserNotFoundError, 
-    CourseNotFoundError,
-    InsufficientTeoCoinsError
-)
+
 
 class HybridPaymentView(APIView):
     permission_classes = [IsAuthenticated]
@@ -19,7 +17,8 @@ class HybridPaymentView(APIView):
         Initiate hybrid payment: deduct TeoCoin for discount, return Stripe intent for remainder.
         """
         try:
-            teocoin_to_spend = Decimal(request.data.get('teocoin_to_spend', '0'))
+            teocoin_to_spend = Decimal(
+                request.data.get('teocoin_to_spend', '0'))
             wallet_address = request.data.get('wallet_address')
             if not teocoin_to_spend or not wallet_address:
                 return Response({"error": "teocoin_to_spend and wallet_address required"}, status=400)

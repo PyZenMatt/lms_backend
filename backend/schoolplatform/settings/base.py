@@ -1,8 +1,8 @@
 import os
-from pathlib import Path
 from datetime import timedelta
+from pathlib import Path
+
 from dotenv import load_dotenv
-from django.core.exceptions import ImproperlyConfigured
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 print("BASE_DIR:", BASE_DIR)
@@ -121,18 +121,23 @@ TEST_RUNNER = 'django.test.runner.DiscoverRunner'
 
 
 # Blockchain config (comune)
-POLYGON_AMOY_RPC_URL = os.getenv('POLYGON_AMOY_RPC_URL', 'https://rpc-amoy.polygon.technology/')
-TEOCOIN_CONTRACT_ADDRESS = os.getenv('TEOCOIN_CONTRACT_ADDRESS', '0x20D6656A31297ab3b8A87291Ed562D4228Be9ff8')
+POLYGON_AMOY_RPC_URL = os.getenv(
+    'POLYGON_AMOY_RPC_URL', 'https://rpc-amoy.polygon.technology/')
+TEOCOIN_CONTRACT_ADDRESS = os.getenv(
+    'TEOCOIN_CONTRACT_ADDRESS', '0x20D6656A31297ab3b8A87291Ed562D4228Be9ff8')
 ADMIN_PRIVATE_KEY = os.getenv('ADMIN_PRIVATE_KEY')
 ADMIN_WALLET_ADDRESS = os.getenv('ADMIN_WALLET_ADDRESS')
 
 # Platform wallet address for TeoCoin payments (with minting permissions)
-PLATFORM_WALLET_ADDRESS = os.getenv('PLATFORM_WALLET_ADDRESS', '0x3b72a4E942CF1467134510cA3952F01b63005044')
+PLATFORM_WALLET_ADDRESS = os.getenv(
+    'PLATFORM_WALLET_ADDRESS', '0x3b72a4E942CF1467134510cA3952F01b63005044')
 PLATFORM_PRIVATE_KEY = os.getenv('PLATFORM_PRIVATE_KEY')
 
-# Reward Pool Configuration 
-REWARD_POOL_ADDRESS = os.getenv('REWARD_POOL_ADDRESS', '0x17051AB7603B0F7263BC86bF1b0ce137EFfdEcc1')
-REWARD_POOL_PRIVATE_KEY = os.getenv('REWARD_POOL_PRIVATE_KEY', os.getenv('ADMIN_PRIVATE_KEY'))
+# Reward Pool Configuration
+REWARD_POOL_ADDRESS = os.getenv(
+    'REWARD_POOL_ADDRESS', '0x17051AB7603B0F7263BC86bF1b0ce137EFfdEcc1')
+REWARD_POOL_PRIVATE_KEY = os.getenv(
+    'REWARD_POOL_PRIVATE_KEY', os.getenv('ADMIN_PRIVATE_KEY'))
 
 # Payment configuration
 TEOCOIN_EUR_RATE = 10  # 1 EUR = 10 TEO (base rate before discounts)
@@ -158,9 +163,10 @@ AUTHENTICATION_BACKENDS = [
 ]
 
 # TeoCoin System Configuration
-USE_DB_TEOCOIN_SYSTEM = os.getenv('USE_DB_TEOCOIN_SYSTEM', 'True').lower() == 'true'
-TEOCOIN_SYSTEM = os.getenv('TEOCOIN_SYSTEM', 'database')  # 'database' or 'blockchain'
+USE_DB_TEOCOIN_SYSTEM = os.getenv(
+    'USE_DB_TEOCOIN_SYSTEM', 'True').lower() == 'true'
+# 'database' or 'blockchain'
+TEOCOIN_SYSTEM = os.getenv('TEOCOIN_SYSTEM', 'database')
 
 # Reward System Configuration
 REWARD_SYSTEM_BACKEND = 'services.db_teocoin_service.DBTeoCoinService'
-

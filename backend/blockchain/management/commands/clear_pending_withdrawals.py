@@ -2,10 +2,11 @@
 Management command to clear pending TeoCoin withdrawals
 """
 
+import logging
+
+from blockchain.models import DBTeoCoinBalance, TeoCoinWithdrawalRequest
 from django.core.management.base import BaseCommand
 from django.db import transaction
-from blockchain.models import TeoCoinWithdrawalRequest, DBTeoCoinBalance
-import logging
 
 logger = logging.getLogger(__name__)
 
@@ -43,10 +44,11 @@ class Command(BaseCommand):
             )
             return
 
-        self.stdout.write(f"Found {pending_withdrawals.count()} pending withdrawals:")
-        
+        self.stdout.write(
+            f"Found {pending_withdrawals.count()} pending withdrawals:")
+
         total_returned = 0
-        
+
         for withdrawal in pending_withdrawals:
             self.stdout.write(
                 f"  - ID: {withdrawal.id}, User: {withdrawal.user.username}, "
@@ -56,14 +58,15 @@ class Command(BaseCommand):
 
         if dry_run:
             self.stdout.write(
-                self.style.WARNING(f"\nDRY RUN: Would return {total_returned} TEO to user balances")
+                self.style.WARNING(
+                    f"\nDRY RUN: Would return {total_returned} TEO to user balances")
             )
             return
 
         # Confirm action
         if not options.get('user_id'):
             confirm = input(f"\nThis will cancel {pending_withdrawals.count()} withdrawals "
-                          f"and return {total_returned} TEO to user balances. Continue? (y/N): ")
+                            f"and return {total_returned} TEO to user balances. Continue? (y/N): ")
             if confirm.lower() not in ['y', 'yes']:
                 self.stdout.write(self.style.WARNING('Operation cancelled.'))
                 return
@@ -80,27 +83,29 @@ class Command(BaseCommand):
                         user=withdrawal.user,
                         defaults={'available_balance': 0}
                     )
-                    
+
                     # Return amount to balance
                     balance.available_balance += withdrawal.amount
                     balance.save()
-                    
+
                     # Mark withdrawal as cancelled
                     withdrawal.status = 'cancelled'
                     withdrawal.save()
-                    
+
                     cancelled_count += 1
                     returned_amount += float(withdrawal.amount)
-                    
+
                     self.stdout.write(
                         f"✓ Cancelled withdrawal {withdrawal.id}: "
                         f"{withdrawal.amount} TEO returned to {withdrawal.user.username}"
                     )
-                    
+
                 except Exception as e:
-                    logger.error(f"Failed to cancel withdrawal {withdrawal.id}: {e}")
+                    logger.error(
+                        f"Failed to cancel withdrawal {withdrawal.id}: {e}")
                     self.stdout.write(
-                        self.style.ERROR(f"✗ Failed to cancel withdrawal {withdrawal.id}: {e}")
+                        self.style.ERROR(
+                            f"✗ Failed to cancel withdrawal {withdrawal.id}: {e}")
                     )
 
         self.stdout.write(

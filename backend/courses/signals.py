@@ -1,8 +1,10 @@
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from notifications.models import Notification
-from .models import Course, Lesson
 from users.models import User
+
+from .models import Course
+
 
 @receiver(post_save, sender=Course)
 def course_status_notification(sender, instance, created, **kwargs):
@@ -28,6 +30,7 @@ def course_status_notification(sender, instance, created, **kwargs):
                 related_object_id=instance.id
             )
 
+
 @receiver(post_save, sender=Course)
 def new_course_published_notification(sender, instance, created, **kwargs):
     """
@@ -36,7 +39,7 @@ def new_course_published_notification(sender, instance, created, **kwargs):
     if created and instance.is_approved:
         # Invia notifica a tutti gli studenti (o agli studenti interessati alla categoria)
         students = User.objects.filter(role='student', is_active=True)
-        
+
         for student in students[:50]:  # Limita a 50 per non sovraccaricare
             Notification.objects.create(
                 user=student,
@@ -44,6 +47,7 @@ def new_course_published_notification(sender, instance, created, **kwargs):
                 notification_type='new_course_published',
                 related_object_id=instance.id
             )
+
 
 def notify_course_purchase(course, buyer, seller):
     """
@@ -56,7 +60,7 @@ def notify_course_purchase(course, buyer, seller):
         notification_type='course_purchased',
         related_object_id=course.id
     )
-    
+
     # Notifica al venditore
     Notification.objects.create(
         user=seller,
@@ -64,6 +68,7 @@ def notify_course_purchase(course, buyer, seller):
         notification_type='course_sold',
         related_object_id=course.id
     )
+
 
 def notify_lesson_purchase(lesson, buyer, seller):
     """
@@ -76,7 +81,7 @@ def notify_lesson_purchase(lesson, buyer, seller):
         notification_type='lesson_purchased',
         related_object_id=lesson.id
     )
-    
+
     # Notifica al venditore
     Notification.objects.create(
         user=seller,
@@ -84,6 +89,7 @@ def notify_lesson_purchase(lesson, buyer, seller):
         notification_type='lesson_sold',
         related_object_id=lesson.id
     )
+
 
 def notify_course_completion(course, student):
     """
@@ -95,7 +101,7 @@ def notify_course_completion(course, student):
         notification_type='course_completed',
         related_object_id=course.id
     )
-    
+
     # Notifica anche al teacher
     Notification.objects.create(
         user=course.teacher,

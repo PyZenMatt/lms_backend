@@ -6,8 +6,11 @@ Creates sample courses with fiat pricing for testing payment integration.
 
 import os
 import sys
-import django
 from decimal import Decimal
+
+import django
+from courses.models import Course
+from django.contrib.auth import get_user_model
 
 # Add the project directory to Python path
 sys.path.append('/home/teo/Project/school/schoolplatform')
@@ -16,13 +19,10 @@ sys.path.append('/home/teo/Project/school/schoolplatform')
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'schoolplatform.settings')
 django.setup()
 
-from courses.models import Course
-from users.models import User
-from django.contrib.auth import get_user_model
 
 def create_demo_data():
     """Create demo courses with fiat pricing"""
-    
+
     # Get or create a demo instructor
     User = get_user_model()
     instructor, created = User.objects.get_or_create(
@@ -34,12 +34,12 @@ def create_demo_data():
             'is_staff': True,
         }
     )
-    
+
     if created:
         print(f"✓ Created demo instructor: {instructor.username}")
     else:
         print(f"✓ Using existing instructor: {instructor.username}")
-    
+
     # Sample courses data
     courses_data = [
         {
@@ -85,9 +85,9 @@ def create_demo_data():
             'teocoin_discount_percent': Decimal('0.00'),
         }
     ]
-    
+
     created_courses = []
-    
+
     for course_data in courses_data:
         course, created = Course.objects.get_or_create(
             title=course_data['title'],
@@ -100,7 +100,7 @@ def create_demo_data():
                 'is_published': True,
             }
         )
-        
+
         if created:
             created_courses.append(course)
             print(f"✓ Created course: {course.title} (€{course.price_eur})")
@@ -111,16 +111,18 @@ def create_demo_data():
             course.teocoin_discount_percent = course_data['teocoin_discount_percent']
             course.save()
             print(f"✓ Updated course: {course.title} (€{course.price_eur})")
-    
+
     print(f"\n🎉 Demo data creation completed!")
     print(f"📚 Total courses in database: {Course.objects.count()}")
-    print(f"💰 Courses with fiat pricing: {Course.objects.filter(price_eur__gt=0).count()}")
+    print(
+        f"💰 Courses with fiat pricing: {Course.objects.filter(price_eur__gt=0).count()}")
     print(f"🆓 Free courses: {Course.objects.filter(price_eur=0).count()}")
-    
+
     print("\n💡 You can now test the payment integration with these courses!")
     print("🔗 Access the platform at: http://localhost:8000")
-    
+
     return created_courses
+
 
 if __name__ == '__main__':
     try:

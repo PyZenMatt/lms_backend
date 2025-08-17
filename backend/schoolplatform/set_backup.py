@@ -1,11 +1,10 @@
-from pathlib import Path
 import os
 from datetime import timedelta
-from dotenv import load_dotenv
-from django.core.exceptions import ImproperlyConfigured
+from pathlib import Path
+
 import dj_database_url
-
-
+from django.core.exceptions import ImproperlyConfigured
+from dotenv import load_dotenv
 
 # Carica il file .env che deve stare nella root del progetto (stesso livello di manage.py)
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -15,9 +14,11 @@ SECRET_KEY = os.getenv('SECRET_KEY')
 DEBUG = os.getenv('DEBUG', 'False') == 'True'
 
 # Allowed hosts (solo da variabile d'ambiente, nessun default su localhost)
-ALLOWED_HOSTS = [h.strip() for h in os.getenv("ALLOWED_HOSTS", "").split(",") if h.strip()]
+ALLOWED_HOSTS = [h.strip() for h in os.getenv(
+    "ALLOWED_HOSTS", "").split(",") if h.strip()]
 
-CSRF_TRUSTED_ORIGINS = [h.strip() for h in os.getenv("CSRF_TRUSTED_ORIGINS", "").split(",") if h.strip()]
+CSRF_TRUSTED_ORIGINS = [h.strip() for h in os.getenv(
+    "CSRF_TRUSTED_ORIGINS", "").split(",") if h.strip()]
 
 # App
 INSTALLED_APPS = [
@@ -99,7 +100,6 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'schoolplatform.wsgi.application'
 
-import dj_database_url
 
 # Sviluppo: SQLite
 DATABASES = {
@@ -130,8 +130,10 @@ else:
 
 # Database connection pooling and optimization for development
 if DEBUG:
-    DATABASES['default']['CONN_MAX_AGE'] = 60  # Connection pooling for 60 seconds
-    DATABASES['default']['CONN_HEALTH_CHECKS'] = True  # Health checks for connections
+    # Connection pooling for 60 seconds
+    DATABASES['default']['CONN_MAX_AGE'] = 60
+    # Health checks for connections
+    DATABASES['default']['CONN_HEALTH_CHECKS'] = True
 
 # Password
 AUTH_PASSWORD_VALIDATORS = [
@@ -187,14 +189,14 @@ CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
     "http://127.0.0.1:3000",
-    "http://localhost:3001", 
+    "http://localhost:3001",
     "http://127.0.0.1:3001",
     "http://localhost:8000",
     "http://127.0.0.1:8000",
     "http://localhost:8001",
     "http://127.0.0.1:8001",
     "https://schoolplatform-frontend.onrender.com",
-    
+
 ]
 SESSION_COOKIE_SAMESITE = "None"
 CSRF_COOKIE_SECURE = True
@@ -242,21 +244,23 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 TEST_RUNNER = 'django.test.runner.DiscoverRunner'
 
 
-
 # Blockchain Configuration
-POLYGON_AMOY_RPC_URL = os.getenv('POLYGON_AMOY_RPC_URL', 'https://rpc-amoy.polygon.technology/')
-TEOCOIN_CONTRACT_ADDRESS = os.getenv('TEOCOIN_CONTRACT_ADDRESS', '0x20D6656A31297ab3b8A87291Ed562D4228Be9ff8')
+POLYGON_AMOY_RPC_URL = os.getenv(
+    'POLYGON_AMOY_RPC_URL', 'https://rpc-amoy.polygon.technology/')
+TEOCOIN_CONTRACT_ADDRESS = os.getenv(
+    'TEOCOIN_CONTRACT_ADDRESS', '0x20D6656A31297ab3b8A87291Ed562D4228Be9ff8')
 ADMIN_PRIVATE_KEY = os.getenv('ADMIN_PRIVATE_KEY')
 ADMIN_WALLET_ADDRESS = os.getenv('ADMIN_WALLET_ADDRESS')
 
-# Reward Pool Configuration 
-REWARD_POOL_ADDRESS = os.getenv('REWARD_POOL_ADDRESS', '0x17051AB7603B0F7263BC86bF1b0ce137EFfdEcc1')
-REWARD_POOL_PRIVATE_KEY = os.getenv('REWARD_POOL_PRIVATE_KEY', os.getenv('ADMIN_PRIVATE_KEY'))
+# Reward Pool Configuration
+REWARD_POOL_ADDRESS = os.getenv(
+    'REWARD_POOL_ADDRESS', '0x17051AB7603B0F7263BC86bF1b0ce137EFfdEcc1')
+REWARD_POOL_PRIVATE_KEY = os.getenv(
+    'REWARD_POOL_PRIVATE_KEY', os.getenv('ADMIN_PRIVATE_KEY'))
 
 # =====================================
 # 🚀 PERFORMANCE OPTIMIZATION CONFIG
 # =====================================
-
 
 
 # Celery Configuration
@@ -270,9 +274,9 @@ CELERY_TIMEZONE = 'Europe/Rome'
 # Sentry Configuration (only in production)
 if not DEBUG:
     import sentry_sdk
-    from sentry_sdk.integrations.django import DjangoIntegration
     from sentry_sdk.integrations.celery import CeleryIntegration
-    
+    from sentry_sdk.integrations.django import DjangoIntegration
+
     sentry_sdk.init(
         dsn=os.getenv('SENTRY_DSN'),
         integrations=[
@@ -325,8 +329,10 @@ LOGGING = {
 }
 
 # File Upload Settings - Support for larger video files
-FILE_UPLOAD_MAX_MEMORY_SIZE = 10 * 1024 * 1024  # 10MB - files larger than this will be saved to disk
-DATA_UPLOAD_MAX_MEMORY_SIZE = 250 * 1024 * 1024  # 250MB - maximum total upload size
+# 10MB - files larger than this will be saved to disk
+FILE_UPLOAD_MAX_MEMORY_SIZE = 10 * 1024 * 1024
+DATA_UPLOAD_MAX_MEMORY_SIZE = 250 * 1024 * \
+    1024  # 250MB - maximum total upload size
 FILE_UPLOAD_PERMISSIONS = 0o644
 FILE_UPLOAD_DIRECTORY_PERMISSIONS = 0o755
 
@@ -340,15 +346,16 @@ STRIPE_SECRET_KEY = os.getenv('STRIPE_SECRET_KEY')
 
 # Validate that Stripe keys are configured
 if not STRIPE_SECRET_KEY and not DEBUG:
-    raise ImproperlyConfigured("STRIPE_SECRET_KEY environment variable is required for production")
+    raise ImproperlyConfigured(
+        "STRIPE_SECRET_KEY environment variable is required for production")
 
 # Platform wallet address for TeoCoin payments (with minting permissions)
-PLATFORM_WALLET_ADDRESS = os.getenv('PLATFORM_WALLET_ADDRESS', '0x3b72a4E942CF1467134510cA3952F01b63005044')
+PLATFORM_WALLET_ADDRESS = os.getenv(
+    'PLATFORM_WALLET_ADDRESS', '0x3b72a4E942CF1467134510cA3952F01b63005044')
 
 # Payment configuration
 TEOCOIN_EUR_RATE = 10  # 1 EUR = 10 TEO (base rate before discounts)
 TEOCOIN_POOL_PERCENTAGE = 10  # 10% of fiat revenue goes to TeoCoin reward pool
-
 
 
 # ⚡ Cache settings for optimal performance
@@ -358,10 +365,13 @@ CACHE_MIDDLEWARE_KEY_PREFIX = 'teoart'
 
 # ========== TEOCOIN STAKING CONTRACT CONFIGURATION ==========
 
-# TeoCoin Staking Contract Configuration  
-TEOCOIN_STAKING_CONTRACT_ADDRESS = os.getenv('TEOCOIN_STAKING_CONTRACT', '0xd74fc566c0c5b83f95fd82e6866d8a7a6eaca7a9')
+# TeoCoin Staking Contract Configuration
+TEOCOIN_STAKING_CONTRACT_ADDRESS = os.getenv(
+    'TEOCOIN_STAKING_CONTRACT', '0xd74fc566c0c5b83f95fd82e6866d8a7a6eaca7a9')
 
 # Load staking contract ABI
+
+
 def load_staking_abi():
     try:
         import json
@@ -371,14 +381,18 @@ def load_staking_abi():
     except:
         return []
 
+
 TEOCOIN_STAKING_CONTRACT_ABI = load_staking_abi()
 
 # ========== TEOCOIN DISCOUNT SYSTEM CONFIGURATION ==========
 
 # TeoCoin Discount Contract Configuration
-TEOCOIN_DISCOUNT_CONTRACT_ADDRESS = os.getenv('TEOCOIN_DISCOUNT_CONTRACT', '0xd30afec0bc6ac33e14a0114ec7403bbd746e88de')
+TEOCOIN_DISCOUNT_CONTRACT_ADDRESS = os.getenv(
+    'TEOCOIN_DISCOUNT_CONTRACT', '0xd30afec0bc6ac33e14a0114ec7403bbd746e88de')
 
 # Load discount contract ABI
+
+
 def load_discount_abi():
     try:
         import json
@@ -388,6 +402,7 @@ def load_discount_abi():
     except:
         return []
 
+
 TEOCOIN_DISCOUNT_CONTRACT_ABI = load_discount_abi()
 
 # Platform account private key for gas-free transactions
@@ -396,12 +411,15 @@ PLATFORM_PRIVATE_KEY = os.getenv('PLATFORM_PRIVATE_KEY')
 # ========== GAS-FREE CONTRACTS CONFIGURATION ==========
 
 # Gas-Free TeoCoin Contract Addresses (Phase 3)
-TEOCOIN_DISCOUNT_GAS_FREE_CONTRACT_ADDRESS = os.getenv('TEOCOIN_DISCOUNT_GAS_FREE_CONTRACT', '0x998BbCAABe181843b440D6079596baee6367CAd9')
-TEOCOIN_STAKING_GAS_FREE_CONTRACT_ADDRESS = os.getenv('TEOCOIN_STAKING_GAS_FREE_CONTRACT', '0xf76AcA8FCA2B9dE25D4c77C1343DED80280976D4')
+TEOCOIN_DISCOUNT_GAS_FREE_CONTRACT_ADDRESS = os.getenv(
+    'TEOCOIN_DISCOUNT_GAS_FREE_CONTRACT', '0x998BbCAABe181843b440D6079596baee6367CAd9')
+TEOCOIN_STAKING_GAS_FREE_CONTRACT_ADDRESS = os.getenv(
+    'TEOCOIN_STAKING_GAS_FREE_CONTRACT', '0xf76AcA8FCA2B9dE25D4c77C1343DED80280976D4')
 
 # Platform Configuration for Gas-Free Operations
 PLATFORM_ACCOUNT = os.getenv('PLATFORM_ACCOUNT')
-POLYGON_RPC_URL = os.getenv('POLYGON_RPC_URL', 'https://rpc-amoy.polygon.technology/')
+POLYGON_RPC_URL = os.getenv(
+    'POLYGON_RPC_URL', 'https://rpc-amoy.polygon.technology/')
 
 # ========== END GAS-FREE CONTRACTS CONFIGURATION ==========
 
@@ -416,7 +434,8 @@ DISCOUNT_SYSTEM = {
 
 # Validate discount system configuration in production
 if not DEBUG and TEOCOIN_DISCOUNT_CONTRACT_ADDRESS and not PLATFORM_PRIVATE_KEY:
-    raise ImproperlyConfigured("PLATFORM_PRIVATE_KEY is required when discount system is enabled")
+    raise ImproperlyConfigured(
+        "PLATFORM_PRIVATE_KEY is required when discount system is enabled")
 
 # ========== END TEOCOIN DISCOUNT CONFIGURATION ==========
 
@@ -427,7 +446,8 @@ TEO_TOKEN_ADDRESS = os.getenv('TEO_TOKEN_ADDRESS', '')
 REWARD_POOL_ADDRESS = os.getenv('REWARD_POOL_ADDRESS', '')
 
 # Enable gas-free mode
-GAS_FREE_MODE_ENABLED = os.getenv('GAS_FREE_MODE_ENABLED', 'True').lower() == 'true'
+GAS_FREE_MODE_ENABLED = os.getenv(
+    'GAS_FREE_MODE_ENABLED', 'True').lower() == 'true'
 
 # Platform gas monitoring
 PLATFORM_MATIC_THRESHOLD = float(os.getenv('PLATFORM_MATIC_THRESHOLD', '1.0'))
@@ -437,4 +457,5 @@ GAS_FREE_TEST_MODE = os.getenv('GAS_FREE_TEST_MODE', 'True').lower() == 'true'
 
 # ===== DB-BASED TEOCOIN SYSTEM =====
 # Enable DB-based TeoCoin system instead of blockchain operations
-USE_DB_TEOCOIN_SYSTEM = os.getenv('USE_DB_TEOCOIN_SYSTEM', 'True').lower() == 'true'
+USE_DB_TEOCOIN_SYSTEM = os.getenv(
+    'USE_DB_TEOCOIN_SYSTEM', 'True').lower() == 'true'

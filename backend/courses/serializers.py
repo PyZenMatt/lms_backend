@@ -1,21 +1,23 @@
 from rest_framework import serializers
-from .models import (
-    Lesson, Exercise, Course, CourseEnrollment, ExerciseSubmission,
-    TeacherDiscountDecision, TeacherChoicePreference
-)
-from users.models import User
 from users.serializers import UserSerializer
+
+from .models import (Course, CourseEnrollment, Exercise, ExerciseSubmission,
+                     Lesson, TeacherChoicePreference, TeacherDiscountDecision)
+
 
 class LessonListSerializer(serializers.ModelSerializer):
     exercises_count = serializers.SerializerMethodField()
-    lesson_type_display = serializers.CharField(source='get_lesson_type_display', read_only=True)
-    
+    lesson_type_display = serializers.CharField(
+        source='get_lesson_type_display', read_only=True)
+
     class Meta:
         model = Lesson
-        fields = ['id', 'title', 'order', 'duration', 'lesson_type', 'lesson_type_display', 'exercises_count']
-    
+        fields = ['id', 'title', 'order', 'duration',
+                  'lesson_type', 'lesson_type_display', 'exercises_count']
+
     def get_exercises_count(self, obj):
         return obj.exercises.count()
+
 
 class ExerciseSubmissionSerializer(serializers.ModelSerializer):
     average_score = serializers.FloatField(read_only=True)
@@ -60,13 +62,15 @@ class ExerciseSubmissionSerializer(serializers.ModelSerializer):
     def validate(self, attrs):
         # Verifica che il contenuto non sia vuoto
         if not attrs.get('content'):
-            raise serializers.ValidationError({"content": "Il contenuto della sottomissione è obbligatorio."})
+            raise serializers.ValidationError(
+                {"content": "Il contenuto della sottomissione è obbligatorio."})
         return attrs
-    
+
+
 class TeacherLessonSerializer(serializers.ModelSerializer):
     total_students = serializers.SerializerMethodField()
     total_earnings = serializers.SerializerMethodField()
-    
+
     class Meta:
         model = Lesson
         fields = ['id', 'title', 'total_students', 'total_earnings']
@@ -77,17 +81,19 @@ class TeacherLessonSerializer(serializers.ModelSerializer):
     def get_total_earnings(self, obj):
         return obj.price_eur * obj.students.count() * 0.9  # 10% fee to platform
 
+
 class TeacherCourseSerializer(serializers.ModelSerializer):
     total_earnings = serializers.SerializerMethodField()
     total_students = serializers.SerializerMethodField()
     enrolled_students = serializers.SerializerMethodField()
-    category_display = serializers.CharField(source='get_category_display', read_only=True)
+    category_display = serializers.CharField(
+        source='get_category_display', read_only=True)
     cover_image_url = serializers.SerializerMethodField()
     lessons = serializers.SerializerMethodField()
 
     class Meta:
         model = Course
-        fields = ['id', 'title', 'description', 'price_eur', 'category', 'category_display', 
+        fields = ['id', 'title', 'description', 'price_eur', 'category', 'category_display',
                   'cover_image', 'cover_image_url', 'is_approved', 'created_at', 'updated_at',
                   'total_earnings', 'total_students', 'enrolled_students', 'lessons']
 
@@ -97,17 +103,17 @@ class TeacherCourseSerializer(serializers.ModelSerializer):
 
     def get_total_students(self, obj):
         return obj.students.count()
-        
+
     def get_enrolled_students(self, obj):
         return obj.students.count()
-        
+
     def get_cover_image_url(self, obj):
         if obj.cover_image:
             request = self.context.get('request')
             if request:
                 return request.build_absolute_uri(obj.cover_image.url)
         return None
-    
+
     def get_lessons(self, obj):
         # Restituisce le lezioni del corso con informazioni di base
         lessons = obj.lessons.all().order_by('order', 'created_at')
@@ -126,59 +132,67 @@ class TeacherCourseSerializer(serializers.ModelSerializer):
                 'course': obj.id      # Per compatibilità
             })
         return lesson_data
-    
+
+
 class LessonSerializer(serializers.ModelSerializer):
     course_id = serializers.IntegerField(source='course.id', read_only=True)
     course_title = serializers.CharField(source='course.title', read_only=True)
-    lesson_type_display = serializers.CharField(source='get_lesson_type_display', read_only=True)
+    lesson_type_display = serializers.CharField(
+        source='get_lesson_type_display', read_only=True)
     video_file_url = serializers.SerializerMethodField()
 
     class Meta:
         model = Lesson
-        fields = ['id', 'title', 'content', 'lesson_type', 'lesson_type_display', 
+        fields = ['id', 'title', 'content', 'lesson_type', 'lesson_type_display',
                   'video_file', 'video_file_url', 'course', 'duration', 'teacher',
                   'materials', 'order', 'created_at', 'course_id', 'course_title']
         read_only_fields = ['id', 'created_at', 'teacher']
-    
+
     def get_video_file_url(self, obj):
         if obj.video_file:
             request = self.context.get('request')
             if request:
                 return request.build_absolute_uri(obj.video_file.url)
         return None
-    
+
     def validate_course(self, value):
         if value and value.teacher != self.context['request'].user:
-            raise serializers.ValidationError("Non sei il teacher di questo corso")
+            raise serializers.ValidationError(
+                "Non sei il teacher di questo corso")
         return value
 
+
 class ExerciseSerializer(serializers.ModelSerializer):
-    exercise_type_display = serializers.CharField(source='get_exercise_type_display', read_only=True)
-    difficulty_display = serializers.CharField(source='get_difficulty_display', read_only=True)
+    exercise_type_display = serializers.CharField(
+        source='get_exercise_type_display', read_only=True)
+    difficulty_display = serializers.CharField(
+        source='get_difficulty_display', read_only=True)
     reference_image_url = serializers.SerializerMethodField()
-    
+
     class Meta:
         model = Exercise
         fields = [
             'id', 'title', 'description', 'lesson', 'exercise_type', 'exercise_type_display',
-            'difficulty', 'difficulty_display', 'time_estimate', 'materials', 'instructions', 
+            'difficulty', 'difficulty_display', 'time_estimate', 'materials', 'instructions',
             'reference_image', 'reference_image_url', 'status', 'score', 'feedback', 'created_at', 'updated_at'
         ]
-        read_only_fields = ['id', 'created_at', 'updated_at', 'score', 'feedback', 'status']
-    
+        read_only_fields = ['id', 'created_at',
+                            'updated_at', 'score', 'feedback', 'status']
+
     def get_reference_image_url(self, obj):
         if obj.reference_image:
             request = self.context.get('request')
             if request:
                 return request.build_absolute_uri(obj.reference_image.url)
         return None
-        
 
     def validate_lesson(self, value):
         # Verifica che la lezione appartenga al corso del teacher
         if value.course.teacher != self.context['request'].user:
-            raise serializers.ValidationError("Non sei il proprietario del corso associato a questa lezione.")
+            raise serializers.ValidationError(
+                "Non sei il proprietario del corso associato a questa lezione.")
         return value
+
 
 class CourseSerializer(serializers.ModelSerializer):
     lessons = LessonSerializer(many=True, read_only=True)
@@ -189,11 +203,13 @@ class CourseSerializer(serializers.ModelSerializer):
     updated_at = serializers.DateTimeField(read_only=True)
     is_enrolled = serializers.SerializerMethodField()
     is_approved = serializers.BooleanField(read_only=True)
-    category_display = serializers.CharField(source='get_category_display', read_only=True)
+    category_display = serializers.CharField(
+        source='get_category_display', read_only=True)
     student_count = serializers.SerializerMethodField()
     cover_image_url = serializers.SerializerMethodField()
     teocoin_price = serializers.SerializerMethodField()
-    price = serializers.DecimalField(max_digits=10, decimal_places=2, source='price_eur', required=False)
+    price = serializers.DecimalField(
+        max_digits=10, decimal_places=2, source='price_eur', required=False)
 
     class Meta:
         model = Course
@@ -206,6 +222,7 @@ class CourseSerializer(serializers.ModelSerializer):
         extra_kwargs = {
             'lessons': {'read_only': True}
         }
+
     def get_teocoin_price(self, obj):
         return obj.get_teocoin_price() if hasattr(obj, 'get_teocoin_price') else None
 
@@ -217,20 +234,21 @@ class CourseSerializer(serializers.ModelSerializer):
     def get_is_enrolled(self, obj):
         user = self.context['request'].user
         return obj.students.filter(pk=user.pk).exists()
-    
+
     def get_student_count(self, obj):
-    
+
         return obj.students.count()
 
     def get_cover_image_url(self, obj):
-       
+
         if obj.cover_image:
             request = self.context.get('request')
             if request:
                 return request.build_absolute_uri(obj.cover_image.url)
             return obj.cover_image.url
         return None
-    
+
+
 class CourseEnrollmentSerializer(serializers.ModelSerializer):
     student = serializers.StringRelatedField(read_only=True)
     course = serializers.StringRelatedField(read_only=True)
@@ -244,8 +262,10 @@ class CourseEnrollmentSerializer(serializers.ModelSerializer):
             'enrolled_at',
             'completed',
         ]
-        read_only_fields = ['id', 'student', 'course', 'enrolled_at', 'completed']
-    
+        read_only_fields = ['id', 'student',
+                            'course', 'enrolled_at', 'completed']
+
+
 class StudentCourseSerializer(serializers.ModelSerializer):
     class Meta:
         model = Course
@@ -256,16 +276,20 @@ class TeacherDiscountDecisionSerializer(serializers.ModelSerializer):
     """
     Serializer for teacher discount decisions
     """
-    student_email = serializers.CharField(source='student.email', read_only=True)
+    student_email = serializers.CharField(
+        source='student.email', read_only=True)
     course_title = serializers.CharField(source='course.title', read_only=True)
-    teo_cost_display = serializers.DecimalField(max_digits=10, decimal_places=4, read_only=True)
-    teacher_bonus_display = serializers.DecimalField(max_digits=10, decimal_places=4, read_only=True)
-    discounted_price = serializers.DecimalField(max_digits=10, decimal_places=2, read_only=True)
+    teo_cost_display = serializers.DecimalField(
+        max_digits=10, decimal_places=4, read_only=True)
+    teacher_bonus_display = serializers.DecimalField(
+        max_digits=10, decimal_places=4, read_only=True)
+    discounted_price = serializers.DecimalField(
+        max_digits=10, decimal_places=2, read_only=True)
     teacher_earnings_if_accepted = serializers.SerializerMethodField()
     teacher_earnings_if_declined = serializers.SerializerMethodField()
     is_expired = serializers.BooleanField(read_only=True)
     time_remaining = serializers.SerializerMethodField()
-    
+
     class Meta:
         model = TeacherDiscountDecision
         fields = [
@@ -279,21 +303,21 @@ class TeacherDiscountDecisionSerializer(serializers.ModelSerializer):
             'id', 'student_email', 'course_title', 'created_at',
             'teo_cost_display', 'teacher_bonus_display', 'discounted_price', 'is_expired'
         ]
-    
+
     def get_teacher_earnings_if_accepted(self, obj):
         return obj.teacher_earnings_if_accepted
-    
+
     def get_teacher_earnings_if_declined(self, obj):
         return obj.teacher_earnings_if_declined
-    
+
     def get_time_remaining(self, obj):
         if obj.is_expired:
             return 'Expired'
-        
+
         from django.utils import timezone
         remaining = obj.expires_at - timezone.now()
         hours = remaining.total_seconds() / 3600
-        
+
         if hours < 1:
             minutes = remaining.total_seconds() / 60
             return f'{int(minutes)} minutes'
@@ -308,9 +332,11 @@ class TeacherChoicePreferenceSerializer(serializers.ModelSerializer):
     """
     Serializer for teacher choice preferences
     """
-    teacher_email = serializers.CharField(source='teacher.email', read_only=True)
-    preference_display = serializers.CharField(source='get_preference_display', read_only=True)
-    
+    teacher_email = serializers.CharField(
+        source='teacher.email', read_only=True)
+    preference_display = serializers.CharField(
+        source='get_preference_display', read_only=True)
+
     class Meta:
         model = TeacherChoicePreference
         fields = [
@@ -319,7 +345,7 @@ class TeacherChoicePreferenceSerializer(serializers.ModelSerializer):
             'created_at', 'updated_at'
         ]
         read_only_fields = ['id', 'teacher_email', 'created_at', 'updated_at']
-    
+
     def validate_minimum_teo_threshold(self, value):
         """Validate threshold is positive if provided"""
         if value is not None and value <= 0:

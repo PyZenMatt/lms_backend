@@ -13,20 +13,34 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='TeoCoinDiscountRequest',
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('student_address', models.CharField(help_text="Student's wallet address", max_length=42)),
-                ('teacher_address', models.CharField(help_text="Teacher's wallet address", max_length=42)),
-                ('course_id', models.PositiveIntegerField(help_text='ID of the course being purchased')),
-                ('course_price', models.PositiveIntegerField(help_text='Original course price in cents (EUR)')),
-                ('discount_percent', models.PositiveIntegerField(help_text='Discount percentage in basis points (1000 = 10%)')),
-                ('teo_cost', models.PositiveBigIntegerField(help_text='TEO tokens student pays (in wei, 18 decimals)')),
-                ('teacher_bonus', models.PositiveBigIntegerField(help_text='Bonus TEO for teacher if accepted (in wei, 18 decimals)')),
-                ('status', models.PositiveSmallIntegerField(choices=[(0, 'Pending'), (1, 'Approved'), (2, 'Declined'), (3, 'Expired')], default=0, help_text='Current status of the discount request')),
-                ('created_at', models.DateTimeField(auto_now_add=True, help_text='When the request was created')),
-                ('expires_at', models.DateTimeField(help_text='When the request expires (auto-EUR)')),
-                ('teacher_decision_at', models.DateTimeField(blank=True, help_text='When teacher made their decision', null=True)),
-                ('decline_reason', models.TextField(blank=True, help_text='Optional reason if teacher declined')),
-                ('blockchain_tx_hash', models.CharField(blank=True, help_text='Transaction hash for blockchain operations', max_length=66)),
+                ('id', models.BigAutoField(auto_created=True,
+                 primary_key=True, serialize=False, verbose_name='ID')),
+                ('student_address', models.CharField(
+                    help_text="Student's wallet address", max_length=42)),
+                ('teacher_address', models.CharField(
+                    help_text="Teacher's wallet address", max_length=42)),
+                ('course_id', models.PositiveIntegerField(
+                    help_text='ID of the course being purchased')),
+                ('course_price', models.PositiveIntegerField(
+                    help_text='Original course price in cents (EUR)')),
+                ('discount_percent', models.PositiveIntegerField(
+                    help_text='Discount percentage in basis points (1000 = 10%)')),
+                ('teo_cost', models.PositiveBigIntegerField(
+                    help_text='TEO tokens student pays (in wei, 18 decimals)')),
+                ('teacher_bonus', models.PositiveBigIntegerField(
+                    help_text='Bonus TEO for teacher if accepted (in wei, 18 decimals)')),
+                ('status', models.PositiveSmallIntegerField(choices=[(0, 'Pending'), (1, 'Approved'), (
+                    2, 'Declined'), (3, 'Expired')], default=0, help_text='Current status of the discount request')),
+                ('created_at', models.DateTimeField(
+                    auto_now_add=True, help_text='When the request was created')),
+                ('expires_at', models.DateTimeField(
+                    help_text='When the request expires (auto-EUR)')),
+                ('teacher_decision_at', models.DateTimeField(blank=True,
+                 help_text='When teacher made their decision', null=True)),
+                ('decline_reason', models.TextField(blank=True,
+                 help_text='Optional reason if teacher declined')),
+                ('blockchain_tx_hash', models.CharField(
+                    blank=True, help_text='Transaction hash for blockchain operations', max_length=66)),
             ],
             options={
                 'verbose_name': 'TeoCoin Discount Request',

@@ -1,7 +1,8 @@
+from courses.models import Course
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
+
 from .models import User
-from courses.models import Course
 
 
 @admin.action(description="Approva i teacher selezionati")
@@ -13,13 +14,15 @@ def make_teachers_approved(modeladmin, request, queryset):
 class UserAdmin(BaseUserAdmin):
     fieldsets = (
         (None, {'fields': ('username', 'password')}),
-        ('Informazioni Personali', {'fields': ('first_name', 'last_name', 'email')}),
+        ('Informazioni Personali', {
+         'fields': ('first_name', 'last_name', 'email')}),
         ('Permessi', {
             'fields': ('is_active', 'is_staff', 'is_superuser', 'groups', 'user_permissions'),
         }),
         ("Ruolo & Blockchain", {"fields": ("role", "wallet_address")}),
         ('Date importanti', {'fields': ('last_login', 'date_joined')}),
     )
+
     def email_link(self, obj):
         from django.utils.html import format_html
         url = f"/admin/users/user/{obj.pk}/change/"
@@ -27,8 +30,10 @@ class UserAdmin(BaseUserAdmin):
 
     email_link.short_description = 'Email'
 
-    list_display = ('username', 'email_link', 'role', 'wallet_address', 'is_staff', 'is_approved', 'is_active')
-    list_filter = ('role', 'is_approved', 'is_staff', 'is_superuser', 'is_active')
+    list_display = ('username', 'email_link', 'role',
+                    'wallet_address', 'is_staff', 'is_approved', 'is_active')
+    list_filter = ('role', 'is_approved', 'is_staff',
+                   'is_superuser', 'is_active')
     search_fields = ('username', 'email', 'first_name', 'last_name')
     actions = [make_teachers_approved]
 

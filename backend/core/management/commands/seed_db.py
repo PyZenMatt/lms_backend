@@ -1,8 +1,8 @@
+
+from courses.models import Course, Exercise, Lesson
 from django.core.management.base import BaseCommand
 from users.models import User
-from courses.models import Lesson, Course, Exercise
-from rewards.models import BlockchainTransaction
-import random
+
 
 class Command(BaseCommand):
     help = 'Popola il database con dati demo'
@@ -86,6 +86,7 @@ class Command(BaseCommand):
                             }
                         )
                         if created:
-                            self.stdout.write(f"Esercizio creato: {exercise.title}")
+                            self.stdout.write(
+                                f"Esercizio creato: {exercise.title}")
 
         self.stdout.write("Popolamento del database completato!")

@@ -1,5 +1,6 @@
 from rest_framework import permissions
-from rest_framework.permissions import BasePermission, SAFE_METHODS
+from rest_framework.permissions import SAFE_METHODS, BasePermission
+
 
 class IsAdminOrApprovedTeacherOrReadOnly(BasePermission):
     """
@@ -32,11 +33,13 @@ class IsAdminOrApprovedTeacherOrReadOnly(BasePermission):
         # In tutti gli altri casi, blocca
         return False
 
+
 class IsTeacher(permissions.BasePermission):
     def has_permission(self, request, view):
         print("DEBUG IsTeacher:", getattr(request.user, 'role', None))
         return request.user.is_authenticated and request.user.role == 'teacher'
-    
+
+
 class IsStudent(BasePermission):
     def has_permission(self, request, view):
         print("DEBUG IsStudent:", getattr(request.user, 'role', None))

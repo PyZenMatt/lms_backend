@@ -1,6 +1,8 @@
+from courses.models import Course, ExerciseSubmission, Lesson
 from rest_framework import serializers
-from courses.models import Lesson, Exercise, ExerciseSubmission, Course
+
 from .models import Notification
+
 
 class NotificationSerializer(serializers.ModelSerializer):
     related_object = serializers.SerializerMethodField()
@@ -8,7 +10,8 @@ class NotificationSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Notification
-        fields = ['id', 'message', 'notification_type', 'read', 'created_at', 'related_object', 'link', 'related_object_id']
+        fields = ['id', 'message', 'notification_type', 'read',
+                  'created_at', 'related_object', 'link', 'related_object_id']
         ordering = ['-created_at']
 
     def get_link(self, obj):
@@ -19,25 +22,25 @@ class NotificationSerializer(serializers.ModelSerializer):
                 return f'/review/{obj.related_object_id}'
             elif obj.notification_type == 'exercise_graded' and obj.related_object_id:
                 return f'/submission-graded/{obj.related_object_id}'
-            
+
             # Corsi e Lezioni
             elif obj.notification_type in ['lesson_purchased', 'lesson_sold', 'new_lesson_added'] and obj.related_object_id:
                 return f'/lezioni/{obj.related_object_id}'
             elif obj.notification_type in ['course_approved', 'course_purchased', 'course_sold', 'course_completed', 'new_course_published', 'course_updated'] and obj.related_object_id:
                 return f'/corsi/{obj.related_object_id}'
-            
+
             # TeoCoins e Rewards - redirect al profilo
             elif obj.notification_type in ['teocoins_earned', 'teocoins_spent', 'reward_earned', 'bonus_received']:
                 return '/profile'
-            
+
             # Achievements e Sistema
             elif obj.notification_type in ['achievement_unlocked', 'level_up']:
                 return '/profile'
-            
+
             # Default per notifiche di sistema
             elif obj.notification_type in ['system_message', 'welcome_message']:
                 return '/dashboard/student'
-            
+
             return None
         except Exception:
             return None
@@ -55,7 +58,8 @@ class NotificationSerializer(serializers.ModelSerializer):
     def get_related_object(self, obj):
         try:
             if obj.notification_type == 'exercise_graded':
-                submission = ExerciseSubmission.objects.get(id=obj.related_object_id)
+                submission = ExerciseSubmission.objects.get(
+                    id=obj.related_object_id)
                 return {
                     'id': submission.id,
                     'exercise_title': submission.exercise.title,
@@ -83,6 +87,5 @@ class NotificationSerializer(serializers.ModelSerializer):
                     'amount': obj.related_object_id,
                     'type': obj.notification_type
                 }
-        except Exception as e:
+        except Exception:
             return None
-        

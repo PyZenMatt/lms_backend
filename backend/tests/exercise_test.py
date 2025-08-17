@@ -1,26 +1,27 @@
 
-import pytest
 import os
+
 import django
-from decimal import Decimal
+import pytest
+from courses.models import (Course, ExerciseReview, ExerciseSubmission)
+from django.utils import timezone
+from rewards.blockchain_rewards import BlockchainRewards
+from services.db_teocoin_service import DBTeoCoinService
+from users.models import User
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'schoolplatform.settings')
 django.setup()
 
-from services.db_teocoin_service import DBTeoCoinService
-from users.models import User
-from courses.models import Course, Lesson, Exercise, ExerciseSubmission, ExerciseReview
-from rewards.blockchain_rewards import BlockchainRewards, BlockchainRewardManager
-from django.utils import timezone
-import random
 
 @pytest.mark.quarantine
 @pytest.mark.slow
 @pytest.mark.django_db
 def test_complete_exercise_system():
     db_service = DBTeoCoinService()
-    student = User.objects.filter(role='student').first() or User.objects.first()
-    teacher = User.objects.filter(role='teacher').first() or User.objects.filter(is_staff=True).first()
+    student = User.objects.filter(
+        role='student').first() or User.objects.first()
+    teacher = User.objects.filter(role='teacher').first(
+    ) or User.objects.filter(is_staff=True).first()
     course = Course.objects.first()
     assert course is not None, "No course found - cannot test exercises"
     lesson = course.lessons.first()
@@ -30,10 +31,12 @@ def test_complete_exercise_system():
 
     # Calcolo reward
     from rewards.blockchain_rewards import BlockchainRewardCalculator
-    total_pool = BlockchainRewardCalculator.calculate_course_reward_pool(course)
+    total_pool = BlockchainRewardCalculator.calculate_course_reward_pool(
+        course)
     total_exercises = sum(l.exercises.count() for l in course.lessons.all())
     if total_exercises > 0:
-        exercise_rewards = BlockchainRewardCalculator.distribute_exercise_rewards(course, total_exercises)
+        exercise_rewards = BlockchainRewardCalculator.distribute_exercise_rewards(
+            course, total_exercises)
         exercise_index = 0
         current_exercise_index = 0
         for l in course.lessons.all():
@@ -42,12 +45,13 @@ def test_complete_exercise_system():
                     current_exercise_index = exercise_index
                     break
                 exercise_index += 1
-        our_exercise_reward = exercise_rewards[current_exercise_index]
+        exercise_rewards[current_exercise_index]
 
     initial_balance = db_service.get_balance(student)
 
     # Submission
-    submission = ExerciseSubmission.objects.filter(exercise=exercise, student=student).first()
+    submission = ExerciseSubmission.objects.filter(
+        exercise=exercise, student=student).first()
     if not submission:
         submission = ExerciseSubmission.objects.create(
             exercise=exercise,
@@ -62,7 +66,7 @@ def test_complete_exercise_system():
     existing_reward = BlockchainTransaction.objects.filter(
         user=student,
         transaction_type='exercise_reward',
-    related_object_id=str(submission.pk)
+        related_object_id=str(submission.pk)
     ).first()
     if not existing_reward:
         result = BlockchainRewards.award_exercise_completion(submission)
@@ -74,7 +78,8 @@ def test_complete_exercise_system():
 
     # Review system
     if teacher:
-        review = ExerciseReview.objects.filter(submission=submission, reviewer=teacher).first()
+        review = ExerciseReview.objects.filter(
+            submission=submission, reviewer=teacher).first()
         if not review:
             review = ExerciseReview.objects.create(
                 submission=submission,
@@ -92,7 +97,8 @@ def test_complete_exercise_system():
             ).first()
             if not existing_review_reward:
                 reviewer_initial = db_service.get_balance(teacher)
-                review_result = BlockchainRewards.award_review_completion(review)
+                review_result = BlockchainRewards.award_review_completion(
+                    review)
                 assert review_result is not None, "Reviewer reward assignment failed!"
                 reviewer_new = db_service.get_balance(teacher)
                 assert reviewer_new > reviewer_initial, "Reviewer balance did not increase after reward"

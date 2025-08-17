@@ -13,14 +13,22 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='StakingActivity',
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('teacher_address', models.CharField(help_text="Teacher's wallet address", max_length=42)),
-                ('activity_type', models.CharField(choices=[('stake', 'Stake Tokens'), ('unstake', 'Unstake Tokens'), ('tier_update', 'Tier Update')], max_length=20)),
-                ('teo_amount', models.DecimalField(decimal_places=8, help_text='TEO amount involved', max_digits=18)),
-                ('previous_tier', models.CharField(blank=True, help_text='Previous staking tier', max_length=20)),
-                ('new_tier', models.CharField(help_text='New staking tier', max_length=20)),
-                ('platform_tx_hash', models.CharField(help_text='Platform transaction hash', max_length=66)),
-                ('gas_cost_matic', models.DecimalField(decimal_places=6, help_text='Platform gas cost in MATIC', max_digits=10)),
+                ('id', models.BigAutoField(auto_created=True,
+                 primary_key=True, serialize=False, verbose_name='ID')),
+                ('teacher_address', models.CharField(
+                    help_text="Teacher's wallet address", max_length=42)),
+                ('activity_type', models.CharField(choices=[('stake', 'Stake Tokens'), (
+                    'unstake', 'Unstake Tokens'), ('tier_update', 'Tier Update')], max_length=20)),
+                ('teo_amount', models.DecimalField(decimal_places=8,
+                 help_text='TEO amount involved', max_digits=18)),
+                ('previous_tier', models.CharField(blank=True,
+                 help_text='Previous staking tier', max_length=20)),
+                ('new_tier', models.CharField(
+                    help_text='New staking tier', max_length=20)),
+                ('platform_tx_hash', models.CharField(
+                    help_text='Platform transaction hash', max_length=66)),
+                ('gas_cost_matic', models.DecimalField(decimal_places=6,
+                 help_text='Platform gas cost in MATIC', max_digits=10)),
                 ('created_at', models.DateTimeField(auto_now_add=True)),
             ],
             options={
@@ -31,14 +39,22 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='PlatformGasExpense',
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('expense_type', models.CharField(choices=[('student_approval', 'Student Approval'), ('discount_creation', 'Discount Creation'), ('discount_approval', 'Discount Approval'), ('teacher_staking', 'Teacher Staking'), ('teacher_unstaking', 'Teacher Unstaking'), ('batch_operations', 'Batch Operations')], max_length=30)),
-                ('transaction_hash', models.CharField(help_text='Transaction hash', max_length=66, unique=True)),
-                ('gas_used', models.PositiveIntegerField(help_text='Gas units used')),
-                ('gas_price_gwei', models.DecimalField(decimal_places=2, help_text='Gas price in Gwei', max_digits=10)),
-                ('total_cost_matic', models.DecimalField(decimal_places=6, help_text='Total cost in MATIC', max_digits=10)),
-                ('total_cost_usd', models.DecimalField(blank=True, decimal_places=4, help_text='Total cost in USD', max_digits=8, null=True)),
-                ('related_address', models.CharField(blank=True, help_text='Related user address', max_length=42)),
+                ('id', models.BigAutoField(auto_created=True,
+                 primary_key=True, serialize=False, verbose_name='ID')),
+                ('expense_type', models.CharField(choices=[('student_approval', 'Student Approval'), ('discount_creation', 'Discount Creation'), ('discount_approval', 'Discount Approval'), (
+                    'teacher_staking', 'Teacher Staking'), ('teacher_unstaking', 'Teacher Unstaking'), ('batch_operations', 'Batch Operations')], max_length=30)),
+                ('transaction_hash', models.CharField(
+                    help_text='Transaction hash', max_length=66, unique=True)),
+                ('gas_used', models.PositiveIntegerField(
+                    help_text='Gas units used')),
+                ('gas_price_gwei', models.DecimalField(decimal_places=2,
+                 help_text='Gas price in Gwei', max_digits=10)),
+                ('total_cost_matic', models.DecimalField(decimal_places=6,
+                 help_text='Total cost in MATIC', max_digits=10)),
+                ('total_cost_usd', models.DecimalField(blank=True, decimal_places=4,
+                 help_text='Total cost in USD', max_digits=8, null=True)),
+                ('related_address', models.CharField(blank=True,
+                 help_text='Related user address', max_length=42)),
                 ('created_at', models.DateTimeField(auto_now_add=True)),
             ],
             options={
@@ -49,13 +65,20 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='PlatformAllowance',
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('student_address', models.CharField(help_text="Student's wallet address", max_length=42, unique=True)),
-                ('total_allowance', models.DecimalField(decimal_places=2, help_text='Total TEO allowance given', max_digits=12)),
-                ('used_allowance', models.DecimalField(decimal_places=2, default=0, help_text='TEO allowance used', max_digits=12)),
-                ('remaining_allowance', models.DecimalField(decimal_places=2, help_text='TEO allowance remaining', max_digits=12)),
-                ('last_topped_up', models.DateTimeField(blank=True, help_text='Last top-up timestamp', null=True)),
-                ('approval_tx_hash', models.CharField(blank=True, help_text='Initial approval transaction', max_length=66)),
+                ('id', models.BigAutoField(auto_created=True,
+                 primary_key=True, serialize=False, verbose_name='ID')),
+                ('student_address', models.CharField(
+                    help_text="Student's wallet address", max_length=42, unique=True)),
+                ('total_allowance', models.DecimalField(decimal_places=2,
+                 help_text='Total TEO allowance given', max_digits=12)),
+                ('used_allowance', models.DecimalField(decimal_places=2,
+                 default=0, help_text='TEO allowance used', max_digits=12)),
+                ('remaining_allowance', models.DecimalField(decimal_places=2,
+                 help_text='TEO allowance remaining', max_digits=12)),
+                ('last_topped_up', models.DateTimeField(
+                    blank=True, help_text='Last top-up timestamp', null=True)),
+                ('approval_tx_hash', models.CharField(blank=True,
+                 help_text='Initial approval transaction', max_length=66)),
                 ('created_at', models.DateTimeField(auto_now_add=True)),
                 ('updated_at', models.DateTimeField(auto_now=True)),
             ],
@@ -67,22 +90,36 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='DiscountRequest',
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('student_address', models.CharField(help_text="Student's wallet address", max_length=42)),
-                ('teacher_address', models.CharField(help_text="Teacher's wallet address", max_length=42)),
-                ('course_id', models.PositiveIntegerField(help_text='Course ID for discount')),
-                ('course_price', models.PositiveIntegerField(help_text='Course price in EUR cents')),
-                ('discount_percent', models.PositiveIntegerField(help_text='Discount percentage (5-15)')),
-                ('teo_cost', models.DecimalField(decimal_places=2, help_text='TEO cost for discount', max_digits=12)),
-                ('status', models.CharField(choices=[('pending', 'Pending'), ('approved', 'Approved'), ('declined', 'Declined'), ('expired', 'Expired')], default='pending', max_length=20)),
-                ('student_signature', models.CharField(help_text="Student's message signature", max_length=132)),
-                ('platform_tx_hash', models.CharField(blank=True, help_text='Platform transaction hash', max_length=66)),
-                ('teacher_decision_reason', models.TextField(blank=True, help_text="Teacher's reason for decision")),
+                ('id', models.BigAutoField(auto_created=True,
+                 primary_key=True, serialize=False, verbose_name='ID')),
+                ('student_address', models.CharField(
+                    help_text="Student's wallet address", max_length=42)),
+                ('teacher_address', models.CharField(
+                    help_text="Teacher's wallet address", max_length=42)),
+                ('course_id', models.PositiveIntegerField(
+                    help_text='Course ID for discount')),
+                ('course_price', models.PositiveIntegerField(
+                    help_text='Course price in EUR cents')),
+                ('discount_percent', models.PositiveIntegerField(
+                    help_text='Discount percentage (5-15)')),
+                ('teo_cost', models.DecimalField(decimal_places=2,
+                 help_text='TEO cost for discount', max_digits=12)),
+                ('status', models.CharField(choices=[('pending', 'Pending'), ('approved', 'Approved'), (
+                    'declined', 'Declined'), ('expired', 'Expired')], default='pending', max_length=20)),
+                ('student_signature', models.CharField(
+                    help_text="Student's message signature", max_length=132)),
+                ('platform_tx_hash', models.CharField(blank=True,
+                 help_text='Platform transaction hash', max_length=66)),
+                ('teacher_decision_reason', models.TextField(
+                    blank=True, help_text="Teacher's reason for decision")),
                 ('created_at', models.DateTimeField(auto_now_add=True)),
                 ('teacher_responded_at', models.DateTimeField(blank=True, null=True)),
-                ('expires_at', models.DateTimeField(help_text='Request expiration time')),
-                ('contract_request_id', models.PositiveIntegerField(blank=True, help_text='Contract request ID', null=True)),
-                ('gas_cost_matic', models.DecimalField(blank=True, decimal_places=6, help_text='Platform gas cost in MATIC', max_digits=10, null=True)),
+                ('expires_at', models.DateTimeField(
+                    help_text='Request expiration time')),
+                ('contract_request_id', models.PositiveIntegerField(
+                    blank=True, help_text='Contract request ID', null=True)),
+                ('gas_cost_matic', models.DecimalField(blank=True, decimal_places=6,
+                 help_text='Platform gas cost in MATIC', max_digits=10, null=True)),
             ],
             options={
                 'ordering': ['-created_at'],

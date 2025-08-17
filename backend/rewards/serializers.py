@@ -1,4 +1,5 @@
 from rest_framework import serializers
+
 from .models import BlockchainTransaction
 
 
@@ -11,20 +12,20 @@ class BlockchainTransactionSerializer(serializers.ModelSerializer):
     description = serializers.SerializerMethodField()
     related_object_title = serializers.SerializerMethodField()
     user = serializers.SerializerMethodField()
-    
+
     class Meta:
         model = BlockchainTransaction
         fields = [
-            'id', 
-            'transaction_type', 
-            'amount', 
-            'from_address', 
-            'to_address', 
-            'tx_hash', 
-            'status', 
+            'id',
+            'transaction_type',
+            'amount',
+            'from_address',
+            'to_address',
+            'tx_hash',
+            'status',
             'error_message',
             'notes',
-            'created_at', 
+            'created_at',
             'confirmed_at',
             'explorer_url',
             'description',
@@ -37,7 +38,7 @@ class BlockchainTransactionSerializer(serializers.ModelSerializer):
         """Generate a human-readable description of the transaction"""
         if obj.notes:
             return obj.notes
-            
+
         descriptions = {
             'course_purchase': f"Acquisto corso (${obj.amount} TEO)",
             'course_earned': f"Guadagno da vendita corso (${obj.amount} TEO)",
@@ -46,28 +47,28 @@ class BlockchainTransactionSerializer(serializers.ModelSerializer):
             'manual_mint': f"Distribuzione manuale (${obj.amount} TEO)",
             'reward_pool': f"Ricompensa dal pool (${obj.amount} TEO)"
         }
-        
+
         return descriptions.get(obj.transaction_type, f"Transazione (${obj.amount} TEO)")
 
     def get_related_object_title(self, obj):
         """Get the title of the related object (course, exercise, etc.)"""
         if not obj.related_object_id:
             return None
-            
+
         try:
             if obj.transaction_type in ['course_purchase', 'course_earned']:
                 from courses.models import Course
                 course = Course.objects.get(pk=obj.related_object_id)
                 return course.title
-                
+
             elif obj.transaction_type in ['exercise_reward']:
                 from courses.models import Exercise
                 exercise = Exercise.objects.get(pk=obj.related_object_id)
                 return exercise.title
-                
+
         except Exception:
             pass
-            
+
         return None
 
     def get_user(self, obj):
@@ -81,4 +82,3 @@ class BlockchainTransactionSerializer(serializers.ModelSerializer):
                 'last_name': obj.user.last_name
             }
         return None
-

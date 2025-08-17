@@ -1,22 +1,21 @@
 """
 User profile management views
 """
-from rest_framework import generics, status
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated, AllowAny
-from rest_framework.decorators import api_view, permission_classes
-from rest_framework.parsers import MultiPartParser, FormParser
-from django.shortcuts import get_object_or_404
-from courses.models import CourseEnrollment
-from authentication.serializers import RegisterSerializer
-from users.models import User
-from ..serializers import UserProfileSerializer
 import logging
 
+from authentication.serializers import RegisterSerializer
+from rest_framework import generics, status
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.parsers import FormParser, MultiPartParser
+from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.response import Response
+from rest_framework.views import APIView
+from services.exceptions import TeoArtServiceException, UserNotFoundError
 # Service imports
 from services.user_service import user_service
-from services.exceptions import TeoArtServiceException, UserNotFoundError
+from users.models import User
+
+from ..serializers import UserProfileSerializer
 
 logger = logging.getLogger(__name__)
 
@@ -45,7 +44,8 @@ def user_profile(request):
         logger.warning(f"Service error in user_profile: {e}")
         return Response(
             {'error': str(e)},
-            status=e.status_code if hasattr(e, 'status_code') else status.HTTP_400_BAD_REQUEST
+            status=e.status_code if hasattr(
+                e, 'status_code') else status.HTTP_400_BAD_REQUEST
         )
     except Exception as e:
         logger.error(f"Unexpected error in user_profile: {e}")
@@ -69,20 +69,21 @@ class UserProfileView(APIView):
             logger.warning(f"Service error in UserProfileView.get: {e}")
             return Response(
                 {'error': str(e)},
-                status=e.status_code if hasattr(e, 'status_code') else status.HTTP_400_BAD_REQUEST
+                status=e.status_code if hasattr(
+                    e, 'status_code') else status.HTTP_400_BAD_REQUEST
             )
         except Exception as e:
             logger.error(f"Unexpected error in UserProfileView.get: {e}")
             return Response(
-                {"error": "Error retrieving profile"}, 
+                {"error": "Error retrieving profile"},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 
     def put(self, request):
         """Update user profile"""
         serializer = UserProfileSerializer(
-            request.user, 
-            data=request.data, 
+            request.user,
+            data=request.data,
             partial=True
         )
         if serializer.is_valid():

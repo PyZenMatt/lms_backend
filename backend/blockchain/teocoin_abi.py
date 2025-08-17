@@ -49,7 +49,7 @@ TEOCOIN_ABI = [
             {
                 "indexed": True,
                 "internalType": "address",
-                "name": "spender", 
+                "name": "spender",
                 "type": "address"
             },
             {

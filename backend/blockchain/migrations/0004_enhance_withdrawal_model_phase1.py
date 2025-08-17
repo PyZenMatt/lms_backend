@@ -40,12 +40,14 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='teocoinwithdrawalrequest',
             name='gas_cost_eur',
-            field=models.DecimalField(decimal_places=2, max_digits=8, null=True),
+            field=models.DecimalField(
+                decimal_places=2, max_digits=8, null=True),
         ),
         migrations.AddField(
             model_name='teocoinwithdrawalrequest',
             name='gas_price_gwei',
-            field=models.DecimalField(decimal_places=2, max_digits=8, null=True),
+            field=models.DecimalField(
+                decimal_places=2, max_digits=8, null=True),
         ),
         migrations.AddField(
             model_name='teocoinwithdrawalrequest',
@@ -75,18 +77,22 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='teocoinwithdrawalrequest',
             name='status',
-            field=models.CharField(choices=[('pending', 'Pending'), ('processing', 'Processing'), ('completed', 'Completed'), ('failed', 'Failed'), ('cancelled', 'Cancelled')], default='pending', max_length=20),
+            field=models.CharField(choices=[('pending', 'Pending'), ('processing', 'Processing'), (
+                'completed', 'Completed'), ('failed', 'Failed'), ('cancelled', 'Cancelled')], default='pending', max_length=20),
         ),
         migrations.AddIndex(
             model_name='teocoinwithdrawalrequest',
-            index=models.Index(fields=['metamask_address'], name='blockchain__metamas_bb4227_idx'),
+            index=models.Index(
+                fields=['metamask_address'], name='blockchain__metamas_bb4227_idx'),
         ),
         migrations.AddIndex(
             model_name='teocoinwithdrawalrequest',
-            index=models.Index(fields=['status', 'created_at'], name='blockchain__status_09d5fc_idx'),
+            index=models.Index(
+                fields=['status', 'created_at'], name='blockchain__status_09d5fc_idx'),
         ),
         migrations.AddIndex(
             model_name='teocoinwithdrawalrequest',
-            index=models.Index(fields=['daily_withdrawal_count'], name='blockchain__daily_w_1908bf_idx'),
+            index=models.Index(
+                fields=['daily_withdrawal_count'], name='blockchain__daily_w_1908bf_idx'),
         ),
     ]

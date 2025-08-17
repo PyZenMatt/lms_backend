@@ -1,23 +1,24 @@
-from rest_framework import generics, status
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated, IsAdminUser
-from rest_framework.exceptions import PermissionDenied
-from django.shortcuts import get_object_or_404
-from django.db import transaction
-from django.db import models
-from django.db.models import Q
-from courses.models import Exercise, Lesson, Course, ExerciseSubmission, ExerciseReview
-from courses.serializers import ExerciseSerializer, ExerciseSubmissionSerializer
-from users.permissions import IsTeacher
-from django.utils import timezone
-from datetime import timedelta
-import random
-from users.models import User
-from notifications.models import Notification
-from rest_framework_simplejwt.tokens import RefreshToken
-from rest_framework.generics import RetrieveAPIView
 import logging
+import random
+
+from courses.models import (Course, Exercise, ExerciseReview,
+                            ExerciseSubmission, Lesson)
+from courses.serializers import (ExerciseSerializer,
+                                 ExerciseSubmissionSerializer)
+from django.db import transaction
+from django.db.models import Q
+from django.shortcuts import get_object_or_404
+from django.utils import timezone
+from notifications.models import Notification
+from rest_framework import generics, status
+from rest_framework.exceptions import PermissionDenied
+from rest_framework.generics import RetrieveAPIView
+from rest_framework.permissions import IsAdminUser, IsAuthenticated
+from rest_framework.response import Response
+from rest_framework.views import APIView
+from rest_framework_simplejwt.tokens import RefreshToken
+from users.models import User
+from users.permissions import IsTeacher
 
 logger = logging.getLogger(__name__)
 
@@ -28,10 +29,10 @@ def create_reward_transaction(user, amount, transaction_type, submission_id, ref
     Maps specific reward types to DB-allowed transaction types and encodes the
     semantic type in the description for auditing.
     """
-    from services.db_teocoin_service import db_teocoin_service
-    
     # Convert amount to Decimal for DB service
     from decimal import Decimal
+
+    from services.db_teocoin_service import db_teocoin_service
     amount_decimal = Decimal(str(amount))
     # Encode original semantic type in description for auditing, but map to a
     # valid DB transaction type (choices) for persistence
@@ -47,7 +48,7 @@ def create_reward_transaction(user, amount, transaction_type, submission_id, ref
         transaction_type=mapped_type,
         description=description
     )
-    
+
     if success:
         # Return a mock object that mimics the old BlockchainTransaction for compatibility
         class MockTransaction:
@@ -58,10 +59,11 @@ def create_reward_transaction(user, amount, transaction_type, submission_id, ref
                 self.transaction_type = transaction_type
                 self.submission_id = submission_id
                 self.success = True
-        
+
         return MockTransaction(user, amount_decimal, transaction_type, submission_id)
     else:
-        logger.error(f"Failed to create reward transaction for {user.email}: {amount} {transaction_type}")
+        logger.error(
+            f"Failed to create reward transaction for {user.email}: {amount} {transaction_type}")
         return None
 
 
@@ -91,18 +93,21 @@ class CreateExerciseView(APIView):
 
         course = get_object_or_404(Course, id=course_id, teacher=request.user)
         if not (request.user.is_staff or request.user.is_superuser) and not course.is_approved:
-            raise PermissionDenied("Non puoi aggiungere esercizi a un corso non approvato.")
+            raise PermissionDenied(
+                "Non puoi aggiungere esercizi a un corso non approvato.")
         lesson = get_object_or_404(Lesson, id=lesson_id, course=course)
 
         data = request.data.copy()
         data['lesson'] = lesson.id
 
-        serializer = ExerciseSerializer(data=data, context={'request': request})
+        serializer = ExerciseSerializer(
+            data=data, context={'request': request})
         if serializer.is_valid():
-            exercise = serializer.save()
+            serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    
+
+
 class SubmissionDetailForReviewerView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -113,7 +118,8 @@ class SubmissionDetailForReviewerView(APIView):
         is_staff = getattr(request.user, 'is_staff', False)
         is_course_teacher = False
         if submission.exercise and submission.exercise.lesson and submission.exercise.lesson.course:
-            is_course_teacher = (submission.exercise.lesson.course.teacher_id == request.user.id)
+            is_course_teacher = (
+                submission.exercise.lesson.course.teacher_id == request.user.id)
         is_reviewer = submission.reviewers.filter(id=request.user.id).exists()
 
         if not (is_owner or is_staff or is_course_teacher or is_reviewer):
@@ -144,8 +150,10 @@ class SubmitExerciseView(APIView):
             content=content
         )
 
-        eligible_reviewers = User.objects.filter(role__in=['student', 'teacher']).exclude(id=request.user.id)
-        reviewers = random.sample(list(eligible_reviewers), min(3, eligible_reviewers.count()))
+        eligible_reviewers = User.objects.filter(
+            role__in=['student', 'teacher']).exclude(id=request.user.id)
+        reviewers = random.sample(
+            list(eligible_reviewers), min(3, eligible_reviewers.count()))
 
         for reviewer in reviewers:
             ExerciseReview.objects.create(
@@ -159,7 +167,7 @@ class SubmitExerciseView(APIView):
                 notification_type='review_assigned',
                 related_object_id=submission.id,
                 link=f"/review/{submission.id}"
-                )
+            )
 
         submission.save()
         # Ritorna i dati reali della submission creata, così il frontend si sincronizza subito
@@ -182,7 +190,8 @@ class ReviewExerciseView(APIView):
         if not score or not (1 <= int(score) <= 10):
             return Response({"error": "Il punteggio deve essere compreso tra 1 e 10."}, status=status.HTTP_400_BAD_REQUEST)
 
-        review = get_object_or_404(ExerciseReview, submission=submission, reviewer=request.user)
+        review = get_object_or_404(
+            ExerciseReview, submission=submission, reviewer=request.user)
         if review.score is not None:
             return Response({"error": "Hai già valutato questo esercizio."}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -197,7 +206,8 @@ class ReviewExerciseView(APIView):
                 user=request.user,
                 transaction_type='bonus'
             ).filter(
-                Q(description__contains='[review_reward]') & Q(description__contains=f"ref=review:{review.id}")
+                Q(description__contains='[review_reward]') & Q(
+                    description__contains=f"ref=review:{review.id}")
             ).exists()
             if not exists:
                 _ = create_reward_transaction(
@@ -218,22 +228,26 @@ class ReviewExerciseView(APIView):
             # Mark as reviewed FIRST to prevent double processing
             submission.reviewed = True
             submission.save(update_fields=['reviewed'])
-            
-            logger.info(f"🔄 Starting reward processing for submission {submission.id}")
-            
+
+            logger.info(
+                f"🔄 Starting reward processing for submission {submission.id}")
+
             # Use atomic transaction to ensure all rewards are created
             try:
                 with transaction.atomic():
-                    logger.info(f"📊 Calculating average score for submission {submission.id}")
+                    logger.info(
+                        f"📊 Calculating average score for submission {submission.id}")
                     # Calcola media e numero di review completate
                     scores = [r.score for r in reviews if r.score is not None]
                     completed_count = len(scores)
-                    average = (sum(scores) / completed_count) if completed_count > 0 else None
+                    average = (
+                        sum(scores) / completed_count) if completed_count > 0 else None
 
                     # Regola: studente premiato solo se almeno 3 review e media >= 6
                     passed = average is not None and completed_count >= 3 and average >= 6
 
-                    logger.info(f"📈 Submission {submission.id}: completed={completed_count}, average={average}, passed={passed}")
+                    logger.info(
+                        f"📈 Submission {submission.id}: completed={completed_count}, average={average}, passed={passed}")
 
                     # Update submission status
                     submission.passed = passed
@@ -247,7 +261,8 @@ class ReviewExerciseView(APIView):
                             user=submission.student,
                             transaction_type='bonus'
                         ).filter(
-                            Q(description__contains='[exercise_reward]') & Q(description__contains=f"submission {submission.id}")
+                            Q(description__contains='[exercise_reward]') & Q(
+                                description__contains=f"submission {submission.id}")
                         ).exists()
 
                         if not existing_student_reward:
@@ -261,17 +276,22 @@ class ReviewExerciseView(APIView):
                             )
                             reward_transactions_created.append(exercise_reward)
                             if exercise_reward:
-                                logger.info(f"✅ Exercise reward transaction created: ID {exercise_reward.id}")
+                                logger.info(
+                                    f"✅ Exercise reward transaction created: ID {exercise_reward.id}")
                             else:
-                                logger.error(f"❌ Failed to create exercise reward transaction")
+                                logger.error(
+                                    f"❌ Failed to create exercise reward transaction")
                         else:
-                            logger.info("ℹ️ Exercise reward already exists; skipping duplicate grant.")
-                    
-                    logger.info(f"💾 Saving submission changes for {submission.id}")
+                            logger.info(
+                                "ℹ️ Exercise reward already exists; skipping duplicate grant.")
+
+                    logger.info(
+                        f"💾 Saving submission changes for {submission.id}")
                     # Save submission changes
                     submission.save()
 
-                    logger.info(f"📢 Creating notification for student {submission.student.username}")
+                    logger.info(
+                        f"📢 Creating notification for student {submission.student.username}")
                     # Create notification for student
                     Notification.objects.create(
                         user=submission.student,
@@ -279,28 +299,31 @@ class ReviewExerciseView(APIView):
                         notification_type='exercise_graded',
                         related_object_id=getattr(submission, 'id', None)
                     )
-                    
-                    logger.info(f"✅ Review completed for submission {submission.id}. Created {len(reward_transactions_created)} reward transactions.")
-                    
+
+                    logger.info(
+                        f"✅ Review completed for submission {submission.id}. Created {len(reward_transactions_created)} reward transactions.")
+
             except Exception as e:
-                logger.error(f"❌ Error processing rewards for submission {submission.id}: {e}")
+                logger.error(
+                    f"❌ Error processing rewards for submission {submission.id}: {e}")
                 logger.error(f"❌ Exception type: {type(e).__name__}")
                 import traceback
                 logger.error(f"❌ Full traceback:\n{traceback.format_exc()}")
-                
+
                 # If reward processing fails, at least mark the review as complete
                 # The rewards can be processed later manually
                 if not submission.reviewed:
                     submission.reviewed = True
                     submission.save(update_fields=['reviewed'])
-                
+
                 # Return a more specific error message
                 return Response({
                     "error": f"Errore durante il processing dei reward: {str(e)}",
                     "details": "La valutazione è stata salvata ma ci potrebbero essere problemi con i reward. Contatta l'amministratore."
                 }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-        logger.info(f"🎉 Successfully returning response for submission {submission.id}")        
+        logger.info(
+            f"🎉 Successfully returning response for submission {submission.id}")
         return Response({"success": "Esercizio valutato con successo."}, status=status.HTTP_201_CREATED)
 
 
@@ -310,14 +333,17 @@ class LessonExercisesView(APIView):
     def get(self, request, lesson_id):
         lesson = get_object_or_404(Lesson, id=lesson_id)
         exercises = lesson.exercises.all()
-        data = [{"id": e.id, "title": e.title, "description": e.description} for e in exercises]
+        data = [{"id": e.id, "title": e.title, "description": e.description}
+                for e in exercises]
         return Response(data, status=status.HTTP_200_OK)
 
 
 class MySubmissionView(APIView):
     permission_classes = [IsAuthenticated]
+
     def get(self, request, exercise_id):
-        submission = ExerciseSubmission.objects.filter(exercise_id=exercise_id, student=request.user).first()
+        submission = ExerciseSubmission.objects.filter(
+            exercise_id=exercise_id, student=request.user).first()
         if not submission:
             return Response({'detail': 'Nessuna submission trovata.'}, status=404)
         return Response(ExerciseSubmissionSerializer(submission).data)
@@ -363,11 +389,13 @@ class ReviewHistoryView(APIView):
         ]
         return Response(data)
 
+
 class AssignedReviewsView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        reviews = ExerciseReview.objects.filter(reviewer=request.user, score__isnull=True)
+        reviews = ExerciseReview.objects.filter(
+            reviewer=request.user, score__isnull=True)
         data = [
             {
                 'pk': r.pk,
@@ -379,8 +407,10 @@ class AssignedReviewsView(APIView):
         ]
         return Response(data)
 
+
 class ExerciseSubmissionsView(APIView):
     permission_classes = [IsAuthenticated]
+
     def get(self, request, exercise_id):
         exercise = get_object_or_404(Exercise, pk=exercise_id)
         # Solo admin o docente del corso (gestione lesson/course null safe)
@@ -393,8 +423,10 @@ class ExerciseSubmissionsView(APIView):
         data = ExerciseSubmissionSerializer(submissions, many=True).data
         return Response(data)
 
+
 class ExerciseDebugReviewersView(APIView):
     permission_classes = [IsAuthenticated, IsAdminUser]
+
     def get(self, request, exercise_id):
         exercise = get_object_or_404(Exercise, pk=exercise_id)
         submissions = ExerciseSubmission.objects.filter(exercise=exercise)
@@ -420,14 +452,16 @@ class ExerciseDebugReviewersView(APIView):
             })
         return Response(result)
 
+
 class ExerciseDetailView(RetrieveAPIView):
     serializer_class = ExerciseSerializer
     permission_classes = [IsAuthenticated]
     lookup_field = 'id'
-    
+
     def get_queryset(self):
         # ✅ OTTIMIZZATO - Prevent N+1 queries
         return Exercise.objects.select_related('lesson', 'lesson__course', 'lesson__course__teacher')
+
 
 class SubmissionDetailView(APIView):
     permission_classes = [IsAuthenticated]
@@ -439,7 +473,8 @@ class SubmissionDetailView(APIView):
         is_staff = getattr(request.user, 'is_staff', False)
         is_course_teacher = False
         if submission.exercise and submission.exercise.lesson and submission.exercise.lesson.course:
-            is_course_teacher = (submission.exercise.lesson.course.teacher_id == request.user.id)
+            is_course_teacher = (
+                submission.exercise.lesson.course.teacher_id == request.user.id)
 
         if not (is_owner or is_staff or is_course_teacher):
             return Response({'detail': 'Non autorizzato.'}, status=403)

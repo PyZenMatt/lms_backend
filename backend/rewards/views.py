@@ -7,12 +7,7 @@ continue working while providing better code organization.
 """
 
 # Import all views from the modular structure
-from .views import *
 
 # This ensures that all existing imports like:
 # from rewards.views import UserTeoCoinsView
 # continue to work without any changes to other files.
-
-
-
-

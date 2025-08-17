@@ -8,20 +8,20 @@ Classes:
     BlockchainTransactionSerializer: For blockchain transaction data
     TeacherCourseSerializer: For teacher course management data
 """
+from courses.models import Course
 from rest_framework import serializers
 from rewards.models import BlockchainTransaction
-from courses.models import Course
 from users.serializers import UserSerializer
 
 
 class BlockchainTransactionSerializer(serializers.ModelSerializer):
     """
     Serializer for blockchain transactions.
-    
+
     This serializer replaces the old TeoCoinTransaction serializer and provides
     detailed information about blockchain transactions including buyer information
     and human-readable descriptions.
-    
+
     Fields:
         - id: Transaction ID
         - created_at: Transaction timestamp
@@ -38,17 +38,17 @@ class BlockchainTransactionSerializer(serializers.ModelSerializer):
     class Meta:
         model = BlockchainTransaction
         fields = [
-            'id', 'created_at', 'amount', 'transaction_type', 
+            'id', 'created_at', 'amount', 'transaction_type',
             'buyer', 'description', 'tx_hash', 'status'
         ]
 
     def get_buyer(self, obj):
         """
         Get the buyer information for course-related transactions.
-        
+
         Args:
             obj: BlockchainTransaction instance
-            
+
         Returns:
             str: Username of the buyer or None
         """
@@ -60,20 +60,20 @@ class BlockchainTransactionSerializer(serializers.ModelSerializer):
             ).order_by('-created_at').first()
             if purchase and purchase.user:
                 return purchase.user.username
-                
+
         # For course purchases, the buyer is the user
         if obj.transaction_type == 'course_purchase' and obj.user:
             return obj.user.username
-            
+
         return None
 
     def get_description(self, obj):
         """
         Generate a human-readable description for the transaction.
-        
+
         Args:
             obj: BlockchainTransaction instance
-            
+
         Returns:
             str: Human-readable transaction description
         """
@@ -108,7 +108,7 @@ class BlockchainTransactionSerializer(serializers.ModelSerializer):
             # Default: convert transaction type to readable format
             return obj.transaction_type.replace('_', ' ').title()
 
-        except Exception as e:
+        except Exception:
             # Fallback description in case of any errors
             return f"Transazione blockchain: {obj.transaction_type}"
 
@@ -116,10 +116,10 @@ class BlockchainTransactionSerializer(serializers.ModelSerializer):
 class TeacherCourseSerializer(serializers.ModelSerializer):
     """
     Serializer for teacher course management.
-    
+
     This serializer provides course information specifically formatted for
     teacher dashboards, including student enrollment counts and teacher details.
-    
+
     Fields:
         - id: Course ID
         - title: Course title
@@ -143,13 +143,11 @@ class TeacherCourseSerializer(serializers.ModelSerializer):
     def get_students_count(self, obj):
         """
         Get the number of students enrolled in the course.
-        
+
         Args:
             obj: Course instance
-            
+
         Returns:
             int: Number of enrolled students
         """
         return obj.students.count()
-
-

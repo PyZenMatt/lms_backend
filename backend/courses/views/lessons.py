@@ -1,14 +1,15 @@
+from courses.models import Course, CourseEnrollment, Lesson, LessonCompletion
+from courses.serializers import LessonListSerializer, LessonSerializer
+from django.shortcuts import get_object_or_404
 from rest_framework import generics, status, viewsets
-from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
+from rest_framework.decorators import action
+from rest_framework.exceptions import PermissionDenied
+from rest_framework.generics import RetrieveAPIView
+from rest_framework.permissions import (IsAuthenticated,
+                                        IsAuthenticatedOrReadOnly)
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework.exceptions import PermissionDenied
-from rest_framework.decorators import action
-from django.shortcuts import get_object_or_404
-from rest_framework.generics import RetrieveAPIView
-from courses.models import Lesson, Course, LessonCompletion, CourseEnrollment
-from courses.serializers import LessonSerializer, LessonListSerializer
-from users.permissions import IsTeacher, IsAdminOrApprovedTeacherOrReadOnly
+from users.permissions import IsTeacher
 
 
 class CourseLessonsView(APIView):
@@ -17,10 +18,10 @@ class CourseLessonsView(APIView):
     def get(self, request, course_id):
         course = get_object_or_404(Course, id=course_id)
         user = request.user
-        
+
         # Check if user has access to course lessons
         has_access = False
-        
+
         if user.is_authenticated:
             # Staff, superuser, and course teacher always have access
             if user.is_staff or user.is_superuser or course.teacher == user:
@@ -31,13 +32,14 @@ class CourseLessonsView(APIView):
         else:
             # Unauthenticated users can see lessons only if course is approved (for preview)
             has_access = course.is_approved
-        
+
         if not has_access:
             if not course.is_approved:
                 raise PermissionDenied("Corso non approvato")
             else:
-                raise PermissionDenied("Devi essere iscritto al corso per vedere le lezioni")
-        
+                raise PermissionDenied(
+                    "Devi essere iscritto al corso per vedere le lezioni")
+
         lessons = Lesson.objects.filter(course_id=course_id).order_by('order')
         serializer = LessonListSerializer(lessons, many=True)
         return Response(serializer.data)
@@ -51,7 +53,8 @@ class AllLessonsWithCourseView(generics.ListAPIView):
 
 class LessonViewSet(viewsets.ModelViewSet):
     serializer_class = LessonSerializer
-    permission_classes = [IsAuthenticated]  # Rimuovi IsAdminOrApprovedTeacherOrReadOnly per permettere agli studenti di segnare come completata
+    # Rimuovi IsAdminOrApprovedTeacherOrReadOnly per permettere agli studenti di segnare come completata
+    permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
         # ✅ OTTIMIZZATO - Prevent N+1 queries with select_related and prefetch_related
@@ -73,12 +76,13 @@ class LessonViewSet(viewsets.ModelViewSet):
             )
 
         # Registra il completamento della lezione per lo studente
-        completion, created = LessonCompletion.objects.get_or_create(student=request.user, lesson=lesson)
+        completion, created = LessonCompletion.objects.get_or_create(
+            student=request.user, lesson=lesson)
 
         # Import here to avoid circular imports
         try:
-            from rewards.automation import reward_system
-            
+            pass
+
             # The automated reward system will be triggered by the signal
             # But we can also check course completion here for immediate feedback
             total_lessons = course.lessons.count()
@@ -86,37 +90,37 @@ class LessonViewSet(viewsets.ModelViewSet):
                 student=request.user,
                 lesson__course=course
             ).count()
-            
+
             if completed_lessons >= total_lessons:
                 # Mark course as completed and trigger completion bonus
                 enrollment, _ = CourseEnrollment.objects.get_or_create(
                     student=request.user,
                     course=course
                 )
-                
+
                 if not enrollment.completed:
                     enrollment.completed = True
                     enrollment.save()
-                    
+
                     return Response({
-                        "completed": True, 
+                        "completed": True,
                         "course_completed": True,
                         "detail": "🎓 Congratulazioni! Hai completato tutto il corso!"
                     }, status=status.HTTP_200_OK)
                 else:
                     return Response({
                         "completed": True,
-                        "course_completed": True, 
+                        "course_completed": True,
                         "detail": "Corso già completato!"
                     }, status=status.HTTP_200_OK)
             else:
                 return Response({
-                    "completed": True, 
+                    "completed": True,
                     "course_completed": False,
                     "progress": f"{completed_lessons}/{total_lessons}",
                     "detail": f"Lezione completata! Progresso: {completed_lessons}/{total_lessons}"
                 }, status=status.HTTP_200_OK)
-                
+
         except ImportError:
             # Fallback if reward system is not available
             total = Lesson.objects.filter(course=course).count()
@@ -150,7 +154,7 @@ class LessonCreateAssignView(APIView):
             'lesson_type': request.data.get('lesson_type'),
             'course': course.id,
         }
-        
+
         # Handle file separately if present
         if 'video_file' in request.FILES:
             data['video_file'] = request.FILES['video_file']
@@ -192,7 +196,8 @@ class LessonDetailView(RetrieveAPIView):
         completed = False
         if request.user.is_authenticated:
             from courses.models import LessonCompletion
-            completed = LessonCompletion.objects.filter(student=request.user, lesson=lesson).exists()
+            completed = LessonCompletion.objects.filter(
+                student=request.user, lesson=lesson).exists()
         data = response.data
         data['completed'] = completed
         return Response(data)
@@ -209,7 +214,8 @@ class LessonExercisesView(APIView):
         if course and not (user.is_staff or user.is_superuser or course.teacher == user) and not course.is_approved:
             raise PermissionDenied("Corso non approvato")
         exercises = lesson.exercises.all()
-        data = [{"id": e.id, "title": e.title, "description": e.description} for e in exercises]
+        data = [{"id": e.id, "title": e.title, "description": e.description}
+                for e in exercises]
         return Response(data, status=status.HTTP_200_OK)
 
 
@@ -223,7 +229,8 @@ class MarkLessonCompleteView(APIView):
             return Response({"detail": "Lezione non associata a nessun corso."}, status=status.HTTP_400_BAD_REQUEST)
         if request.user not in course.students.all():
             return Response({"detail": "Non sei iscritto a questo corso."}, status=status.HTTP_400_BAD_REQUEST)
-        LessonCompletion.objects.get_or_create(student=request.user, lesson=lesson)
+        LessonCompletion.objects.get_or_create(
+            student=request.user, lesson=lesson)
         total = Lesson.objects.filter(course=course).count()
         if lesson.order == total:
             return Response({"completed": True, "detail": "Corso completato!"}, status=status.HTTP_200_OK)

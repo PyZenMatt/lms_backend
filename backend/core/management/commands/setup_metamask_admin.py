@@ -5,6 +5,7 @@ Guida per configurare la chiave privata di MetaMask come admin key
 
 import os
 import sys
+
 import django
 from web3 import Web3
 
@@ -37,7 +38,8 @@ print("3. Verrà salvata nel file .env")
 
 # Input della chiave privata
 print("\n" + "="*60)
-private_key = input("Incolla la tua chiave privata MetaMask (senza 0x): ").strip()
+private_key = input(
+    "Incolla la tua chiave privata MetaMask (senza 0x): ").strip()
 
 # Validazione
 if not private_key:
@@ -50,7 +52,8 @@ if private_key.startswith('0x'):
 
 # Validazione lunghezza
 if len(private_key) != 64:
-    print(f"❌ Chiave privata non valida. Lunghezza: {len(private_key)}, richiesta: 64")
+    print(
+        f"❌ Chiave privata non valida. Lunghezza: {len(private_key)}, richiesta: 64")
     sys.exit(1)
 
 # Validazione formato esadecimale
@@ -104,8 +107,9 @@ blockchain_configs = [
 
 for config in blockchain_configs:
     config_name = config.split('=')[0]
-    config_found = any(line.startswith(f'{config_name}=') for line in updated_lines)
-    
+    config_found = any(line.startswith(
+        f'{config_name}=') for line in updated_lines)
+
     if not config_found:
         updated_lines.append(config)
         print(f"➕ Aggiunta configurazione: {config_name}")
@@ -120,46 +124,49 @@ print(f"\n✅ File .env aggiornato: {env_file}")
 print(f"\n🧪 TEST CONNESSIONE BLOCKCHAIN...")
 
 try:
-    from blockchain.blockchain import TeoCoinService
-    
     # Ricarica le variabili d'ambiente
-    from django.conf import settings
+    pass
+
+    from blockchain.blockchain import TeoCoinService
     os.environ['ADMIN_PRIVATE_KEY'] = private_key
-    
+
     service = TeoCoinService()
-    
+
     if service.w3.is_connected():
         print("✅ Connesso alla blockchain Polygon Amoy")
-        
+
         # Verifica admin address
         if service.admin_private_key:
-            admin_account = service.w3.eth.account.from_key(service.admin_private_key)
+            admin_account = service.w3.eth.account.from_key(
+                service.admin_private_key)
             print(f"✅ Admin address configurato: {admin_account.address}")
-            
+
             # Controlla balance MATIC
             admin_balance = service.w3.eth.get_balance(admin_account.address)
             admin_matic = service.w3.from_wei(admin_balance, 'ether')
             print(f"💰 Balance MATIC: {admin_matic}")
-            
+
             if admin_matic > 0:
                 print("✅ Admin ha MATIC per gas fees")
             else:
                 print("⚠️  Admin non ha MATIC per gas fees")
-                print("   Aggiungi MATIC testnet dal faucet: https://faucet.polygon.technology/")
-            
+                print(
+                    "   Aggiungi MATIC testnet dal faucet: https://faucet.polygon.technology/")
+
             # Test info contratto
             try:
                 token_info = service.get_token_info()
-                print(f"🪙 Token: {token_info.get('name')} ({token_info.get('symbol')})")
+                print(
+                    f"🪙 Token: {token_info.get('name')} ({token_info.get('symbol')})")
                 print(f"📊 Total Supply: {token_info.get('total_supply')}")
             except Exception as e:
                 print(f"⚠️  Errore lettura contratto: {e}")
-                
+
         else:
             print("❌ Admin private key non caricata nel servizio")
     else:
         print("❌ Impossibile connettersi alla blockchain")
-        
+
 except Exception as e:
     print(f"❌ Errore test blockchain: {e}")
 

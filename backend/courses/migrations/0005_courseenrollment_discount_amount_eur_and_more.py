@@ -13,21 +13,25 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='courseenrollment',
             name='discount_amount_eur',
-            field=models.DecimalField(blank=True, decimal_places=2, help_text='Discount amount in EUR for TeoCoin discount payments', max_digits=10, null=True),
+            field=models.DecimalField(
+                blank=True, decimal_places=2, help_text='Discount amount in EUR for TeoCoin discount payments', max_digits=10, null=True),
         ),
         migrations.AddField(
             model_name='courseenrollment',
             name='original_price_eur',
-            field=models.DecimalField(blank=True, decimal_places=2, help_text='Original course price before discount', max_digits=10, null=True),
+            field=models.DecimalField(
+                blank=True, decimal_places=2, help_text='Original course price before discount', max_digits=10, null=True),
         ),
         migrations.AddField(
             model_name='courseenrollment',
             name='teocoin_discount_request_id',
-            field=models.CharField(blank=True, help_text='TeoCoin discount request ID from smart contract', max_length=100, null=True),
+            field=models.CharField(
+                blank=True, help_text='TeoCoin discount request ID from smart contract', max_length=100, null=True),
         ),
         migrations.AlterField(
             model_name='courseenrollment',
             name='payment_method',
-            field=models.CharField(choices=[('fiat', 'Euro Payment'), ('teocoin', 'TeoCoin Payment'), ('teocoin_discount', 'Euro Payment with TeoCoin Discount'), ('free', 'Free Course'), ('admin', 'Admin Granted')], default='free', max_length=20),
+            field=models.CharField(choices=[('fiat', 'Euro Payment'), ('teocoin', 'TeoCoin Payment'), ('teocoin_discount',
+                                   'Euro Payment with TeoCoin Discount'), ('free', 'Free Course'), ('admin', 'Admin Granted')], default='free', max_length=20),
         ),
     ]

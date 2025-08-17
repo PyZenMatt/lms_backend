@@ -1,15 +1,15 @@
 # ✅ OTTIMIZZATO - Batch API endpoints to reduce multiple frontend calls
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated
-from django.db.models import Count, Q, Prefetch
-from django.core.cache import cache
-from courses.models import Course, Lesson, CourseEnrollment, LessonCompletion
+from courses.models import Course, CourseEnrollment, Lesson, LessonCompletion
 from courses.serializers import CourseSerializer, LessonSerializer
-from users.models import UserProgress
-from users.serializers import UserProgressSerializer
+from django.core.cache import cache
+from django.db.models import Count, Prefetch, Q
 from notifications.models import Notification
 from notifications.serializers import NotificationSerializer
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+from rest_framework.views import APIView
+from users.models import UserProgress
+from users.serializers import UserProgressSerializer
 
 
 class StudentBatchDataAPI(APIView):
@@ -21,11 +21,11 @@ class StudentBatchDataAPI(APIView):
 
     def get(self, request):
         user = request.user
-        
+
         # Cache key for this user's batch data
         cache_key = f'student_batch_data_{user.id}'
         cached_data = cache.get(cache_key)
-        
+
         if cached_data:
             return Response(cached_data)
 
@@ -41,13 +41,15 @@ class StudentBatchDataAPI(APIView):
             )
         ).annotate(
             total_lessons=Count('lessons'),
-            completed_lessons=Count('lessons__completions', filter=Q(lessons__completions__student=user))
+            completed_lessons=Count('lessons__completions', filter=Q(
+                lessons__completions__student=user))
         )
 
         # Serialize courses data
         courses_data = []
         for course in enrolled_courses:
-            course_data = CourseSerializer(course, context={'request': request}).data
+            course_data = CourseSerializer(
+                course, context={'request': request}).data
             course_data['progress'] = {
                 'total_lessons': course.total_lessons,
                 'completed_lessons': course.completed_lessons,
@@ -57,13 +59,15 @@ class StudentBatchDataAPI(APIView):
 
         # ✅ OPTIMIZED - User progress data
         user_progress, created = UserProgress.objects.get_or_create(user=user)
-        progress_data = UserProgressSerializer(user_progress, context={'request': request}).data
+        progress_data = UserProgressSerializer(
+            user_progress, context={'request': request}).data
 
         # ✅ OPTIMIZED - Recent notifications
         notifications = Notification.objects.filter(
             user=user, read=False
         ).order_by('-created_at')[:10]
-        notifications_data = NotificationSerializer(notifications, many=True).data
+        notifications_data = NotificationSerializer(
+            notifications, many=True).data
 
         # ✅ OPTIMIZED - Recent activity summary
         recent_completions = LessonCompletion.objects.filter(
@@ -94,7 +98,7 @@ class StudentBatchDataAPI(APIView):
 
         # Cache for 3 minutes
         cache.set(cache_key, data, 180)
-        
+
         return Response(data)
 
 
@@ -108,7 +112,7 @@ class CourseBatchDataAPI(APIView):
     def get(self, request, course_id):
         cache_key = f'course_batch_data_{course_id}_{request.user.id}'
         cached_data = cache.get(cache_key)
-        
+
         if cached_data:
             return Response(cached_data)
 
@@ -119,16 +123,17 @@ class CourseBatchDataAPI(APIView):
                 'lessons__exercises',
                 Prefetch(
                     'lessons__completions',
-                    queryset=LessonCompletion.objects.filter(student=request.user),
+                    queryset=LessonCompletion.objects.filter(
+                        student=request.user),
                     to_attr='user_completions'
                 )
             ).get(id=course_id, is_approved=True)
-            
+
             # Check if user is enrolled
             is_enrolled = CourseEnrollment.objects.filter(
                 student=request.user, course=course
             ).exists()
-            
+
             if not is_enrolled:
                 return Response({'error': 'Not enrolled in this course'}, status=403)
 
@@ -136,7 +141,8 @@ class CourseBatchDataAPI(APIView):
             return Response({'error': 'Course not found'}, status=404)
 
         # Serialize course data
-        course_data = CourseSerializer(course, context={'request': request}).data
+        course_data = CourseSerializer(
+            course, context={'request': request}).data
 
         # ✅ OPTIMIZED - Lessons with completion status
         lessons_data = []
@@ -144,19 +150,21 @@ class CourseBatchDataAPI(APIView):
         completed_count = 0
 
         for lesson in course.lessons.all():
-            lesson_data = LessonSerializer(lesson, context={'request': request}).data
-            
+            lesson_data = LessonSerializer(
+                lesson, context={'request': request}).data
+
             # Check if user completed this lesson
             is_completed = bool(lesson.user_completions)
             if is_completed:
                 completed_count += 1
-            
+
             lesson_data['completed'] = is_completed
             lesson_data['exercises_count'] = lesson.exercises.count()
             lessons_data.append(lesson_data)
 
         # Calculate progress
-        progress_percentage = round((completed_count / total_lessons * 100) if total_lessons > 0 else 0, 2)
+        progress_percentage = round(
+            (completed_count / total_lessons * 100) if total_lessons > 0 else 0, 2)
 
         data = {
             'course': course_data,
@@ -175,7 +183,7 @@ class CourseBatchDataAPI(APIView):
 
         # Cache for 5 minutes
         cache.set(cache_key, data, 300)
-        
+
         return Response(data)
 
 
@@ -188,7 +196,7 @@ class LessonBatchDataAPI(APIView):
     def get(self, request, lesson_id):
         cache_key = f'lesson_batch_data_{lesson_id}_{request.user.id}'
         cached_data = cache.get(cache_key)
-        
+
         if cached_data:
             return Response(cached_data)
 
@@ -197,18 +205,18 @@ class LessonBatchDataAPI(APIView):
             lesson = Lesson.objects.select_related('course', 'course__teacher').prefetch_related(
                 'exercises'
             ).get(id=lesson_id)
-            
+
             # Check course access
             if lesson.course and not lesson.course.is_approved:
                 if not (request.user.is_staff or request.user.is_superuser or lesson.course.teacher == request.user):
                     return Response({'error': 'Course not approved'}, status=403)
-            
+
             # Check enrollment if course exists
             if lesson.course:
                 is_enrolled = CourseEnrollment.objects.filter(
                     student=request.user, course=lesson.course
                 ).exists()
-                
+
                 if not is_enrolled and lesson.course.teacher != request.user:
                     return Response({'error': 'Not enrolled in this course'}, status=403)
 
@@ -216,7 +224,8 @@ class LessonBatchDataAPI(APIView):
             return Response({'error': 'Lesson not found'}, status=404)
 
         # Serialize lesson data
-        lesson_data = LessonSerializer(lesson, context={'request': request}).data
+        lesson_data = LessonSerializer(
+            lesson, context={'request': request}).data
 
         # Check completion status
         is_completed = LessonCompletion.objects.filter(
@@ -249,5 +258,5 @@ class LessonBatchDataAPI(APIView):
 
         # Cache for 5 minutes
         cache.set(cache_key, data, 300)
-        
+
         return Response(data)

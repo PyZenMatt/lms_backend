@@ -1,34 +1,33 @@
-from django.test import TestCase, TransactionTestCase
-from django.core.exceptions import ValidationError
-from django.db import transaction
-from users.models import User
-from courses.models import Lesson, Exercise, Course
-from rewards.models import BlockchainTransaction
 import time
-from django.db.models import F
+
+from courses.models import Course, Exercise, Lesson
+from django.core.exceptions import ValidationError
+from django.test import TestCase, TransactionTestCase
+from users.models import User
+
 
 class UserModelTests(TestCase):
     def test_user_creation_with_roles(self):
         # Usa username unici con timestamp
         timestamp = str(time.time()).replace('.', '')
-        
+
         teacher = User.objects.create_user(
             username=f'teacher_{timestamp}',
             password='testpass123',
             role='teacher'
         )
-        
+
         student = User.objects.create_user(
             username=f'student_{timestamp}',
             password='testpass123',
             role='student'
         )
-        
+
         self.assertEqual(teacher.role, 'teacher')
         self.assertEqual(student.role, 'student')
 
     # Metodo add_teo_coins/subtract_teo_coins non presente: test rimosso o da adattare
-    pass
+
 
 class LessonModelTests(TestCase):
     def setUp(self):
@@ -67,6 +66,7 @@ class LessonModelTests(TestCase):
         # Verifica che la transazione blockchain sia registrata (se logica implementata)
         # self.assertEqual(BlockchainTransaction.objects.count(), 1)
 
+
 class ExerciseModelTests(TestCase):
     def setUp(self):
         self.teacher = User.objects.create_user(
@@ -74,13 +74,13 @@ class ExerciseModelTests(TestCase):
             password='testpass123',
             role='teacher'
         )
-        
+
         self.student = User.objects.create_user(
             username=f'learner_{time.time()}',
             password='testpass123',
             role='student'
         )
-        
+
         self.lesson = Lesson.objects.create(
             title='Test Lesson',
             content='Content',
@@ -104,6 +104,7 @@ class ExerciseModelTests(TestCase):
 
     def tearDown(self):
         Exercise.objects.all().delete()
+
 
 class ConcurrencyTests(TransactionTestCase):
     pass

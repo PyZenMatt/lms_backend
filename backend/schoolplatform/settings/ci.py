@@ -1,6 +1,6 @@
 # config/settings/ci.py
-from .base import *
 import os
+
 
 # In CI vogliamo ambiente "prod-like"
 DEBUG = False
@@ -51,4 +51,5 @@ ADMIN_PRIVATE_KEY = os.environ.get("ADMIN_PRIVATE_KEY")
 PLATFORM_WALLET_ADDRESS = os.environ.get("PLATFORM_WALLET_ADDRESS")
 
 # Usa TeoCoin su DB (come da dev), ma senza forzare valori sensibili
-USE_DB_TEOCOIN_SYSTEM = os.environ.get("USE_DB_TEOCOIN_SYSTEM", "True").lower() == "true"
+USE_DB_TEOCOIN_SYSTEM = os.environ.get(
+    "USE_DB_TEOCOIN_SYSTEM", "True").lower() == "true"

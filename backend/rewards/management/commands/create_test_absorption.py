@@ -1,11 +1,12 @@
 """
 Management command to create test data for Teacher Discount Absorption system
 """
-from django.core.management.base import BaseCommand
-from django.contrib.auth import get_user_model
+
 from courses.models import Course
-from services.teacher_discount_absorption_service import TeacherDiscountAbsorptionService
-from decimal import Decimal
+from django.contrib.auth import get_user_model
+from django.core.management.base import BaseCommand
+from services.teacher_discount_absorption_service import \
+    TeacherDiscountAbsorptionService
 
 User = get_user_model()
 
@@ -20,7 +21,7 @@ class Command(BaseCommand):
             help='Teacher email address',
         )
         parser.add_argument(
-            '--student-email', 
+            '--student-email',
             type=str,
             help='Student email address',
         )
@@ -37,7 +38,8 @@ class Command(BaseCommand):
 
         if not all([teacher_email, student_email, course_id]):
             self.stdout.write(
-                self.style.ERROR('Please provide --teacher-email, --student-email, and --course-id')
+                self.style.ERROR(
+                    'Please provide --teacher-email, --student-email, and --course-id')
             )
             return
 
@@ -69,15 +71,19 @@ class Command(BaseCommand):
             )
 
             self.stdout.write(
-                self.style.SUCCESS(f'Successfully created absorption opportunity {absorption.pk}')
+                self.style.SUCCESS(
+                    f'Successfully created absorption opportunity {absorption.pk}')
             )
-            
+
             self.stdout.write(f"Teacher tier: {absorption.teacher_tier}")
-            self.stdout.write(f"Commission rate: {absorption.teacher_commission_rate}%")
-            self.stdout.write(f"Option A - EUR: €{absorption.option_a_teacher_eur}")
-            self.stdout.write(f"Option B - EUR: €{absorption.option_b_teacher_eur} + {absorption.option_b_teacher_teo} TEO")
+            self.stdout.write(
+                f"Commission rate: {absorption.teacher_commission_rate}%")
+            self.stdout.write(
+                f"Option A - EUR: €{absorption.option_a_teacher_eur}")
+            self.stdout.write(
+                f"Option B - EUR: €{absorption.option_b_teacher_eur} + {absorption.option_b_teacher_teo} TEO")
             self.stdout.write(f"Expires at: {absorption.expires_at}")
-            
+
         except User.DoesNotExist as e:
             self.stdout.write(
                 self.style.ERROR(f'User not found: {e}')

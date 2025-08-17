@@ -3,17 +3,17 @@ TeoCoin Withdrawal API Views
 Provides REST API endpoints for withdrawal functionality
 """
 
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated, IsAdminUser
-from rest_framework import status
-from decimal import Decimal
-from django.db.models import Sum, Count
 import logging
+from decimal import Decimal
 
-from services.teocoin_withdrawal_service import teocoin_withdrawal_service
-from services.hybrid_teocoin_service import hybrid_teocoin_service
 from blockchain.models import DBTeoCoinTransaction
+from django.db.models import Sum
+from rest_framework import status
+from rest_framework.permissions import IsAdminUser, IsAuthenticated
+from rest_framework.response import Response
+from rest_framework.views import APIView
+from services.hybrid_teocoin_service import hybrid_teocoin_service
+from services.teocoin_withdrawal_service import teocoin_withdrawal_service
 
 logger = logging.getLogger(__name__)
 
@@ -21,11 +21,11 @@ logger = logging.getLogger(__name__)
 class GetBalanceView(APIView):
     """Get current user's TeoCoin balance"""
     permission_classes = [IsAuthenticated]
-    
+
     def get(self, request):
         """
         Get user's current TeoCoin balance
-        
+
         Returns:
         {
             "success": true,
@@ -42,7 +42,7 @@ class GetBalanceView(APIView):
             # Use the db_teocoin_service to get balance
             from services.db_teocoin_service import db_teocoin_service
             result = db_teocoin_service.get_user_balance(request.user)
-            
+
             return Response({
                 'success': True,
                 'balance': {
@@ -54,7 +54,8 @@ class GetBalanceView(APIView):
                 'user_role': request.user.role if hasattr(request.user, 'role') else 'unknown'
             })
         except Exception as e:
-            logger.error(f"Error getting balance for user {request.user.id}: {str(e)}")
+            logger.error(
+                f"Error getting balance for user {request.user.id}: {str(e)}")
             return Response({
                 'success': False,
                 'error': str(e)
@@ -64,11 +65,11 @@ class GetBalanceView(APIView):
 class CreateWithdrawalView(APIView):
     """Create a new withdrawal request"""
     permission_classes = [IsAuthenticated]
-    
+
     def post(self, request):
         """
         Create withdrawal request
-        
+
         Body:
         {
             "amount": "10.50",
@@ -78,20 +79,20 @@ class CreateWithdrawalView(APIView):
         try:
             amount = request.data.get('amount')
             wallet_address = request.data.get('wallet_address')
-            
+
             # Validation
             if not amount:
                 return Response({
                     'success': False,
                     'error': 'Amount is required'
                 }, status=status.HTTP_400_BAD_REQUEST)
-            
+
             if not wallet_address:
                 return Response({
                     'success': False,
                     'error': 'Wallet address is required'
                 }, status=status.HTTP_400_BAD_REQUEST)
-            
+
             try:
                 amount_decimal = Decimal(str(amount))
                 if amount_decimal <= 0:
@@ -104,14 +105,14 @@ class CreateWithdrawalView(APIView):
                     'success': False,
                     'error': 'Invalid amount format'
                 }, status=status.HTTP_400_BAD_REQUEST)
-            
+
             # Create withdrawal request
             result = teocoin_withdrawal_service.create_withdrawal_request(
                 user=request.user,
                 amount=amount_decimal,
                 wallet_address=wallet_address
             )
-            
+
             if result['success']:
                 return Response({
                     'success': True,
@@ -127,9 +128,10 @@ class CreateWithdrawalView(APIView):
                     'success': False,
                     'error': result['error']
                 }, status=status.HTTP_400_BAD_REQUEST)
-                
+
         except Exception as e:
-            logger.error(f"Error creating withdrawal for user {request.user.email}: {e}")
+            logger.error(
+                f"Error creating withdrawal for user {request.user.email}: {e}")
             return Response({
                 'success': False,
                 'error': 'Internal server error'
@@ -139,7 +141,7 @@ class CreateWithdrawalView(APIView):
 class WithdrawalStatusView(APIView):
     """Get status of a withdrawal request"""
     permission_classes = [IsAuthenticated]
-    
+
     def get(self, request, withdrawal_id):
         """Get withdrawal status by ID"""
         try:
@@ -147,7 +149,7 @@ class WithdrawalStatusView(APIView):
                 withdrawal_id=withdrawal_id,
                 user=request.user
             )
-            
+
             if result['success']:
                 return Response({
                     'success': True,
@@ -158,9 +160,10 @@ class WithdrawalStatusView(APIView):
                     'success': False,
                     'error': result['error']
                 }, status=status.HTTP_404_NOT_FOUND)
-                
+
         except Exception as e:
-            logger.error(f"Error getting withdrawal status {withdrawal_id}: {e}")
+            logger.error(
+                f"Error getting withdrawal status {withdrawal_id}: {e}")
             return Response({
                 'success': False,
                 'error': 'Internal server error'
@@ -170,26 +173,27 @@ class WithdrawalStatusView(APIView):
 class UserWithdrawalHistoryView(APIView):
     """Get user's withdrawal history"""
     permission_classes = [IsAuthenticated]
-    
+
     def get(self, request):
         """Get current user's withdrawal history"""
         try:
             limit = int(request.query_params.get('limit', 20))
             limit = min(limit, 100)  # Cap at 100
-            
+
             withdrawals = teocoin_withdrawal_service.get_user_withdrawal_history(
                 user=request.user,
                 limit=limit
             )
-            
+
             return Response({
                 'success': True,
                 'withdrawals': withdrawals,
                 'count': len(withdrawals)
             }, status=status.HTTP_200_OK)
-            
+
         except Exception as e:
-            logger.error(f"Error getting withdrawal history for {request.user.email}: {e}")
+            logger.error(
+                f"Error getting withdrawal history for {request.user.email}: {e}")
             return Response({
                 'success': False,
                 'error': 'Internal server error'
@@ -199,7 +203,7 @@ class UserWithdrawalHistoryView(APIView):
 class CancelWithdrawalView(APIView):
     """Cancel a pending withdrawal request"""
     permission_classes = [IsAuthenticated]
-    
+
     def post(self, request, withdrawal_id):
         """Cancel withdrawal request"""
         try:
@@ -207,7 +211,7 @@ class CancelWithdrawalView(APIView):
                 withdrawal_id=withdrawal_id,
                 user=request.user
             )
-            
+
             if result['success']:
                 return Response({
                     'success': True,
@@ -219,7 +223,7 @@ class CancelWithdrawalView(APIView):
                     'success': False,
                     'error': result['error']
                 }, status=status.HTTP_400_BAD_REQUEST)
-                
+
         except Exception as e:
             logger.error(f"Error cancelling withdrawal {withdrawal_id}: {e}")
             return Response({
@@ -231,12 +235,13 @@ class CancelWithdrawalView(APIView):
 class DBTeoCoinBalanceView(APIView):
     """Get user's DB TeoCoin balance"""
     permission_classes = [IsAuthenticated]
-    
+
     def get(self, request):
         """Get current user's TeoCoin balance"""
         try:
-            balance_data = hybrid_teocoin_service.get_user_balance(request.user)
-            
+            balance_data = hybrid_teocoin_service.get_user_balance(
+                request.user)
+
             return Response({
                 'success': True,
                 'balance': {
@@ -247,9 +252,10 @@ class DBTeoCoinBalanceView(APIView):
                     'source': balance_data['source']
                 }
             }, status=status.HTTP_200_OK)
-            
+
         except Exception as e:
-            logger.error(f"Error getting balance for {request.user.email}: {e}")
+            logger.error(
+                f"Error getting balance for {request.user.email}: {e}")
             return Response({
                 'success': False,
                 'error': 'Internal server error'
@@ -259,26 +265,27 @@ class DBTeoCoinBalanceView(APIView):
 class TeoCoinTransactionHistoryView(APIView):
     """Get user's TeoCoin transaction history"""
     permission_classes = [IsAuthenticated]
-    
+
     def get(self, request):
         """Get current user's transaction history"""
         try:
             limit = int(request.query_params.get('limit', 50))
             limit = min(limit, 200)  # Cap at 200
-            
+
             transactions = hybrid_teocoin_service.get_user_transactions(
                 user=request.user,
                 limit=limit
             )
-            
+
             return Response({
                 'success': True,
                 'transactions': transactions,
                 'count': len(transactions)
             }, status=status.HTTP_200_OK)
-            
+
         except Exception as e:
-            logger.error(f"Error getting transactions for {request.user.email}: {e}")
+            logger.error(
+                f"Error getting transactions for {request.user.email}: {e}")
             return Response({
                 'success': False,
                 'error': 'Internal server error'
@@ -290,21 +297,22 @@ class TeoCoinTransactionHistoryView(APIView):
 class AdminPendingWithdrawalsView(APIView):
     """Admin view for pending withdrawals"""
     permission_classes = [IsAdminUser]
-    
+
     def get(self, request):
         """Get all pending withdrawal requests (admin only)"""
         try:
             limit = int(request.query_params.get('limit', 50))
             limit = min(limit, 200)  # Cap at 200
-            
-            pending_withdrawals = teocoin_withdrawal_service.get_pending_withdrawals(limit)
-            
+
+            pending_withdrawals = teocoin_withdrawal_service.get_pending_withdrawals(
+                limit)
+
             return Response({
                 'success': True,
                 'pending_withdrawals': pending_withdrawals,
                 'count': len(pending_withdrawals)
             }, status=status.HTTP_200_OK)
-            
+
         except Exception as e:
             logger.error(f"Error getting pending withdrawals (admin): {e}")
             return Response({
@@ -316,17 +324,17 @@ class AdminPendingWithdrawalsView(APIView):
 class AdminWithdrawalStatsView(APIView):
     """Admin view for withdrawal statistics"""
     permission_classes = [IsAdminUser]
-    
+
     def get(self, request):
         """Get withdrawal statistics (admin only)"""
         try:
             stats = teocoin_withdrawal_service.get_withdrawal_statistics()
-            
+
             return Response({
                 'success': True,
                 'statistics': stats
             }, status=status.HTTP_200_OK)
-            
+
         except Exception as e:
             logger.error(f"Error getting withdrawal statistics (admin): {e}")
             return Response({
@@ -338,17 +346,17 @@ class AdminWithdrawalStatsView(APIView):
 class AdminPlatformStatsView(APIView):
     """Admin view for platform TeoCoin statistics"""
     permission_classes = [IsAdminUser]
-    
+
     def get(self, request):
         """Get platform TeoCoin statistics (admin only)"""
         try:
             stats = hybrid_teocoin_service.get_platform_statistics()
-            
+
             return Response({
                 'success': True,
                 'platform_statistics': stats
             }, status=status.HTTP_200_OK)
-            
+
         except Exception as e:
             logger.error(f"Error getting platform statistics (admin): {e}")
             return Response({
@@ -360,11 +368,11 @@ class AdminPlatformStatsView(APIView):
 class StudentTeoCoinStatsView(APIView):
     """Get student's personal TeoCoin statistics and journey info"""
     permission_classes = [IsAuthenticated]
-    
+
     def get(self, request):
         """
         Get student's TeoCoin statistics and journey information
-        
+
         Returns:
         {
             "success": true,
@@ -381,25 +389,25 @@ class StudentTeoCoinStatsView(APIView):
         """
         try:
             user = request.user
-            
+
             # Get transaction statistics
             transactions = DBTeoCoinTransaction.objects.filter(user=user)
-            
+
             # Calculate totals by transaction type
             total_earned = transactions.filter(
                 transaction_type__in=['reward', 'bonus', 'deposit']
             ).aggregate(total=Sum('amount'))['total'] or Decimal('0')
-            
+
             total_used_discounts = abs(transactions.filter(
                 transaction_type='discount'
             ).aggregate(total=Sum('amount'))['total'] or Decimal('0'))
-            
+
             total_withdrawn = abs(transactions.filter(
                 transaction_type='withdrawal'
             ).aggregate(total=Sum('amount'))['total'] or Decimal('0'))
-            
+
             total_transactions = transactions.count()
-            
+
             # Determine achievement level based on total earned
             if total_earned >= Decimal('500'):
                 achievement_level = "Gold"
@@ -413,11 +421,11 @@ class StudentTeoCoinStatsView(APIView):
             else:
                 achievement_level = "Beginner"
                 next_level_info = f"Earn {100 - total_earned} more TEO to reach Bronze level"
-            
+
             # Get recent achievement (latest transaction)
             latest_transaction = transactions.order_by('-created_at').first()
             recent_achievement = None
-            
+
             if latest_transaction:
                 if latest_transaction.transaction_type == 'withdrawal':
                     recent_achievement = "Withdrawal completed successfully!"
@@ -425,7 +433,7 @@ class StudentTeoCoinStatsView(APIView):
                     recent_achievement = f"Earned {latest_transaction.amount} TEO from exercise completion!"
                 elif latest_transaction.transaction_type == 'discount':
                     recent_achievement = f"Used {abs(latest_transaction.amount)} TEO for course discount!"
-            
+
             return Response({
                 'success': True,
                 'stats': {
@@ -438,9 +446,10 @@ class StudentTeoCoinStatsView(APIView):
                     'recent_achievement': recent_achievement
                 }
             }, status=status.HTTP_200_OK)
-            
+
         except Exception as e:
-            logger.error(f"Error getting student TeoCoin stats for user {request.user.id}: {e}")
+            logger.error(
+                f"Error getting student TeoCoin stats for user {request.user.id}: {e}")
             return Response({
                 'success': False,
                 'error': 'Failed to load TeoCoin statistics'
@@ -450,14 +459,14 @@ class StudentTeoCoinStatsView(APIView):
 class StudentTeoCoinTransactionHistoryView(APIView):
     """Get user's TeoCoin transaction history"""
     permission_classes = [IsAuthenticated]
-    
+
     def get(self, request):
         """
         Get user's transaction history with optional limit
-        
+
         Query Parameters:
         - limit: Number of transactions to return (default 10)
-        
+
         Returns:
         {
             "success": true,
@@ -476,12 +485,12 @@ class StudentTeoCoinTransactionHistoryView(APIView):
         try:
             user = request.user
             limit = int(request.GET.get('limit', 10))
-            
+
             # Get transactions from database
             transactions = DBTeoCoinTransaction.objects.filter(
                 user=user
             ).order_by('-created_at')[:limit]
-            
+
             transaction_data = []
             for tx in transactions:
                 transaction_data.append({
@@ -492,14 +501,15 @@ class StudentTeoCoinTransactionHistoryView(APIView):
                     'created_at': tx.created_at.isoformat(),
                     'status': 'completed'  # DB transactions are always completed
                 })
-            
+
             return Response({
                 'success': True,
                 'transactions': transaction_data
             }, status=status.HTTP_200_OK)
-            
+
         except Exception as e:
-            logger.error(f"Error getting transaction history for user {request.user.id}: {e}")
+            logger.error(
+                f"Error getting transaction history for user {request.user.id}: {e}")
             return Response({
                 'success': False,
                 'error': 'Failed to load transaction history'

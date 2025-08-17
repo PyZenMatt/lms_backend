@@ -1,10 +1,11 @@
-from django.db import models
-from django.contrib.auth.models import AbstractUser
-from django.core.mail import send_mail
-from django.utils.crypto import get_random_string
-from django.contrib.auth.models import BaseUserManager
-from django.utils import timezone
 from decimal import Decimal
+
+from django.contrib.auth.models import AbstractUser, BaseUserManager
+from django.core.mail import send_mail
+from django.db import models
+from django.utils import timezone
+from django.utils.crypto import get_random_string
+
 
 class UserManager(BaseUserManager):
     def create_user(self, email, password=None, **extra_fields):
@@ -35,6 +36,7 @@ class UserManager(BaseUserManager):
 
         return self.create_user(email, password, **extra_fields)
 
+
 class User(AbstractUser):
     is_approved = models.BooleanField(
         default=False,
@@ -54,11 +56,13 @@ class User(AbstractUser):
         ('teacher', 'Maestro'),
         ('admin', 'Amministratore'),
     )
-    enrolled_courses = models.ManyToManyField('courses.Course', related_name='enrolled_students', blank=True)
-    created_courses = models.ManyToManyField('courses.Course', related_name='teachers', blank=True)
+    enrolled_courses = models.ManyToManyField(
+        'courses.Course', related_name='enrolled_students', blank=True)
+    created_courses = models.ManyToManyField(
+        'courses.Course', related_name='teachers', blank=True)
     is_email_verified = models.BooleanField(default=False)
     role = models.CharField(
-        max_length=10, 
+        max_length=10,
         choices=ROLE_CHOICES,
         error_messages={
             'invalid_choice': '"%(value)s" non è una scelta valida.'
@@ -75,32 +79,33 @@ class User(AbstractUser):
         related_name='purchasers',
         blank=True
     )
-    phone = models.CharField(max_length=30, blank=True)  # Nuovo campo per il numero di telefono
-    
+    # Nuovo campo per il numero di telefono
+    phone = models.CharField(max_length=30, blank=True)
+
     # Blockchain Integration
     wallet_address = models.CharField(
-        max_length=42, 
-        blank=True, 
+        max_length=42,
+        blank=True,
         null=True,
         help_text="Indirizzo wallet Ethereum/Polygon per TeoCoins"
     )
-    
+
     # Campi specifici per la scuola d'arte
     profession = models.CharField(
-        max_length=100, 
-        blank=True, 
+        max_length=100,
+        blank=True,
         null=True,
         help_text="Professione artistica (es. illustratore, pittore ad olio, scultore)"
     )
     artistic_aspirations = models.TextField(
-        blank=True, 
+        blank=True,
         null=True,
         help_text="Aspirazioni e specializzazioni artistiche"
     )
-    
+
     def __str__(self):
         return self.email
-    
+
     def send_verification_email(self):
         self.email_verification_token = get_random_string(50)
         self.save()
@@ -120,62 +125,67 @@ class User(AbstractUser):
 
 class UserSettings(models.Model):
     """Model for storing user preferences and settings"""
-    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='settings')
-    
+    user = models.OneToOneField(
+        User, on_delete=models.CASCADE, related_name='settings')
+
     # Notification preferences
     email_notifications = models.BooleanField(default=True)
     push_notifications = models.BooleanField(default=False)
     course_reminders = models.BooleanField(default=True)
     weekly_digest = models.BooleanField(default=True)
     marketing_emails = models.BooleanField(default=False)
-    
+
     # UI preferences
-    theme = models.CharField(max_length=10, choices=[('light', 'Light'), ('dark', 'Dark')], default='light')
+    theme = models.CharField(max_length=10, choices=[(
+        'light', 'Light'), ('dark', 'Dark')], default='light')
     language = models.CharField(max_length=5, default='it')
     timezone = models.CharField(max_length=50, default='Europe/Rome')
-    
+
     # Privacy settings
     show_profile = models.BooleanField(default=True)
     show_progress = models.BooleanField(default=False)
     show_achievements = models.BooleanField(default=True)
-    
+
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    
+
     class Meta:
         verbose_name = "Impostazioni Utente"
         verbose_name_plural = "Impostazioni Utenti"
-    
+
     def __str__(self):
         return f"Settings for {self.user.email}"
 
 
 class UserProgress(models.Model):
     """Model for tracking user progress across categories"""
-    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='progress')
-    
+    user = models.OneToOneField(
+        User, on_delete=models.CASCADE, related_name='progress')
+
     # Overall statistics
     total_courses_enrolled = models.PositiveIntegerField(default=0)
     total_courses_completed = models.PositiveIntegerField(default=0)
     total_lessons_completed = models.PositiveIntegerField(default=0)
     total_exercises_completed = models.PositiveIntegerField(default=0)
-    total_hours_studied = models.DecimalField(max_digits=10, decimal_places=2, default=Decimal('0.00'))
-    average_score = models.DecimalField(max_digits=5, decimal_places=2, default=Decimal('0.00'))
-    
+    total_hours_studied = models.DecimalField(
+        max_digits=10, decimal_places=2, default=Decimal('0.00'))
+    average_score = models.DecimalField(
+        max_digits=5, decimal_places=2, default=Decimal('0.00'))
+
     # Tracking fields
     last_activity_date = models.DateTimeField(null=True, blank=True)
     streak_days = models.PositiveIntegerField(default=0)
-    
+
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    
+
     class Meta:
         verbose_name = "Progresso Utente"
         verbose_name_plural = "Progressi Utenti"
-    
+
     def __str__(self):
         return f"Progress for {self.user.email}"
-    
+
     def calculate_overall_progress(self):
         """Calculate overall progress percentage"""
         if self.total_courses_enrolled == 0:
@@ -198,29 +208,31 @@ class Achievement(models.Model):
         ('special', 'Special Achievement')
     ])
     is_active = models.BooleanField(default=True)
-    
+
     created_at = models.DateTimeField(auto_now_add=True)
-    
+
     class Meta:
         verbose_name = "Achievement"
         verbose_name_plural = "Achievements"
-    
+
     def __str__(self):
         return self.title
 
 
 class UserAchievement(models.Model):
     """Model for tracking which achievements users have earned"""
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='earned_achievements')
+    user = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name='earned_achievements')
     achievement = models.ForeignKey(Achievement, on_delete=models.CASCADE)
     earned_date = models.DateTimeField(auto_now_add=True)
-    progress_percentage = models.DecimalField(max_digits=5, decimal_places=2, default=Decimal('0.00'))
-    
+    progress_percentage = models.DecimalField(
+        max_digits=5, decimal_places=2, default=Decimal('0.00'))
+
     class Meta:
         unique_together = ('user', 'achievement')
         verbose_name = "Achievement Utente"
         verbose_name_plural = "Achievements Utenti"
-    
+
     def __str__(self):
         return f"{self.user.email} - {self.achievement.title}"
 
@@ -228,28 +240,28 @@ class UserAchievement(models.Model):
 class TeacherProfile(models.Model):
     """
     Teacher-specific profile for commission rates and staking data
-    
+
     This model stores the dynamic commission rates and staking information
     that are updated by the TeoCoin staking system.
     """
     user = models.OneToOneField(
-        User, 
-        on_delete=models.CASCADE, 
+        User,
+        on_delete=models.CASCADE,
         related_name='teacher_profile',
         help_text="User account associated with this teacher profile"
     )
-    
+
     # Commission and earnings data
     commission_rate = models.DecimalField(
-        max_digits=5, 
-        decimal_places=2, 
+        max_digits=5,
+        decimal_places=2,
         default=Decimal('50.00'),
         help_text="Platform commission rate percentage (e.g., 50.00 for 50%)"
     )
-    
+
     # Staking information
     staking_tier = models.CharField(
-        max_length=20, 
+        max_length=20,
         default='Bronze',
         choices=[
             ('Bronze', 'Bronze (0 TEO)'),
@@ -260,55 +272,55 @@ class TeacherProfile(models.Model):
         ],
         help_text="Current staking tier based on TEO staked"
     )
-    
+
     staked_teo_amount = models.DecimalField(
-        max_digits=12, 
-        decimal_places=2, 
+        max_digits=12,
+        decimal_places=2,
         default=Decimal('0.00'),
         help_text="Amount of TEO currently staked"
     )
-    
+
     # Blockchain integration
     wallet_address = models.CharField(
-        max_length=42, 
-        blank=True, 
+        max_length=42,
+        blank=True,
         null=True,
         help_text="Teacher's blockchain wallet address for staking"
     )
-    
+
     # Earnings tracking
     total_earned_eur = models.DecimalField(
-        max_digits=12, 
-        decimal_places=2, 
+        max_digits=12,
+        decimal_places=2,
         default=Decimal('0.00'),
         help_text="Total EUR earned from course sales"
     )
-    
+
     total_earned_teo = models.DecimalField(
-        max_digits=12, 
-        decimal_places=2, 
+        max_digits=12,
+        decimal_places=2,
         default=Decimal('0.00'),
         help_text="Total TEO earned from student discounts"
     )
-    
+
     # Course statistics
     total_courses = models.PositiveIntegerField(
         default=0,
         help_text="Total number of courses created by this teacher"
     )
-    
+
     total_earnings = models.DecimalField(
         max_digits=12,
         decimal_places=2,
         default=Decimal('0.00'),
         help_text="Combined total earnings (EUR equivalent)"
     )
-    
+
     # Metadata
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     last_staking_update = models.DateTimeField(null=True, blank=True)
-    
+
     class Meta:
         verbose_name = "Profilo Insegnante"
         verbose_name_plural = "Profili Insegnanti"
@@ -317,93 +329,102 @@ class TeacherProfile(models.Model):
             models.Index(fields=['commission_rate']),
             models.Index(fields=['wallet_address']),
         ]
-    
+
     def __str__(self):
         return f"{self.user.email} - {self.staking_tier} ({self.commission_rate}%)"
-    
+
     @property
     def teacher_earnings_percentage(self):
         """Calculate teacher's earnings percentage (100% - commission%)"""
         return Decimal('100.00') - self.commission_rate
-    
+
     @property
     def commission_rate_decimal(self):
         """Get commission rate as decimal (for calculations)"""
         return self.commission_rate / Decimal('100.00')
-    
+
     def update_from_staking_info(self, staking_info):
         """
         Update teacher profile with data from TeoCoin staking service
-        
+
         Args:
             staking_info: Dict from TeoCoinStakingService.get_user_staking_info()
         """
-        self.commission_rate = Decimal(str(staking_info.get('commission_percentage', 50.00)))
+        self.commission_rate = Decimal(
+            str(staking_info.get('commission_percentage', 50.00)))
         self.staking_tier = staking_info.get('tier_name', 'Bronze')
-        self.staked_teo_amount = Decimal(str(staking_info.get('staked_amount_formatted', 0.00)))
-        self.wallet_address = staking_info.get('wallet_address', self.wallet_address)
+        self.staked_teo_amount = Decimal(
+            str(staking_info.get('staked_amount_formatted', 0.00)))
+        self.wallet_address = staking_info.get(
+            'wallet_address', self.wallet_address)
         self.last_staking_update = timezone.now()
         self.save()
-        
+
     def can_stake_more(self):
         """Check if teacher can progress to next tier"""
         tier_requirements = {
             'Bronze': Decimal('100.00'),    # Next: Silver
-            'Silver': Decimal('300.00'),    # Next: Gold  
+            'Silver': Decimal('300.00'),    # Next: Gold
             'Gold': Decimal('600.00'),      # Next: Platinum
-            'Platinum': Decimal('1000.00'), # Next: Diamond
+            'Platinum': Decimal('1000.00'),  # Next: Diamond
             'Diamond': None                 # Already at max
         }
-        
+
         next_requirement = tier_requirements.get(self.staking_tier)
         if next_requirement is None:
             return False, "Already at maximum tier (Diamond)"
-        
+
         needed = next_requirement - self.staked_teo_amount
         if needed <= 0:
             return True, "Ready to upgrade tier!"
-        
+
         return True, f"Need {needed} more TEO for next tier"
 
     def update_tier_and_commission(self):
         """
         Update teacher's tier and commission based on current staked amount
-        
+
         This method calculates the appropriate tier based on the staked amount
         and updates both the tier and commission rate accordingly.
         """
         # Define tier thresholds and commission rates (CORRECTED to match business logic)
         tier_config = {
-            'Bronze': {'min_stake': Decimal('0'), 'commission_rate': Decimal('50.00')},     # 50% platform
-            'Silver': {'min_stake': Decimal('100.00'), 'commission_rate': Decimal('45.00')}, # 45% platform  
-            'Gold': {'min_stake': Decimal('300.00'), 'commission_rate': Decimal('40.00')},   # 40% platform
-            'Platinum': {'min_stake': Decimal('600.00'), 'commission_rate': Decimal('35.00')}, # 35% platform
-            'Diamond': {'min_stake': Decimal('1000.00'), 'commission_rate': Decimal('25.00')}, # 25% platform
+            # 50% platform
+            'Bronze': {'min_stake': Decimal('0'), 'commission_rate': Decimal('50.00')},
+            # 45% platform
+            'Silver': {'min_stake': Decimal('100.00'), 'commission_rate': Decimal('45.00')},
+            # 40% platform
+            'Gold': {'min_stake': Decimal('300.00'), 'commission_rate': Decimal('40.00')},
+            # 35% platform
+            'Platinum': {'min_stake': Decimal('600.00'), 'commission_rate': Decimal('35.00')},
+            # 25% platform
+            'Diamond': {'min_stake': Decimal('1000.00'), 'commission_rate': Decimal('25.00')},
         }
-        
+
         # Determine the appropriate tier based on staked amount
         current_staked = self.staked_teo_amount or Decimal('0')
         new_tier = 'Bronze'  # Default
         new_commission = Decimal('50.00')  # Default
-        
+
         # Check from highest tier down
         for tier_name, config in reversed(list(tier_config.items())):
             if current_staked >= config['min_stake']:
                 new_tier = tier_name
                 new_commission = config['commission_rate']
                 break
-        
+
         # Update if changed
         if self.staking_tier != new_tier or self.commission_rate != new_commission:
             self.staking_tier = new_tier
             self.commission_rate = new_commission
             self.last_staking_update = timezone.now()
-            
+
             # Log the change
             import logging
             logger = logging.getLogger(__name__)
-            logger.info(f"Updated teacher {self.user.email}: Tier={new_tier}, Commission={new_commission}%")
-        
+            logger.info(
+                f"Updated teacher {self.user.email}: Tier={new_tier}, Commission={new_commission}%")
+
         return {
             'tier': new_tier,
             'commission_rate': new_commission,
@@ -418,21 +439,20 @@ class TeacherProfile(models.Model):
         try:
             # Use database-only staking system instead
             update_result = self.update_tier_and_commission()
-            
+
             # Save changes
             self.save()
-            
+
             return True, {
                 'message': 'Profile updated using database staking system',
                 'tier': update_result['tier'],
                 'commission_rate': update_result['commission_rate'],
                 'staked_amount': update_result['staked_amount']
             }
-                
+
         except Exception as e:
             import logging
             logger = logging.getLogger(__name__)
-            logger.error(f"Staking sync failed for {self.user.email}: {str(e)}")
+            logger.error(
+                f"Staking sync failed for {self.user.email}: {str(e)}")
             return False, f"Sync error: {str(e)}"
-
-

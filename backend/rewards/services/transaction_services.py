@@ -1,11 +1,11 @@
-from django.db import transaction
-from django.core.exceptions import ValidationError
-from users.models import User
 from courses.models import Course
+from django.core.exceptions import ValidationError
+from django.db import transaction
 from rewards.models import BlockchainTransaction
-
 # Import BlockchainService for new architecture
 from services.blockchain_service import blockchain_service
+from users.models import User
+
 
 class TransactionService:
     @classmethod
@@ -27,7 +27,7 @@ class TransactionService:
 
         # Lock ottimistico sull'utente
         user = User.objects.select_for_update().get(pk=user.pk)
-        
+
         # Use BlockchainService for transaction
         try:
             # Try blockchain-based purchase
@@ -37,17 +37,18 @@ class TransactionService:
                 amount=course.price,
                 reason=f"Course purchase: {course.title}"
             )
-            
+
             if not result.get('success'):
-                raise ValidationError(f"Blockchain transaction failed: {result.get('error')}")
-                
-        except Exception as e:
+                raise ValidationError(
+                    f"Blockchain transaction failed: {result.get('error')}")
+
+        except Exception:
             # Fallback to traditional model-based transaction
             user.teo_coins -= course.price
             user.save(update_fields=['teo_coins'])
-        
+
         course.students.add(user)
-        
+
         # Registrazione transazione blockchain
         BlockchainTransaction.objects.create(
             user=user,
@@ -84,16 +85,17 @@ class TransactionService:
                 amount=float(amount),
                 reason="TeoCoin transfer between users"
             )
-            
+
             if not result.get('success'):
-                raise ValidationError(f"Transfer failed: {result.get('error')}")
-                
+                raise ValidationError(
+                    f"Transfer failed: {result.get('error')}")
+
         except Exception as e:
             # Fallback to traditional model-based transaction
             # Note: This assumes User model has teo_coins field
             # if sender.teo_coins < amount:
             #     raise ValidationError("Saldo insufficiente")
-            # sender.teo_coins -= amount  
+            # sender.teo_coins -= amount
             # receiver.teo_coins += amount
             # sender.save(update_fields=['teo_coins'])
             # receiver.save(update_fields=['teo_coins'])

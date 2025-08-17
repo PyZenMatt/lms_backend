@@ -8,11 +8,12 @@ and business logic processing.
 Signal Handlers:
     - handle_exercise_graded: Creates notifications when exercises are graded
 """
+import logging
+
+from courses.models import Exercise
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from notifications.models import Notification
-from courses.models import Exercise
-import logging
 
 logger = logging.getLogger('signals')
 
@@ -21,10 +22,10 @@ logger = logging.getLogger('signals')
 def handle_exercise_graded(sender, instance, created, **kwargs):
     """
     Create automatic notification when an exercise is graded.
-    
+
     This signal handler is triggered whenever an Exercise model is saved,
     and creates a notification for the student when their exercise is reviewed.
-    
+
     Args:
         sender: The model class (Exercise)
         instance: The actual Exercise instance that was saved
@@ -40,12 +41,12 @@ def handle_exercise_graded(sender, instance, created, **kwargs):
                 notification_type='exercise_graded',
                 related_object_id=instance.id
             )
-            
+
             logger.info(
                 f"Created exercise graded notification for user {instance.student.username}, "
                 f"exercise {instance.id}, score: {instance.score}"
             )
-            
+
         except Exception as e:
             logger.error(
                 f"Failed to create exercise graded notification for exercise {instance.id}: {e}",

@@ -5,22 +5,23 @@ Script per popolare il database con corsi, lezioni ed esercizi di esempio
 
 import os
 import sys
+
 import django
+from courses.models import Course, Exercise, Lesson
+from django.db import transaction
+from users.models import User
 
 # Setup Django
 sys.path.append('/home/teo/Project/school/schoolplatform')
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'schoolplatform.settings')
 django.setup()
 
-from django.db import transaction
-from users.models import User
-from courses.models import Course, Lesson, Exercise
 
 def create_sample_data():
     """Crea dati di esempio per corsi, lezioni ed esercizi"""
-    
+
     print("🎨 Creazione dati di esempio per la scuola d'arte...")
-    
+
     # Trova o crea un teacher
     try:
         teacher = User.objects.filter(role='teacher').first()
@@ -261,7 +262,7 @@ def create_sample_data():
                 teacher=teacher
             )
             print(f"📚 Creato corso: {course.title}")
-            
+
             # Crea le lezioni per questo corso
             for order, lesson_data in enumerate(course_data['lessons'], 1):
                 lesson = Lesson.objects.create(
@@ -274,7 +275,7 @@ def create_sample_data():
                     order=order
                 )
                 print(f"  📖 Creata lezione {order}: {lesson.title}")
-                
+
                 # Crea l'esercizio per questa lezione
                 if 'exercise' in lesson_data:
                     exercise_data = lesson_data['exercise']
@@ -293,14 +294,16 @@ def create_sample_data():
     print(f"✅ Creati {Course.objects.count()} corsi")
     print(f"✅ Create {Lesson.objects.count()} lezioni")
     print(f"✅ Creati {Exercise.objects.count()} esercizi")
-    
+
     # Mostra riassunto
     print("\n📊 Riassunto corsi creati:")
     for course in Course.objects.all():
         lesson_count = course.lessons_in_course.count()
-        exercise_count = sum(lesson.exercises.count() for lesson in course.lessons_in_course.all())
+        exercise_count = sum(lesson.exercises.count()
+                             for lesson in course.lessons_in_course.all())
         print(f"• {course.title}")
         print(f"  Lezioni: {lesson_count} | Esercizi: {exercise_count}")
+
 
 if __name__ == "__main__":
     create_sample_data()

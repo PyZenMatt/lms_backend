@@ -1,16 +1,19 @@
+import random
+from datetime import timedelta
+
+from courses.models import ExerciseReview, Notification
 from django.core.management.base import BaseCommand
 from django.utils import timezone
-from datetime import timedelta
-from courses.models import ExerciseReview, ExerciseSubmission, Notification
 from users.models import User
-import random
+
 
 class Command(BaseCommand):
     help = 'Sostituisce i reviewer inattivi oltre 24 ore'
 
     def handle(self, *args, **kwargs):
         timeout = timezone.now() - timedelta(hours=24)
-        stale_reviews = ExerciseReview.objects.filter(score__isnull=True, assigned_at__lte=timeout)
+        stale_reviews = ExerciseReview.objects.filter(
+            score__isnull=True, assigned_at__lte=timeout)
 
         for review in stale_reviews:
             submission = review.submission
@@ -44,4 +47,5 @@ class Command(BaseCommand):
                 message=f"Sei stato rimpiazzato come reviewer per l'esercizio: {submission.exercise.title}"
             )
 
-        self.stdout.write(self.style.SUCCESS("Reviewer scaduti sostituiti con successo."))
+        self.stdout.write(self.style.SUCCESS(
+            "Reviewer scaduti sostituiti con successo."))

@@ -1,21 +1,23 @@
 
-import pytest
 import os
 import sys
-import django
 from decimal import Decimal
+
+import django
+import pytest
+from blockchain.models import DBTeoCoinBalance, DBTeoCoinTransaction
+from courses.models import Course
+from django.contrib.auth import get_user_model
+from services.db_teocoin_service import DBTeoCoinService
 
 # Setup Django
 sys.path.insert(0, '/home/teo/Project/school/schoolplatform')
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'schoolplatform.settings')
 django.setup()
 
-from django.contrib.auth import get_user_model
-from courses.models import Course
-from services.db_teocoin_service import DBTeoCoinService
-from blockchain.models import DBTeoCoinBalance, DBTeoCoinTransaction
 
 User = get_user_model()
+
 
 @pytest.mark.quarantine
 @pytest.mark.slow
@@ -85,6 +87,7 @@ def test_teocoin_discount_deduction():
         transaction_type='spent_discount'
     ).last()
     assert transaction is not None, "No transaction recorded"
+
 
 @pytest.mark.quarantine
 @pytest.mark.slow
