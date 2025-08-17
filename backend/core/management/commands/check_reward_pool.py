@@ -14,7 +14,7 @@ from blockchain.blockchain import teocoin_service
 
 # Setup Django
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'schoolplatform.settings')
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "schoolplatform.settings")
 django.setup()
 
 
@@ -42,9 +42,9 @@ def check_reward_pool_balance():
         balance = teocoin_service.get_reward_pool_balance()
         print(f"💰 Current Balance: {balance} TEO")
 
-        if balance < Decimal('100'):
+        if balance < Decimal("100"):
             print("⚠️  ATTENZIONE: Bilancio reward pool basso (< 100 TEO)")
-        elif balance < Decimal('10'):
+        elif balance < Decimal("10"):
             print("🚨 CRITICO: Bilancio reward pool molto basso (< 10 TEO)")
         else:
             print("✅ Bilancio reward pool OK")
@@ -73,7 +73,7 @@ def transfer_to_reward_pool(amount_teo):
         tx_hash = teocoin_service.transfer_tokens(
             from_private_key=teocoin_service.admin_private_key,
             to_address=teocoin_service.reward_pool_address,
-            amount=Decimal(str(amount_teo))
+            amount=Decimal(str(amount_teo)),
         )
 
         if tx_hash:
@@ -91,12 +91,13 @@ def transfer_to_reward_pool(amount_teo):
 if __name__ == "__main__":
     import argparse
 
-    parser = argparse.ArgumentParser(
-        description="Gestisce la reward pool TeoCoin")
-    parser.add_argument('--check', action='store_true',
-                        help='Controlla il bilancio della reward pool')
-    parser.add_argument('--transfer', type=float,
-                        help='Trasferisce TEO alla reward pool')
+    parser = argparse.ArgumentParser(description="Gestisce la reward pool TeoCoin")
+    parser.add_argument(
+        "--check", action="store_true", help="Controlla il bilancio della reward pool"
+    )
+    parser.add_argument(
+        "--transfer", type=float, help="Trasferisce TEO alla reward pool"
+    )
 
     args = parser.parse_args()
 

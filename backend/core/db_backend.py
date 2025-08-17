@@ -1,6 +1,7 @@
 """
 SQLite database optimizations using Django signals
 """
+
 from django.db.backends.signals import connection_created
 from django.dispatch import receiver
 
@@ -8,7 +9,7 @@ from django.dispatch import receiver
 @receiver(connection_created)
 def set_sqlite_pragma(connection, **kwargs):
     """Set SQLite optimizations when connection is created"""
-    if connection.vendor == 'sqlite':
+    if connection.vendor == "sqlite":
         with connection.cursor() as cursor:
             # WAL mode for better performance and concurrency
             cursor.execute("PRAGMA journal_mode=WAL;")

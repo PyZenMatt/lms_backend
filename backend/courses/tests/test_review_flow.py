@@ -6,16 +6,16 @@ import random
 import sys
 
 import django
-from courses.models import (Course, ExerciseReview, ExerciseSubmission)
+from courses.models import Course, ExerciseReview, ExerciseSubmission
 from django.utils import timezone
 from rewards.models import BlockchainTransaction
 from users.models import User
 
 # Add the parent directory to the Python path
-sys.path.append('/home/teo/Project/school/schoolplatform')
+sys.path.append("/home/teo/Project/school/schoolplatform")
 
 # Set up Django environment
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'schoolplatform.settings')
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "schoolplatform.settings")
 django.setup()
 
 
@@ -61,8 +61,7 @@ def create_test_scenario():
 
     # Check if submission already exists
     submission = ExerciseSubmission.objects.filter(
-        exercise=exercise,
-        student=student
+        exercise=exercise, student=student
     ).first()
 
     if submission:
@@ -72,7 +71,7 @@ def create_test_scenario():
         submission = ExerciseSubmission.objects.create(
             exercise=exercise,
             student=student,
-            content="Test submission for network error debugging"
+            content="Test submission for network error debugging",
         )
 
         # Assign reviewers
@@ -81,7 +80,7 @@ def create_test_scenario():
             review, created = ExerciseReview.objects.get_or_create(
                 submission=submission,
                 reviewer=reviewer,
-                defaults={'assigned_at': timezone.now()}
+                defaults={"assigned_at": timezone.now()},
             )
             if created:
                 submission.reviewers.add(reviewer)
@@ -119,14 +118,13 @@ def simulate_review_completion(submission, review_to_complete):
     """
     print("\n=== Simulating Review Completion ===")
 
-    print(
-        f"About to complete review by {review_to_complete.reviewer.username}")
+    print(f"About to complete review by {review_to_complete.reviewer.username}")
     print(f"Submission {submission.id} reviewed status: {submission.reviewed}")
 
     # Check existing reward transactions
     existing_rewards = BlockchainTransaction.objects.filter(
-        transaction_type__in=['exercise_reward', 'review_reward'],
-        related_object_id=str(submission.id)
+        transaction_type__in=["exercise_reward", "review_reward"],
+        related_object_id=str(submission.id),
     )
     print(f"Existing reward transactions: {existing_rewards.count()}")
 
@@ -141,6 +139,7 @@ def simulate_review_completion(submission, review_to_complete):
 
         # Wait a moment for signals to process
         import time
+
         time.sleep(2)
 
         # Check if submission was marked as reviewed
@@ -150,15 +149,16 @@ def simulate_review_completion(submission, review_to_complete):
 
         # Check reward transactions
         new_rewards = BlockchainTransaction.objects.filter(
-            transaction_type__in=['exercise_reward', 'review_reward'],
-            related_object_id=str(submission.id)
+            transaction_type__in=["exercise_reward", "review_reward"],
+            related_object_id=str(submission.id),
         )
         print(f"Total reward transactions after: {new_rewards.count()}")
 
-        for reward in new_rewards.order_by('-created_at')[:5]:
+        for reward in new_rewards.order_by("-created_at")[:5]:
             print(
-                f"  - {reward.transaction_type}: {reward.amount} TEO for {reward.user.username} - Status: {reward.status}")
-            if reward.status == 'failed':
+                f"  - {reward.transaction_type}: {reward.amount} TEO for {reward.user.username} - Status: {reward.status}"
+            )
+            if reward.status == "failed":
                 print(f"    Error: {reward.error_message}")
 
         return True
@@ -166,6 +166,7 @@ def simulate_review_completion(submission, review_to_complete):
     except Exception as e:
         print(f"❌ Error during review completion: {e}")
         import traceback
+
         traceback.print_exc()
         return False
 
@@ -196,4 +197,5 @@ if __name__ == "__main__":
     except Exception as e:
         logger.error(f"Error during test: {e}")
         import traceback
+
         traceback.print_exc()

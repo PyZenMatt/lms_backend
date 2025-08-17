@@ -14,8 +14,8 @@ from django.db import transaction
 from users.models import User
 
 # Setup Django
-sys.path.append('/home/teo/Project/school/schoolplatform')
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'schoolplatform.settings')
+sys.path.append("/home/teo/Project/school/schoolplatform")
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "schoolplatform.settings")
 django.setup()
 
 
@@ -27,13 +27,13 @@ def cleanup_users_and_assign_courses():
 
     # Utenti da mantenere
     users_to_keep = [
-        'Teo',           # admin
-        'student1',      # studente
-        'student4',      # studente
-        'student11',     # studente
-        'teacher1',      # insegnante
-        'teacher2',      # insegnante
-        'teacher3'       # insegnante
+        "Teo",  # admin
+        "student1",  # studente
+        "student4",  # studente
+        "student11",  # studente
+        "teacher1",  # insegnante
+        "teacher2",  # insegnante
+        "teacher3",  # insegnante
     ]
 
     print(f"👥 Utenti da mantenere: {', '.join(users_to_keep)}")
@@ -71,8 +71,9 @@ def cleanup_users_and_assign_courses():
         print()
 
         # 2. Verifica utenti rimanenti
-        remaining_users = User.objects.filter(
-            username__in=users_to_keep).order_by('username')
+        remaining_users = User.objects.filter(username__in=users_to_keep).order_by(
+            "username"
+        )
         print(f"👤 UTENTI RIMANENTI ({remaining_users.count()}):")
 
         students = []
@@ -81,30 +82,30 @@ def cleanup_users_and_assign_courses():
         for user in remaining_users:
             print(f"   • {user.username} ({user.role}) - {user.email}")
 
-            if user.role == 'admin':
+            if user.role == "admin":
                 pass
-            elif user.role == 'student':
+            elif user.role == "student":
                 students.append(user)
-            elif user.role == 'teacher':
+            elif user.role == "teacher":
                 teachers.append(user)
 
         print()
 
         # 3. Ottieni i teacher specifici
-        teacher1 = User.objects.filter(username='teacher1').first()
-        teacher2 = User.objects.filter(username='teacher2').first()
-        teacher3 = User.objects.filter(username='teacher3').first()
+        teacher1 = User.objects.filter(username="teacher1").first()
+        teacher2 = User.objects.filter(username="teacher2").first()
+        teacher3 = User.objects.filter(username="teacher3").first()
 
         # Verifica che esistano
         if not all([teacher1, teacher2, teacher3]):
             print("❌ Errore: Non tutti i teacher (1,2,3) sono presenti!")
             missing = []
             if not teacher1:
-                missing.append('teacher1')
+                missing.append("teacher1")
             if not teacher2:
-                missing.append('teacher2')
+                missing.append("teacher2")
             if not teacher3:
-                missing.append('teacher3')
+                missing.append("teacher3")
             print(f"   Mancanti: {', '.join(missing)}")
             return
 
@@ -112,7 +113,7 @@ def cleanup_users_and_assign_courses():
         print(f"📚 ASSEGNAZIONE CORSI AI TEACHER:")
 
         # Ottieni tutti i corsi esistenti
-        all_courses = Course.objects.all().order_by('title')
+        all_courses = Course.objects.all().order_by("title")
         course_list = list(all_courses)
 
         if not course_list:
@@ -124,7 +125,7 @@ def cleanup_users_and_assign_courses():
 
         # Dividi i corsi tra i 3 teacher
         teachers_list = [teacher1, teacher2, teacher3]
-        teacher_names = ['teacher1', 'teacher2', 'teacher3']
+        teacher_names = ["teacher1", "teacher2", "teacher3"]
 
         for i, course in enumerate(course_list):
             # Assegna in round-robin
@@ -180,10 +181,10 @@ def cleanup_users_and_assign_courses():
             for course in courses_assigned:
                 # Usa query dirette per evitare problemi con related_name
                 lessons_count = Lesson.objects.filter(course=course).count()
-                exercises_count = Exercise.objects.filter(
-                    lesson__course=course).count()
+                exercises_count = Exercise.objects.filter(lesson__course=course).count()
                 print(
-                    f"      • {course.title[:30]}... ({lessons_count} lezioni, {exercises_count} esercizi)")
+                    f"      • {course.title[:30]}... ({lessons_count} lezioni, {exercises_count} esercizi)"
+                )
             print()
 
     print("=" * 60)
@@ -192,8 +193,9 @@ def cleanup_users_and_assign_courses():
 
     # 8. Mostra wallet rimanenti
     print("\n💳 WALLET RIMANENTI:")
-    remaining_wallets = UserWallet.objects.select_related(
-        'user').all().order_by('user__username')
+    remaining_wallets = (
+        UserWallet.objects.select_related("user").all().order_by("user__username")
+    )
     for wallet in remaining_wallets:
         print(f"   {wallet.user.username} ({wallet.user.role}) -> {wallet.address}")
 
@@ -209,9 +211,10 @@ if __name__ == "__main__":
     print()
 
     confirm = input(
-        "Sei sicuro di voler procedere? (scrivi 'CONFERMA' per continuare): ").strip()
+        "Sei sicuro di voler procedere? (scrivi 'CONFERMA' per continuare): "
+    ).strip()
 
-    if confirm == 'CONFERMA':
+    if confirm == "CONFERMA":
         cleanup_users_and_assign_courses()
     else:
         print("❌ Operazione annullata.")

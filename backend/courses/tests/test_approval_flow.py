@@ -13,8 +13,8 @@ from django.conf import settings
 from blockchain.blockchain import teocoin_service
 
 # Setup Django
-sys.path.append('/home/teo/Project/school/schoolplatform')
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'schoolplatform.settings')
+sys.path.append("/home/teo/Project/school/schoolplatform")
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "schoolplatform.settings")
 django.setup()
 
 
@@ -28,15 +28,16 @@ def test_approval_transferfrom():
     student_address = "0x61CA0280cE520a8eB7e4ee175A30C768A5d144D4"
     teacher_address = "0xE2fA8AfbF1B795f5dEd1a33aa360872E9020a9A0"
     reward_pool_address = settings.REWARD_POOL_ADDRESS
-    amount = Decimal('15')  # 15 TEO
-    teacher_amount = amount * Decimal('0.85')  # 12.75 TEO
-    commission_amount = amount * Decimal('0.15')  # 2.25 TEO
+    amount = Decimal("15")  # 15 TEO
+    teacher_amount = amount * Decimal("0.85")  # 12.75 TEO
+    commission_amount = amount * Decimal("0.15")  # 2.25 TEO
 
     print(f"👤 Student: {student_address}")
     print(f"👨‍🏫 Teacher: {teacher_address}")
     print(f"🏦 Reward Pool: {reward_pool_address}")
     print(
-        f"💰 Amount: {amount} TEO (Teacher: {teacher_amount}, Commission: {commission_amount})")
+        f"💰 Amount: {amount} TEO (Teacher: {teacher_amount}, Commission: {commission_amount})"
+    )
 
     try:
         # 1. Verifica bilanci iniziali
@@ -53,9 +54,9 @@ def test_approval_transferfrom():
         print("\n🔍 2. Verifica allowance attuale...")
         allowance = teocoin_service.contract.functions.allowance(
             teocoin_service.w3.to_checksum_address(student_address),
-            teocoin_service.w3.to_checksum_address(reward_pool_address)
+            teocoin_service.w3.to_checksum_address(reward_pool_address),
         ).call()
-        allowance_teo = teocoin_service.w3.from_wei(allowance, 'ether')
+        allowance_teo = teocoin_service.w3.from_wei(allowance, "ether")
         print(f"Allowance: {allowance_teo} TEO")
 
         # 3. STEP CRITICO: Approve via reward pool (simula MetaMask)
@@ -74,17 +75,16 @@ def test_approval_transferfrom():
         # Prima assicuriamoci che la reward pool abbia abbastanza fondi
         if reward_pool_balance < amount:
             print(
-                f"❌ Reward pool ha solo {reward_pool_balance} TEO, servono {amount} TEO")
+                f"❌ Reward pool ha solo {reward_pool_balance} TEO, servono {amount} TEO"
+            )
 
             # Mint alcuni token alla reward pool per il test
             print("💰 Minting token alla reward pool per il test...")
             mint_tx = teocoin_service.mint_tokens(reward_pool_address, amount)
             if mint_tx:
                 print(f"✅ Mint successful: {mint_tx}")
-                reward_pool_balance = teocoin_service.get_balance(
-                    reward_pool_address)
-                print(
-                    f"💼 Nuovo balance reward pool: {reward_pool_balance} TEO")
+                reward_pool_balance = teocoin_service.get_balance(reward_pool_address)
+                print(f"💼 Nuovo balance reward pool: {reward_pool_balance} TEO")
             else:
                 print("❌ Mint failed")
                 return
@@ -95,7 +95,8 @@ def test_approval_transferfrom():
         # Transfer al teacher
         print(f"💸 Transfer {teacher_amount} TEO al teacher...")
         teacher_tx = teocoin_service.transfer_from_reward_pool(
-            teacher_address, teacher_amount)
+            teacher_address, teacher_amount
+        )
 
         if teacher_tx:
             print(f"✅ Teacher payment successful: {teacher_tx}")
@@ -106,13 +107,11 @@ def test_approval_transferfrom():
         print("\n💼 5. Verifica bilanci finali...")
         student_balance_final = teocoin_service.get_balance(student_address)
         teacher_balance_final = teocoin_service.get_balance(teacher_address)
-        reward_pool_balance_final = teocoin_service.get_balance(
-            reward_pool_address)
+        reward_pool_balance_final = teocoin_service.get_balance(reward_pool_address)
 
         print(f"Student: {student_balance} → {student_balance_final} TEO")
         print(f"Teacher: {teacher_balance} → {teacher_balance_final} TEO")
-        print(
-            f"Reward Pool: {reward_pool_balance} → {reward_pool_balance_final} TEO")
+        print(f"Reward Pool: {reward_pool_balance} → {reward_pool_balance_final} TEO")
 
         # 6. Calcolo differenze
         teacher_diff = float(teacher_balance_final) - float(teacher_balance)
@@ -126,6 +125,7 @@ def test_approval_transferfrom():
     except Exception as e:
         print(f"❌ Errore durante il test: {e}")
         import traceback
+
         traceback.print_exc()
 
 

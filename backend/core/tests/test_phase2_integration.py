@@ -11,8 +11,8 @@ from decimal import Decimal
 import django
 
 # Setup Django
-sys.path.append('/home/teo/Project/school/schoolplatform')
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'schoolplatform.settings')
+sys.path.append("/home/teo/Project/school/schoolplatform")
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "schoolplatform.settings")
 django.setup()
 
 
@@ -26,16 +26,16 @@ def test_withdrawal_integration():
         # Test 1: Import services
         print("Test 1: Importing withdrawal and blockchain services...")
         from services.consolidated_teocoin_service import teocoin_service
-        from services.teocoin_withdrawal_service import \
-            teocoin_withdrawal_service
+        from services.teocoin_withdrawal_service import teocoin_withdrawal_service
+
         print("✅ Services imported successfully")
 
         # Test 2: Test service initialization
         print("\nTest 2: Testing service initialization...")
         print(
-            f"✅ Withdrawal service initialized: {type(teocoin_withdrawal_service).__name__}")
-        print(
-            f"✅ Blockchain service initialized: {type(teocoin_service).__name__}")
+            f"✅ Withdrawal service initialized: {type(teocoin_withdrawal_service).__name__}"
+        )
+        print(f"✅ Blockchain service initialized: {type(teocoin_service).__name__}")
 
         # Test 3: Test validation methods
         print("\nTest 3: Testing validation methods...")
@@ -51,17 +51,19 @@ def test_withdrawal_integration():
         max_amount = teocoin_withdrawal_service.MAX_WITHDRAWAL_AMOUNT
         print(f"✅ Withdrawal limits: MIN={min_amount}, MAX={max_amount}")
         print(
-            f"✅ Test amount {test_amount} is valid: {min_amount <= test_amount <= max_amount}")
+            f"✅ Test amount {test_amount} is valid: {min_amount <= test_amount <= max_amount}"
+        )
 
         # Test 4: Test model access
         print("\nTest 4: Testing database model access...")
-        from blockchain.models import (DBTeoCoinBalance,
-                                       TeoCoinWithdrawalRequest)
+        from blockchain.models import TeoCoinWithdrawalRequest
+
         print("✅ Withdrawal models accessible")
 
         # Check withdrawal request count
         pending_count = TeoCoinWithdrawalRequest.objects.filter(
-            status='pending').count()
+            status="pending"
+        ).count()
         print(f"✅ Current pending withdrawals: {pending_count}")
 
         # Test 5: Test contract integration
@@ -88,6 +90,7 @@ def test_withdrawal_integration():
     except Exception as e:
         print(f"❌ Integration test failed: {e}")
         import traceback
+
         traceback.print_exc()
         return False
 

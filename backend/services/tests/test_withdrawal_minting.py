@@ -13,8 +13,8 @@ from django.conf import settings
 from services.teocoin_withdrawal_service import teocoin_withdrawal_service
 
 # Setup Django
-sys.path.append('/home/teo/Project/school/schoolplatform')
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'schoolplatform.settings.dev')
+sys.path.append("/home/teo/Project/school/schoolplatform")
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "schoolplatform.settings.dev")
 django.setup()
 
 
@@ -28,11 +28,11 @@ def test_withdrawal_minting():
     print(f"🏛️ Platform wallet: {settings.PLATFORM_WALLET_ADDRESS}")
     print(f"📍 TeoCoin contract: {settings.TEOCOIN_CONTRACT_ADDRESS}")
     print(
-        f"🌐 Polygon RPC: {getattr(settings, 'POLYGON_AMOY_RPC_URL', 'Not configured')}")
+        f"🌐 Polygon RPC: {getattr(settings, 'POLYGON_AMOY_RPC_URL', 'Not configured')}"
+    )
 
     # Get pending withdrawals
-    pending_withdrawals = TeoCoinWithdrawalRequest.objects.filter(
-        status='pending')
+    pending_withdrawals = TeoCoinWithdrawalRequest.objects.filter(status="pending")
     print(f"\n📋 Pending withdrawals: {pending_withdrawals.count()}")
 
     if not pending_withdrawals.exists():
@@ -49,13 +49,12 @@ def test_withdrawal_minting():
         # Test the minting function
         print("   🔄 Testing minting functionality...")
         result = teocoin_withdrawal_service.mint_tokens_to_address(
-            amount=withdrawal.amount,
-            to_address=withdrawal.metamask_address
+            amount=withdrawal.amount, to_address=withdrawal.metamask_address
         )
 
-        if result['success']:
+        if result["success"]:
             print(f"   ✅ {result['message']}")
-            if 'gas_estimate' in result:
+            if "gas_estimate" in result:
                 print(f"   ⛽ Gas estimate: {result['gas_estimate']}")
         else:
             print(f"   ❌ Error: {result['error']}")
@@ -85,7 +84,8 @@ def demonstrate_balance_update():
 
     # Get a sample user with pending withdrawal
     sample_withdrawal = TeoCoinWithdrawalRequest.objects.filter(
-        status='pending').first()
+        status="pending"
+    ).first()
 
     if sample_withdrawal:
         user = sample_withdrawal.user
@@ -97,15 +97,15 @@ def demonstrate_balance_update():
         print(f"   Pending: {balance.pending_withdrawal} TEO")
         print(f"   Staked: {balance.staked_balance} TEO")
 
-        print(
-            f"\n🔄 After processing withdrawal of {sample_withdrawal.amount} TEO:")
+        print(f"\n🔄 After processing withdrawal of {sample_withdrawal.amount} TEO:")
         new_pending = balance.pending_withdrawal - sample_withdrawal.amount
         print(f"   Available: {balance.available_balance} TEO (unchanged)")
         print(f"   Pending: {new_pending} TEO (reduced)")
         print(f"   Staked: {balance.staked_balance} TEO (unchanged)")
 
         print(
-            f"✅ {sample_withdrawal.amount} TEO would be minted to {sample_withdrawal.metamask_address}")
+            f"✅ {sample_withdrawal.amount} TEO would be minted to {sample_withdrawal.metamask_address}"
+        )
 
 
 if __name__ == "__main__":

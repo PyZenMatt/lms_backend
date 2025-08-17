@@ -11,8 +11,8 @@ import django
 from blockchain.blockchain import TeoCoinService
 
 # Setup Django
-sys.path.append('/home/teo/Project/school/schoolplatform')
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'schoolplatform.settings')
+sys.path.append("/home/teo/Project/school/schoolplatform")
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "schoolplatform.settings")
 django.setup()
 
 
@@ -26,13 +26,15 @@ def quick_admin_test():
 
         # Balance MATIC
         matic_balance_wei = service.w3.eth.get_balance(
-            service.w3.to_checksum_address(admin_address))
-        matic_balance = service.w3.from_wei(matic_balance_wei, 'ether')
+            service.w3.to_checksum_address(admin_address)
+        )
+        matic_balance = service.w3.from_wei(matic_balance_wei, "ether")
 
         # Balance TEO
         teo_balance_wei = service.contract.functions.balanceOf(
-            service.w3.to_checksum_address(admin_address)).call()
-        teo_balance = service.w3.from_wei(teo_balance_wei, 'ether')
+            service.w3.to_checksum_address(admin_address)
+        ).call()
+        teo_balance = service.w3.from_wei(teo_balance_wei, "ether")
 
         print(f"🔍 ADMIN WALLET CHECK")
         print(f"📍 Address: {admin_address}")
@@ -68,4 +70,5 @@ def quick_admin_test():
 if __name__ == "__main__":
     can_proceed = quick_admin_test()
     print(
-        f"\n🎯 Risultato: {'Procedere con distribuzione' if can_proceed else 'Serve più MATIC'}")
+        f"\n🎯 Risultato: {'Procedere con distribuzione' if can_proceed else 'Serve più MATIC'}"
+    )

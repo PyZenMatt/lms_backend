@@ -8,7 +8,7 @@ from rewards.models import BlockchainTransaction
 from users.models import User
 
 # Setup Django
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'schoolplatform.settings')
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "schoolplatform.settings")
 django.setup()
 
 
@@ -35,8 +35,8 @@ def test_new_review_system():
         print(f"\n📝 Using exercise: {exercise.title}")
 
         # Get users for testing
-        students = User.objects.filter(role='student')[:2]
-        teachers = User.objects.filter(role='teacher')[:2]
+        students = User.objects.filter(role="student")[:2]
+        teachers = User.objects.filter(role="teacher")[:2]
 
         print(f"👥 Available students: {[s.username for s in students]}")
         print(f"👥 Available teachers: {[t.username for t in teachers]}")
@@ -54,7 +54,7 @@ def test_new_review_system():
         submission = ExerciseSubmission.objects.create(
             exercise=exercise,
             student=student,
-            content="Test submission content for testing reward system"
+            content="Test submission content for testing reward system",
         )
 
         print(f"\n✅ Created submission {submission.id} by {student.username}")
@@ -73,12 +73,11 @@ def test_new_review_system():
             review = ExerciseReview.objects.create(
                 submission=submission,
                 reviewer=reviewer,
-                score=scores[i] if i < len(scores) else 7
+                score=scores[i] if i < len(scores) else 7,
             )
             review.reviewed_at = review.created_at
             review.save()
-            print(
-                f"✅ Review {i+1}: {reviewer.username} gave score {review.score}")
+            print(f"✅ Review {i+1}: {reviewer.username} gave score {review.score}")
 
         # Check if rewards were created automatically
         print(f"\n🔍 CHECKING AUTOMATIC REWARD CREATION")
@@ -92,14 +91,15 @@ def test_new_review_system():
         # Check for reward transactions
         rewards = BlockchainTransaction.objects.filter(
             related_object_id=str(submission.id)
-        ).order_by('-created_at')
+        ).order_by("-created_at")
 
         print(f"\n💰 REWARD TRANSACTIONS: {rewards.count()}")
 
         if rewards.count() > 0:
             for reward in rewards:
                 print(
-                    f"  - {reward.user.username}: {reward.amount} TEO ({reward.transaction_type}) - {reward.status}")
+                    f"  - {reward.user.username}: {reward.amount} TEO ({reward.transaction_type}) - {reward.status}"
+                )
             print("✅ Rewards were created automatically!")
         else:
             print("❌ No rewards found - system needs debugging")
@@ -109,6 +109,7 @@ def test_new_review_system():
     except Exception as e:
         print(f"❌ Error: {e}")
         import traceback
+
         traceback.print_exc()
         return False
 

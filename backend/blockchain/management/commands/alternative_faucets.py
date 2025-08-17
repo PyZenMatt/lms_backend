@@ -19,32 +19,32 @@ def show_alternative_faucets():
             "name": "Official Polygon Faucet",
             "url": "https://faucet.polygon.technology/",
             "status": "❌ Blocked (72h cooldown)",
-            "amount": "0.1-1 MATIC"
+            "amount": "0.1-1 MATIC",
         },
         {
             "name": "Alchemy Polygon Faucet",
             "url": "https://www.alchemy.com/faucets/polygon-amoy",
             "status": "🔄 Try this",
-            "amount": "0.1 MATIC"
+            "amount": "0.1 MATIC",
         },
         {
             "name": "QuickNode Faucet",
             "url": "https://faucet.quicknode.com/polygon/amoy",
             "status": "🔄 Try this",
-            "amount": "0.01-0.1 MATIC"
+            "amount": "0.01-0.1 MATIC",
         },
         {
             "name": "GetBlock Faucet",
             "url": "https://getblock.io/faucet/polygon-amoy/",
             "status": "🔄 Try this",
-            "amount": "0.01 MATIC"
+            "amount": "0.01 MATIC",
         },
         {
             "name": "Moralis Faucet",
             "url": "https://moralis.io/faucets/",
             "status": "🔄 Try this",
-            "amount": "0.1 MATIC"
-        }
+            "amount": "0.1 MATIC",
+        },
     ]
 
     for i, faucet in enumerate(faucets, 1):

@@ -4,6 +4,7 @@ Core middleware for the TeoArt School Platform.
 This module contains custom middleware for JWT handling, API performance monitoring,
 and access control for different user roles.
 """
+
 import datetime
 import logging
 import time
@@ -15,8 +16,8 @@ from django.utils.deprecation import MiddlewareMixin
 from rest_framework_simplejwt.tokens import AccessToken
 
 # Loggers
-auth_logger = logging.getLogger('authentication')
-api_logger = logging.getLogger('api_performance')
+auth_logger = logging.getLogger("authentication")
+api_logger = logging.getLogger("api_performance")
 
 
 class AutoJWTFromSessionMiddleware(MiddlewareMixin):
@@ -39,33 +40,38 @@ class AutoJWTFromSessionMiddleware(MiddlewareMixin):
             Modified response with JWT tokens set in session and cookies
         """
         # NON rigenerare token se è in corso un logout
-        if hasattr(request, '_logout_in_progress') and request._logout_in_progress:
-            auth_logger.debug(
-                "Skipping JWT token generation - logout in progress")
+        if hasattr(request, "_logout_in_progress") and request._logout_in_progress:
+            auth_logger.debug("Skipping JWT token generation - logout in progress")
             return response
 
         # NON rigenerare token se siamo in logout
-        if (hasattr(request, 'resolver_match') and
-            request.resolver_match and
-            request.resolver_match.url_name and
-                'logout' in request.resolver_match.url_name):
+        if (
+            hasattr(request, "resolver_match")
+            and request.resolver_match
+            and request.resolver_match.url_name
+            and "logout" in request.resolver_match.url_name
+        ):
             auth_logger.debug("Skipping JWT token generation during logout")
             return response
 
         # NON rigenerare token se la response ha eliminato i cookie di sessione (indica logout)
-        if ('sessionid' in response.cookies and
-            hasattr(response.cookies['sessionid'], 'get') and
-                response.cookies['sessionid'].get('expires')):
-            auth_logger.debug(
-                "Skipping JWT token generation - session cookie deleted")
+        if (
+            "sessionid" in response.cookies
+            and hasattr(response.cookies["sessionid"], "get")
+            and response.cookies["sessionid"].get("expires")
+        ):
+            auth_logger.debug("Skipping JWT token generation - session cookie deleted")
             return response
 
         # NON rigenerare token se la response contiene "Logout successful"
-        if (hasattr(response, 'data') and
-            isinstance(response.data, dict) and
-                'Logout successful' in str(response.data.get('detail', ''))):
+        if (
+            hasattr(response, "data")
+            and isinstance(response.data, dict)
+            and "Logout successful" in str(response.data.get("detail", ""))
+        ):
             auth_logger.debug(
-                "Skipping JWT token generation - logout response detected")
+                "Skipping JWT token generation - logout response detected"
+            )
             return response
 
         if request.user.is_authenticated:
@@ -74,24 +80,26 @@ class AutoJWTFromSessionMiddleware(MiddlewareMixin):
                 token = AccessToken.for_user(request.user)
 
                 # Store token in session for server-side access
-                request.session['jwt_token'] = str(token)
+                request.session["jwt_token"] = str(token)
 
                 # Set secure HTTP-only cookie for client-side access
                 response.set_cookie(
-                    'jwt_token',
+                    "jwt_token",
                     str(token),
                     httponly=True,
                     secure=not settings.DEBUG,  # Secure only in production
-                    samesite='Lax',
-                    expires=datetime.datetime.now() + datetime.timedelta(minutes=30)
+                    samesite="Lax",
+                    expires=datetime.datetime.now() + datetime.timedelta(minutes=30),
                 )
 
                 auth_logger.debug(
-                    f"JWT token generated for user {request.user.username}")
+                    f"JWT token generated for user {request.user.username}"
+                )
 
             except Exception as e:
                 auth_logger.error(
-                    f"Failed to generate JWT token for user {request.user.username}: {e}")
+                    f"Failed to generate JWT token for user {request.user.username}: {e}"
+                )
 
         return response
 
@@ -121,26 +129,28 @@ class DashboardAccessMiddleware:
         response = self.get_response(request)
 
         # Check dashboard access permissions
-        if request.path.startswith('/dashboard/'):
+        if request.path.startswith("/dashboard/"):
             if not request.user.is_authenticated:
-                auth_logger.warning(
-                    f"Unauthenticated access attempt to {request.path}")
-                return redirect(f'/login/?next={request.path}')
+                auth_logger.warning(f"Unauthenticated access attempt to {request.path}")
+                return redirect(f"/login/?next={request.path}")
 
             # Role-based access control
-            if 'student' in request.path and request.user.role != 'student':
+            if "student" in request.path and request.user.role != "student":
                 auth_logger.warning(
-                    f"Unauthorized access attempt by {request.user.username} to student area")
+                    f"Unauthorized access attempt by {request.user.username} to student area"
+                )
                 return HttpResponseForbidden("Accesso negato: area studenti")
 
-            if 'teacher' in request.path and request.user.role != 'teacher':
+            if "teacher" in request.path and request.user.role != "teacher":
                 auth_logger.warning(
-                    f"Unauthorized access attempt by {request.user.username} to teacher area")
+                    f"Unauthorized access attempt by {request.user.username} to teacher area"
+                )
                 return HttpResponseForbidden("Accesso negato: area docenti")
 
-            if 'admin' in request.path and request.user.role != 'admin':
+            if "admin" in request.path and request.user.role != "admin":
                 auth_logger.warning(
-                    f"Unauthorized access attempt by {request.user.username} to admin area")
+                    f"Unauthorized access attempt by {request.user.username} to admin area"
+                )
                 return HttpResponseForbidden("Accesso negato: area amministratori")
 
         return response
@@ -173,7 +183,7 @@ class APITimingMiddleware:
         duration = time.time() - start_time
 
         # Log performance metrics for API calls only
-        if request.path.startswith('/api/'):
+        if request.path.startswith("/api/"):
             api_logger.info(
                 f"API {request.method} {request.path} - "
                 f"{duration:.3f}s - {response.status_code}"
@@ -231,15 +241,15 @@ class GlobalErrorHandlingMiddleware:
             f"Unhandled exception in {request.method} {request.path}: {exception}",
             exc_info=True,
             extra={
-                'request_path': request.path,
-                'request_method': request.method,
-                'user': str(request.user) if hasattr(request, 'user') else 'Anonymous',
-                'ip_address': self._get_client_ip(request)
-            }
+                "request_path": request.path,
+                "request_method": request.method,
+                "user": str(request.user) if hasattr(request, "user") else "Anonymous",
+                "ip_address": self._get_client_ip(request),
+            },
         )
 
         # Response standardizzata per API
-        if request.path.startswith('/api/'):
+        if request.path.startswith("/api/"):
             return self._format_api_error(exception, 500)
 
         # Per pagine HTML, lascia che Django gestisca con le sue pagine di errore
@@ -259,33 +269,33 @@ class GlobalErrorHandlingMiddleware:
 
         # Mappa dei messaggi di errore user-friendly
         error_map = {
-            404: 'Resource not found',
-            403: 'Permission denied',
-            401: 'Authentication required',
-            400: 'Bad request',
-            500: 'Internal server error'
+            404: "Resource not found",
+            403: "Permission denied",
+            401: "Authentication required",
+            400: "Bad request",
+            500: "Internal server error",
         }
 
         # Struttura dati errore standardizzata
         error_data = {
-            'error': True,
-            'message': error_map.get(status_code, 'An error occurred'),
-            'status_code': status_code,
-            'timestamp': datetime.datetime.now().isoformat()
+            "error": True,
+            "message": error_map.get(status_code, "An error occurred"),
+            "status_code": status_code,
+            "timestamp": datetime.datetime.now().isoformat(),
         }
 
         # Aggiungi dettagli solo in DEBUG mode
         if settings.DEBUG:
-            error_data['details'] = str(exception)
-            error_data['type'] = type(exception).__name__
+            error_data["details"] = str(exception)
+            error_data["type"] = type(exception).__name__
 
         return JsonResponse(error_data, status=status_code)
 
     def _get_client_ip(self, request):
         """Ottiene l'IP del client considerando i proxy"""
-        x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+        x_forwarded_for = request.META.get("HTTP_X_FORWARDED_FOR")
         if x_forwarded_for:
-            ip = x_forwarded_for.split(',')[0]
+            ip = x_forwarded_for.split(",")[0]
         else:
-            ip = request.META.get('REMOTE_ADDR')
+            ip = request.META.get("REMOTE_ADDR")
         return ip

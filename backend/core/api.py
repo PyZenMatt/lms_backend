@@ -9,7 +9,7 @@ from rest_framework.response import Response
 from rewards.models import BlockchainTransaction
 
 
-@api_view(['GET'])
+@api_view(["GET"])
 @permission_classes([IsAuthenticated])
 def dashboard_data(request):
     user = request.user
@@ -19,29 +19,32 @@ def dashboard_data(request):
     if user.wallet_address:
         try:
             from blockchain.views import teocoin_service
-            blockchain_balance = str(
-                teocoin_service.get_balance(user.wallet_address))
+
+            blockchain_balance = str(teocoin_service.get_balance(user.wallet_address))
         except:
             blockchain_balance = "0"
 
-    return Response({
-        'user': {
-            'username': user.username,
-            'blockchain_balance': blockchain_balance,
-            'wallet_address': user.wallet_address,
-            'role': user.role
-        },
-        'lessons': LessonSerializer(
-            Lesson.objects.filter(students=user).select_related('teacher'),
-            many=True
-        ).data,
-        'transactions': BlockchainTransactionSerializer(
-            BlockchainTransaction.objects.filter(
-                user=user).order_by('-created_at')[:10],
-            many=True
-        ).data,
-        'notifications': NotificationSerializer(
-            Notification.objects.filter(user=user).order_by('-created_at')[:5],
-            many=True
-        ).data
-    })
+    return Response(
+        {
+            "user": {
+                "username": user.username,
+                "blockchain_balance": blockchain_balance,
+                "wallet_address": user.wallet_address,
+                "role": user.role,
+            },
+            "lessons": LessonSerializer(
+                Lesson.objects.filter(students=user).select_related("teacher"),
+                many=True,
+            ).data,
+            "transactions": BlockchainTransactionSerializer(
+                BlockchainTransaction.objects.filter(user=user).order_by("-created_at")[
+                    :10
+                ],
+                many=True,
+            ).data,
+            "notifications": NotificationSerializer(
+                Notification.objects.filter(user=user).order_by("-created_at")[:5],
+                many=True,
+            ).data,
+        }
+    )

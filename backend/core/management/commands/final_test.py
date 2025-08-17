@@ -11,14 +11,13 @@ print("=" * 50)
 
 # Verifica variabili d'ambiente
 print("1. 🔍 Verifica variabili d'ambiente:")
-admin_key = os.getenv('ADMIN_PRIVATE_KEY')
-rpc_url = os.getenv('POLYGON_AMOY_RPC_URL',
-                    'https://rpc-amoy.polygon.technology/')
-contract_addr = os.getenv('TEOCOIN_CONTRACT_ADDRESS',
-                          '0x20D6656A31297ab3b8A87291Ed562D4228Be9ff8')
+admin_key = os.getenv("ADMIN_PRIVATE_KEY")
+rpc_url = os.getenv("POLYGON_AMOY_RPC_URL", "https://rpc-amoy.polygon.technology/")
+contract_addr = os.getenv(
+    "TEOCOIN_CONTRACT_ADDRESS", "0x20D6656A31297ab3b8A87291Ed562D4228Be9ff8"
+)
 
-print(
-    f"   ADMIN_PRIVATE_KEY: {'✅ Configurata' if admin_key else '❌ Mancante'}")
+print(f"   ADMIN_PRIVATE_KEY: {'✅ Configurata' if admin_key else '❌ Mancante'}")
 print(f"   POLYGON_AMOY_RPC_URL: {rpc_url}")
 print(f"   TEOCOIN_CONTRACT_ADDRESS: {contract_addr}")
 
@@ -42,7 +41,7 @@ if admin_key:
         admin_account = w3.eth.account.from_key(admin_key)
         admin_address = admin_account.address
         balance = w3.eth.get_balance(admin_address)
-        matic_balance = w3.from_wei(balance, 'ether')
+        matic_balance = w3.from_wei(balance, "ether")
 
         print(f"   Address: {admin_address}")
         print(f"   MATIC Balance: {matic_balance}")
@@ -64,8 +63,7 @@ try:
     from blockchain.teocoin_abi import TEOCOIN_ABI
 
     contract = w3.eth.contract(
-        address=Web3.to_checksum_address(contract_addr),
-        abi=TEOCOIN_ABI
+        address=Web3.to_checksum_address(contract_addr), abi=TEOCOIN_ABI
     )
 
     name = contract.functions.name().call()
@@ -84,22 +82,21 @@ except Exception as e:
 print("\n5. 🔧 Test integrazione Django:")
 try:
     # Setup Django environment
-    os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'schoolplatform.settings')
+    os.environ.setdefault("DJANGO_SETTINGS_MODULE", "schoolplatform.settings")
     import django
+
     django.setup()
 
     from blockchain.blockchain import TeoCoinService
 
     service = TeoCoinService()
     print("   ✅ TeoCoinService inizializzato")
-    print(
-        f"   Admin key configurata: {'✅' if service.admin_private_key else '❌'}")
+    print(f"   Admin key configurata: {'✅' if service.admin_private_key else '❌'}")
 
     if service.admin_private_key:
-        admin_account = service.w3.eth.account.from_key(
-            service.admin_private_key)
+        admin_account = service.w3.eth.account.from_key(service.admin_private_key)
         balance = service.w3.eth.get_balance(admin_account.address)
-        matic_balance = service.w3.from_wei(balance, 'ether')
+        matic_balance = service.w3.from_wei(balance, "ether")
 
         print(f"   Admin MATIC: {matic_balance}")
 

@@ -8,12 +8,13 @@ from users.models import User
 
 
 class Command(BaseCommand):
-    help = 'Sostituisce i reviewer inattivi oltre 24 ore'
+    help = "Sostituisce i reviewer inattivi oltre 24 ore"
 
     def handle(self, *args, **kwargs):
         timeout = timezone.now() - timedelta(hours=24)
         stale_reviews = ExerciseReview.objects.filter(
-            score__isnull=True, assigned_at__lte=timeout)
+            score__isnull=True, assigned_at__lte=timeout
+        )
 
         for review in stale_reviews:
             submission = review.submission
@@ -21,9 +22,11 @@ class Command(BaseCommand):
             old_reviewer = review.reviewer
             review.delete()
 
-            candidates = User.objects.filter(role='student').exclude(
-                id__in=current_reviewers.values_list('id', flat=True)
-            ).exclude(id=submission.student.id)
+            candidates = (
+                User.objects.filter(role="student")
+                .exclude(id__in=current_reviewers.values_list("id", flat=True))
+                .exclude(id=submission.student.id)
+            )
 
             if not candidates.exists():
                 continue
@@ -31,21 +34,20 @@ class Command(BaseCommand):
             new_reviewer = random.choice(candidates)
 
             ExerciseReview.objects.create(
-                submission=submission,
-                reviewer=new_reviewer,
-                assigned_at=timezone.now()
+                submission=submission, reviewer=new_reviewer, assigned_at=timezone.now()
             )
             submission.reviewers.add(new_reviewer)
 
             Notification.objects.create(
                 user=new_reviewer,
-                message=f"Hai ricevuto una nuova richiesta di review (rimpiazzo) per l'esercizio: {submission.exercise.title}"
+                message=f"Hai ricevuto una nuova richiesta di review (rimpiazzo) per l'esercizio: {submission.exercise.title}",
             )
 
             Notification.objects.create(
                 user=old_reviewer,
-                message=f"Sei stato rimpiazzato come reviewer per l'esercizio: {submission.exercise.title}"
+                message=f"Sei stato rimpiazzato come reviewer per l'esercizio: {submission.exercise.title}",
             )
 
-        self.stdout.write(self.style.SUCCESS(
-            "Reviewer scaduti sostituiti con successo."))
+        self.stdout.write(
+            self.style.SUCCESS("Reviewer scaduti sostituiti con successo.")
+        )

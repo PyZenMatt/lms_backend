@@ -24,10 +24,10 @@ class ApproveCourseView(APIView):
         Notification.objects.create(
             user=course.teacher,
             message=f"Il tuo corso '{course.title}' è stato approvato!",
-            notification_type='course_approved',
-            related_object_id=course.pk
+            notification_type="course_approved",
+            related_object_id=course.pk,
         )
-        return Response({'success': f"Il corso '{course.title}' è stato approvato."})
+        return Response({"success": f"Il corso '{course.title}' è stato approvato."})
 
 
 class RejectCourseView(APIView):
@@ -38,8 +38,10 @@ class RejectCourseView(APIView):
         Notification.objects.create(
             user=course.teacher,
             message=f"Il tuo corso '{course.title}' è stato rifiutato.",
-            notification_type='course_rejected',
-            related_object_id=course.pk
+            notification_type="course_rejected",
+            related_object_id=course.pk,
         )
         course.delete()
-        return Response({'success': f"Il corso '{course.title}' è stato rifiutato e cancellato."})
+        return Response(
+            {"success": f"Il corso '{course.title}' è stato rifiutato e cancellato."}
+        )

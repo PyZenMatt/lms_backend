@@ -20,12 +20,14 @@ from typing import Any, Dict
 import requests
 
 # Setup per Django (se necessario)
-sys.path.append('/home/teo/Project/school/schoolplatform')
+sys.path.append("/home/teo/Project/school/schoolplatform")
 try:
     import django
-    os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'schoolplatform.settings')
+
+    os.environ.setdefault("DJANGO_SETTINGS_MODULE", "schoolplatform.settings")
     django.setup()
     from blockchain.blockchain import TeoCoinService
+
     DJANGO_AVAILABLE = True
 except:
     DJANGO_AVAILABLE = False
@@ -35,12 +37,12 @@ class MaticFaucetRequester:
     """Classe per richiedere MATIC da diversi faucet sulla rete Amoy"""
 
     def __init__(self):
-        self.reward_pool_address = os.getenv('REWARD_POOL_ADDRESS')
+        self.reward_pool_address = os.getenv("REWARD_POOL_ADDRESS")
         self.faucet_endpoints = {
-            'polygon_official': 'https://faucet.polygon.technology/api/v1/faucet',
-            'alchemy': 'https://polygon-amoy-faucet.alchemy.com/api/faucet',
-            'quicknode': 'https://faucet.quicknode.com/polygon/amoy',
-            'chainlink': 'https://faucets.chain.link/polygon-amoy'
+            "polygon_official": "https://faucet.polygon.technology/api/v1/faucet",
+            "alchemy": "https://polygon-amoy-faucet.alchemy.com/api/faucet",
+            "quicknode": "https://faucet.quicknode.com/polygon/amoy",
+            "chainlink": "https://faucets.chain.link/polygon-amoy",
         }
 
     def get_reward_pool_address(self) -> str:
@@ -50,11 +52,13 @@ class MaticFaucetRequester:
 
         # Se Django è disponibile, prova a ottenere l'indirizzo dalla configurazione
         if DJANGO_AVAILABLE:
-            return self.reward_pool_address or "0x3b72a4E942CF1467134510cA3952F01b63005044"  # Fallback
+            return (
+                self.reward_pool_address or "0x3b72a4E942CF1467134510cA3952F01b63005044"
+            )  # Fallback
 
         # Chiedi all'utente di inserire l'indirizzo
         address = input("Inserisci l'indirizzo della reward pool: ").strip()
-        if not address.startswith('0x') or len(address) != 42:
+        if not address.startswith("0x") or len(address) != 42:
             raise ValueError("Indirizzo non valido")
         return address
 
@@ -67,9 +71,9 @@ class MaticFaucetRequester:
         try:
             tcs = TeoCoinService()
             from web3 import Web3
-            balance_wei = tcs.w3.eth.get_balance(
-                Web3.to_checksum_address(address))
-            balance_matic = tcs.w3.from_wei(balance_wei, 'ether')
+
+            balance_wei = tcs.w3.eth.get_balance(Web3.to_checksum_address(address))
+            balance_matic = tcs.w3.from_wei(balance_wei, "ether")
             return float(balance_matic)
         except Exception as e:
             print(f"⚠️ Errore nel controllo balance: {e}")
@@ -80,29 +84,32 @@ class MaticFaucetRequester:
         print("🔄 Tentativo con faucet ufficiale Polygon...")
 
         try:
-            payload = {
-                "network": "amoy",
-                "address": address,
-                "token": "maticToken"
-            }
+            payload = {"network": "amoy", "address": address, "token": "maticToken"}
 
             headers = {
-                'Content-Type': 'application/json',
-                'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36'
+                "Content-Type": "application/json",
+                "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36",
             }
 
             response = requests.post(
-                self.faucet_endpoints['polygon_official'],
+                self.faucet_endpoints["polygon_official"],
                 json=payload,
                 headers=headers,
-                timeout=30
+                timeout=30,
             )
 
             if response.status_code == 200:
                 result = response.json()
-                return {"success": True, "response": result, "faucet": "polygon_official"}
+                return {
+                    "success": True,
+                    "response": result,
+                    "faucet": "polygon_official",
+                }
             else:
-                return {"success": False, "error": f"HTTP {response.status_code}: {response.text}"}
+                return {
+                    "success": False,
+                    "error": f"HTTP {response.status_code}: {response.text}",
+                }
 
         except Exception as e:
             return {"success": False, "error": str(e)}
@@ -112,28 +119,28 @@ class MaticFaucetRequester:
         print("🔄 Tentativo con faucet Alchemy...")
 
         try:
-            payload = {
-                "address": address,
-                "network": "amoy"
-            }
+            payload = {"address": address, "network": "amoy"}
 
             headers = {
-                'Content-Type': 'application/json',
-                'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36'
+                "Content-Type": "application/json",
+                "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36",
             }
 
             response = requests.post(
-                self.faucet_endpoints['alchemy'],
+                self.faucet_endpoints["alchemy"],
                 json=payload,
                 headers=headers,
-                timeout=30
+                timeout=30,
             )
 
             if response.status_code == 200:
                 result = response.json()
                 return {"success": True, "response": result, "faucet": "alchemy"}
             else:
-                return {"success": False, "error": f"HTTP {response.status_code}: {response.text}"}
+                return {
+                    "success": False,
+                    "error": f"HTTP {response.status_code}: {response.text}",
+                }
 
         except Exception as e:
             return {"success": False, "error": str(e)}
@@ -150,6 +157,7 @@ class MaticFaucetRequester:
 
         try:
             import webbrowser
+
             webbrowser.open(f"https://faucet.polygon.technology/")
             return {"success": True, "response": "Browser aperto", "faucet": "manual"}
         except Exception as e:
@@ -196,7 +204,8 @@ class MaticFaucetRequester:
 
                 # Attendi che l'utente completi manualmente
                 input(
-                    "\n⏳ Completa la richiesta nel browser e premi INVIO per continuare...")
+                    "\n⏳ Completa la richiesta nel browser e premi INVIO per continuare..."
+                )
                 success = True
 
         # Controlla balance finale
@@ -213,7 +222,8 @@ class MaticFaucetRequester:
                 return True
             else:
                 print(
-                    "⚠️ Il balance non è cambiato, la transazione potrebbe essere ancora in pending")
+                    "⚠️ Il balance non è cambiato, la transazione potrebbe essere ancora in pending"
+                )
 
         return success
 
@@ -233,7 +243,8 @@ class MaticFaucetRequester:
             if current_balance != last_balance:
                 change = current_balance - last_balance
                 print(
-                    f"🔄 Balance cambiato: {current_balance:.6f} MATIC ({change:+.6f})")
+                    f"🔄 Balance cambiato: {current_balance:.6f} MATIC ({change:+.6f})"
+                )
                 last_balance = current_balance
 
                 if change > 0:
@@ -251,13 +262,17 @@ def main():
     import argparse
 
     parser = argparse.ArgumentParser(
-        description='Richiedi MATIC faucet per Polygon Amoy')
+        description="Richiedi MATIC faucet per Polygon Amoy"
+    )
     parser.add_argument(
-        '--address', help='Indirizzo destinatario (default: reward pool)')
-    parser.add_argument('--monitor', action='store_true',
-                        help='Monitora i cambiamenti di balance')
-    parser.add_argument('--duration', type=int, default=300,
-                        help='Durata monitoraggio in secondi')
+        "--address", help="Indirizzo destinatario (default: reward pool)"
+    )
+    parser.add_argument(
+        "--monitor", action="store_true", help="Monitora i cambiamenti di balance"
+    )
+    parser.add_argument(
+        "--duration", type=int, default=300, help="Durata monitoraggio in secondi"
+    )
 
     args = parser.parse_args()
 

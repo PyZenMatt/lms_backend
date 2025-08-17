@@ -5,7 +5,7 @@ import django
 
 from blockchain.blockchain import TeoCoinService
 
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'schoolplatform.settings')
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "schoolplatform.settings")
 
 django.setup()
 
@@ -19,10 +19,9 @@ try:
     print(f"🔑 Admin key: {'✅' if service.admin_private_key else '❌'}")
 
     if service.admin_private_key:
-        admin_account = service.w3.eth.account.from_key(
-            service.admin_private_key)
+        admin_account = service.w3.eth.account.from_key(service.admin_private_key)
         balance = service.w3.eth.get_balance(admin_account.address)
-        matic_balance = service.w3.from_wei(balance, 'ether')
+        matic_balance = service.w3.from_wei(balance, "ether")
 
         print(f"👤 Admin: {admin_account.address}")
         print(f"💰 MATIC: {matic_balance}")

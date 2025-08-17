@@ -30,13 +30,17 @@ class HybridTeoCoinService:
         """Get user's staked balance"""
         return self.db_service.get_staked_balance(user)
 
-    def add_balance(self, user, amount, transaction_type, description="", course_id=None):
+    def add_balance(
+        self, user, amount, transaction_type, description="", course_id=None
+    ):
         """Add TeoCoin to user's balance"""
         return self.db_service.add_balance(
             user, amount, transaction_type, description, course_id
         )
 
-    def deduct_balance(self, user, amount, transaction_type, description="", course_id=None):
+    def deduct_balance(
+        self, user, amount, transaction_type, description="", course_id=None
+    ):
         """Deduct TeoCoin from user's balance"""
         return self.db_service.deduct_balance(
             user, amount, transaction_type, description, course_id
@@ -69,8 +73,9 @@ class HybridTeoCoinService:
     def reward_teacher_lesson_completion(self, teacher, student, lesson_reward=None):
         """Reward teacher for lesson completion"""
         from decimal import Decimal
+
         if lesson_reward is None:
-            lesson_reward = Decimal('1.0')
+            lesson_reward = Decimal("1.0")
         return self.db_service.reward_teacher_lesson_completion(
             teacher, student, lesson_reward
         )

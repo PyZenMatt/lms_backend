@@ -9,9 +9,11 @@ from decimal import ROUND_HALF_UP, Decimal
 
 from django.db import transaction
 from django.utils import timezone
-# Import BlockchainService for new architecture
 
 from .models import BlockchainTransaction
+
+# Import BlockchainService for new architecture
+
 
 logger = logging.getLogger(__name__)
 
@@ -30,7 +32,7 @@ class BlockchainRewardCalculator:
     # Configurazione percentuali (modificabili per corso)
     DEFAULT_MAX_EXERCISE_REWARD_PERCENTAGE = 0.10  # Max 10% del costo corso
     DEFAULT_MIN_EXERCISE_REWARD_PERCENTAGE = 0.03  # Min 3% del costo corso
-    DEFAULT_REVIEWER_REWARD_PERCENTAGE = 0.05      # 5% del premio dell'esercizio
+    DEFAULT_REVIEWER_REWARD_PERCENTAGE = 0.05  # 5% del premio dell'esercizio
 
     @classmethod
     def get_course_reward_config(cls, course):
@@ -39,9 +41,21 @@ class BlockchainRewardCalculator:
         (in futuro può essere personalizzata per corso)
         """
         return {
-            'max_percentage': getattr(course, 'max_exercise_reward_percentage', cls.DEFAULT_MAX_EXERCISE_REWARD_PERCENTAGE),
-            'min_percentage': getattr(course, 'min_exercise_reward_percentage', cls.DEFAULT_MIN_EXERCISE_REWARD_PERCENTAGE),
-            'reviewer_percentage': getattr(course, 'reviewer_reward_percentage', cls.DEFAULT_REVIEWER_REWARD_PERCENTAGE)
+            "max_percentage": getattr(
+                course,
+                "max_exercise_reward_percentage",
+                cls.DEFAULT_MAX_EXERCISE_REWARD_PERCENTAGE,
+            ),
+            "min_percentage": getattr(
+                course,
+                "min_exercise_reward_percentage",
+                cls.DEFAULT_MIN_EXERCISE_REWARD_PERCENTAGE,
+            ),
+            "reviewer_percentage": getattr(
+                course,
+                "reviewer_reward_percentage",
+                cls.DEFAULT_REVIEWER_REWARD_PERCENTAGE,
+            ),
         }
 
     @classmethod
@@ -50,21 +64,18 @@ class BlockchainRewardCalculator:
         Calcola il pool totale di reward per un corso
 
         Esempio: Corso da 30€
-        - Min 3% = 0.9€ 
+        - Min 3% = 0.9€
         - Max 10% = 3€
         - Percentuale casuale tra 3% e 10%
         """
         config = cls.get_course_reward_config(course)
 
         # Percentuale casuale tra min e max
-        percentage = random.uniform(
-            config['min_percentage'],
-            config['max_percentage']
-        )
+        percentage = random.uniform(config["min_percentage"], config["max_percentage"])
 
         total_pool = Decimal(course.price) * Decimal(str(percentage))
         # Precisione a 3 decimali
-        return total_pool.quantize(Decimal('0.001'), rounding=ROUND_HALF_UP)
+        return total_pool.quantize(Decimal("0.001"), rounding=ROUND_HALF_UP)
 
     @classmethod
     def distribute_exercise_rewards(cls, course, exercise_count):
@@ -89,13 +100,15 @@ class BlockchainRewardCalculator:
             return [total_pool]
 
         # Minimo garantito per esercizio
-        min_per_exercise = Decimal('0.001')
+        min_per_exercise = Decimal("0.001")
         guaranteed_minimum = min_per_exercise * exercise_count
 
         if total_pool <= guaranteed_minimum:
             # Se il pool è troppo piccolo, distribuisci equamente
             per_exercise = total_pool / exercise_count
-            return [per_exercise.quantize(Decimal('0.001'), rounding=ROUND_HALF_UP)] * exercise_count
+            return [
+                per_exercise.quantize(Decimal("0.001"), rounding=ROUND_HALF_UP)
+            ] * exercise_count
 
         # Pool disponibile dopo aver garantito il minimo
         distributable_pool = total_pool - guaranteed_minimum
@@ -106,20 +119,25 @@ class BlockchainRewardCalculator:
 
         # Distribuisce il pool rimanente in base ai pesi
         rewards = []
-        distributed = Decimal('0')
+        distributed = Decimal("0")
 
         for i, weight in enumerate(weights):
-            if i == len(weights) - 1:  # Ultimo esercizio prende il resto per garantire somma esatta
+            if (
+                i == len(weights) - 1
+            ):  # Ultimo esercizio prende il resto per garantire somma esatta
                 remaining = total_pool - distributed
-                rewards.append(remaining.quantize(
-                    Decimal('0.001'), rounding=ROUND_HALF_UP))
+                rewards.append(
+                    remaining.quantize(Decimal("0.001"), rounding=ROUND_HALF_UP)
+                )
             else:
                 # Minimo garantito + quota proporzionale del distributable
-                proportional_share = (
-                    distributable_pool * Decimal(str(weight / total_weight)))
+                proportional_share = distributable_pool * Decimal(
+                    str(weight / total_weight)
+                )
                 exercise_reward = min_per_exercise + proportional_share
                 exercise_reward = exercise_reward.quantize(
-                    Decimal('0.001'), rounding=ROUND_HALF_UP)
+                    Decimal("0.001"), rounding=ROUND_HALF_UP
+                )
                 rewards.append(exercise_reward)
                 distributed += exercise_reward
 
@@ -129,8 +147,7 @@ class BlockchainRewardCalculator:
             # Aggiusta l'ultimo reward per correggere errori di arrotondamento
             difference = total_pool - total_distributed
             rewards[-1] += difference
-            rewards[-1] = rewards[-1].quantize(Decimal('0.001'),
-                                               rounding=ROUND_HALF_UP)
+            rewards[-1] = rewards[-1].quantize(Decimal("0.001"), rounding=ROUND_HALF_UP)
 
         return rewards
 
@@ -147,11 +164,12 @@ class BlockchainRewardCalculator:
         reviewer_percentage = cls.DEFAULT_REVIEWER_REWARD_PERCENTAGE
         if course:
             config = cls.get_course_reward_config(course)
-            reviewer_percentage = config['reviewer_percentage']
+            reviewer_percentage = config["reviewer_percentage"]
 
-        reviewer_reward = Decimal(
-            str(exercise_reward_amount)) * Decimal(str(reviewer_percentage))
-        return reviewer_reward.quantize(Decimal('0.001'), rounding=ROUND_HALF_UP)
+        reviewer_reward = Decimal(str(exercise_reward_amount)) * Decimal(
+            str(reviewer_percentage)
+        )
+        return reviewer_reward.quantize(Decimal("0.001"), rounding=ROUND_HALF_UP)
 
 
 class BlockchainRewardManager:
@@ -167,31 +185,34 @@ class BlockchainRewardManager:
         """
         try:
             from services.db_teocoin_service import DBTeoCoinService
+
             db_service = DBTeoCoinService()
 
             # Verifica che non sia già stato premiato nel database TeoCoin
             from blockchain.models import DBTeoCoinTransaction
+
             existing_transaction = DBTeoCoinTransaction.objects.filter(
                 user=submission.student,
-                transaction_type='exercise_completion',
-                related_object_id=str(submission.id)
+                transaction_type="exercise_completion",
+                related_object_id=str(submission.id),
             ).first()
 
             if existing_transaction:
                 logger.info(
-                    f"Exercise {submission.id} già premiato per utente {submission.student.email}")
+                    f"Exercise {submission.id} già premiato per utente {submission.student.email}"
+                )
                 return True  # Considera successo
 
             # REWARD FISSO: 2 TEO per ogni esercizio completato
-            reward_amount = Decimal('2.0')
+            reward_amount = Decimal("2.0")
 
             # Accredita TeoCoin nel database
             success = db_service.add_balance(
                 user=submission.student,
                 amount=reward_amount,
-                transaction_type='exercise_completion',
+                transaction_type="exercise_completion",
                 description=f"Exercise completion reward: {submission.exercise.title}",
-                related_object_id=str(submission.id)
+                related_object_id=str(submission.id),
             )
 
             if success:
@@ -202,12 +223,12 @@ class BlockchainRewardManager:
                 return True
             else:
                 logger.error(
-                    f"❌ Failed to credit exercise reward to {submission.student.email}")
+                    f"❌ Failed to credit exercise reward to {submission.student.email}"
+                )
                 return False
 
         except Exception as e:
-            logger.error(
-                f"Error awarding exercise completion reward: {str(e)}")
+            logger.error(f"Error awarding exercise completion reward: {str(e)}")
             return False
 
     @classmethod
@@ -218,31 +239,34 @@ class BlockchainRewardManager:
         """
         try:
             from services.db_teocoin_service import DBTeoCoinService
+
             db_service = DBTeoCoinService()
 
             # Verifica che non sia già stato premiato nel database TeoCoin
             from blockchain.models import DBTeoCoinTransaction
+
             existing_transaction = DBTeoCoinTransaction.objects.filter(
                 user=review.reviewer,
-                transaction_type='review_completion',
-                related_object_id=str(review.id)
+                transaction_type="review_completion",
+                related_object_id=str(review.id),
             ).first()
 
             if existing_transaction:
                 logger.info(
-                    f"Review {review.id} già premiata per reviewer {review.reviewer.email}")
+                    f"Review {review.id} già premiata per reviewer {review.reviewer.email}"
+                )
                 return True  # Considera successo
 
             # REWARD FISSO: 1 TEO per ogni review completata
-            reviewer_reward = Decimal('1.0')
+            reviewer_reward = Decimal("1.0")
 
             # Accredita TeoCoin nel database
             success = db_service.add_balance(
                 user=review.reviewer,
                 amount=reviewer_reward,
-                transaction_type='review_completion',
+                transaction_type="review_completion",
                 description=f"Review completion reward for submission {review.submission.id}",
-                related_object_id=str(review.id)
+                related_object_id=str(review.id),
             )
 
             if success:
@@ -253,7 +277,8 @@ class BlockchainRewardManager:
                 return True
             else:
                 logger.error(
-                    f"❌ Failed to credit review reward to {review.reviewer.email}")
+                    f"❌ Failed to credit review reward to {review.reviewer.email}"
+                )
                 return False
 
         except Exception as e:
@@ -269,24 +294,23 @@ class BlockchainRewardManager:
         Kept for compatibility but will always use DB-based transactions.
         """
         logger.warning(
-            f"_transfer_from_reward_pool called but using DB-based system instead: {reason}")
+            f"_transfer_from_reward_pool called but using DB-based system instead: {reason}"
+        )
 
         # Simply create a transaction record for historical tracking
         try:
             blockchain_transaction = BlockchainTransaction.objects.create(
                 user=user,
-                transaction_type='db_transfer',  # Mark as DB-based
+                transaction_type="db_transfer",  # Mark as DB-based
                 amount=amount,
-                to_address=getattr(user, 'wallet_address',
-                                   None) or 'db_balance',
+                to_address=getattr(user, "wallet_address", None) or "db_balance",
                 related_teocoin_transaction=teocoin_transaction,
-                status='completed',  # Always completed for DB transactions
+                status="completed",  # Always completed for DB transactions
                 tx_hash=f"db_reward_{timezone.now().strftime('%Y%m%d_%H%M%S')}",
-                confirmed_at=timezone.now()
+                confirmed_at=timezone.now(),
             )
 
-            logger.info(
-                f"Reward recorded in DB for user {user.email}: {amount} TEO")
+            logger.info(f"Reward recorded in DB for user {user.email}: {amount} TEO")
             return blockchain_transaction
 
         except Exception as e:
@@ -309,8 +333,7 @@ def setup_course_reward_system(course):
             return
 
         # Calcola e logga la distribuzione dei reward
-        reward_pool = BlockchainRewardCalculator.calculate_course_reward_pool(
-            course)
+        reward_pool = BlockchainRewardCalculator.calculate_course_reward_pool(course)
         exercise_rewards = BlockchainRewardCalculator.distribute_exercise_rewards(
             course, total_exercises
         )
@@ -323,9 +346,9 @@ def setup_course_reward_system(course):
         )
 
         return {
-            'total_pool': reward_pool,
-            'exercise_rewards': exercise_rewards,
-            'total_exercises': total_exercises
+            "total_pool": reward_pool,
+            "exercise_rewards": exercise_rewards,
+            "total_exercises": total_exercises,
         }
 
     except Exception as e:
@@ -346,7 +369,7 @@ class BlockchainRewards:
         try:
             course = submission.exercise.lesson.course
             if not course:
-                return Decimal('0')
+                return Decimal("0")
 
             # Conta tutti gli esercizi del corso
             total_exercises = 0
@@ -354,7 +377,7 @@ class BlockchainRewards:
                 total_exercises += lesson.exercises.count()
 
             if total_exercises == 0:
-                return Decimal('0')
+                return Decimal("0")
 
             # Distribuisce i reward tra tutti gli esercizi
             exercise_rewards = BlockchainRewardCalculator.distribute_exercise_rewards(
@@ -375,7 +398,7 @@ class BlockchainRewards:
 
         except Exception as e:
             logger.error(f"Error calculating exercise reward: {str(e)}")
-            return Decimal('0')
+            return Decimal("0")
 
     @classmethod
     def award_exercise_completion(cls, submission):

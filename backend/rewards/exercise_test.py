@@ -3,7 +3,7 @@
 # ========================================
 
 
-from courses.models import (Course, ExerciseReview, ExerciseSubmission)
+from courses.models import Course, ExerciseReview, ExerciseSubmission
 from django.utils import timezone
 from rewards.blockchain_rewards import BlockchainRewards
 from services.db_teocoin_service import DBTeoCoinService
@@ -26,7 +26,7 @@ print("\n📚 1. SETTING UP TEST DATA")
 print("-" * 40)
 
 # Trova studente
-student = User.objects.filter(role='student').first()
+student = User.objects.filter(role="student").first()
 if not student:
     print("⚠️  No student found, using first available user")
     student = User.objects.first()
@@ -34,12 +34,11 @@ if not student:
 print(f"   📘 Student: {student.username} (ID: {student.id})")
 
 # Trova teacher/reviewer
-teacher = User.objects.filter(role='teacher').first()
+teacher = User.objects.filter(role="teacher").first()
 if not teacher:
     teacher = User.objects.filter(is_staff=True).first()
 
-print(
-    f"   👨‍🏫 Teacher/Reviewer: {teacher.username if teacher else 'None found'}")
+print(f"   👨‍🏫 Teacher/Reviewer: {teacher.username if teacher else 'None found'}")
 
 # Trova corso ed esercizio
 course = Course.objects.first()
@@ -77,8 +76,7 @@ try:
     from rewards.blockchain_rewards import BlockchainRewardCalculator
 
     # Calcola pool reward totale del corso
-    total_pool = BlockchainRewardCalculator.calculate_course_reward_pool(
-        course)
+    total_pool = BlockchainRewardCalculator.calculate_course_reward_pool(course)
     print(f"   📊 Course total reward pool: {total_pool} TEO")
 
     # Conta esercizi nel corso
@@ -109,7 +107,8 @@ try:
 
         our_exercise_reward = exercise_rewards[current_exercise_index]
         print(
-            f"   🎯 Our exercise '{exercise.title}' reward: {our_exercise_reward} TEO")
+            f"   🎯 Our exercise '{exercise.title}' reward: {our_exercise_reward} TEO"
+        )
 
 except Exception as e:
     print(f"   ❌ Error calculating rewards: {e}")
@@ -141,8 +140,7 @@ print("-" * 40)
 
 # Cerca submission esistente o creane una nuova
 submission = ExerciseSubmission.objects.filter(
-    exercise=exercise,
-    student=student
+    exercise=exercise, student=student
 ).first()
 
 if submission:
@@ -157,8 +155,8 @@ else:
             exercise=exercise,
             student=student,
             content="Test submission for exercise reward system",
-            status='submitted',
-            submitted_at=timezone.now()
+            status="submitted",
+            submitted_at=timezone.now(),
         )
         print(f"   ✅ Created submission: ID {submission.id}")
     except Exception as e:
@@ -175,15 +173,17 @@ if submission:
     try:
         # Verifica se già premiato
         from rewards.models import BlockchainTransaction
+
         existing_reward = BlockchainTransaction.objects.filter(
             user=student,
-            transaction_type='exercise_reward',
-            related_object_id=str(submission.id)
+            transaction_type="exercise_reward",
+            related_object_id=str(submission.id),
         ).first()
 
         if existing_reward:
             print(
-                f"   ⚠️  Exercise already rewarded (Transaction ID: {existing_reward.id})")
+                f"   ⚠️  Exercise already rewarded (Transaction ID: {existing_reward.id})"
+            )
             print(f"      Amount: {existing_reward.amount} TEO")
             print(f"      Status: {existing_reward.status}")
         else:
@@ -201,14 +201,14 @@ if submission:
                 # Verifica nuovo balance studente
                 new_balance = db_service.get_balance(student)
                 balance_increase = new_balance - initial_balance
-                print(
-                    f"   💰 Student balance: {initial_balance} → {new_balance} TEO")
+                print(f"   💰 Student balance: {initial_balance} → {new_balance} TEO")
                 print(f"   📈 Balance increase: +{balance_increase} TEO")
 
                 # Verifica che la submission sia aggiornata
                 submission.refresh_from_db()
                 print(
-                    f"   📋 Submission reward_amount updated: {submission.reward_amount}")
+                    f"   📋 Submission reward_amount updated: {submission.reward_amount}"
+                )
 
             else:
                 print("   ❌ Exercise reward assignment failed!")
@@ -216,6 +216,7 @@ if submission:
     except Exception as e:
         print(f"   ❌ Error in exercise reward assignment: {e}")
         import traceback
+
         traceback.print_exc()
 
 # ========================================
@@ -229,8 +230,7 @@ if submission and teacher:
     try:
         # Cerca review esistente
         review = ExerciseReview.objects.filter(
-            submission=submission,
-            reviewer=teacher
+            submission=submission, reviewer=teacher
         ).first()
 
         if review:
@@ -242,10 +242,10 @@ if submission and teacher:
             review = ExerciseReview.objects.create(
                 submission=submission,
                 reviewer=teacher,
-                status='completed',
+                status="completed",
                 score=85,
                 feedback="Good work! Test review for reward system.",
-                reviewed_at=timezone.now()
+                reviewed_at=timezone.now(),
             )
             print(f"   ✅ Created review: ID {review.id}")
 
@@ -256,30 +256,31 @@ if submission and teacher:
             # Verifica se reviewer già premiato
             existing_review_reward = BlockchainTransaction.objects.filter(
                 user=teacher,
-                transaction_type='review_reward',
-                related_object_id=str(review.id)
+                transaction_type="review_reward",
+                related_object_id=str(review.id),
             ).first()
 
             if existing_review_reward:
                 print(
-                    f"      ⚠️  Reviewer already rewarded: {existing_review_reward.amount} TEO")
+                    f"      ⚠️  Reviewer already rewarded: {existing_review_reward.amount} TEO"
+                )
             else:
                 # Verifica balance reviewer iniziale
                 reviewer_initial = db_service.get_balance(teacher)
-                print(
-                    f"      💰 Reviewer initial balance: {reviewer_initial} TEO")
+                print(f"      💰 Reviewer initial balance: {reviewer_initial} TEO")
 
                 # Assegna reward per review
-                review_result = BlockchainRewards.award_review_completion(
-                    review)
+                review_result = BlockchainRewards.award_review_completion(review)
 
                 if review_result:
                     reviewer_new = db_service.get_balance(teacher)
                     reviewer_increase = reviewer_new - reviewer_initial
                     print(
-                        f"      ✅ Reviewer reward assigned: {review_result.amount} TEO")
+                        f"      ✅ Reviewer reward assigned: {review_result.amount} TEO"
+                    )
                     print(
-                        f"      💰 Reviewer balance: {reviewer_initial} → {reviewer_new} TEO (+{reviewer_increase})")
+                        f"      💰 Reviewer balance: {reviewer_initial} → {reviewer_new} TEO (+{reviewer_increase})"
+                    )
                 else:
                     print("      ❌ Reviewer reward assignment failed!")
         else:
@@ -306,21 +307,26 @@ try:
 
     # Transazioni nel database
     from django.db import connection
+
     with connection.cursor() as cursor:
         cursor.execute(
-            "SELECT COUNT(*) FROM blockchain_dbteocointransaction WHERE user_id = %s", [student.id])
+            "SELECT COUNT(*) FROM blockchain_dbteocointransaction WHERE user_id = %s",
+            [student.id],
+        )
         student_transactions = cursor.fetchone()[0]
         print(f"   📊 Student transactions in DB: {student_transactions}")
 
         if teacher:
             cursor.execute(
-                "SELECT COUNT(*) FROM blockchain_dbteocointransaction WHERE user_id = %s", [teacher.id])
+                "SELECT COUNT(*) FROM blockchain_dbteocointransaction WHERE user_id = %s",
+                [teacher.id],
+            )
             teacher_transactions = cursor.fetchone()[0]
             print(f"   📊 Teacher transactions in DB: {teacher_transactions}")
 
     # Reward transactions
     reward_transactions = BlockchainTransaction.objects.filter(
-        transaction_type__in=['exercise_reward', 'review_reward']
+        transaction_type__in=["exercise_reward", "review_reward"]
     ).count()
     print(f"   🎁 Total reward transactions: {reward_transactions}")
 

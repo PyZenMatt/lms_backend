@@ -19,7 +19,7 @@ from users.models import UserProgress
 from users.serializers import UserProgressSerializer
 
 # Setup Django environment
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'schoolplatform.settings')
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "schoolplatform.settings")
 django.setup()
 
 
@@ -59,13 +59,12 @@ class PerformanceTestRunner:
 
         # Get a user with some data
         try:
-            user = User.objects.filter(role='student').first()
+            user = User.objects.filter(role="student").first()
             if not user:
                 print("❌ No student users found for testing")
                 return
 
-            user_progress, created = UserProgress.objects.get_or_create(
-                user=user)
+            user_progress, created = UserProgress.objects.get_or_create(user=user)
 
             # Test serializer performance
             duration, query_count, result = self.time_function(
@@ -76,9 +75,9 @@ class PerformanceTestRunner:
             print(f"   ⏱️  Execution time: {duration:.4f} seconds")
             print(f"   🔍 Database queries: {query_count}")
 
-            self.results['user_progress_serializer'] = {
-                'duration': duration,
-                'queries': query_count
+            self.results["user_progress_serializer"] = {
+                "duration": duration,
+                "queries": query_count,
             }
 
         except Exception as e:
@@ -89,12 +88,12 @@ class PerformanceTestRunner:
         print("\n🧪 Testing Student Dashboard API Performance...")
 
         try:
-            student = User.objects.filter(role='student').first()
+            student = User.objects.filter(role="student").first()
             if not student:
                 print("❌ No student users found for testing")
                 return
 
-            request = self.factory.get('/dashboard/student/')
+            request = self.factory.get("/dashboard/student/")
             request.user = student
 
             view = StudentDashboardView()
@@ -117,13 +116,14 @@ class PerformanceTestRunner:
             print(f"✅ Student Dashboard API (cached):")
             print(f"   ⏱️  Execution time: {cached_duration:.4f} seconds")
             print(
-                f"   🚀 Speed improvement: {((duration - cached_duration) / duration * 100):.1f}%")
+                f"   🚀 Speed improvement: {((duration - cached_duration) / duration * 100):.1f}%"
+            )
 
-            self.results['student_dashboard'] = {
-                'duration_no_cache': duration,
-                'duration_cached': cached_duration,
-                'queries_no_cache': query_count,
-                'speed_improvement': ((duration - cached_duration) / duration * 100)
+            self.results["student_dashboard"] = {
+                "duration_no_cache": duration,
+                "duration_cached": cached_duration,
+                "queries_no_cache": query_count,
+                "speed_improvement": ((duration - cached_duration) / duration * 100),
             }
 
         except Exception as e:
@@ -134,12 +134,12 @@ class PerformanceTestRunner:
         print("\n🧪 Testing Teacher Dashboard API Performance...")
 
         try:
-            teacher = User.objects.filter(role='teacher').first()
+            teacher = User.objects.filter(role="teacher").first()
             if not teacher:
                 print("❌ No teacher users found for testing")
                 return
 
-            request = self.factory.get('/dashboard/teacher/')
+            request = self.factory.get("/dashboard/teacher/")
             request.user = teacher
 
             view = TeacherDashboardAPI()
@@ -162,13 +162,14 @@ class PerformanceTestRunner:
             print(f"✅ Teacher Dashboard API (cached):")
             print(f"   ⏱️  Execution time: {cached_duration:.4f} seconds")
             print(
-                f"   🚀 Speed improvement: {((duration - cached_duration) / duration * 100):.1f}%")
+                f"   🚀 Speed improvement: {((duration - cached_duration) / duration * 100):.1f}%"
+            )
 
-            self.results['teacher_dashboard'] = {
-                'duration_no_cache': duration,
-                'duration_cached': cached_duration,
-                'queries_no_cache': query_count,
-                'speed_improvement': ((duration - cached_duration) / duration * 100)
+            self.results["teacher_dashboard"] = {
+                "duration_no_cache": duration,
+                "duration_cached": cached_duration,
+                "queries_no_cache": query_count,
+                "speed_improvement": ((duration - cached_duration) / duration * 100),
             }
 
         except Exception as e:
@@ -179,12 +180,12 @@ class PerformanceTestRunner:
         print("\n🧪 Testing Batch API Performance...")
 
         try:
-            student = User.objects.filter(role='student').first()
+            student = User.objects.filter(role="student").first()
             if not student:
                 print("❌ No student users found for testing")
                 return
 
-            request = self.factory.get('/api/student/batch-data/')
+            request = self.factory.get("/api/student/batch-data/")
             request.user = student
 
             view = StudentBatchDataAPI()
@@ -198,13 +199,12 @@ class PerformanceTestRunner:
             print(f"✅ Student Batch API:")
             print(f"   ⏱️  Execution time: {duration:.4f} seconds")
             print(f"   🔍 Database queries: {query_count}")
-            print(
-                f"   📦 Data points returned: {len(result.data.get('courses', []))}")
+            print(f"   📦 Data points returned: {len(result.data.get('courses', []))}")
 
-            self.results['batch_api'] = {
-                'duration': duration,
-                'queries': query_count,
-                'data_points': len(result.data.get('courses', []))
+            self.results["batch_api"] = {
+                "duration": duration,
+                "queries": query_count,
+                "data_points": len(result.data.get("courses", [])),
             }
 
         except Exception as e:
@@ -217,11 +217,11 @@ class PerformanceTestRunner:
         try:
             # Test course list with optimization
             duration, query_count, result = self.time_function(
-                lambda: list(Course.objects.select_related('teacher').prefetch_related(
-                    'students', 'lessons', 'enrollments'
-                ).annotate(
-                    student_count=django.db.models.Count('students')
-                )[:10])
+                lambda: list(
+                    Course.objects.select_related("teacher")
+                    .prefetch_related("students", "lessons", "enrollments")
+                    .annotate(student_count=django.db.models.Count("students"))[:10]
+                )
             )
 
             print(f"✅ Optimized Course Query:")
@@ -233,10 +233,10 @@ class PerformanceTestRunner:
             duration_unopt, query_count_unopt, result_unopt = self.time_function(
                 lambda: [
                     {
-                        'course': course,
-                        'teacher': course.teacher,
-                        'student_count': course.students.count(),  # This causes N+1
-                        'lessons_count': course.lessons.count()    # This causes N+1
+                        "course": course,
+                        "teacher": course.teacher,
+                        "student_count": course.students.count(),  # This causes N+1
+                        "lessons_count": course.lessons.count(),  # This causes N+1
                     }
                     for course in Course.objects.all()[:10]
                 ]
@@ -246,17 +246,21 @@ class PerformanceTestRunner:
             print(f"   ⏱️  Execution time: {duration_unopt:.4f} seconds")
             print(f"   🔍 Database queries: {query_count_unopt}")
             print(
-                f"   🚀 Optimization improvement: {((duration_unopt - duration) / duration_unopt * 100):.1f}%")
+                f"   🚀 Optimization improvement: {((duration_unopt - duration) / duration_unopt * 100):.1f}%"
+            )
             print(
-                f"   📊 Query reduction: {query_count_unopt - query_count} fewer queries")
+                f"   📊 Query reduction: {query_count_unopt - query_count} fewer queries"
+            )
 
-            self.results['course_optimization'] = {
-                'optimized_duration': duration,
-                'unoptimized_duration': duration_unopt,
-                'optimized_queries': query_count,
-                'unoptimized_queries': query_count_unopt,
-                'speed_improvement': ((duration_unopt - duration) / duration_unopt * 100),
-                'query_reduction': query_count_unopt - query_count
+            self.results["course_optimization"] = {
+                "optimized_duration": duration,
+                "unoptimized_duration": duration_unopt,
+                "optimized_queries": query_count,
+                "unoptimized_queries": query_count_unopt,
+                "speed_improvement": (
+                    (duration_unopt - duration) / duration_unopt * 100
+                ),
+                "query_reduction": query_count_unopt - query_count,
             }
 
         except Exception as e:
@@ -281,28 +285,26 @@ class PerformanceTestRunner:
         print("📊 PERFORMANCE TEST SUMMARY")
         print("=" * 80)
 
-        if 'course_optimization' in self.results:
-            opt = self.results['course_optimization']
+        if "course_optimization" in self.results:
+            opt = self.results["course_optimization"]
             print(f"🏆 Best Optimization - Course Queries:")
             print(f"   📈 Speed improvement: {opt['speed_improvement']:.1f}%")
-            print(
-                f"   🔍 Query reduction: {opt['query_reduction']} fewer queries")
+            print(f"   🔍 Query reduction: {opt['query_reduction']} fewer queries")
 
-        if 'student_dashboard' in self.results:
-            dash = self.results['student_dashboard']
+        if "student_dashboard" in self.results:
+            dash = self.results["student_dashboard"]
             print(f"⚡ Cache Performance - Student Dashboard:")
             print(f"   🚀 Speed improvement: {dash['speed_improvement']:.1f}%")
 
-        if 'teacher_dashboard' in self.results:
-            teacher = self.results['teacher_dashboard']
+        if "teacher_dashboard" in self.results:
+            teacher = self.results["teacher_dashboard"]
             print(f"⚡ Cache Performance - Teacher Dashboard:")
-            print(
-                f"   🚀 Speed improvement: {teacher['speed_improvement']:.1f}%")
+            print(f"   🚀 Speed improvement: {teacher['speed_improvement']:.1f}%")
 
         total_optimizations = len(
-            [k for k in self.results.keys() if 'improvement' in str(self.results[k])])
-        print(
-            f"\n✅ Successfully tested {total_optimizations} optimization categories")
+            [k for k in self.results.keys() if "improvement" in str(self.results[k])]
+        )
+        print(f"\n✅ Successfully tested {total_optimizations} optimization categories")
         print("🎯 All performance optimizations are working correctly!")
 
 

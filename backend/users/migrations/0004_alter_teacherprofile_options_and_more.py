@@ -10,83 +10,122 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('users', '0003_teacherprofile'),
+        ("users", "0003_teacherprofile"),
     ]
 
     operations = [
         migrations.AlterModelOptions(
-            name='teacherprofile',
-            options={'verbose_name': 'Profilo Insegnante',
-                     'verbose_name_plural': 'Profili Insegnanti'},
+            name="teacherprofile",
+            options={
+                "verbose_name": "Profilo Insegnante",
+                "verbose_name_plural": "Profili Insegnanti",
+            },
         ),
         migrations.RemoveField(
-            model_name='teacherprofile',
-            name='total_earnings_eur',
+            model_name="teacherprofile",
+            name="total_earnings_eur",
         ),
         migrations.RemoveField(
-            model_name='teacherprofile',
-            name='total_earnings_teo',
+            model_name="teacherprofile",
+            name="total_earnings_teo",
         ),
         migrations.AddField(
-            model_name='teacherprofile',
-            name='total_earned_eur',
-            field=models.DecimalField(decimal_places=2, default=Decimal(
-                '0.00'), help_text='Total EUR earned from course sales', max_digits=12),
+            model_name="teacherprofile",
+            name="total_earned_eur",
+            field=models.DecimalField(
+                decimal_places=2,
+                default=Decimal("0.00"),
+                help_text="Total EUR earned from course sales",
+                max_digits=12,
+            ),
         ),
         migrations.AddField(
-            model_name='teacherprofile',
-            name='total_earned_teo',
-            field=models.DecimalField(decimal_places=2, default=Decimal(
-                '0.00'), help_text='Total TEO earned from student discounts', max_digits=12),
+            model_name="teacherprofile",
+            name="total_earned_teo",
+            field=models.DecimalField(
+                decimal_places=2,
+                default=Decimal("0.00"),
+                help_text="Total TEO earned from student discounts",
+                max_digits=12,
+            ),
         ),
         migrations.AddField(
-            model_name='teacherprofile',
-            name='wallet_address',
+            model_name="teacherprofile",
+            name="wallet_address",
             field=models.CharField(
-                blank=True, help_text="Teacher's blockchain wallet address for staking", max_length=42, null=True),
+                blank=True,
+                help_text="Teacher's blockchain wallet address for staking",
+                max_length=42,
+                null=True,
+            ),
         ),
         migrations.AlterField(
-            model_name='teacherprofile',
-            name='commission_rate',
-            field=models.DecimalField(decimal_places=2, default=Decimal(
-                '50.00'), help_text='Platform commission rate percentage (e.g., 50.00 for 50%)', max_digits=5),
+            model_name="teacherprofile",
+            name="commission_rate",
+            field=models.DecimalField(
+                decimal_places=2,
+                default=Decimal("50.00"),
+                help_text="Platform commission rate percentage (e.g., 50.00 for 50%)",
+                max_digits=5,
+            ),
         ),
         migrations.AlterField(
-            model_name='teacherprofile',
-            name='last_staking_update',
+            model_name="teacherprofile",
+            name="last_staking_update",
             field=models.DateTimeField(blank=True, null=True),
         ),
         migrations.AlterField(
-            model_name='teacherprofile',
-            name='staked_teo_amount',
-            field=models.DecimalField(decimal_places=2, default=Decimal(
-                '0.00'), help_text='Amount of TEO currently staked', max_digits=12),
+            model_name="teacherprofile",
+            name="staked_teo_amount",
+            field=models.DecimalField(
+                decimal_places=2,
+                default=Decimal("0.00"),
+                help_text="Amount of TEO currently staked",
+                max_digits=12,
+            ),
         ),
         migrations.AlterField(
-            model_name='teacherprofile',
-            name='staking_tier',
-            field=models.CharField(choices=[('Bronze', 'Bronze (0 TEO)'), ('Silver', 'Silver (100 TEO)'), ('Gold', 'Gold (300 TEO)'), ('Platinum', 'Platinum (600 TEO)'), (
-                'Diamond', 'Diamond (1,000 TEO)')], default='Bronze', help_text='Current staking tier based on TEO staked', max_length=20),
+            model_name="teacherprofile",
+            name="staking_tier",
+            field=models.CharField(
+                choices=[
+                    ("Bronze", "Bronze (0 TEO)"),
+                    ("Silver", "Silver (100 TEO)"),
+                    ("Gold", "Gold (300 TEO)"),
+                    ("Platinum", "Platinum (600 TEO)"),
+                    ("Diamond", "Diamond (1,000 TEO)"),
+                ],
+                default="Bronze",
+                help_text="Current staking tier based on TEO staked",
+                max_length=20,
+            ),
         ),
         migrations.AlterField(
-            model_name='teacherprofile',
-            name='user',
-            field=models.OneToOneField(help_text='User account associated with this teacher profile',
-                                       on_delete=django.db.models.deletion.CASCADE, related_name='teacher_profile', to=settings.AUTH_USER_MODEL),
+            model_name="teacherprofile",
+            name="user",
+            field=models.OneToOneField(
+                help_text="User account associated with this teacher profile",
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="teacher_profile",
+                to=settings.AUTH_USER_MODEL,
+            ),
         ),
         migrations.AddIndex(
-            model_name='teacherprofile',
-            index=models.Index(fields=['staking_tier'],
-                               name='users_teach_staking_ac796b_idx'),
-        ),
-        migrations.AddIndex(
-            model_name='teacherprofile',
+            model_name="teacherprofile",
             index=models.Index(
-                fields=['commission_rate'], name='users_teach_commiss_4030e1_idx'),
+                fields=["staking_tier"], name="users_teach_staking_ac796b_idx"
+            ),
         ),
         migrations.AddIndex(
-            model_name='teacherprofile',
+            model_name="teacherprofile",
             index=models.Index(
-                fields=['wallet_address'], name='users_teach_wallet__309e0e_idx'),
+                fields=["commission_rate"], name="users_teach_commiss_4030e1_idx"
+            ),
+        ),
+        migrations.AddIndex(
+            model_name="teacherprofile",
+            index=models.Index(
+                fields=["wallet_address"], name="users_teach_wallet__309e0e_idx"
+            ),
         ),
     ]

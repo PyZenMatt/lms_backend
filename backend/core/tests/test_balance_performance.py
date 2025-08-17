@@ -16,7 +16,7 @@ from rest_framework.test import APIClient
 
 # Setup Django environment
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'schoolplatform.settings')
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "schoolplatform.settings")
 django.setup()
 
 
@@ -43,14 +43,13 @@ def test_balance_performance():
 
     for i in range(3):
         start_time = time.time()
-        response = client.get('/api/v1/blockchain/balance/')
+        response = client.get("/api/v1/blockchain/balance/")
         duration = time.time() - start_time
 
-        print(
-            f"Request {i+1}: {duration:.3f} seconds - Status: {response.status_code}")
+        print(f"Request {i+1}: {duration:.3f} seconds - Status: {response.status_code}")
         if response.status_code == 200:
             data = response.json()
-            cached = data.get('cached', False)
+            cached = data.get("cached", False)
             print(f"  Balance: {data.get('balance')} - Cached: {cached}")
 
         # Pause between requests

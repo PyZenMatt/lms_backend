@@ -11,8 +11,11 @@ from courses.models import Course, CourseEnrollment, LessonCompletion
 from django.contrib.auth import get_user_model
 from django.utils import timezone
 from services.base import TransactionalService
-from services.exceptions import (CourseNotFoundError, TeoArtServiceException,
-                                 UserNotFoundError)
+from services.exceptions import (
+    CourseNotFoundError,
+    TeoArtServiceException,
+    UserNotFoundError,
+)
 
 User = get_user_model()
 
@@ -39,9 +42,7 @@ class CourseService(TransactionalService):
             self.log_info("Retrieving available courses")
 
             # Get approved courses
-            courses = Course.objects.filter(
-                is_approved=True
-            ).select_related('teacher')
+            courses = Course.objects.filter(is_approved=True).select_related("teacher")
 
             course_list = []
             for course in courses:
@@ -49,24 +50,25 @@ class CourseService(TransactionalService):
                 is_enrolled = False
                 if user:
                     is_enrolled = CourseEnrollment.objects.filter(
-                        student=user,
-                        course=course
+                        student=user, course=course
                     ).exists()
 
                 course_data = {
-                    'id': course.id,
-                    'title': course.title,
-                    'description': course.description,
-                    'price': float(course.price),
-                    'category': course.category,
-                    'cover_image': course.cover_image.url if course.cover_image else None,
-                    'creator': {
-                        'id': course.teacher.id,
-                        'username': course.teacher.username,
+                    "id": course.id,
+                    "title": course.title,
+                    "description": course.description,
+                    "price": float(course.price),
+                    "category": course.category,
+                    "cover_image": (
+                        course.cover_image.url if course.cover_image else None
+                    ),
+                    "creator": {
+                        "id": course.teacher.id,
+                        "username": course.teacher.username,
                     },
-                    'is_enrolled': is_enrolled,
-                    'lesson_count': course.lessons_in_course.count(),
-                    'created_at': course.created_at.isoformat(),
+                    "is_enrolled": is_enrolled,
+                    "lesson_count": course.lessons_in_course.count(),
+                    "created_at": course.created_at.isoformat(),
                 }
                 course_list.append(course_data)
 
@@ -95,9 +97,8 @@ class CourseService(TransactionalService):
             self.log_info(f"Retrieving course details for course {course_id}")
 
             try:
-                course = Course.objects.select_related('teacher').get(
-                    id=course_id,
-                    is_approved=True
+                course = Course.objects.select_related("teacher").get(
+                    id=course_id, is_approved=True
                 )
             except Course.DoesNotExist:
                 raise CourseNotFoundError(course_id)
@@ -110,8 +111,7 @@ class CourseService(TransactionalService):
             if user:
                 try:
                     enrollment = CourseEnrollment.objects.get(
-                        student=user,
-                        course=course
+                        student=user, course=course
                     )
                     is_enrolled = True
                     progress = self._calculate_course_progress(enrollment)
@@ -119,37 +119,39 @@ class CourseService(TransactionalService):
                     pass
 
             # Get lessons
-            lessons = course.lessons_in_course.all().order_by('id')
+            lessons = course.lessons_in_course.all().order_by("id")
             lessons_data = [
                 {
-                    'id': lesson.id,
-                    'title': lesson.title,
-                    'content': lesson.content,
-                    'lesson_type': lesson.lesson_type,
-                    'duration': lesson.duration,
-                    'is_completed': self._is_lesson_completed(lesson, user) if user else False,
+                    "id": lesson.id,
+                    "title": lesson.title,
+                    "content": lesson.content,
+                    "lesson_type": lesson.lesson_type,
+                    "duration": lesson.duration,
+                    "is_completed": (
+                        self._is_lesson_completed(lesson, user) if user else False
+                    ),
                 }
                 for lesson in lessons
             ]
 
             course_details = {
-                'id': course.id,
-                'title': course.title,
-                'description': course.description,
-                'price': float(course.price),
-                'category': course.category,
-                'cover_image': course.cover_image.url if course.cover_image else None,
-                'creator': {
-                    'id': course.teacher.id,
-                    'username': course.teacher.username,
-                    'bio': course.teacher.bio,
+                "id": course.id,
+                "title": course.title,
+                "description": course.description,
+                "price": float(course.price),
+                "category": course.category,
+                "cover_image": course.cover_image.url if course.cover_image else None,
+                "creator": {
+                    "id": course.teacher.id,
+                    "username": course.teacher.username,
+                    "bio": course.teacher.bio,
                 },
-                'is_enrolled': is_enrolled,
-                'progress': progress,
-                'lessons': lessons_data,
-                'total_lessons': len(lessons_data),
-                'created_at': course.created_at.isoformat(),
-                'updated_at': course.updated_at.isoformat(),
+                "is_enrolled": is_enrolled,
+                "progress": progress,
+                "lessons": lessons_data,
+                "total_lessons": len(lessons_data),
+                "created_at": course.created_at.isoformat(),
+                "updated_at": course.updated_at.isoformat(),
             }
 
             self.log_info(f"Successfully retrieved course {course_id} details")
@@ -158,12 +160,12 @@ class CourseService(TransactionalService):
         except CourseNotFoundError:
             raise
         except Exception as e:
-            self.log_error(
-                f"Error retrieving course {course_id} details: {str(e)}")
-            raise TeoArtServiceException(
-                f"Error retrieving course details: {str(e)}")
+            self.log_error(f"Error retrieving course {course_id} details: {str(e)}")
+            raise TeoArtServiceException(f"Error retrieving course details: {str(e)}")
 
-    def enroll_student_in_course(self, student_id: int, course_id: int) -> Dict[str, Any]:
+    def enroll_student_in_course(
+        self, student_id: int, course_id: int
+    ) -> Dict[str, Any]:
         """
         Enroll a student in a course (free enrollment).
 
@@ -179,10 +181,11 @@ class CourseService(TransactionalService):
             CourseNotFoundError: If course not found
             TeoArtServiceException: If enrollment fails
         """
+
         def _enrollment_operation():
             # Validate student
             try:
-                student = User.objects.get(id=student_id, role='student')
+                student = User.objects.get(id=student_id, role="student")
             except User.DoesNotExist:
                 raise UserNotFoundError(user_id=student_id)
 
@@ -194,32 +197,32 @@ class CourseService(TransactionalService):
 
             # Check if already enrolled
             enrollment, created = CourseEnrollment.objects.get_or_create(
-                student=student,
-                course=course,
-                defaults={'enrolled_at': timezone.now()}
+                student=student, course=course, defaults={"enrolled_at": timezone.now()}
             )
 
             if not created:
                 self.log_info(
-                    f"Student {student_id} already enrolled in course {course_id}")
+                    f"Student {student_id} already enrolled in course {course_id}"
+                )
                 return {
-                    'enrollment_id': enrollment.id,
-                    'student_id': student.id,
-                    'course_id': course.id,
-                    'already_enrolled': True,
-                    'enrolled_at': enrollment.enrolled_at.isoformat()
+                    "enrollment_id": enrollment.id,
+                    "student_id": student.id,
+                    "course_id": course.id,
+                    "already_enrolled": True,
+                    "enrolled_at": enrollment.enrolled_at.isoformat(),
                 }
 
             self.log_info(
-                f"Successfully enrolled student {student_id} in course {course_id}")
+                f"Successfully enrolled student {student_id} in course {course_id}"
+            )
 
             return {
-                'enrollment_id': enrollment.id,
-                'student_id': student.id,
-                'course_id': course.id,
-                'course_title': course.title,
-                'enrolled_at': enrollment.enrolled_at.isoformat(),
-                'already_enrolled': False
+                "enrollment_id": enrollment.id,
+                "student_id": student.id,
+                "course_id": course.id,
+                "course_title": course.title,
+                "enrolled_at": enrollment.enrolled_at.isoformat(),
+                "already_enrolled": False,
             }
 
         try:
@@ -228,9 +231,9 @@ class CourseService(TransactionalService):
             raise
         except Exception as e:
             self.log_error(
-                f"Error enrolling student {student_id} in course {course_id}: {str(e)}")
-            raise TeoArtServiceException(
-                f"Error enrolling in course: {str(e)}")
+                f"Error enrolling student {student_id} in course {course_id}: {str(e)}"
+            )
+            raise TeoArtServiceException(f"Error enrolling in course: {str(e)}")
 
     def get_student_enrollments(self, student_id: int) -> List[Dict[str, Any]]:
         """
@@ -247,36 +250,41 @@ class CourseService(TransactionalService):
 
             enrollments = CourseEnrollment.objects.filter(
                 student_id=student_id
-            ).select_related('course', 'course__teacher')
+            ).select_related("course", "course__teacher")
 
             enrollments_data = []
             for enrollment in enrollments:
                 progress = self._calculate_course_progress(enrollment)
 
                 enrollment_data = {
-                    'enrollment_id': enrollment.id,
-                    'course': {
-                        'id': enrollment.course.id,
-                        'title': enrollment.course.title,
-                        'description': enrollment.course.description,
-                        'cover_image': enrollment.course.cover_image.url if enrollment.course.cover_image else None,
-                        'creator': enrollment.course.teacher.username,
+                    "enrollment_id": enrollment.id,
+                    "course": {
+                        "id": enrollment.course.id,
+                        "title": enrollment.course.title,
+                        "description": enrollment.course.description,
+                        "cover_image": (
+                            enrollment.course.cover_image.url
+                            if enrollment.course.cover_image
+                            else None
+                        ),
+                        "creator": enrollment.course.teacher.username,
                     },
-                    'enrolled_at': enrollment.enrolled_at.isoformat(),
-                    'completed': enrollment.completed,
-                    'progress': progress,
+                    "enrolled_at": enrollment.enrolled_at.isoformat(),
+                    "completed": enrollment.completed,
+                    "progress": progress,
                 }
                 enrollments_data.append(enrollment_data)
 
             self.log_info(
-                f"Retrieved {len(enrollments_data)} enrollments for student {student_id}")
+                f"Retrieved {len(enrollments_data)} enrollments for student {student_id}"
+            )
             return enrollments_data
 
         except Exception as e:
             self.log_error(
-                f"Error retrieving enrollments for student {student_id}: {str(e)}")
-            raise TeoArtServiceException(
-                f"Error retrieving enrollments: {str(e)}")
+                f"Error retrieving enrollments for student {student_id}: {str(e)}"
+            )
+            raise TeoArtServiceException(f"Error retrieving enrollments: {str(e)}")
 
     def _calculate_course_progress(self, enrollment: CourseEnrollment) -> int:
         """Calculate progress percentage for a course enrollment."""
@@ -285,8 +293,7 @@ class CourseService(TransactionalService):
             return 0
 
         completed_lessons = LessonCompletion.objects.filter(
-            student=enrollment.student,
-            lesson__course=enrollment.course
+            student=enrollment.student, lesson__course=enrollment.course
         ).count()
 
         return int((completed_lessons / total_lessons) * 100)
@@ -296,10 +303,7 @@ class CourseService(TransactionalService):
         if not user:
             return False
 
-        return LessonCompletion.objects.filter(
-            student=user,
-            lesson=lesson
-        ).exists()
+        return LessonCompletion.objects.filter(student=user, lesson=lesson).exists()
 
 
 # Singleton instance for easy access

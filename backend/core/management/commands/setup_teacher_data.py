@@ -13,32 +13,32 @@ User = get_user_model()
 
 
 class Command(BaseCommand):
-    help = 'Set up test data for teacher1 with specific TeoCoin balances'
+    help = "Set up test data for teacher1 with specific TeoCoin balances"
 
     def add_arguments(self, parser):
         parser.add_argument(
-            '--email',
+            "--email",
             type=str,
-            default='teacher1@example.com',
-            help='Email of the teacher to set up (default: teacher1@example.com)'
+            default="teacher1@example.com",
+            help="Email of the teacher to set up (default: teacher1@example.com)",
         )
         parser.add_argument(
-            '--unstaked',
+            "--unstaked",
             type=float,
             default=323.50,
-            help='Unstaked (available) balance (default: 323.50)'
+            help="Unstaked (available) balance (default: 323.50)",
         )
         parser.add_argument(
-            '--staked',
+            "--staked",
             type=float,
             default=250.00,
-            help='Staked balance (default: 250.00)'
+            help="Staked balance (default: 250.00)",
         )
 
     def handle(self, *args, **options):
-        email = options['email']
-        unstaked_amount = Decimal(str(options['unstaked']))
-        staked_amount = Decimal(str(options['staked']))
+        email = options["email"]
+        unstaked_amount = Decimal(str(options["unstaked"]))
+        staked_amount = Decimal(str(options["staked"]))
         total_amount = unstaked_amount + staked_amount
 
         try:
@@ -48,7 +48,7 @@ class Command(BaseCommand):
                 self.stdout.write(f"Using existing user: {email}")
             except User.DoesNotExist:
                 # Create new user with unique username
-                username = email.split('@')[0]
+                username = email.split("@")[0]
                 counter = 1
                 original_username = username
 
@@ -60,23 +60,22 @@ class Command(BaseCommand):
                 user = User.objects.create(
                     email=email,
                     username=username,
-                    first_name='Teacher',
-                    last_name='One',
-                    role='teacher',
-                    is_approved=True
+                    first_name="Teacher",
+                    last_name="One",
+                    role="teacher",
+                    is_approved=True,
                 )
-                user.set_password('teacher123')
+                user.set_password("teacher123")
                 user.save()
-                self.stdout.write(
-                    f"Created new user: {email} (username: {username})")
+                self.stdout.write(f"Created new user: {email} (username: {username})")
 
             # Get or create TeoCoin balance
             teo_balance, created = DBTeoCoinBalance.objects.get_or_create(
                 user=user,
                 defaults={
-                    'available_balance': unstaked_amount,
-                    'staked_balance': staked_amount
-                }
+                    "available_balance": unstaked_amount,
+                    "staked_balance": staked_amount,
+                },
             )
 
             if not created:
@@ -92,10 +91,10 @@ class Command(BaseCommand):
             teacher_profile, created = TeacherProfile.objects.get_or_create(
                 user=user,
                 defaults={
-                    'staked_teo_amount': staked_amount,
-                    'commission_rate': Decimal('50.00'),
-                    'staking_tier': 'Bronze'
-                }
+                    "staked_teo_amount": staked_amount,
+                    "commission_rate": Decimal("50.00"),
+                    "staking_tier": "Bronze",
+                },
             )
 
             if not created:
@@ -113,18 +112,18 @@ class Command(BaseCommand):
             # Create initial deposit transaction
             DBTeoCoinTransaction.objects.create(
                 user=user,
-                transaction_type='deposit',
+                transaction_type="deposit",
                 amount=total_amount,
-                description=f'Initial deposit of {total_amount} TEO from test setup'
+                description=f"Initial deposit of {total_amount} TEO from test setup",
             )
 
             # Create staking transaction if any amount is staked
             if staked_amount > 0:
                 DBTeoCoinTransaction.objects.create(
                     user=user,
-                    transaction_type='staked',
+                    transaction_type="staked",
                     amount=staked_amount,
-                    description=f'Initial stake of {staked_amount} TEO - Tier: {tier_info["tier"]}'
+                    description=f'Initial stake of {staked_amount} TEO - Tier: {tier_info["tier"]}',
                 )
 
             # Display results

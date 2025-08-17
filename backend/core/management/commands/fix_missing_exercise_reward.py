@@ -14,7 +14,7 @@ from rewards.models import BlockchainTransaction
 from users.models import User
 
 # Setup Django
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'schoolplatform.settings')
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "schoolplatform.settings")
 django.setup()
 
 
@@ -26,7 +26,7 @@ def create_missing_exercise_reward():
 
     try:
         # Trova student1 e il submission
-        student1 = User.objects.get(username='student1')
+        student1 = User.objects.get(username="student1")
         submission = ExerciseSubmission.objects.get(id=70)
 
         print(f"Student: {student1.username}")
@@ -39,19 +39,18 @@ def create_missing_exercise_reward():
         # Verifica che non esista già un exercise reward
         existing_reward = BlockchainTransaction.objects.filter(
             user=student1,
-            transaction_type='exercise_reward',
-            related_object_id=submission.id
+            transaction_type="exercise_reward",
+            related_object_id=submission.id,
         ).first()
 
         if existing_reward:
-            print(
-                f"\n❌ Exercise reward già esistente (ID: {existing_reward.id})")
+            print(f"\n❌ Exercise reward già esistente (ID: {existing_reward.id})")
             return
 
         # Calcola l'ammonto del reward
         course = submission.exercise.lesson.course
         # Reward standard per exercise completion
-        reward_amount = Decimal('1.5')
+        reward_amount = Decimal("1.5")
 
         # Verifica che il reward pool abbia fondi sufficienti
         pool_balance = course.get_reward_pool_balance()
@@ -66,10 +65,10 @@ def create_missing_exercise_reward():
         with transaction.atomic():
             reward_transaction = BlockchainTransaction.objects.create(
                 user=student1,
-                transaction_type='exercise_reward',
+                transaction_type="exercise_reward",
                 amount=reward_amount,
                 related_object_id=submission.id,
-                notes=f"Exercise completion reward per '{submission.exercise.title}' - Created manually after network error"
+                notes=f"Exercise completion reward per '{submission.exercise.title}' - Created manually after network error",
             )
 
             print(f"\n✅ Exercise reward creato:")
@@ -88,6 +87,7 @@ def create_missing_exercise_reward():
     except Exception as e:
         print(f"❌ Errore: {e}")
         import traceback
+
         traceback.print_exc()
 
 

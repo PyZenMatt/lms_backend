@@ -21,8 +21,7 @@ from rest_framework import generics, permissions, status, views
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from .serializers import (EmailVerifySerializer, LoginSerializer,
-                          RegisterSerializer)
+from .serializers import EmailVerifySerializer, LoginSerializer, RegisterSerializer
 
 # Get the custom User model
 User = get_user_model()
@@ -36,17 +35,20 @@ class RegisterView(generics.CreateAPIView):
     Automatically sends email verification after successful registration.
     No authentication required (public endpoint).
     """
+
     serializer_class = RegisterSerializer
     permission_classes = (permissions.AllowAny,)
 
     def create(self, request, *args, **kwargs):
         """Override create to provide custom response"""
         import logging
+
         logger = logging.getLogger(__name__)
 
         try:
             logger.info(
-                f"📝 Registration attempt for: {request.data.get('username', 'unknown')}")
+                f"📝 Registration attempt for: {request.data.get('username', 'unknown')}"
+            )
 
             serializer = self.get_serializer(data=request.data)
             serializer.is_valid(raise_exception=True)
@@ -55,23 +57,25 @@ class RegisterView(generics.CreateAPIView):
             logger.info(f"✅ Registration successful for: {user.username}")
 
             # Custom success response
-            return Response({
-                'success': True,
-                'message': 'Registrazione completata con successo',
-                'user': {
-                    'id': user.id,
-                    'username': user.username,
-                    'email': user.email,
-                    'role': user.role,
-                }
-            }, status=status.HTTP_201_CREATED)
+            return Response(
+                {
+                    "success": True,
+                    "message": "Registrazione completata con successo",
+                    "user": {
+                        "id": user.id,
+                        "username": user.username,
+                        "email": user.email,
+                        "role": user.role,
+                    },
+                },
+                status=status.HTTP_201_CREATED,
+            )
 
         except Exception as e:
             logger.error(f"❌ Registration failed: {e}")
-            return Response({
-                'success': False,
-                'error': str(e)
-            }, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {"success": False, "error": str(e)}, status=status.HTTP_400_BAD_REQUEST
+            )
 
 
 class VerifyEmailView(views.APIView):
@@ -82,6 +86,7 @@ class VerifyEmailView(views.APIView):
     Activates user account and marks email as verified upon successful verification.
     No authentication required (public endpoint).
     """
+
     permission_classes = (permissions.AllowAny,)
 
     def get(self, request, uid, token):
@@ -97,35 +102,38 @@ class VerifyEmailView(views.APIView):
             JSON response indicating success or failure of verification
         """
         # Validate the provided UID and token using serializer
-        serializer = EmailVerifySerializer(data={'uid': uid, 'token': token})
+        serializer = EmailVerifySerializer(data={"uid": uid, "token": token})
         serializer.is_valid(raise_exception=True)
 
         try:
             # Decode the user ID from base64
-            uid = force_str(urlsafe_base64_decode(
-                serializer.validated_data['uid']))  # type: ignore
+            uid = force_str(
+                urlsafe_base64_decode(serializer.validated_data["uid"])
+            )  # type: ignore
             user = User.objects.get(pk=uid)
         except (TypeError, ValueError, OverflowError, User.DoesNotExist):
             return Response(
-                {'detail': 'Link non valido.'},  # Invalid link
-                status=status.HTTP_400_BAD_REQUEST
+                {"detail": "Link non valido."},  # Invalid link
+                status=status.HTTP_400_BAD_REQUEST,
             )
 
         # Verify the token and activate user if valid
         # type: ignore
-        if default_token_generator.check_token(user, serializer.validated_data['token']):
+        if default_token_generator.check_token(
+            user, serializer.validated_data["token"]
+        ):
             user.is_active = True
             user.is_email_verified = True  # type: ignore
             user.save()
             return Response(
                 # Email verified successfully
-                {'detail': 'Email verificata con successo.'},
-                status=status.HTTP_200_OK
+                {"detail": "Email verificata con successo."},
+                status=status.HTTP_200_OK,
             )
 
         return Response(
-            {'detail': 'Token non valido.'},  # Invalid token
-            status=status.HTTP_400_BAD_REQUEST
+            {"detail": "Token non valido."},  # Invalid token
+            status=status.HTTP_400_BAD_REQUEST,
         )
 
 
@@ -137,6 +145,7 @@ class LoginApiView(views.APIView):
     Handles account activation checks and provides appropriate error messages.
     No authentication required (public endpoint).
     """
+
     permission_classes = (permissions.AllowAny,)
 
     def post(self, request):
@@ -152,8 +161,8 @@ class LoginApiView(views.APIView):
         serializer = LoginSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
-        email = serializer.validated_data['email']  # type: ignore
-        password = serializer.validated_data['password']  # type: ignore
+        email = serializer.validated_data["email"]  # type: ignore
+        password = serializer.validated_data["password"]  # type: ignore
 
         # Attempt to authenticate user
         user = authenticate(request, username=email, password=password)
@@ -167,23 +176,25 @@ class LoginApiView(views.APIView):
             # Authentication failed for email
             print(f"Autenticazione fallita per email: {email}")
             return Response(
-                {'detail': 'Credenziali non valide.'},  # Invalid credentials
-                status=status.HTTP_401_UNAUTHORIZED
+                {"detail": "Credenziali non valide."},  # Invalid credentials
+                status=status.HTTP_401_UNAUTHORIZED,
             )
 
         if not user.is_active:
             return Response(
                 # Account inactive. Verify your email
-                {'detail': 'Account non attivo. Verifica la tua email.'},
-                status=status.HTTP_403_FORBIDDEN
+                {"detail": "Account non attivo. Verifica la tua email."},
+                status=status.HTTP_403_FORBIDDEN,
             )
 
         # Generate JWT tokens for authenticated user
         refresh = RefreshToken.for_user(user)
-        return Response({
-            'access': str(refresh.access_token),
-            'refresh': str(refresh),
-        })
+        return Response(
+            {
+                "access": str(refresh.access_token),
+                "refresh": str(refresh),
+            }
+        )
 
 
 class LoginTemplateView(TemplateView):
@@ -194,7 +205,8 @@ class LoginTemplateView(TemplateView):
     Redirects to user profile upon successful login.
     Used for web interface rather than API.
     """
-    template_name = 'login.html'
+
+    template_name = "login.html"
 
     def post(self, request, *args, **kwargs):
         """
@@ -206,8 +218,8 @@ class LoginTemplateView(TemplateView):
         Returns:
             Redirect to profile page or render login form with error
         """
-        email = request.POST.get('email')
-        password = request.POST.get('password')
+        email = request.POST.get("email")
+        password = request.POST.get("password")
 
         # Authenticate the user with provided credentials
         user = authenticate(request, username=email, password=password)
@@ -217,21 +229,27 @@ class LoginTemplateView(TemplateView):
                 # Login user and redirect to profile page
                 login(request, user)
                 # Replace with appropriate URL name
-                return redirect('account-profile')
+                return redirect("account-profile")
             else:
                 # Account not active - needs email verification
-                return render(request, self.template_name, {
-                    # Account inactive. Verify your email
-                    'error': 'Account non attivo. Verifica la tua email.'
-                })
+                return render(
+                    request,
+                    self.template_name,
+                    {
+                        # Account inactive. Verify your email
+                        "error": "Account non attivo. Verifica la tua email."
+                    },
+                )
         else:
             # Invalid credentials provided
-            return render(request, self.template_name, {
-                'error': 'Credenziali non valide.'  # Invalid credentials
-            })
+            return render(
+                request,
+                self.template_name,
+                {"error": "Credenziali non valide."},  # Invalid credentials
+            )
 
 
-logger = logging.getLogger('authentication')
+logger = logging.getLogger("authentication")
 
 
 class LogoutView(views.APIView):
@@ -240,14 +258,14 @@ class LogoutView(views.APIView):
     Invalida sia la sessione Django che il refresh token JWT (se presente).
     Forza l'eliminazione di tutte le sessioni dell'utente.
     """
+
     permission_classes = (permissions.IsAuthenticated,)
 
     def post(self, request):
         logger.info(f"🔓 Logout started for user: {request.user.username}")
         logger.info(f"🔓 Request headers: {dict(request.headers)}")
         logger.info(f"🔓 Request data: {request.data}")
-        logger.info(
-            f"🔓 Session key before logout: {request.session.session_key}")
+        logger.info(f"🔓 Session key before logout: {request.session.session_key}")
 
         # Forza eliminazione di tutte le sessioni dell'utente
         from django.contrib.sessions.models import Session
@@ -259,13 +277,12 @@ class LogoutView(views.APIView):
         for session in Session.objects.all():
             try:
                 session_data = session.get_decoded()
-                if session_data.get('_auth_user_id') == str(user.id):
+                if session_data.get("_auth_user_id") == str(user.id):
                     user_sessions.append(session.session_key)
             except:
                 continue
 
-        logger.info(
-            f"🔓 Found {len(user_sessions)} sessions for user: {user_sessions}")
+        logger.info(f"🔓 Found {len(user_sessions)} sessions for user: {user_sessions}")
 
         # Elimina tutte le sessioni dell'utente
         Session.objects.filter(session_key__in=user_sessions).delete()
@@ -274,14 +291,13 @@ class LogoutView(views.APIView):
         # Logout sessione Django corrente
         django_logout(request)
         logger.info("🔓 Django session logout completed")
-        logger.info(
-            f"🔓 Session key after logout: {request.session.session_key}")
+        logger.info(f"🔓 Session key after logout: {request.session.session_key}")
 
         # Blacklist refresh token se presente
-        refresh = request.data.get(
-            'refresh') or request.data.get('refreshToken')
+        refresh = request.data.get("refresh") or request.data.get("refreshToken")
         if refresh:
             from rest_framework_simplejwt.tokens import RefreshToken
+
             try:
                 token = RefreshToken(refresh)
                 token.blacklist()
@@ -291,12 +307,11 @@ class LogoutView(views.APIView):
         else:
             logger.warning("🔓 No refresh token provided in request")
 
-        response = Response({'detail': 'Logout successful'},
-                            status=status.HTTP_200_OK)
+        response = Response({"detail": "Logout successful"}, status=status.HTTP_200_OK)
 
         # Cancellazione cookie di autenticazione
-        response.delete_cookie('sessionid', path='/', domain=None)
-        response.delete_cookie('csrftoken', path='/', domain=None)
+        response.delete_cookie("sessionid", path="/", domain=None)
+        response.delete_cookie("csrftoken", path="/", domain=None)
 
         logger.info("🔓 Logout completed successfully")
         return response

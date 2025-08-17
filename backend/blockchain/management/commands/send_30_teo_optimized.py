@@ -14,8 +14,8 @@ from web3 import Web3
 from blockchain.blockchain import TeoCoinService
 
 # Setup Django
-sys.path.append('/home/teo/Project/school/schoolplatform')
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'schoolplatform.settings')
+sys.path.append("/home/teo/Project/school/schoolplatform")
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "schoolplatform.settings")
 django.setup()
 
 
@@ -25,14 +25,14 @@ def check_gas_fees(service):
 
     # Gas price corrente dalla rete
     current_gas_price = service.w3.eth.gas_price
-    current_gwei = service.w3.from_wei(current_gas_price, 'gwei')
+    current_gwei = service.w3.from_wei(current_gas_price, "gwei")
 
     # Minimo per Polygon Amoy
-    min_gas_price = service.w3.to_wei('25', 'gwei')
+    min_gas_price = service.w3.to_wei("25", "gwei")
     min_gwei = 25
 
     # Massimo che vogliamo pagare per test
-    max_gas_price = service.w3.to_wei('40', 'gwei')  # Ridotto da 50 a 40
+    max_gas_price = service.w3.to_wei("40", "gwei")  # Ridotto da 50 a 40
     max_gwei = 40
 
     # Gas price ottimizzato
@@ -58,7 +58,7 @@ def check_gas_fees(service):
 def estimate_gas_cost(service, gas_price, gas_limit):
     """Stima il costo in MATIC"""
     cost_wei = gas_price * gas_limit
-    cost_matic = service.w3.from_wei(cost_wei, 'ether')
+    cost_matic = service.w3.from_wei(cost_wei, "ether")
     return cost_matic
 
 
@@ -67,7 +67,9 @@ def send_30_teo_optimized():
     print("🚀 Sending 30 TEO to student1 (gas optimized)...")
 
     # Configurazione
-    ADMIN_PRIVATE_KEY = "e1636922fa350bfe8ed929096d330eb70bbe3dc17dbb03dacdcf1dd668fc4255"
+    ADMIN_PRIVATE_KEY = (
+        "e1636922fa350bfe8ed929096d330eb70bbe3dc17dbb03dacdcf1dd668fc4255"
+    )
     STUDENT1_ADDRESS = "0x61CA0280cE520a8eB7e4ee175A30C768A5d144D4"
 
     try:
@@ -89,16 +91,13 @@ def send_30_teo_optimized():
 
         # Prepara transazione per stima
         checksum_to = Web3.to_checksum_address(STUDENT1_ADDRESS)
-        amount_wei = Web3.to_wei(Decimal('30'), 'ether')
+        amount_wei = Web3.to_wei(Decimal("30"), "ether")
 
         try:
             # Stima gas necessario per questa specifica transazione
             estimated_gas = service.contract.functions.mintTo(
-                checksum_to,
-                amount_wei
-            ).estimate_gas({
-                'from': admin_address
-            })
+                checksum_to, amount_wei
+            ).estimate_gas({"from": admin_address})
 
             # Aggiungi 20% di buffer per sicurezza
             gas_limit = int(estimated_gas * 1.2)
@@ -120,12 +119,12 @@ def send_30_teo_optimized():
         # Step 4: Verifica bilanci
         print("\\n📊 INITIAL BALANCES:")
         admin_matic_wei = service.w3.eth.get_balance(admin_address)
-        admin_matic = service.w3.from_wei(admin_matic_wei, 'ether')
+        admin_matic = service.w3.from_wei(admin_matic_wei, "ether")
         admin_teo = service.get_balance(admin_address)
         print(f"Admin - MATIC: {admin_matic:.4f}, TEO: {admin_teo}")
 
         student1_matic_wei = service.w3.eth.get_balance(STUDENT1_ADDRESS)
-        student1_matic = service.w3.from_wei(student1_matic_wei, 'ether')
+        student1_matic = service.w3.from_wei(student1_matic_wei, "ether")
         student1_teo = service.get_balance(STUDENT1_ADDRESS)
         print(f"Student1 - MATIC: {student1_matic:.4f}, TEO: {student1_teo}")
 
@@ -144,37 +143,39 @@ def send_30_teo_optimized():
         # Usa il nostro gas ottimizzato invece del default del servizio
         # Dobbiamo costruire la transazione manualmente per controllo completo
         transaction = service.contract.functions.mintTo(
-            checksum_to,
-            amount_wei
-        ).build_transaction({
-            'from': admin_address,
-            'gas': gas_limit,
-            'gasPrice': optimal_gas_price,
-            'nonce': service.w3.eth.get_transaction_count(admin_address),
-        })
+            checksum_to, amount_wei
+        ).build_transaction(
+            {
+                "from": admin_address,
+                "gas": gas_limit,
+                "gasPrice": optimal_gas_price,
+                "nonce": service.w3.eth.get_transaction_count(admin_address),
+            }
+        )
 
         # Firma e invia
         signed_txn = service.w3.eth.account.sign_transaction(
-            transaction, ADMIN_PRIVATE_KEY)
-        tx_hash = service.w3.eth.send_raw_transaction(
-            signed_txn.raw_transaction)
+            transaction, ADMIN_PRIVATE_KEY
+        )
+        tx_hash = service.w3.eth.send_raw_transaction(signed_txn.raw_transaction)
 
         print(f"✅ Transaction sent!")
         print(f"   TX Hash: {tx_hash.hex()}")
 
         # Step 7: Aspetta conferma
         print("\\n⏳ Waiting for confirmation...")
-        receipt = service.w3.eth.wait_for_transaction_receipt(
-            tx_hash, timeout=120)
+        receipt = service.w3.eth.wait_for_transaction_receipt(tx_hash, timeout=120)
 
         if receipt.status == 1:
             actual_gas_used = receipt.gasUsed
             actual_cost = service.w3.from_wei(
-                optimal_gas_price * actual_gas_used, 'ether')
+                optimal_gas_price * actual_gas_used, "ether"
+            )
 
             print(f"✅ Transaction confirmed!")
             print(
-                f"   Gas used: {actual_gas_used} (saved {gas_limit - actual_gas_used})")
+                f"   Gas used: {actual_gas_used} (saved {gas_limit - actual_gas_used})"
+            )
             print(f"   Actual cost: {actual_cost:.6f} MATIC")
             print(f"   Estimated cost: {total_cost:.6f} MATIC")
             print(f"   Savings: {(total_cost - actual_cost):.6f} MATIC")
@@ -187,25 +188,28 @@ def send_30_teo_optimized():
         time.sleep(2)  # Breve pausa per propagazione
 
         admin_matic_wei = service.w3.eth.get_balance(admin_address)
-        admin_matic_final = service.w3.from_wei(admin_matic_wei, 'ether')
+        admin_matic_final = service.w3.from_wei(admin_matic_wei, "ether")
         admin_teo_final = service.get_balance(admin_address)
         print(
-            f"Admin - MATIC: {admin_matic_final:.4f} (-{admin_matic - admin_matic_final:.6f}), TEO: {admin_teo_final}")
+            f"Admin - MATIC: {admin_matic_final:.4f} (-{admin_matic - admin_matic_final:.6f}), TEO: {admin_teo_final}"
+        )
 
         student1_matic_wei = service.w3.eth.get_balance(STUDENT1_ADDRESS)
-        student1_matic_final = service.w3.from_wei(student1_matic_wei, 'ether')
+        student1_matic_final = service.w3.from_wei(student1_matic_wei, "ether")
         student1_teo_final = service.get_balance(STUDENT1_ADDRESS)
         print(
-            f"Student1 - MATIC: {student1_matic_final:.4f}, TEO: {student1_teo_final} (+{student1_teo_final - student1_teo})")
+            f"Student1 - MATIC: {student1_matic_final:.4f}, TEO: {student1_teo_final} (+{student1_teo_final - student1_teo})"
+        )
 
         print(
-            f"\\n🎉 SUCCESS! Student1 received {student1_teo_final - student1_teo} TEO!")
-        print(
-            f"💸 Total transaction cost: {admin_matic - admin_matic_final:.6f} MATIC")
+            f"\\n🎉 SUCCESS! Student1 received {student1_teo_final - student1_teo} TEO!"
+        )
+        print(f"💸 Total transaction cost: {admin_matic - admin_matic_final:.6f} MATIC")
 
     except Exception as e:
         print(f"❌ Error: {e}")
         import traceback
+
         traceback.print_exc()
 
 

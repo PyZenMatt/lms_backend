@@ -13,7 +13,7 @@ from services.db_teocoin_service import DBTeoCoinService
 from users.models import User
 
 # Setup Django
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'schoolplatform.settings')
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "schoolplatform.settings")
 django.setup()
 
 
@@ -25,33 +25,30 @@ def test_teacher2_api():
 
     try:
         # 1. Get teacher2
-        username = 'teacher2'
+        username = "teacher2"
         user = User.objects.get(username=username)
         print(f"✅ Teacher found: {username}")
 
         # 2. Check initial balance
         service = DBTeoCoinService()
         initial_balance_data = service.get_user_balance(user)
-        initial_balance = initial_balance_data['available_balance']
+        initial_balance = initial_balance_data["available_balance"]
         print(f"💰 Initial balance: {initial_balance:.2f} TEO")
 
         # 3. Create authenticated API client
         client = APIClient()
         refresh = RefreshToken.for_user(user)
-        client.credentials(HTTP_AUTHORIZATION=f'Bearer {refresh.access_token}')
+        client.credentials(HTTP_AUTHORIZATION=f"Bearer {refresh.access_token}")
         print("✅ API client authenticated")
 
         # 4. Test absorption ID 10 (teacher2's pending absorption)
-        url = '/api/v1/teocoin/teacher/absorptions/choose/'
-        data = {
-            'absorption_id': 10,
-            'choice': 'absorb'
-        }
+        url = "/api/v1/teocoin/teacher/absorptions/choose/"
+        data = {"absorption_id": 10, "choice": "absorb"}
 
         print(f"📡 Making API call to {url}")
         print(f"📤 Data: {data}")
 
-        response = client.post(url, data, format='json')
+        response = client.post(url, data, format="json")
         print(f"📈 Response status: {response.status_code}")
 
         if response.status_code == 200:
@@ -61,7 +58,7 @@ def test_teacher2_api():
 
             # 5. Check final balance
             final_balance_data = service.get_user_balance(user)
-            final_balance = final_balance_data['available_balance']
+            final_balance = final_balance_data["available_balance"]
             balance_increase = final_balance - initial_balance
 
             print(f"💰 Final balance: {final_balance:.2f} TEO")
@@ -85,6 +82,7 @@ def test_teacher2_api():
     except Exception as e:
         print(f"❌ Error: {e}")
         import traceback
+
         traceback.print_exc()
         return False
 

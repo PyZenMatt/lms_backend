@@ -2,6 +2,7 @@
 Teacher Discount Absorption Service
 Handles the business logic for teachers choosing between EUR vs TEO compensation
 """
+
 from datetime import timedelta
 from decimal import Decimal
 
@@ -34,7 +35,7 @@ class TeacherDiscountAbsorptionService:
 
         # Get teacher's current tier and commission rate
         teacher_balance = teo_service.get_user_balance(teacher)
-        teacher_tier = teacher_balance.get('tier', 0)
+        teacher_tier = teacher_balance.get("tier", 0)
 
         # Commission rates by tier (platform commission, so teacher gets 100 - this)
         tier_commission_rates = {
@@ -45,29 +46,25 @@ class TeacherDiscountAbsorptionService:
             4: 75,  # Diamond: Teacher gets 75%, Platform gets 25%
         }
 
-        teacher_commission_rate = tier_commission_rates.get(
-            int(teacher_tier), 50)
+        teacher_commission_rate = tier_commission_rates.get(int(teacher_tier), 50)
 
         from datetime import timedelta
 
         from django.utils import timezone
 
         # Calculate both options before creating the object
-        course_price_eur = Decimal(str(discount_data['course_price_eur']))
-        discount_amount_eur = Decimal(
-            str(discount_data['discount_amount_eur']))
-        teo_used_by_student = Decimal(str(discount_data['teo_used']))
+        course_price_eur = Decimal(str(discount_data["course_price_eur"]))
+        discount_amount_eur = Decimal(str(discount_data["discount_amount_eur"]))
+        teo_used_by_student = Decimal(str(discount_data["teo_used"]))
         teacher_commission_rate_decimal = Decimal(str(teacher_commission_rate))
 
         # Option A: Standard commission, platform absorbs discount
-        option_a_teacher_eur = (
-            course_price_eur * teacher_commission_rate_decimal / 100)
+        option_a_teacher_eur = course_price_eur * teacher_commission_rate_decimal / 100
         option_a_platform_eur = course_price_eur - option_a_teacher_eur
 
         # Option B: Teacher absorbs discount, gets TEO + 25% bonus
         option_b_teacher_eur = option_a_teacher_eur - discount_amount_eur
-        option_b_teacher_teo = teo_used_by_student * \
-            Decimal('1.25')  # 25% bonus
+        option_b_teacher_teo = teo_used_by_student * Decimal("1.25")  # 25% bonus
         option_b_platform_eur = option_a_platform_eur + discount_amount_eur
 
         # Create the absorption opportunity with all fields populated
@@ -76,7 +73,7 @@ class TeacherDiscountAbsorptionService:
             course=course,
             student=student,
             course_price_eur=course_price_eur,
-            discount_percentage=discount_data['discount_percentage'],
+            discount_percentage=discount_data["discount_percentage"],
             teo_used_by_student=teo_used_by_student,
             discount_amount_eur=discount_amount_eur,
             teacher_tier=teacher_tier,
@@ -88,7 +85,7 @@ class TeacherDiscountAbsorptionService:
             # Option B (Absorb Discount for TEO)
             option_b_teacher_eur=option_b_teacher_eur,
             option_b_teacher_teo=option_b_teacher_teo,
-            option_b_platform_eur=option_b_platform_eur
+            option_b_platform_eur=option_b_platform_eur,
         )
 
         # Send notification to teacher about the new absorption opportunity
@@ -99,16 +96,18 @@ class TeacherDiscountAbsorptionService:
                 teacher=teacher,
                 student=student,
                 course_title=course.title,
-                discount_percent=discount_data['discount_percentage'],
+                discount_percent=discount_data["discount_percentage"],
                 teo_cost=float(teo_used_by_student),
-                teacher_bonus=float(option_b_teacher_teo -
-                                    teo_used_by_student),  # 25% bonus part
+                teacher_bonus=float(
+                    option_b_teacher_teo - teo_used_by_student
+                ),  # 25% bonus part
                 request_id=absorption.pk,
-                expires_at=absorption.expires_at
+                expires_at=absorption.expires_at,
             )
         except Exception as e:
             # Log error but don't fail the whole process
             import logging
+
             logger = logging.getLogger(__name__)
             logger.error(f"Failed to send teacher notification: {e}")
 
@@ -126,13 +125,10 @@ class TeacherDiscountAbsorptionService:
         """
         try:
             absorption = TeacherDiscountAbsorption.objects.get(
-                id=absorption_id,
-                teacher=teacher,
-                status='pending'
+                id=absorption_id, teacher=teacher, status="pending"
             )
         except TeacherDiscountAbsorption.DoesNotExist:
-            raise ValueError(
-                "Invalid absorption opportunity or already processed")
+            raise ValueError("Invalid absorption opportunity or already processed")
 
         if absorption.is_expired:
             absorption.auto_expire()
@@ -142,41 +138,42 @@ class TeacherDiscountAbsorptionService:
         absorption.make_choice(choice)
 
         # If teacher chose to absorb, add TEO to their balance
-        if choice == 'absorb' and absorption.status == 'absorbed':
+        if choice == "absorb" and absorption.status == "absorbed":
             teo_service = DBTeoCoinService()
             teo_service.add_balance(
                 user=teacher,
                 amount=Decimal(str(absorption.final_teacher_teo)),
-                transaction_type='discount_absorption',
-                description=f"Absorbed discount for course: {absorption.course.title}"
+                transaction_type="discount_absorption",
+                description=f"Absorbed discount for course: {absorption.course.title}",
             )
 
         # Send notification to student about teacher's decision
         try:
             from notifications.services import teocoin_notification_service
 
-            decision = 'accepted' if choice == 'absorb' else 'declined'
-            teo_amount = float(
-                absorption.final_teacher_teo) if choice == 'absorb' else None
+            decision = "accepted" if choice == "absorb" else "declined"
+            teo_amount = (
+                float(absorption.final_teacher_teo) if choice == "absorb" else None
+            )
 
             teocoin_notification_service.notify_student_teacher_decision(
                 student=absorption.student,
                 teacher=teacher,
                 course_title=absorption.course.title,
                 decision=decision,
-                teo_amount=teo_amount
+                teo_amount=teo_amount,
             )
 
             # If teacher accepted TEO, send staking reminder
-            if choice == 'absorb':
+            if choice == "absorb":
                 teocoin_notification_service.create_teacher_staking_reminder(
-                    teacher=teacher,
-                    teo_amount=float(absorption.final_teacher_teo)
+                    teacher=teacher, teo_amount=float(absorption.final_teacher_teo)
                 )
 
         except Exception as e:
             # Log error but don't fail the whole process
             import logging
+
             logger = logging.getLogger(__name__)
             logger.error(f"Failed to send decision notifications: {e}")
 
@@ -187,11 +184,13 @@ class TeacherDiscountAbsorptionService:
         """
         Get all pending absorption opportunities for a teacher
         """
-        return TeacherDiscountAbsorption.objects.filter(
-            teacher=teacher,
-            status='pending',
-            expires_at__gt=timezone.now()
-        ).select_related('course', 'student').order_by('expires_at')
+        return (
+            TeacherDiscountAbsorption.objects.filter(
+                teacher=teacher, status="pending", expires_at__gt=timezone.now()
+            )
+            .select_related("course", "student")
+            .order_by("expires_at")
+        )
 
     @staticmethod
     def get_teacher_absorption_history(teacher, days=30):
@@ -200,10 +199,13 @@ class TeacherDiscountAbsorptionService:
         """
         since_date = timezone.now() - timedelta(days=days)
 
-        return TeacherDiscountAbsorption.objects.filter(
-            teacher=teacher,
-            created_at__gte=since_date
-        ).select_related('course', 'student').order_by('-created_at')
+        return (
+            TeacherDiscountAbsorption.objects.filter(
+                teacher=teacher, created_at__gte=since_date
+            )
+            .select_related("course", "student")
+            .order_by("-created_at")
+        )
 
     @staticmethod
     def get_teacher_absorption_stats(teacher, days=30):
@@ -213,38 +215,37 @@ class TeacherDiscountAbsorptionService:
         since_date = timezone.now() - timedelta(days=days)
 
         absorptions = TeacherDiscountAbsorption.objects.filter(
-            teacher=teacher,
-            created_at__gte=since_date
+            teacher=teacher, created_at__gte=since_date
         )
 
         total_opportunities = absorptions.count()
-        absorbed_count = absorptions.filter(status='absorbed').count()
-        refused_count = absorptions.filter(status='refused').count()
-        expired_count = absorptions.filter(status='expired').count()
-        pending_count = absorptions.filter(status='pending').count()
+        absorbed_count = absorptions.filter(status="absorbed").count()
+        refused_count = absorptions.filter(status="refused").count()
+        expired_count = absorptions.filter(status="expired").count()
+        pending_count = absorptions.filter(status="pending").count()
 
         # Calculate totals
         total_eur_earned = sum(
-            a.final_teacher_eur for a in absorptions
-            if a.final_teacher_eur is not None
+            a.final_teacher_eur for a in absorptions if a.final_teacher_eur is not None
         )
-        total_teo_earned = sum(
-            a.final_teacher_teo for a in absorptions
-        )
+        total_teo_earned = sum(a.final_teacher_teo for a in absorptions)
 
-        absorption_rate = (absorbed_count / total_opportunities *
-                           100) if total_opportunities > 0 else 0
+        absorption_rate = (
+            (absorbed_count / total_opportunities * 100)
+            if total_opportunities > 0
+            else 0
+        )
 
         return {
-            'total_opportunities': total_opportunities,
-            'absorbed_count': absorbed_count,
-            'refused_count': refused_count,
-            'expired_count': expired_count,
-            'pending_count': pending_count,
-            'absorption_rate': round(absorption_rate, 1),
-            'total_eur_earned': total_eur_earned,
-            'total_teo_earned': total_teo_earned,
-            'days': days
+            "total_opportunities": total_opportunities,
+            "absorbed_count": absorbed_count,
+            "refused_count": refused_count,
+            "expired_count": expired_count,
+            "pending_count": pending_count,
+            "absorption_rate": round(absorption_rate, 1),
+            "total_eur_earned": total_eur_earned,
+            "total_teo_earned": total_teo_earned,
+            "days": days,
         }
 
     @staticmethod
@@ -253,8 +254,7 @@ class TeacherDiscountAbsorptionService:
         Auto-expire old pending absorptions (to be run as a cron job)
         """
         expired_absorptions = TeacherDiscountAbsorption.objects.filter(
-            status='pending',
-            expires_at__lt=timezone.now()
+            status="pending", expires_at__lt=timezone.now()
         )
 
         count = 0
@@ -269,14 +269,16 @@ class TeacherDiscountAbsorptionService:
                     teacher=absorption.teacher,
                     student=absorption.student,
                     course_title=absorption.course.title,
-                    request_id=absorption.pk
+                    request_id=absorption.pk,
                 )
             except Exception as e:
                 # Log error but continue processing
                 import logging
+
                 logger = logging.getLogger(__name__)
                 logger.error(
-                    f"Failed to send expiration notification for absorption {absorption.pk}: {e}")
+                    f"Failed to send expiration notification for absorption {absorption.pk}: {e}"
+                )
 
             count += 1
 
@@ -288,7 +290,7 @@ class TeacherDiscountAbsorptionService:
         Calculate how much money the platform saved through teacher absorptions
         """
         absorbed_absorptions = TeacherDiscountAbsorption.objects.filter(
-            status='absorbed'
+            status="absorbed"
         )
 
         total_discount_absorbed = sum(
@@ -296,6 +298,6 @@ class TeacherDiscountAbsorptionService:
         )
 
         return {
-            'total_discount_absorbed_eur': total_discount_absorbed,
-            'absorption_count': absorbed_absorptions.count()
+            "total_discount_absorbed_eur": total_discount_absorbed,
+            "absorption_count": absorbed_absorptions.count(),
         }

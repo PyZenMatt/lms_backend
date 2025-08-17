@@ -13,7 +13,7 @@ from django.utils import timezone
 from services.db_teocoin_service import DBTeoCoinService
 
 # Setup Django
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'schoolplatform.settings')
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "schoolplatform.settings")
 django.setup()
 
 
@@ -26,7 +26,7 @@ def test_real_submission_flow():
 
     try:
         # Find student1
-        student1 = User.objects.filter(email='student1@teoart.it').first()
+        student1 = User.objects.filter(email="student1@teoart.it").first()
         if not student1:
             print("❌ student1@teoart.it not found")
             return False
@@ -34,9 +34,11 @@ def test_real_submission_flow():
         print(f"👤 Found student: {student1.email}")
 
         # Get their latest submission
-        latest_submission = ExerciseSubmission.objects.filter(
-            student=student1
-        ).order_by('-created_at').first()
+        latest_submission = (
+            ExerciseSubmission.objects.filter(student=student1)
+            .order_by("-created_at")
+            .first()
+        )
 
         if not latest_submission:
             print("❌ No submissions found for student1")
@@ -45,8 +47,7 @@ def test_real_submission_flow():
         print(f"📝 Latest submission: ID {latest_submission.id}")
         print(f"📚 Exercise: {latest_submission.exercise.title}")
         print(f"🎓 Course: {latest_submission.exercise.lesson.course.title}")
-        print(
-            f"💰 Course Price: {latest_submission.exercise.lesson.course.price} TEO")
+        print(f"💰 Course Price: {latest_submission.exercise.lesson.course.price} TEO")
         print(f"📅 Submitted: {latest_submission.created_at}")
 
         # Check current status
@@ -70,11 +71,9 @@ def test_real_submission_flow():
 
         reviewer_initials = {}
         for review in reviews:
-            reviewer_initial = db_service.get_available_balance(
-                review.reviewer)
+            reviewer_initial = db_service.get_available_balance(review.reviewer)
             reviewer_initials[review.reviewer.id] = reviewer_initial
-            print(
-                f"   Reviewer ({review.reviewer.email}): {reviewer_initial} TEO")
+            print(f"   Reviewer ({review.reviewer.email}): {reviewer_initial} TEO")
 
         # Simulate reviews with score of 6 if not already reviewed
         print(f"\n🔍 Simulating Reviews (score: 6 each):")
@@ -91,8 +90,7 @@ def test_real_submission_flow():
                 # Trigger the average calculation manually
                 ExerciseReview.calculate_average_score(latest_submission)
             else:
-                print(
-                    f"   {review.reviewer.email}: Already scored {review.score}")
+                print(f"   {review.reviewer.email}: Already scored {review.score}")
 
         if all_reviewed:
             print("   ⚠️ All reviews were already completed")
@@ -117,7 +115,7 @@ def test_real_submission_flow():
         print(f"     Final: {student_final} TEO")
         print(f"     Earned: {student_earned} TEO")
 
-        total_reviewer_earned = Decimal('0')
+        total_reviewer_earned = Decimal("0")
         for review in reviews:
             reviewer_final = db_service.get_available_balance(review.reviewer)
             reviewer_initial = reviewer_initials[review.reviewer.id]
@@ -133,7 +131,8 @@ def test_real_submission_flow():
         total_earned = student_earned + total_reviewer_earned
         course_price = latest_submission.exercise.lesson.course.price
         percentage_distributed = (
-            float(total_earned) / float(course_price)) * 100 if course_price > 0 else 0
+            (float(total_earned) / float(course_price)) * 100 if course_price > 0 else 0
+        )
 
         print(f"\n📊 Reward Distribution Summary:")
         print(f"   Course Price: {course_price} TEO")
@@ -146,21 +145,21 @@ def test_real_submission_flow():
         print(f"\n📜 Recent Transactions for Student:")
         transactions = db_service.get_user_transactions(student1, limit=3)
         for tx in transactions:
-            print(
-                f"   - {tx['type']}: {tx['amount']} TEO - {tx['description']}")
+            print(f"   - {tx['type']}: {tx['amount']} TEO - {tx['description']}")
 
         if student_earned > 0 or total_reviewer_earned > 0:
-            print(
-                f"\n✅ Reward system working! Total {total_earned} TEO distributed.")
+            print(f"\n✅ Reward system working! Total {total_earned} TEO distributed.")
             return True
         else:
             print(
-                f"\n⚠️ No rewards distributed. Check if submission passed or if rewards were already given.")
+                f"\n⚠️ No rewards distributed. Check if submission passed or if rewards were already given."
+            )
             return True  # Still consider it a success as the system is working
 
     except Exception as e:
         print(f"❌ Test failed with error: {e}")
         import traceback
+
         traceback.print_exc()
         return False
 

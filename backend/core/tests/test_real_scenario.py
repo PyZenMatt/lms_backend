@@ -13,10 +13,10 @@ from rewards.models import BlockchainTransaction
 from users.models import User
 
 # Add the parent directory to the Python path
-sys.path.append('/home/teo/Project/school/schoolplatform')
+sys.path.append("/home/teo/Project/school/schoolplatform")
 
 # Set up Django environment
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'schoolplatform.settings')
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "schoolplatform.settings")
 django.setup()
 
 
@@ -55,7 +55,7 @@ def create_and_test_real_scenario():
         student=student,
         content="Test submission for real scenario",
         reviewed=False,
-        passed=False
+        passed=False,
     )
 
     # Create reviews without scores
@@ -64,7 +64,7 @@ def create_and_test_real_scenario():
             submission=submission,
             reviewer=reviewer,
             assigned_at=timezone.now(),
-            score=None  # No score initially
+            score=None,  # No score initially
         )
         submission.reviewers.add(reviewer)
 
@@ -84,8 +84,7 @@ def complete_reviews_step_by_step(submission, reviewers):
 
     # Complete first two reviews
     for i, review in enumerate(reviews[:2]):
-        print(
-            f"\n--- Completing Review {i+1} by {review.reviewer.username} ---")
+        print(f"\n--- Completing Review {i+1} by {review.reviewer.username} ---")
 
         # Directly update the review (simulating what the view does)
         review.score = random.randint(6, 10)
@@ -102,22 +101,22 @@ def complete_reviews_step_by_step(submission, reviewers):
         remaining_reviews = all_reviews.filter(score__isnull=True)
 
         print(
-            f"Reviews completed: {all_reviews.count() - remaining_reviews.count()}/{all_reviews.count()}")
+            f"Reviews completed: {all_reviews.count() - remaining_reviews.count()}/{all_reviews.count()}"
+        )
 
         submission.refresh_from_db()
         print(f"Submission reviewed status: {submission.reviewed}")
 
         # Check for any reward transactions
         rewards = BlockchainTransaction.objects.filter(
-            transaction_type__in=['exercise_reward', 'review_reward'],
-            related_object_id=str(submission.id)
+            transaction_type__in=["exercise_reward", "review_reward"],
+            related_object_id=str(submission.id),
         )
         print(f"Reward transactions so far: {rewards.count()}")
 
     # Now complete the FINAL review
     final_review = reviews[2]
-    print(
-        f"\n🎯 --- Completing FINAL Review by {final_review.reviewer.username} ---")
+    print(f"\n🎯 --- Completing FINAL Review by {final_review.reviewer.username} ---")
     print("This should trigger all reward creation...")
 
     # Check state before
@@ -125,8 +124,8 @@ def complete_reviews_step_by_step(submission, reviewers):
     print(f"Before final review - Submission reviewed: {submission.reviewed}")
 
     existing_rewards = BlockchainTransaction.objects.filter(
-        transaction_type__in=['exercise_reward', 'review_reward'],
-        related_object_id=str(submission.id)
+        transaction_type__in=["exercise_reward", "review_reward"],
+        related_object_id=str(submission.id),
     )
     print(f"Existing rewards before: {existing_rewards.count()}")
 
@@ -151,7 +150,7 @@ def complete_reviews_step_by_step(submission, reviewers):
 
                 # This mimics the logic in ReviewExerciseView.post()
                 submission.reviewed = True
-                submission.save(update_fields=['reviewed'])
+                submission.save(update_fields=["reviewed"])
 
                 # Calculate scores and passing
                 scores = [r.score for r in reviews if r.score is not None]
@@ -164,104 +163,109 @@ def complete_reviews_step_by_step(submission, reviewers):
                 # Get course for reward calculation
                 course = None
                 try:
-                    if hasattr(submission.exercise, 'lesson') and submission.exercise.lesson:
+                    if (
+                        hasattr(submission.exercise, "lesson")
+                        and submission.exercise.lesson
+                    ):
                         course = submission.exercise.lesson.course
                 except AttributeError:
                     pass
 
-                if course and hasattr(course, 'price'):
-                    print(
-                        f"Course found: {course.title}, Price: {course.price}")
+                if course and hasattr(course, "price"):
+                    print(f"Course found: {course.title}, Price: {course.price}")
 
                     # Create reward transactions manually (like in the view)
-                    from courses.views.exercises import \
-                        create_reward_transaction
+                    from courses.views.exercises import create_reward_transaction
 
                     reward_transactions_created = []
 
                     # Exercise reward for student (if passed)
                     if passed:
                         reward_max = int(course.price * 0.15)
-                        reward_distributed = getattr(
-                            course, 'reward_distributed', 0)
+                        reward_distributed = getattr(course, "reward_distributed", 0)
                         reward_remaining = reward_max - reward_distributed
 
                         if reward_remaining > 0:
                             reward_cap = int(course.price * 0.05)
-                            random_reward = min(random.randint(
-                                1, reward_cap), reward_remaining)
+                            random_reward = min(
+                                random.randint(1, reward_cap), reward_remaining
+                            )
 
                             submission.reward_amount = random_reward
 
                             exercise_reward = create_reward_transaction(
                                 submission.student,
                                 random_reward,
-                                'exercise_reward',
-                                submission.id
+                                "exercise_reward",
+                                submission.id,
                             )
                             reward_transactions_created.append(exercise_reward)
                             print(
-                                f"Created exercise reward: {random_reward} TEO for {submission.student.username}")
+                                f"Created exercise reward: {random_reward} TEO for {submission.student.username}"
+                            )
 
-                            course.reward_distributed = reward_distributed + random_reward
-                            course.save(update_fields=['reward_distributed'])
+                            course.reward_distributed = (
+                                reward_distributed + random_reward
+                            )
+                            course.save(update_fields=["reward_distributed"])
 
                     # Review rewards for all reviewers
                     reviewer_reward = max(1, int(course.price * 0.005))
 
                     for r in reviews:
                         review_reward = create_reward_transaction(
-                            r.reviewer,
-                            reviewer_reward,
-                            'review_reward',
-                            submission.id
+                            r.reviewer, reviewer_reward, "review_reward", submission.id
                         )
                         reward_transactions_created.append(review_reward)
                         print(
-                            f"Created review reward: {reviewer_reward} TEO for {r.reviewer.username}")
+                            f"Created review reward: {reviewer_reward} TEO for {r.reviewer.username}"
+                        )
 
                     # Update submission
                     submission.passed = passed
                     submission.save()
 
                     print(
-                        f"✅ Created {len(reward_transactions_created)} reward transactions")
+                        f"✅ Created {len(reward_transactions_created)} reward transactions"
+                    )
 
                     # Wait for signals to process
                     import time
+
                     time.sleep(3)
 
                     # Check final status
                     print("\n--- Final Status Check ---")
 
                     final_rewards = BlockchainTransaction.objects.filter(
-                        transaction_type__in=[
-                            'exercise_reward', 'review_reward'],
-                        related_object_id=str(submission.id)
-                    ).order_by('-created_at')
+                        transaction_type__in=["exercise_reward", "review_reward"],
+                        related_object_id=str(submission.id),
+                    ).order_by("-created_at")
 
                     print(f"Total rewards created: {final_rewards.count()}")
 
                     for reward in final_rewards:
                         print(
-                            f"  - {reward.transaction_type}: {reward.amount} TEO for {reward.user.username}")
+                            f"  - {reward.transaction_type}: {reward.amount} TEO for {reward.user.username}"
+                        )
                         print(
-                            f"    Status: {reward.status}, Created: {reward.created_at}")
-                        if reward.status == 'failed':
+                            f"    Status: {reward.status}, Created: {reward.created_at}"
+                        )
+                        if reward.status == "failed":
                             print(f"    Error: {reward.error_message}")
 
                     # Check if all reviewers got rewards
                     reviewer_rewards = final_rewards.filter(
-                        transaction_type='review_reward')
-                    print(
-                        f"\nReview rewards: {reviewer_rewards.count()}/3 expected")
+                        transaction_type="review_reward"
+                    )
+                    print(f"\nReview rewards: {reviewer_rewards.count()}/3 expected")
 
                     for reviewer in reviewers:
-                        reviewer_reward = reviewer_rewards.filter(
-                            user=reviewer).first()
+                        reviewer_reward = reviewer_rewards.filter(user=reviewer).first()
                         if reviewer_reward:
                             print(
-                                f"  ✅ {reviewer.username}: {reviewer_reward.amount} TEO ({reviewer_reward.status})")
+                                f"  ✅ {reviewer.username}: {reviewer_reward.amount} TEO ({reviewer_reward.status})"
+                            )
                         else:
                             print(f"  ❌ {reviewer.username}: NO REWARD FOUND")
 
@@ -277,6 +281,7 @@ def complete_reviews_step_by_step(submission, reviewers):
     except Exception as e:
         print(f"❌ ERROR during final review processing: {e}")
         import traceback
+
         traceback.print_exc()
         return False
 
@@ -305,4 +310,5 @@ if __name__ == "__main__":
     except Exception as e:
         logger.error(f"Error during test: {e}")
         import traceback
+
         traceback.print_exc()

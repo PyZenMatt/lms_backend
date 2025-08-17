@@ -1,6 +1,7 @@
 """
 Teacher approval management views
 """
+
 import logging
 
 from core.api_standards import StandardizedAPIView
@@ -8,6 +9,7 @@ from rest_framework.generics import ListAPIView
 from rest_framework.permissions import IsAdminUser
 from rest_framework.views import APIView
 from services.exceptions import UserNotFoundError
+
 # Service imports
 from services.user_service import user_service
 
@@ -16,6 +18,7 @@ logger = logging.getLogger(__name__)
 
 class PendingTeachersView(ListAPIView, StandardizedAPIView):
     """List teachers pending approval"""
+
     permission_classes = [IsAdminUser]
 
     def get(self, request, *args, **kwargs):
@@ -24,8 +27,7 @@ class PendingTeachersView(ListAPIView, StandardizedAPIView):
             pending_teachers = user_service.get_pending_teachers()
 
             return self.handle_success(
-                data=pending_teachers,
-                message="Pending teachers retrieved successfully"
+                data=pending_teachers, message="Pending teachers retrieved successfully"
             )
         except Exception as e:
             return self.handle_server_error(e)
@@ -33,6 +35,7 @@ class PendingTeachersView(ListAPIView, StandardizedAPIView):
 
 class ApproveTeacherView(APIView, StandardizedAPIView):
     """Approve a teacher application"""
+
     permission_classes = [IsAdminUser]
 
     def post(self, request, user_id):
@@ -42,7 +45,7 @@ class ApproveTeacherView(APIView, StandardizedAPIView):
 
             return self.handle_success(
                 data=result,
-                message=f"Teacher {result['teacher_email']} has been approved."
+                message=f"Teacher {result['teacher_email']} has been approved.",
             )
 
         except UserNotFoundError as e:
@@ -53,19 +56,20 @@ class ApproveTeacherView(APIView, StandardizedAPIView):
 
 class RejectTeacherView(APIView, StandardizedAPIView):
     """Reject a teacher application"""
+
     permission_classes = [IsAdminUser]
 
     def post(self, request, user_id):
         """Reject teacher using UserService"""
         try:
             # Get optional rejection reason from request
-            reason = request.data.get('reason', None)
+            reason = request.data.get("reason", None)
 
             result = user_service.reject_teacher(user_id, reason=reason)
 
             return self.handle_success(
                 data=result,
-                message=f"Teacher {result['teacher_email']} has been rejected."
+                message=f"Teacher {result['teacher_email']} has been rejected.",
             )
 
         except UserNotFoundError as e:

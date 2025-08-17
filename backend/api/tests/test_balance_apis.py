@@ -4,6 +4,7 @@ Test script to verify balance APIs are working correctly
 """
 
 import os
+
 # Setup Django
 import sys
 
@@ -12,8 +13,8 @@ import requests
 from blockchain.models import DBTeoCoinBalance
 from users.models import User
 
-sys.path.append('/home/teo/Project/school/schoolplatform')
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'schoolplatform.settings')
+sys.path.append("/home/teo/Project/school/schoolplatform")
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "schoolplatform.settings")
 django.setup()
 
 
@@ -45,8 +46,10 @@ def test_balance_apis():
     # Test old API endpoint
     print(f"\n🔄 Testing OLD API: /api/v1/teocoin/balance/")
     try:
-        response = requests.get('http://localhost:8000/api/v1/teocoin/balance/',
-                                headers={'Authorization': 'Bearer fake_token'})
+        response = requests.get(
+            "http://localhost:8000/api/v1/teocoin/balance/",
+            headers={"Authorization": "Bearer fake_token"},
+        )
         print(f"   Status: {response.status_code}")
         if response.status_code != 401:  # We expect 401 without real auth
             print(f"   Response: {response.json()}")
@@ -56,8 +59,10 @@ def test_balance_apis():
     # Test new API endpoint
     print(f"\n🔄 Testing NEW API: /api/v1/teocoin/withdrawals/balance/")
     try:
-        response = requests.get('http://localhost:8000/api/v1/teocoin/withdrawals/balance/',
-                                headers={'Authorization': 'Bearer fake_token'})
+        response = requests.get(
+            "http://localhost:8000/api/v1/teocoin/withdrawals/balance/",
+            headers={"Authorization": "Bearer fake_token"},
+        )
         print(f"   Status: {response.status_code}")
         if response.status_code != 401:  # We expect 401 without real auth
             print(f"   Response: {response.json()}")

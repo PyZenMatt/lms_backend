@@ -9,6 +9,7 @@ This service provides essential blockchain functionality for the DB-based TeoCoi
 
 All core operations (rewards, discounts, transfers) use the DB-based system.
 """
+
 import logging
 from decimal import Decimal
 from typing import Any, Dict, Optional
@@ -33,10 +34,10 @@ class ConsolidatedTeoCoinService:
         """Initialize Web3 connection and contract."""
         # Configuration
         self.rpc_url = getattr(
-            settings, 'POLYGON_AMOY_RPC_URL', 'https://rpc-amoy.polygon.technology/')
-        self.contract_address = getattr(
-            settings, 'TEOCOIN_CONTRACT_ADDRESS', None)
-        self.admin_private_key = getattr(settings, 'ADMIN_PRIVATE_KEY', None)
+            settings, "POLYGON_AMOY_RPC_URL", "https://rpc-amoy.polygon.technology/"
+        )
+        self.contract_address = getattr(settings, "TEOCOIN_CONTRACT_ADDRESS", None)
+        self.admin_private_key = getattr(settings, "ADMIN_PRIVATE_KEY", None)
 
         if not self.contract_address:
             raise ValueError("TEOCOIN_CONTRACT_ADDRESS must be configured")
@@ -47,6 +48,7 @@ class ConsolidatedTeoCoinService:
         # Add PoA middleware for Polygon
         try:
             from web3.middleware import ExtraDataToPOAMiddleware
+
             self.w3.middleware_onion.inject(ExtraDataToPOAMiddleware, layer=0)
         except ImportError:
             logger.warning("Could not load PoA middleware")
@@ -59,7 +61,8 @@ class ConsolidatedTeoCoinService:
         self._load_contract()
 
         logger.info(
-            f"ConsolidatedTeoCoinService initialized - Contract: {self.contract_address}")
+            f"ConsolidatedTeoCoinService initialized - Contract: {self.contract_address}"
+        )
 
     def _load_contract(self):
         """Load TeoCoin contract with ABI."""
@@ -67,19 +70,22 @@ class ConsolidatedTeoCoinService:
             # Try to load from blockchain/teocoin_abi.py first
             try:
                 from blockchain.teocoin_abi import TEOCOIN_ABI
+
                 contract_abi = TEOCOIN_ABI
             except ImportError:
                 # Fallback to JSON file
                 import json
                 import os
+
                 abi_path = os.path.join(
-                    settings.BASE_DIR, 'blockchain', 'abi', 'teoCoin2_ABI.json')
-                with open(abi_path, 'r') as f:
+                    settings.BASE_DIR, "blockchain", "abi", "teoCoin2_ABI.json"
+                )
+                with open(abi_path, "r") as f:
                     contract_abi = json.load(f)
 
             self.contract = self.w3.eth.contract(
                 address=Web3.to_checksum_address(self.contract_address),
-                abi=contract_abi
+                abi=contract_abi,
             )
 
         except Exception as e:
@@ -102,9 +108,8 @@ class ConsolidatedTeoCoinService:
             return None
 
         try:
-            admin_account = self.w3.eth.account.from_key(
-                self.admin_private_key)
-            amount_wei = Web3.to_wei(amount, 'ether')
+            admin_account = self.w3.eth.account.from_key(self.admin_private_key)
+            amount_wei = Web3.to_wei(amount, "ether")
             checksum_to = Web3.to_checksum_address(to_address)
 
             # Get gas price
@@ -114,34 +119,39 @@ class ConsolidatedTeoCoinService:
             try:
                 # Try mint function first
                 transaction = self.contract.functions.mint(
-                    checksum_to,
-                    amount_wei
-                ).build_transaction({
-                    'from': admin_account.address,
-                    'gas': 150000,
-                    'gasPrice': gas_price,
-                    'nonce': self.w3.eth.get_transaction_count(admin_account.address, 'pending'),
-                })
+                    checksum_to, amount_wei
+                ).build_transaction(
+                    {
+                        "from": admin_account.address,
+                        "gas": 150000,
+                        "gasPrice": gas_price,
+                        "nonce": self.w3.eth.get_transaction_count(
+                            admin_account.address, "pending"
+                        ),
+                    }
+                )
             except Exception:
                 # Fallback to mintTo function
                 transaction = self.contract.functions.mintTo(
-                    checksum_to,
-                    amount_wei
-                ).build_transaction({
-                    'from': admin_account.address,
-                    'gas': 150000,
-                    'gasPrice': gas_price,
-                    'nonce': self.w3.eth.get_transaction_count(admin_account.address, 'pending'),
-                })
+                    checksum_to, amount_wei
+                ).build_transaction(
+                    {
+                        "from": admin_account.address,
+                        "gas": 150000,
+                        "gasPrice": gas_price,
+                        "nonce": self.w3.eth.get_transaction_count(
+                            admin_account.address, "pending"
+                        ),
+                    }
+                )
 
             # Sign and send
             signed_txn = self.w3.eth.account.sign_transaction(
-                transaction, self.admin_private_key)
-            tx_hash = self.w3.eth.send_raw_transaction(
-                signed_txn.raw_transaction)
+                transaction, self.admin_private_key
+            )
+            tx_hash = self.w3.eth.send_raw_transaction(signed_txn.raw_transaction)
 
-            logger.info(
-                f"✅ Minted {amount} TEO to {to_address} - TX: {tx_hash.hex()}")
+            logger.info(f"✅ Minted {amount} TEO to {to_address} - TX: {tx_hash.hex()}")
             return tx_hash.hex()
 
         except Exception as e:
@@ -160,13 +170,12 @@ class ConsolidatedTeoCoinService:
         """
         try:
             checksum_address = Web3.to_checksum_address(wallet_address)
-            balance_wei = self.contract.functions.balanceOf(
-                checksum_address).call()
-            balance_teo = Web3.from_wei(balance_wei, 'ether')
+            balance_wei = self.contract.functions.balanceOf(checksum_address).call()
+            balance_teo = Web3.from_wei(balance_wei, "ether")
             return Decimal(str(balance_teo))
         except Exception as e:
             logger.error(f"Error getting balance for {wallet_address}: {e}")
-            return Decimal('0')
+            return Decimal("0")
 
     def get_transaction_receipt(self, tx_hash: str) -> Optional[Dict[str, Any]]:
         """
@@ -181,13 +190,13 @@ class ConsolidatedTeoCoinService:
         try:
             receipt = self.w3.eth.get_transaction_receipt(tx_hash)
             return {
-                'status': receipt['status'],
-                'block_number': receipt['blockNumber'],
-                'gas_used': receipt['gasUsed'],
-                'transaction_hash': receipt['transactionHash'].hex(),
-                'from': receipt['from'],
-                'to': receipt['to'],
-                'logs': receipt['logs']
+                "status": receipt["status"],
+                "block_number": receipt["blockNumber"],
+                "gas_used": receipt["gasUsed"],
+                "transaction_hash": receipt["transactionHash"].hex(),
+                "from": receipt["from"],
+                "to": receipt["to"],
+                "logs": receipt["logs"],
             }
         except Exception as e:
             logger.error(f"Error getting receipt for {tx_hash}: {e}")
@@ -218,11 +227,13 @@ class ConsolidatedTeoCoinService:
         """
         try:
             return {
-                'name': self.contract.functions.name().call(),
-                'symbol': self.contract.functions.symbol().call(),
-                'decimals': self.contract.functions.decimals().call(),
-                'contract_address': self.contract_address,
-                'total_supply': str(Web3.from_wei(self.contract.functions.totalSupply().call(), 'ether'))
+                "name": self.contract.functions.name().call(),
+                "symbol": self.contract.functions.symbol().call(),
+                "decimals": self.contract.functions.decimals().call(),
+                "contract_address": self.contract_address,
+                "total_supply": str(
+                    Web3.from_wei(self.contract.functions.totalSupply().call(), "ether")
+                ),
             }
         except Exception as e:
             logger.error(f"Error getting token info: {e}")
@@ -234,12 +245,13 @@ class ConsolidatedTeoCoinService:
         Note: Reward pool operations now use DB-based system.
         """
         logger.warning(
-            "get_reward_pool_info called - reward operations now use DB system")
+            "get_reward_pool_info called - reward operations now use DB system"
+        )
         return {
-            'teo_balance': '0',
-            'matic_balance': '0',
-            'status': 'db_based',
-            'message': 'Reward operations now use DB-based system'
+            "teo_balance": "0",
+            "matic_balance": "0",
+            "status": "db_based",
+            "message": "Reward operations now use DB-based system",
         }
 
     def _get_gas_price(self) -> int:
@@ -250,8 +262,8 @@ class ConsolidatedTeoCoinService:
             gas_price = int(gas_price * 1.1)
 
             # Set reasonable limits
-            min_gas_price = self.w3.to_wei('25', 'gwei')
-            max_gas_price = self.w3.to_wei('50', 'gwei')
+            min_gas_price = self.w3.to_wei("25", "gwei")
+            max_gas_price = self.w3.to_wei("50", "gwei")
 
             if gas_price < min_gas_price:
                 gas_price = min_gas_price
@@ -260,7 +272,7 @@ class ConsolidatedTeoCoinService:
 
             return gas_price
         except:
-            return self.w3.to_wei('30', 'gwei')
+            return self.w3.to_wei("30", "gwei")
 
 
 # Global service instance
@@ -281,26 +293,24 @@ except Exception as e:
 
         def get_balance(self, *args, **kwargs):
             logger.error("TeoCoin service not available - get_balance failed")
-            return Decimal('0')
+            return Decimal("0")
 
         def get_transaction_receipt(self, *args, **kwargs):
             logger.error(
-                "TeoCoin service not available - get_transaction_receipt failed")
+                "TeoCoin service not available - get_transaction_receipt failed"
+            )
             return None
 
         def validate_address(self, *args, **kwargs):
-            logger.error(
-                "TeoCoin service not available - validate_address failed")
+            logger.error("TeoCoin service not available - validate_address failed")
             return False
 
         def get_token_info(self, *args, **kwargs):
-            logger.error(
-                "TeoCoin service not available - get_token_info failed")
+            logger.error("TeoCoin service not available - get_token_info failed")
             return {}
 
         def get_reward_pool_info(self, *args, **kwargs):
-            logger.error(
-                "TeoCoin service not available - get_reward_pool_info failed")
+            logger.error("TeoCoin service not available - get_reward_pool_info failed")
             return {}
 
     consolidated_teocoin_service = DummyTeoCoinService()

@@ -10,7 +10,7 @@ from courses.models import Course
 from rewards.models import BlockchainTransaction
 
 # Setup Django
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'schoolplatform.settings')
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "schoolplatform.settings")
 django.setup()
 
 
@@ -19,14 +19,15 @@ def check_database_constraints():
     print("=== DATABASE CONSTRAINTS DEBUG ===")
 
     # Connect to SQLite directly
-    db_path = 'db.sqlite3'
+    db_path = "db.sqlite3"
     if os.path.exists(db_path):
         conn = sqlite3.connect(db_path)
         cursor = conn.cursor()
 
         # Get table schema for BlockchainTransaction
         cursor.execute(
-            "SELECT sql FROM sqlite_master WHERE type='table' AND name='rewards_blockchaintransaction'")
+            "SELECT sql FROM sqlite_master WHERE type='table' AND name='rewards_blockchaintransaction'"
+        )
         schema = cursor.fetchone()
         if schema:
             print("Table Schema:")
@@ -46,6 +47,7 @@ def check_database_constraints():
     # Try to create a test transaction with different related_object_id values
     print("=== TESTING DIFFERENT related_object_id VALUES ===")
     from django.contrib.auth import get_user_model
+
     User = get_user_model()
 
     try:
@@ -69,13 +71,13 @@ def check_database_constraints():
                 print(f"\nTesting {desc}: '{related_id}'")
                 tx = BlockchainTransaction(
                     user=user,
-                    transaction_type='course_purchase',
+                    transaction_type="course_purchase",
                     amount=10.0,
-                    from_address='0x123',
-                    to_address='0x456',
-                    status='pending',
+                    from_address="0x123",
+                    to_address="0x456",
+                    status="pending",
                     related_object_id=related_id,
-                    notes='Test transaction'
+                    notes="Test transaction",
                 )
                 tx.full_clean()  # Validate without saving
                 print(f"  ✓ Validation passed")
@@ -106,6 +108,7 @@ def test_real_course_purchase():
         print(f"Testing with course: {course} (ID: {course.id})")
 
         from django.contrib.auth import get_user_model
+
         User = get_user_model()
         user = User.objects.first()
 
@@ -118,14 +121,14 @@ def test_real_course_purchase():
         # Test the exact code from the view
         tx = BlockchainTransaction.objects.create(
             user=user,
-            transaction_type='course_purchase',
+            transaction_type="course_purchase",
             amount=-15.0,  # Negative = outgoing
-            from_address='0x123',
-            to_address='0x456',
-            transaction_hash='test_hash',
-            status='completed',
+            from_address="0x123",
+            to_address="0x456",
+            transaction_hash="test_hash",
+            status="completed",
             related_object_id=str(course.id),
-            notes=f'Course purchase payment - Total: 15.0 TEO'
+            notes=f"Course purchase payment - Total: 15.0 TEO",
         )
 
         print(f"✓ Transaction created successfully - ID: {tx.id}")
@@ -138,9 +141,10 @@ def test_real_course_purchase():
     except Exception as e:
         print(f"✗ Error: {e}")
         import traceback
+
         traceback.print_exc()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     check_database_constraints()
     test_real_course_purchase()

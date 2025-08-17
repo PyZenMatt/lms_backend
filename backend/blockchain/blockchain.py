@@ -34,6 +34,7 @@ This architecture provides the best of both worlds:
 - Fast, reliable, cost-free internal operations via database
 - Real cryptocurrency functionality via selective blockchain integration
 """
+
 import logging
 import time
 from decimal import Decimal
@@ -62,15 +63,16 @@ class TeoCoinService:
         """Initialize the TeoCoin service with Web3 connection and contract setup."""
         # Web3 Configuration
         self.rpc_url = getattr(
-            settings, 'POLYGON_AMOY_RPC_URL', 'https://rpc-amoy.polygon.technology/')
-        self.contract_address = getattr(
-            settings, 'TEOCOIN_CONTRACT_ADDRESS', None)
-        self.admin_private_key = getattr(settings, 'ADMIN_PRIVATE_KEY', None)
+            settings, "POLYGON_AMOY_RPC_URL", "https://rpc-amoy.polygon.technology/"
+        )
+        self.contract_address = getattr(settings, "TEOCOIN_CONTRACT_ADDRESS", None)
+        self.admin_private_key = getattr(settings, "ADMIN_PRIVATE_KEY", None)
 
         # Validate required configuration
         if not self.contract_address:
             raise ValueError(
-                "TEOCOIN_CONTRACT_ADDRESS must be set in environment variables")
+                "TEOCOIN_CONTRACT_ADDRESS must be set in environment variables"
+            )
 
         # Initialize Web3 connection
         self.w3 = Web3(Web3.HTTPProvider(self.rpc_url))
@@ -78,6 +80,7 @@ class TeoCoinService:
         # Add middleware for PoA chains (Polygon Amoy)
         try:
             from web3.middleware import ExtraDataToPOAMiddleware
+
             self.w3.middleware_onion.inject(ExtraDataToPOAMiddleware, layer=0)
         except ImportError:
             logger.warning("Could not load PoA middleware - using fallback")
@@ -89,12 +92,10 @@ class TeoCoinService:
 
         # Initialize contract instance
         self.contract = self.w3.eth.contract(
-            address=Web3.to_checksum_address(self.contract_address),
-            abi=TEOCOIN_ABI
+            address=Web3.to_checksum_address(self.contract_address), abi=TEOCOIN_ABI
         )
 
-        logger.info(
-            f"TeoCoinService initialized - Contract: {self.contract_address}")
+        logger.info(f"TeoCoinService initialized - Contract: {self.contract_address}")
 
     def get_balance(self, wallet_address: str) -> Decimal:
         """
@@ -109,23 +110,25 @@ class TeoCoinService:
         start_time = time.time()
         try:
             checksum_address = Web3.to_checksum_address(wallet_address)
-            balance_wei = self.contract.functions.balanceOf(
-                checksum_address).call()
-            balance_teo = Web3.from_wei(balance_wei, 'ether')
+            balance_wei = self.contract.functions.balanceOf(checksum_address).call()
+            balance_teo = Web3.from_wei(balance_wei, "ether")
             execution_time = time.time() - start_time
             logger.info(
-                f"Balance query for {wallet_address} completed in {execution_time:.3f}s")
+                f"Balance query for {wallet_address} completed in {execution_time:.3f}s"
+            )
 
             if execution_time > 1.0:
                 logger.warning(
-                    f"⚠️ Slow balance query ({execution_time:.3f}s) for {wallet_address}")
+                    f"⚠️ Slow balance query ({execution_time:.3f}s) for {wallet_address}"
+                )
 
             return Decimal(str(balance_teo))
         except Exception as e:
             execution_time = time.time() - start_time
             logger.error(
-                f"Error retrieving balance for {wallet_address} after {execution_time:.3f}s: {e}")
-            return Decimal('0')
+                f"Error retrieving balance for {wallet_address} after {execution_time:.3f}s: {e}"
+            )
+            return Decimal("0")
 
     def mint_tokens(self, to_address: str, amount: Decimal) -> Optional[str]:
         """
@@ -147,43 +150,46 @@ class TeoCoinService:
 
         for attempt in range(max_retries):
             try:
-                admin_account = self.w3.eth.account.from_key(
-                    self.admin_private_key)
-                amount_wei = Web3.to_wei(amount, 'ether')
+                admin_account = self.w3.eth.account.from_key(self.admin_private_key)
+                amount_wei = Web3.to_wei(amount, "ether")
                 checksum_to = Web3.to_checksum_address(to_address)
 
                 # Dynamic gas price for each attempt
-                gas_price = int(base_gas_price * (1.2 ** attempt))
+                gas_price = int(base_gas_price * (1.2**attempt))
 
                 # Build transaction
                 transaction = self.contract.functions.mint(
-                    checksum_to,
-                    amount_wei
-                ).build_transaction({
-                    'from': admin_account.address,
-                    'gas': 150000,
-                    'gasPrice': gas_price,
-                    'nonce': self.w3.eth.get_transaction_count(admin_account.address, 'pending'),
-                })
+                    checksum_to, amount_wei
+                ).build_transaction(
+                    {
+                        "from": admin_account.address,
+                        "gas": 150000,
+                        "gasPrice": gas_price,
+                        "nonce": self.w3.eth.get_transaction_count(
+                            admin_account.address, "pending"
+                        ),
+                    }
+                )
 
                 # Sign and send transaction
                 signed_txn = self.w3.eth.account.sign_transaction(
-                    transaction, self.admin_private_key)
-                tx_hash = self.w3.eth.send_raw_transaction(
-                    signed_txn.raw_transaction)
+                    transaction, self.admin_private_key
+                )
+                tx_hash = self.w3.eth.send_raw_transaction(signed_txn.raw_transaction)
 
                 logger.info(
-                    f"✅ Minted {amount} TEO to {to_address} - TX: {tx_hash.hex()}")
+                    f"✅ Minted {amount} TEO to {to_address} - TX: {tx_hash.hex()}"
+                )
                 return tx_hash.hex()
 
             except Exception as e:
-                logger.error(
-                    f"Mint attempt {attempt + 1}/{max_retries} failed: {e}")
+                logger.error(f"Mint attempt {attempt + 1}/{max_retries} failed: {e}")
                 if attempt < max_retries - 1:
-                    time.sleep(2 ** attempt)  # Exponential backoff
+                    time.sleep(2**attempt)  # Exponential backoff
 
         logger.error(
-            f"Failed to mint {amount} TEO to {to_address} after {max_retries} attempts")
+            f"Failed to mint {amount} TEO to {to_address} after {max_retries} attempts"
+        )
         return None
 
     def get_token_info(self) -> Dict[str, Any]:
@@ -195,11 +201,13 @@ class TeoCoinService:
         """
         try:
             info = {
-                'name': self.contract.functions.name().call(),
-                'symbol': self.contract.functions.symbol().call(),
-                'decimals': self.contract.functions.decimals().call(),
-                'contract_address': self.contract_address,
-                'total_supply': str(Web3.from_wei(self.contract.functions.totalSupply().call(), 'ether'))
+                "name": self.contract.functions.name().call(),
+                "symbol": self.contract.functions.symbol().call(),
+                "decimals": self.contract.functions.decimals().call(),
+                "contract_address": self.contract_address,
+                "total_supply": str(
+                    Web3.from_wei(self.contract.functions.totalSupply().call(), "ether")
+                ),
             }
             return info
         except Exception as e:
@@ -219,12 +227,12 @@ class TeoCoinService:
         try:
             receipt = self.w3.eth.get_transaction_receipt(tx_hash)
             return {
-                'status': receipt['status'],
-                'block_number': receipt['blockNumber'],
-                'gas_used': receipt['gasUsed'],
-                'transaction_hash': receipt['transactionHash'].hex(),
-                'from': receipt['from'],
-                'to': receipt['to']
+                "status": receipt["status"],
+                "block_number": receipt["blockNumber"],
+                "gas_used": receipt["gasUsed"],
+                "transaction_hash": receipt["transactionHash"].hex(),
+                "from": receipt["from"],
+                "to": receipt["to"],
             }
         except Exception as e:
             logger.error(f"Error retrieving receipt for {tx_hash}: {e}")
@@ -259,8 +267,8 @@ class TeoCoinService:
             gas_price = int(gas_price * 1.1)
 
             # Set reasonable limits
-            min_gas_price = self.w3.to_wei('25', 'gwei')
-            max_gas_price = self.w3.to_wei('50', 'gwei')
+            min_gas_price = self.w3.to_wei("25", "gwei")
+            max_gas_price = self.w3.to_wei("50", "gwei")
 
             if gas_price < min_gas_price:
                 gas_price = min_gas_price
@@ -269,7 +277,7 @@ class TeoCoinService:
 
             return gas_price
         except:
-            return self.w3.to_wei('30', 'gwei')
+            return self.w3.to_wei("30", "gwei")
 
 
 # Global service instance for backward compatibility
@@ -305,13 +313,14 @@ def check_course_payment_prerequisites(student_address: str, course_price: Decim
     Returns compatibility response indicating DB system is in use.
     """
     logger.warning(
-        "check_course_payment_prerequisites called - this function is deprecated")
+        "check_course_payment_prerequisites called - this function is deprecated"
+    )
     logger.info("All course payments now handled by DB-based TeoCoin system")
     return {
-        'student_address': student_address,
-        'course_price': str(course_price),
-        'prerequisites_met': True,  # DB system handles this
-        'system': 'database',
-        'blockchain_operations': 'mint and burn only',
-        'message': 'Course payments handled by DB-based system. Blockchain used only for mint/burn operations.'
+        "student_address": student_address,
+        "course_price": str(course_price),
+        "prerequisites_met": True,  # DB system handles this
+        "system": "database",
+        "blockchain_operations": "mint and burn only",
+        "message": "Course payments handled by DB-based system. Blockchain used only for mint/burn operations.",
     }

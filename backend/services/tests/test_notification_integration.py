@@ -20,21 +20,21 @@ class NotificationViewsIntegrationTestCase(TestCase):
         """Set up test data"""
         # Create test users
         self.user1 = User.objects.create_user(
-            username='user1',
-            email='user1@test.com',
-            password='testpass',
-            role='student',
-            first_name='User',
-            last_name='One'
+            username="user1",
+            email="user1@test.com",
+            password="testpass",
+            role="student",
+            first_name="User",
+            last_name="One",
         )
 
         self.user2 = User.objects.create_user(
-            username='user2',
-            email='user2@test.com',
-            password='testpass',
-            role='teacher',
-            first_name='User',
-            last_name='Two'
+            username="user2",
+            email="user2@test.com",
+            password="testpass",
+            role="teacher",
+            first_name="User",
+            last_name="Two",
         )
 
         # Create API client
@@ -45,21 +45,21 @@ class NotificationViewsIntegrationTestCase(TestCase):
             user=self.user1,
             message="Test notification 1",
             notification_type="course_purchased",
-            read=False
+            read=False,
         )
 
         self.notification2 = Notification.objects.create(
             user=self.user1,
             message="Test notification 2",
             notification_type="lesson_purchased",
-            read=True
+            read=True,
         )
 
         self.notification3 = Notification.objects.create(
             user=self.user2,
             message="Other user notification",
             notification_type="course_purchased",
-            read=False
+            read=False,
         )
 
     def get_jwt_token(self, user):
@@ -71,10 +71,10 @@ class NotificationViewsIntegrationTestCase(TestCase):
         """Test listing notifications"""
         # Authenticate user
         token = self.get_jwt_token(self.user1)
-        self.client.credentials(HTTP_AUTHORIZATION=f'Bearer {token}')
+        self.client.credentials(HTTP_AUTHORIZATION=f"Bearer {token}")
 
         # Make request
-        url = reverse('notification-list')
+        url = reverse("notification-list")
         response = self.client.get(url)
 
         # Check response
@@ -82,7 +82,7 @@ class NotificationViewsIntegrationTestCase(TestCase):
         self.assertEqual(len(response.data), 2)  # Only user1's notifications
 
         # Check notification data
-        notification_messages = [n['message'] for n in response.data]
+        notification_messages = [n["message"] for n in response.data]
         self.assertIn("Test notification 1", notification_messages)
         self.assertIn("Test notification 2", notification_messages)
 
@@ -90,56 +90,55 @@ class NotificationViewsIntegrationTestCase(TestCase):
         """Test listing notifications with filters"""
         # Authenticate user
         token = self.get_jwt_token(self.user1)
-        self.client.credentials(HTTP_AUTHORIZATION=f'Bearer {token}')
+        self.client.credentials(HTTP_AUTHORIZATION=f"Bearer {token}")
 
         # Test unread filter
-        url = reverse('notification-list')
-        response = self.client.get(url, {'read': 'false'})
+        url = reverse("notification-list")
+        response = self.client.get(url, {"read": "false"})
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data), 1)
-        self.assertEqual(response.data[0]['message'], "Test notification 1")
-        self.assertFalse(response.data[0]['read'])
+        self.assertEqual(response.data[0]["message"], "Test notification 1")
+        self.assertFalse(response.data[0]["read"])
 
         # Test notification type filter
-        response = self.client.get(
-            url, {'notification_type': 'course_purchased'})
+        response = self.client.get(url, {"notification_type": "course_purchased"})
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data), 1)
-        self.assertEqual(
-            response.data[0]['notification_type'], 'course_purchased')
+        self.assertEqual(response.data[0]["notification_type"], "course_purchased")
 
     def test_notification_unread_count_view(self):
         """Test getting unread notification count"""
         # Authenticate user
         token = self.get_jwt_token(self.user1)
-        self.client.credentials(HTTP_AUTHORIZATION=f'Bearer {token}')
+        self.client.credentials(HTTP_AUTHORIZATION=f"Bearer {token}")
 
         # Make request
-        url = reverse('notification-unread-count')
+        url = reverse("notification-unread-count")
         response = self.client.get(url)
 
         # Check response
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         # Only 1 unread notification for user1
-        self.assertEqual(response.data['unread_count'], 1)
+        self.assertEqual(response.data["unread_count"], 1)
 
     def test_notification_mark_read_view(self):
         """Test marking notification as read"""
         # Authenticate user
         token = self.get_jwt_token(self.user1)
-        self.client.credentials(HTTP_AUTHORIZATION=f'Bearer {token}')
+        self.client.credentials(HTTP_AUTHORIZATION=f"Bearer {token}")
 
         # Make request
-        url = reverse('notification-mark-read',
-                      kwargs={'notification_id': self.notification1.id})
+        url = reverse(
+            "notification-mark-read", kwargs={"notification_id": self.notification1.id}
+        )
         response = self.client.patch(url)
 
         # Check response
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertIn('message', response.data)
-        self.assertTrue(response.data['notification']['read'])
+        self.assertIn("message", response.data)
+        self.assertTrue(response.data["notification"]["read"])
 
         # Verify in database
         self.notification1.refresh_from_db()
@@ -149,16 +148,17 @@ class NotificationViewsIntegrationTestCase(TestCase):
         """Test marking notification as read with wrong user"""
         # Authenticate user2
         token = self.get_jwt_token(self.user2)
-        self.client.credentials(HTTP_AUTHORIZATION=f'Bearer {token}')
+        self.client.credentials(HTTP_AUTHORIZATION=f"Bearer {token}")
 
         # Try to mark user1's notification as read
-        url = reverse('notification-mark-read',
-                      kwargs={'notification_id': self.notification1.id})
+        url = reverse(
+            "notification-mark-read", kwargs={"notification_id": self.notification1.id}
+        )
         response = self.client.patch(url)
 
         # Should fail
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertIn('error', response.data)
+        self.assertIn("error", response.data)
 
     def test_notification_mark_all_read_view(self):
         """Test marking all notifications as read"""
@@ -167,42 +167,42 @@ class NotificationViewsIntegrationTestCase(TestCase):
             user=self.user1,
             message="Another unread",
             notification_type="course_purchased",
-            read=False
+            read=False,
         )
 
         # Authenticate user
         token = self.get_jwt_token(self.user1)
-        self.client.credentials(HTTP_AUTHORIZATION=f'Bearer {token}')
+        self.client.credentials(HTTP_AUTHORIZATION=f"Bearer {token}")
 
         # Make request
-        url = reverse('notification-mark-all-read')
+        url = reverse("notification-mark-all-read")
         response = self.client.post(url)
 
         # Check response
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertIn('message', response.data)
+        self.assertIn("message", response.data)
         # 2 unread notifications were updated
-        self.assertEqual(response.data['updated_count'], 2)
+        self.assertEqual(response.data["updated_count"], 2)
 
         # Verify all user1's notifications are now read
-        unread_count = Notification.objects.filter(
-            user=self.user1, read=False).count()
+        unread_count = Notification.objects.filter(user=self.user1, read=False).count()
         self.assertEqual(unread_count, 0)
 
     def test_notification_delete_view(self):
         """Test deleting a notification"""
         # Authenticate user
         token = self.get_jwt_token(self.user1)
-        self.client.credentials(HTTP_AUTHORIZATION=f'Bearer {token}')
+        self.client.credentials(HTTP_AUTHORIZATION=f"Bearer {token}")
 
         # Make request
-        url = reverse('notification-delete',
-                      kwargs={'notification_id': self.notification1.id})
+        url = reverse(
+            "notification-delete", kwargs={"notification_id": self.notification1.id}
+        )
         response = self.client.delete(url)
 
         # Check response
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertIn('message', response.data)
+        self.assertIn("message", response.data)
 
         # Verify notification is deleted
         with self.assertRaises(Notification.DoesNotExist):
@@ -212,38 +212,38 @@ class NotificationViewsIntegrationTestCase(TestCase):
         """Test deleting notification with wrong user"""
         # Authenticate user2
         token = self.get_jwt_token(self.user2)
-        self.client.credentials(HTTP_AUTHORIZATION=f'Bearer {token}')
+        self.client.credentials(HTTP_AUTHORIZATION=f"Bearer {token}")
 
         # Try to delete user1's notification
-        url = reverse('notification-delete',
-                      kwargs={'notification_id': self.notification1.id})
+        url = reverse(
+            "notification-delete", kwargs={"notification_id": self.notification1.id}
+        )
         response = self.client.delete(url)
 
         # Should fail
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertIn('error', response.data)
+        self.assertIn("error", response.data)
 
         # Verify notification still exists
-        self.assertTrue(Notification.objects.filter(
-            id=self.notification1.id).exists())
+        self.assertTrue(Notification.objects.filter(id=self.notification1.id).exists())
 
     def test_notification_clear_all_view(self):
         """Test clearing all notifications"""
         # Authenticate user
         token = self.get_jwt_token(self.user1)
-        self.client.credentials(HTTP_AUTHORIZATION=f'Bearer {token}')
+        self.client.credentials(HTTP_AUTHORIZATION=f"Bearer {token}")
 
         # Check initial count
         initial_count = Notification.objects.filter(user=self.user1).count()
         self.assertEqual(initial_count, 2)
 
         # Make request
-        url = reverse('notification-clear-all')
+        url = reverse("notification-clear-all")
         response = self.client.delete(url)
 
         # Check response
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertIn('message', response.data)
+        self.assertIn("message", response.data)
 
         # Verify all user1's notifications are deleted
         remaining_count = Notification.objects.filter(user=self.user1).count()
@@ -257,19 +257,21 @@ class NotificationViewsIntegrationTestCase(TestCase):
         """Test that endpoints require authentication"""
         # No authentication
         urls = [
-            reverse('notification-list'),
-            reverse('notification-unread-count'),
-            reverse('notification-mark-read',
-                    kwargs={'notification_id': self.notification1.id}),
-            reverse('notification-mark-all-read'),
-            reverse('notification-delete',
-                    kwargs={'notification_id': self.notification1.id}),
-            reverse('notification-clear-all'),
+            reverse("notification-list"),
+            reverse("notification-unread-count"),
+            reverse(
+                "notification-mark-read",
+                kwargs={"notification_id": self.notification1.id},
+            ),
+            reverse("notification-mark-all-read"),
+            reverse(
+                "notification-delete", kwargs={"notification_id": self.notification1.id}
+            ),
+            reverse("notification-clear-all"),
         ]
 
         for url in urls:
-            for method in ['get', 'post', 'patch', 'delete']:
+            for method in ["get", "post", "patch", "delete"]:
                 if hasattr(self.client, method):
                     response = getattr(self.client, method)(url)
-                    self.assertEqual(response.status_code,
-                                     status.HTTP_401_UNAUTHORIZED)
+                    self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)

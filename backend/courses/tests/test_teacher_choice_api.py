@@ -12,7 +12,7 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from rewards.models import TeacherDiscountAbsorption
 
 # Setup Django
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'schoolplatform.settings')
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "schoolplatform.settings")
 django.setup()
 
 
@@ -23,15 +23,13 @@ def test_teacher_choice_api():
     User = get_user_model()
 
     # Get teacher and pending absorption
-    teacher = User.objects.filter(
-        username='test_teacher_notifications').first()
+    teacher = User.objects.filter(username="test_teacher_notifications").first()
     if not teacher:
         print("❌ Teacher not found")
         return
 
     absorption = TeacherDiscountAbsorption.objects.filter(
-        teacher=teacher,
-        status='pending'
+        teacher=teacher, status="pending"
     ).first()
 
     if not absorption:
@@ -50,19 +48,16 @@ def test_teacher_choice_api():
     access_token = str(refresh.access_token)
 
     # Set authentication header
-    client.credentials(HTTP_AUTHORIZATION=f'Bearer {access_token}')
+    client.credentials(HTTP_AUTHORIZATION=f"Bearer {access_token}")
 
     # Test the API endpoint
-    url = '/api/v1/teocoin/teacher/choice/'
-    data = {
-        'absorption_id': absorption.pk,
-        'choice': 'absorb'
-    }
+    url = "/api/v1/teocoin/teacher/choice/"
+    data = {"absorption_id": absorption.pk, "choice": "absorb"}
 
     print(f"\n🔗 Testing URL: {url}")
     print(f"📤 Request data: {data}")
 
-    response = client.post(url, data, format='json')
+    response = client.post(url, data, format="json")
 
     print(f"\n📡 Response:")
     print(f"   Status: {response.status_code}")
@@ -70,7 +65,7 @@ def test_teacher_choice_api():
 
     if response.status_code == 200:
         response_data = response.json()
-        if response_data.get('success'):
+        if response_data.get("success"):
             print("✅ API endpoint working correctly!")
         else:
             print(f"❌ API returned error: {response_data.get('error')}")

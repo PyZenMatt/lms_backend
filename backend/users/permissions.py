@@ -10,7 +10,10 @@ class IsAdminOrApprovedTeacherOrReadOnly(BasePermission):
       • Gli utenti con role='teacher' devono avere is_approved=True.
       • Tutti gli altri (studenti o teacher non approvati) vengono bloccati.
     """
-    message = "Devi essere un insegnante approvato o admin per modificare questo contenuto."
+
+    message = (
+        "Devi essere un insegnante approvato o admin per modificare questo contenuto."
+    )
 
     def has_permission(self, request, view):
         # Lettura sempre permessa
@@ -27,7 +30,7 @@ class IsAdminOrApprovedTeacherOrReadOnly(BasePermission):
             return True
 
         # Insegnante approvato
-        if user.role == 'teacher' and user.is_approved:
+        if user.role == "teacher" and user.is_approved:
             return True
 
         # In tutti gli altri casi, blocca
@@ -36,11 +39,11 @@ class IsAdminOrApprovedTeacherOrReadOnly(BasePermission):
 
 class IsTeacher(permissions.BasePermission):
     def has_permission(self, request, view):
-        print("DEBUG IsTeacher:", getattr(request.user, 'role', None))
-        return request.user.is_authenticated and request.user.role == 'teacher'
+        print("DEBUG IsTeacher:", getattr(request.user, "role", None))
+        return request.user.is_authenticated and request.user.role == "teacher"
 
 
 class IsStudent(BasePermission):
     def has_permission(self, request, view):
-        print("DEBUG IsStudent:", getattr(request.user, 'role', None))
-        return hasattr(request.user, 'role') and request.user.role == 'student'
+        print("DEBUG IsStudent:", getattr(request.user, "role", None))
+        return hasattr(request.user, "role") and request.user.role == "student"

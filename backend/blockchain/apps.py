@@ -16,9 +16,10 @@ class BlockchainConfig(AppConfig):
     token minting, balance queries, and transaction tracking on the
     Polygon Amoy testnet.
     """
-    default_auto_field = 'django.db.models.BigAutoField'
-    name = 'blockchain'
-    verbose_name = 'Blockchain & TeoCoin Management'
+
+    default_auto_field = "django.db.models.BigAutoField"
+    name = "blockchain"
+    verbose_name = "Blockchain & TeoCoin Management"
 
     def ready(self):
         """

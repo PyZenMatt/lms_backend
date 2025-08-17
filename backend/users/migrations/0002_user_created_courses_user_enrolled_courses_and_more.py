@@ -6,27 +6,30 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('courses', '0001_initial'),
-        ('users', '0001_initial'),
+        ("courses", "0001_initial"),
+        ("users", "0001_initial"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='user',
-            name='created_courses',
+            model_name="user",
+            name="created_courses",
             field=models.ManyToManyField(
-                blank=True, related_name='teachers', to='courses.course'),
+                blank=True, related_name="teachers", to="courses.course"
+            ),
         ),
         migrations.AddField(
-            model_name='user',
-            name='enrolled_courses',
+            model_name="user",
+            name="enrolled_courses",
             field=models.ManyToManyField(
-                blank=True, related_name='enrolled_students', to='courses.course'),
+                blank=True, related_name="enrolled_students", to="courses.course"
+            ),
         ),
         migrations.AddField(
-            model_name='user',
-            name='purchased_lessons',
+            model_name="user",
+            name="purchased_lessons",
             field=models.ManyToManyField(
-                blank=True, related_name='purchasers', to='courses.lesson'),
+                blank=True, related_name="purchasers", to="courses.lesson"
+            ),
         ),
     ]

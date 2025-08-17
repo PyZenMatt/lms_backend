@@ -27,26 +27,28 @@ def create_teacher_profile(sender, instance, created, **kwargs):
     2. Non-teachers don't get unnecessary profiles
     3. Existing teachers get profiles if they don't have one
     """
-    if instance.role == 'teacher':
+    if instance.role == "teacher":
         # Check if teacher profile already exists
-        if not hasattr(instance, 'teacher_profile') or not instance.teacher_profile:
+        if not hasattr(instance, "teacher_profile") or not instance.teacher_profile:
             try:
                 # Create new teacher profile with defaults
                 teacher_profile = TeacherProfile.objects.create(
                     user=instance,
                     # Default Bronze tier (50% commission)
                     commission_rate=50.00,
-                    staking_tier='Bronze',
+                    staking_tier="Bronze",
                     staked_teo_amount=0.00,
-                    wallet_address=getattr(instance, 'wallet_address', None)
+                    wallet_address=getattr(instance, "wallet_address", None),
                 )
 
                 logger.info(
-                    f"Created TeacherProfile for {instance.email} with Bronze tier (50% commission)")
+                    f"Created TeacherProfile for {instance.email} with Bronze tier (50% commission)"
+                )
 
             except Exception as e:
                 logger.error(
-                    f"Failed to create TeacherProfile for {instance.email}: {e}")
+                    f"Failed to create TeacherProfile for {instance.email}: {e}"
+                )
 
 
 @receiver(post_save, sender=User)
@@ -57,17 +59,17 @@ def sync_wallet_address(sender, instance, created, **kwargs):
     When a user updates their wallet address, ensure the TeacherProfile
     is also updated to maintain consistency.
     """
-    if instance.role == 'teacher' and hasattr(instance, 'teacher_profile'):
+    if instance.role == "teacher" and hasattr(instance, "teacher_profile"):
         teacher_profile = instance.teacher_profile
 
         # Only update if wallet address has changed
         if teacher_profile.wallet_address != instance.wallet_address:
             teacher_profile.wallet_address = instance.wallet_address
-            teacher_profile.save(
-                update_fields=['wallet_address', 'updated_at'])
+            teacher_profile.save(update_fields=["wallet_address", "updated_at"])
 
             logger.info(
-                f"Synced wallet address for teacher {instance.email}: {instance.wallet_address}")
+                f"Synced wallet address for teacher {instance.email}: {instance.wallet_address}"
+            )
 
 
 # Signal to clean up non-teacher profiles if role changes
@@ -78,14 +80,14 @@ def cleanup_teacher_profile(sender, instance, created, **kwargs):
 
     This ensures data integrity when user roles are modified.
     """
-    if not created and instance.role != 'teacher':
+    if not created and instance.role != "teacher":
         # User role changed away from teacher
         try:
-            if hasattr(instance, 'teacher_profile') and instance.teacher_profile:
+            if hasattr(instance, "teacher_profile") and instance.teacher_profile:
                 teacher_profile = instance.teacher_profile
                 teacher_profile.delete()
                 logger.info(
-                    f"Removed TeacherProfile for {instance.email} (role changed to {instance.role})")
+                    f"Removed TeacherProfile for {instance.email} (role changed to {instance.role})"
+                )
         except Exception as e:
-            logger.error(
-                f"Failed to remove TeacherProfile for {instance.email}: {e}")
+            logger.error(f"Failed to remove TeacherProfile for {instance.email}: {e}")

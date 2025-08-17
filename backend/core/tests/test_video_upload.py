@@ -12,8 +12,8 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from rest_framework.test import APIClient
 
 # Aggiungi il path del progetto Django
-sys.path.append('/home/teo/Project/school/schoolplatform')
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'schoolplatform.settings')
+sys.path.append("/home/teo/Project/school/schoolplatform")
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "schoolplatform.settings")
 
 django.setup()
 
@@ -23,8 +23,9 @@ def test_lesson_video_upload():
 
     # Verifica che la directory media esista
     from django.conf import settings
+
     media_root = settings.MEDIA_ROOT
-    video_dir = os.path.join(media_root, 'lesson_videos')
+    video_dir = os.path.join(media_root, "lesson_videos")
 
     print(f"📁 MEDIA_ROOT: {media_root}")
     print(f"📁 Video directory: {video_dir}")
@@ -39,9 +40,9 @@ def test_lesson_video_upload():
 
     # Verifica i permessi di scrittura
     try:
-        test_file = os.path.join(video_dir, 'test_permissions.txt')
-        with open(test_file, 'w') as f:
-            f.write('test')
+        test_file = os.path.join(video_dir, "test_permissions.txt")
+        with open(test_file, "w") as f:
+            f.write("test")
         os.remove(test_file)
         print("✅ Permessi di scrittura OK")
     except Exception as e:
@@ -52,7 +53,7 @@ def test_lesson_video_upload():
     print("\n📋 Testando il modello Lesson...")
     try:
         # Crea un utente teacher di test
-        teacher = User.objects.filter(role='teacher').first()
+        teacher = User.objects.filter(role="teacher").first()
         if not teacher:
             print("❌ Nessun teacher trovato nel database")
             return
@@ -69,30 +70,27 @@ def test_lesson_video_upload():
         # Simula un file video
         video_content = b"fake video content for testing"
         video_file = SimpleUploadedFile(
-            "test_video.mp4",
-            video_content,
-            content_type="video/mp4"
+            "test_video.mp4", video_content, content_type="video/mp4"
         )
 
         # Crea una lezione con video
         lesson_data = {
-            'title': 'Test Video Lesson',
-            'content': 'This is a test lesson with video',
-            'lesson_type': 'video',
-            'duration': 30,
-            'course': course.id,
-            'video_file': video_file
+            "title": "Test Video Lesson",
+            "content": "This is a test lesson with video",
+            "lesson_type": "video",
+            "duration": 30,
+            "course": course.id,
+            "video_file": video_file,
         }
 
         # Test del serializer
         from django.test import RequestFactory
 
         factory = RequestFactory()
-        request = factory.post('/lessons/create/')
+        request = factory.post("/lessons/create/")
         request.user = teacher
 
-        serializer = LessonSerializer(
-            data=lesson_data, context={'request': request})
+        serializer = LessonSerializer(data=lesson_data, context={"request": request})
         if serializer.is_valid():
             lesson = serializer.save(teacher=teacher)
             print(f"✅ Lezione creata: {lesson.title}")
@@ -100,8 +98,7 @@ def test_lesson_video_upload():
             print(f"✅ Video file URL: {lesson.video_file.url}")
 
             # Verifica che il file esista fisicamente
-            full_path = os.path.join(
-                settings.MEDIA_ROOT, lesson.video_file.name)
+            full_path = os.path.join(settings.MEDIA_ROOT, lesson.video_file.name)
             if os.path.exists(full_path):
                 print("✅ File video salvato correttamente sul filesystem")
             else:
@@ -116,6 +113,7 @@ def test_lesson_video_upload():
     except Exception as e:
         print(f"❌ Errore durante il test: {e}")
         import traceback
+
         traceback.print_exc()
 
 
@@ -123,7 +121,7 @@ def test_api_lesson_creation():
     print("\n🌐 Testando l'API REST per la creazione di lezioni...")
 
     # Trova un teacher
-    teacher = User.objects.filter(role='teacher').first()
+    teacher = User.objects.filter(role="teacher").first()
     if not teacher:
         print("❌ Nessun teacher trovato")
         return
@@ -141,23 +139,21 @@ def test_api_lesson_creation():
     # Simula un file video
     video_content = b"fake video content for API testing"
     video_file = SimpleUploadedFile(
-        "api_test_video.mp4",
-        video_content,
-        content_type="video/mp4"
+        "api_test_video.mp4", video_content, content_type="video/mp4"
     )
 
     # Prepara i dati
     data = {
-        'title': 'API Test Video Lesson',
-        'content': 'This is a test lesson created via API',
-        'lesson_type': 'video',
-        'duration': 45,
-        'course_id': course.id,
-        'video_file': video_file
+        "title": "API Test Video Lesson",
+        "content": "This is a test lesson created via API",
+        "lesson_type": "video",
+        "duration": 45,
+        "course_id": course.id,
+        "video_file": video_file,
     }
 
     # Fai la richiesta POST
-    response = client.post('/api/v1/lessons/create/', data, format='multipart')
+    response = client.post("/api/v1/lessons/create/", data, format="multipart")
 
     if response.status_code == 201:
         lesson_data = response.json()
@@ -165,14 +161,14 @@ def test_api_lesson_creation():
         print(f"✅ Video URL: {lesson_data.get('video_file_url', 'N/A')}")
 
         # Verifica che il file esista
-        if 'video_file_url' in lesson_data and lesson_data['video_file_url']:
+        if "video_file_url" in lesson_data and lesson_data["video_file_url"]:
             print("✅ URL del video restituito correttamente")
         else:
             print("❌ URL del video non restituito")
 
         # Cleanup
-        if 'id' in lesson_data:
-            Lesson.objects.filter(id=lesson_data['id']).delete()
+        if "id" in lesson_data:
+            Lesson.objects.filter(id=lesson_data["id"]).delete()
 
     else:
         print(f"❌ Errore API: Status {response.status_code}")

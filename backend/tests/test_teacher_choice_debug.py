@@ -12,10 +12,10 @@ from django.contrib.auth import get_user_model
 from rest_framework.test import APIRequestFactory
 
 # Add the project directory to Python path
-sys.path.insert(0, '/home/teo/Project/school/schoolplatform')
+sys.path.insert(0, "/home/teo/Project/school/schoolplatform")
 
 # Setup Django
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'schoolplatform.settings')
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "schoolplatform.settings")
 django.setup()
 
 
@@ -36,15 +36,10 @@ def test_teacher_choice():
     factory = APIRequestFactory()
 
     # Test TEO choice
-    request_data = {
-        'choice': 'teo',
-        'discount_amount': 10.0
-    }
+    request_data = {"choice": "teo", "discount_amount": 10.0}
 
     request = factory.post(
-        '/api/v1/teocoin/teacher/choice/',
-        request_data,
-        format='json'
+        "/api/v1/teocoin/teacher/choice/", request_data, format="json"
     )
     request.user = teacher
 
@@ -59,15 +54,12 @@ def test_teacher_choice():
 
         # Test EUR choice too
         print("\n🔍 Testing EUR choice...")
-        request_data_eur = {
-            'choice': 'eur',
-            'discount_amount': 10.0
-        }
+        request_data_eur = {"choice": "eur", "discount_amount": 10.0}
 
         request_eur = factory.post(
-            '/api/v1/teocoin/teacher/choice/',
+            "/api/v1/teocoin/teacher/choice/",
             json.dumps(request_data_eur),
-            content_type='application/json'
+            content_type="application/json",
         )
         request_eur.user = teacher
 
@@ -78,6 +70,7 @@ def test_teacher_choice():
     except Exception as e:
         print(f"❌ Error calling view: {str(e)}")
         import traceback
+
         traceback.print_exc()
 
 

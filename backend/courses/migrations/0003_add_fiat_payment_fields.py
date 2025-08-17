@@ -6,8 +6,7 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('courses', '0002_add_fiat_payment_fields'),
+        ("courses", "0002_add_fiat_payment_fields"),
     ]
 
-    operations = [
-    ]
+    operations = []

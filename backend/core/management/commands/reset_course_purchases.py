@@ -12,7 +12,7 @@ from courses.models import Course
 from rewards.models import BlockchainTransaction
 
 # Setup Django
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'core.settings')
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "core.settings")
 django.setup()
 
 
@@ -44,8 +44,7 @@ def reset_course_purchases():
     # 3. Cancella transazioni blockchain correlate ai corsi
     print("\nCancellando transazioni blockchain...")
     course_purchase_txs = BlockchainTransaction.objects.filter(
-        transaction_type__in=['course_purchase',
-                              'course_earned', 'platform_commission']
+        transaction_type__in=["course_purchase", "course_earned", "platform_commission"]
     )
 
     count_before = course_purchase_txs.count()
@@ -68,8 +67,7 @@ def reset_course_purchases():
             print(f"  Nessuno studente iscritto ✓")
 
     remaining_txs = BlockchainTransaction.objects.filter(
-        transaction_type__in=['course_purchase',
-                              'course_earned', 'platform_commission']
+        transaction_type__in=["course_purchase", "course_earned", "platform_commission"]
     ).count()
     print(f"Transazioni correlate rimaste: {remaining_txs} ✓")
 

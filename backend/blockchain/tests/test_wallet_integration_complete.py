@@ -13,8 +13,8 @@ from django.test import Client
 from users.models import User
 
 # Setup Django
-sys.path.append('/home/teo/Project/school/schoolplatform')
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'schoolplatform.settings')
+sys.path.append("/home/teo/Project/school/schoolplatform")
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "schoolplatform.settings")
 django.setup()
 
 
@@ -23,61 +23,70 @@ def test_wallet_endpoints():
     client = Client()
 
     # Cleanup existing test user if exists
-    User.objects.filter(username='wallet_test_user').delete()
+    User.objects.filter(username="wallet_test_user").delete()
 
     # Crea un utente di test
     test_user = User.objects.create_user(
-        username='wallet_test_user',
-        email='wallet_test@example.com',
-        password='testpassword123',
-        first_name='Test',
-        last_name='Wallet',
-        role='student'
+        username="wallet_test_user",
+        email="wallet_test@example.com",
+        password="testpassword123",
+        first_name="Test",
+        last_name="Wallet",
+        role="student",
     )
 
     # Login
     login_response = client.login(
-        username='wallet_test_user', password='testpassword123')
+        username="wallet_test_user", password="testpassword123"
+    )
     print(f"✓ Login riuscito: {login_response}")
 
     # Test wallet connection
-    test_wallet_address = '0x1234567890AbCdEf1234567890AbCdEf12345678'
+    test_wallet_address = "0x1234567890AbCdEf1234567890AbCdEf12345678"
 
-    connect_response = client.post('/api/v1/wallet/connect/',
-                                   data=json.dumps(
-                                       {'wallet_address': test_wallet_address}),
-                                   content_type='application/json')
+    connect_response = client.post(
+        "/api/v1/wallet/connect/",
+        data=json.dumps({"wallet_address": test_wallet_address}),
+        content_type="application/json",
+    )
 
     print(
-        f"✓ Wallet connect response: {connect_response.status_code} - {connect_response.content.decode()}")
+        f"✓ Wallet connect response: {connect_response.status_code} - {connect_response.content.decode()}"
+    )
 
     # Verifica che l'indirizzo sia stato salvato
     test_user.refresh_from_db()
     print(f"✓ Wallet address salvato: {test_user.wallet_address}")
     if connect_response.status_code == 200:
-        assert test_user.wallet_address == test_wallet_address, "Wallet address non salvato correttamente"
+        assert (
+            test_user.wallet_address == test_wallet_address
+        ), "Wallet address non salvato correttamente"
 
     # Test wallet disconnect
-    disconnect_response = client.post('/api/v1/wallet/disconnect/')
+    disconnect_response = client.post("/api/v1/wallet/disconnect/")
     print(
-        f"✓ Wallet disconnect response: {disconnect_response.status_code} - {disconnect_response.content.decode()}")
+        f"✓ Wallet disconnect response: {disconnect_response.status_code} - {disconnect_response.content.decode()}"
+    )
 
     # Verifica che l'indirizzo sia stato rimosso
     test_user.refresh_from_db()
     print(f"✓ Wallet address dopo disconnect: {test_user.wallet_address}")
     if disconnect_response.status_code == 200:
-        assert test_user.wallet_address is None or test_user.wallet_address == '', "Wallet address non rimosso correttamente"
+        assert (
+            test_user.wallet_address is None or test_user.wallet_address == ""
+        ), "Wallet address non rimosso correttamente"
 
     # Test profile API con wallet
-    client.post('/api/v1/wallet/connect/',
-                data=json.dumps({'wallet_address': test_wallet_address}),
-                content_type='application/json')
+    client.post(
+        "/api/v1/wallet/connect/",
+        data=json.dumps({"wallet_address": test_wallet_address}),
+        content_type="application/json",
+    )
 
-    profile_response = client.get('/api/v1/profile/')
+    profile_response = client.get("/api/v1/profile/")
     if profile_response.status_code == 200:
         profile_data = profile_response.json()
-        print(
-            f"✓ Profile API response: {profile_data.get('wallet_address', 'None')}")
+        print(f"✓ Profile API response: {profile_data.get('wallet_address', 'None')}")
         # assert profile_data.get('wallet_address') == test_wallet_address, "Wallet address non presente nel profilo"
 
     print("✅ Tutti i test degli endpoint sono passati!")
@@ -91,26 +100,27 @@ def test_course_purchase_simulation():
     client = Client()
 
     # Cleanup existing test user if exists
-    User.objects.filter(username='course_test_user').delete()
+    User.objects.filter(username="course_test_user").delete()
 
     # Crea utente di test
     test_user = User.objects.create_user(
-        username='course_test_user',
-        email='course_test@example.com',
-        password='testpassword123',
-        role='student',
-        wallet_address='0x1234567890AbCdEf1234567890AbCdEf12345678'
+        username="course_test_user",
+        email="course_test@example.com",
+        password="testpassword123",
+        role="student",
+        wallet_address="0x1234567890AbCdEf1234567890AbCdEf12345678",
     )
 
-    client.login(username='course_test_user', password='testpassword123')
+    client.login(username="course_test_user", password="testpassword123")
 
     # Verifica che il profilo restituisca l'indirizzo wallet
-    profile_response = client.get('/api/v1/profile/')
+    profile_response = client.get("/api/v1/profile/")
     profile_data = profile_response.json()
 
     print(
-        f"✓ Wallet address nel profilo per acquisti: {profile_data.get('wallet_address')}")
-    assert profile_data.get('wallet_address') == test_user.wallet_address
+        f"✓ Wallet address nel profilo per acquisti: {profile_data.get('wallet_address')}"
+    )
+    assert profile_data.get("wallet_address") == test_user.wallet_address
 
     print("✅ Test simulazione acquisto corso passato!")
 
@@ -120,9 +130,9 @@ def test_course_purchase_simulation():
 
 def print_summary():
     """Stampa un riassunto dello stato dell'implementazione"""
-    print("\n" + "="*60)
+    print("\n" + "=" * 60)
     print("RIASSUNTO IMPLEMENTAZIONE WALLET PERSISTENTE")
-    print("="*60)
+    print("=" * 60)
 
     print("\n✅ COMPLETATO:")
     print("- Web3Service con wallet lock persistente")
@@ -157,10 +167,10 @@ def print_summary():
     print("\n🎯 RISULTATO:")
     print("Il sistema ora mantiene la connessione wallet stabile e")
     print("sincronizzata tra frontend e backend fino alla disconnessione esplicita.")
-    print("="*60)
+    print("=" * 60)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     print("🧪 Avvio test integrazione wallet completa...")
 
     try:
@@ -171,6 +181,7 @@ if __name__ == '__main__':
     except Exception as e:
         print(f"\n❌ Errore durante i test: {e}")
         import traceback
+
         traceback.print_exc()
 
     finally:

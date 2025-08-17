@@ -19,24 +19,24 @@ class UserWallet(models.Model):
     - Using deterministic wallet generation
     - Implementing proper key rotation
     """
+
     user = models.OneToOneField(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
-        related_name='blockchain_wallet',
-        help_text="User associated with this wallet"
+        related_name="blockchain_wallet",
+        help_text="User associated with this wallet",
     )
     address = models.CharField(
         max_length=42,
         unique=True,
-        help_text="Public Ethereum/Polygon wallet address (0x...)"
+        help_text="Public Ethereum/Polygon wallet address (0x...)",
     )
     private_key = models.CharField(
         max_length=66,
-        help_text="Private key for wallet - SECURITY WARNING: stored in plain text!"
+        help_text="Private key for wallet - SECURITY WARNING: stored in plain text!",
     )
     created_at = models.DateTimeField(
-        auto_now_add=True,
-        help_text="Timestamp when wallet was created"
+        auto_now_add=True, help_text="Timestamp when wallet was created"
     )
 
     class Meta:
@@ -65,20 +65,18 @@ class TeoCoinDiscountRequest(models.Model):
     """
 
     STATUS_CHOICES = [
-        (0, 'Pending'),      # Waiting for teacher decision
-        (1, 'Approved'),     # Teacher accepted TEO tokens
-        (2, 'Declined'),     # Teacher chose EUR commission
-        (3, 'Expired'),      # Request expired, auto-EUR
+        (0, "Pending"),  # Waiting for teacher decision
+        (1, "Approved"),  # Teacher accepted TEO tokens
+        (2, "Declined"),  # Teacher chose EUR commission
+        (3, "Expired"),  # Request expired, auto-EUR
     ]
 
     # Core identifiers
     student_address = models.CharField(
-        max_length=42,
-        help_text="Student's wallet address"
+        max_length=42, help_text="Student's wallet address"
     )
     teacher_address = models.CharField(
-        max_length=42,
-        help_text="Teacher's wallet address"
+        max_length=42, help_text="Teacher's wallet address"
     )
     course_id = models.PositiveIntegerField(
         help_text="ID of the course being purchased"
@@ -102,42 +100,36 @@ class TeoCoinDiscountRequest(models.Model):
     status = models.PositiveSmallIntegerField(
         choices=STATUS_CHOICES,
         default=0,
-        help_text="Current status of the discount request"
+        help_text="Current status of the discount request",
     )
     created_at = models.DateTimeField(
-        auto_now_add=True,
-        help_text="When the request was created"
+        auto_now_add=True, help_text="When the request was created"
     )
-    expires_at = models.DateTimeField(
-        help_text="When the request expires (auto-EUR)"
-    )
+    expires_at = models.DateTimeField(help_text="When the request expires (auto-EUR)")
     teacher_decision_at = models.DateTimeField(
-        null=True,
-        blank=True,
-        help_text="When teacher made their decision"
+        null=True, blank=True, help_text="When teacher made their decision"
     )
 
     # Optional fields
     decline_reason = models.TextField(
-        blank=True,
-        help_text="Optional reason if teacher declined"
+        blank=True, help_text="Optional reason if teacher declined"
     )
     blockchain_tx_hash = models.CharField(
         max_length=66,
         blank=True,
-        help_text="Transaction hash for blockchain operations"
+        help_text="Transaction hash for blockchain operations",
     )
 
     class Meta:
         verbose_name = "TeoCoin Discount Request"
         verbose_name_plural = "TeoCoin Discount Requests"
         db_table = "blockchain_teocoin_discount_request"
-        ordering = ['-created_at']
+        ordering = ["-created_at"]
         indexes = [
-            models.Index(fields=['student_address', 'status']),
-            models.Index(fields=['teacher_address', 'status']),
-            models.Index(fields=['course_id']),
-            models.Index(fields=['expires_at']),
+            models.Index(fields=["student_address", "status"]),
+            models.Index(fields=["teacher_address", "status"]),
+            models.Index(fields=["course_id"]),
+            models.Index(fields=["expires_at"]),
         ]
 
     def __str__(self):
@@ -151,7 +143,9 @@ class TeoCoinDiscountRequest(models.Model):
     @property
     def discount_amount_eur(self):
         """Calculate discount amount in EUR"""
-        return (self.course_price * self.discount_percent) / (100 * 10000)  # cents to EUR, basis points to percent
+        return (self.course_price * self.discount_percent) / (
+            100 * 10000
+        )  # cents to EUR, basis points to percent
 
     @property
     def final_price_eur(self):
@@ -161,12 +155,12 @@ class TeoCoinDiscountRequest(models.Model):
     @property
     def teo_cost_formatted(self):
         """Format TEO cost for display"""
-        return self.teo_cost / (10 ** 18)
+        return self.teo_cost / (10**18)
 
     @property
     def teacher_bonus_formatted(self):
         """Format teacher bonus for display"""
-        return self.teacher_bonus / (10 ** 18)
+        return self.teacher_bonus / (10**18)
 
     def can_teacher_decide(self):
         """Check if teacher can still make a decision"""
@@ -186,6 +180,7 @@ class TeoCoinDiscountRequest(models.Model):
 # DB-BASED TEOCOIN SYSTEM - NEW MODELS
 # ===================================================================
 
+
 class DBTeoCoinBalance(models.Model):
     """
     Database-based TeoCoin balance for instant operations
@@ -195,32 +190,33 @@ class DBTeoCoinBalance(models.Model):
 
     Note: Staking functionality is only available for teachers, not students.
     """
+
     user = models.OneToOneField(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
-        related_name='db_teocoin_balance'
+        related_name="db_teocoin_balance",
     )
 
     # Balance tracking
     available_balance = models.DecimalField(
         max_digits=12,
         decimal_places=2,
-        default=Decimal('0.00'),
-        help_text="TEO available for spending (discounts for students, staking for teachers)"
+        default=Decimal("0.00"),
+        help_text="TEO available for spending (discounts for students, staking for teachers)",
     )
 
     staked_balance = models.DecimalField(
         max_digits=12,
         decimal_places=2,
-        default=Decimal('0.00'),
-        help_text="TEO currently staked (Teachers only - affects commission rates)"
+        default=Decimal("0.00"),
+        help_text="TEO currently staked (Teachers only - affects commission rates)",
     )
 
     pending_withdrawal = models.DecimalField(
         max_digits=12,
         decimal_places=2,
-        default=Decimal('0.00'),
-        help_text="TEO pending withdrawal to MetaMask"
+        default=Decimal("0.00"),
+        help_text="TEO pending withdrawal to MetaMask",
     )
 
     # Metadata
@@ -243,7 +239,7 @@ class DBTeoCoinBalance(models.Model):
 
     def can_stake(self):
         """Check if user can stake tokens (teachers only)"""
-        return self.user.role == 'teacher'
+        return self.user.role == "teacher"
 
     def stake_tokens(self, amount):
         """
@@ -268,7 +264,8 @@ class DBTeoCoinBalance(models.Model):
 
         if self.available_balance < amount:
             raise ValueError(
-                f"Insufficient balance. Available: {self.available_balance} TEO")
+                f"Insufficient balance. Available: {self.available_balance} TEO"
+            )
 
         self.available_balance -= amount
         self.staked_balance += amount
@@ -297,7 +294,8 @@ class DBTeoCoinBalance(models.Model):
 
         if self.staked_balance < amount:
             raise ValueError(
-                f"Insufficient staked balance. Staked: {self.staked_balance} TEO")
+                f"Insufficient staked balance. Staked: {self.staked_balance} TEO"
+            )
 
         self.staked_balance -= amount
         self.available_balance += amount
@@ -308,40 +306,39 @@ class DBTeoCoinTransaction(models.Model):
     """
     Track all internal TeoCoin movements in the DB system
     """
+
     TRANSACTION_TYPES = [
-        ('earned', 'Earned (Rewards/Teaching)'),
-        ('spent_discount', 'Spent on Discount'),
-        ('staked', 'Staked for Commission'),
-        ('unstaked', 'Unstaked'),
-        ('withdrawn', 'Withdrawn to MetaMask'),
-        ('deposit', 'Deposited from MetaMask'),
-        ('bonus', 'Platform Bonus'),
-        ('migration', 'Migrated from Blockchain'),
+        ("earned", "Earned (Rewards/Teaching)"),
+        ("spent_discount", "Spent on Discount"),
+        ("staked", "Staked for Commission"),
+        ("unstaked", "Unstaked"),
+        ("withdrawn", "Withdrawn to MetaMask"),
+        ("deposit", "Deposited from MetaMask"),
+        ("bonus", "Platform Bonus"),
+        ("migration", "Migrated from Blockchain"),
     ]
 
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
-        related_name='db_teocoin_transactions'
+        related_name="db_teocoin_transactions",
     )
 
-    transaction_type = models.CharField(
-        max_length=20, choices=TRANSACTION_TYPES)
+    transaction_type = models.CharField(max_length=20, choices=TRANSACTION_TYPES)
     amount = models.DecimalField(max_digits=12, decimal_places=2)
     description = models.TextField()
 
     # Related objects
     course = models.ForeignKey(
-        'courses.Course',
-        null=True, blank=True,
-        on_delete=models.SET_NULL
+        "courses.Course", null=True, blank=True, on_delete=models.SET_NULL
     )
     related_user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
-        null=True, blank=True,
+        null=True,
+        blank=True,
         on_delete=models.SET_NULL,
-        related_name='related_teocoin_transactions',
-        help_text="Other user involved (e.g., teacher in discount)"
+        related_name="related_teocoin_transactions",
+        help_text="Other user involved (e.g., teacher in discount)",
     )
 
     # Blockchain integration
@@ -350,14 +347,14 @@ class DBTeoCoinTransaction(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        ordering = ['-created_at']
+        ordering = ["-created_at"]
         verbose_name = "DB TeoCoin Transaction"
         verbose_name_plural = "DB TeoCoin Transactions"
         db_table = "blockchain_db_teocoin_transaction"
         indexes = [
-            models.Index(fields=['user', 'transaction_type']),
-            models.Index(fields=['created_at']),
-            models.Index(fields=['blockchain_tx_hash']),
+            models.Index(fields=["user", "transaction_type"]),
+            models.Index(fields=["created_at"]),
+            models.Index(fields=["blockchain_tx_hash"]),
         ]
 
     def __str__(self):
@@ -369,31 +366,31 @@ class TeoCoinWithdrawalRequest(models.Model):
     Enhanced withdrawal request model for MetaMask integration
     Handles withdrawal from DB balance to blockchain via minting
     """
+
     WITHDRAWAL_STATUS = [
-        ('pending', 'Pending'),
-        ('processing', 'Processing'),
-        ('completed', 'Completed'),
-        ('failed', 'Failed'),
-        ('cancelled', 'Cancelled')
+        ("pending", "Pending"),
+        ("processing", "Processing"),
+        ("completed", "Completed"),
+        ("failed", "Failed"),
+        ("cancelled", "Cancelled"),
     ]
 
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
-        related_name='withdrawal_requests'
+        related_name="withdrawal_requests",
     )
     amount = models.DecimalField(max_digits=12, decimal_places=2)
     metamask_address = models.CharField(max_length=42)
     status = models.CharField(
-        max_length=20, choices=WITHDRAWAL_STATUS, default='pending')
+        max_length=20, choices=WITHDRAWAL_STATUS, default="pending"
+    )
 
     # Blockchain tracking
     transaction_hash = models.CharField(max_length=66, null=True, blank=True)
     gas_used = models.BigIntegerField(null=True, blank=True)
-    gas_price_gwei = models.DecimalField(
-        max_digits=8, decimal_places=2, null=True)
-    gas_cost_eur = models.DecimalField(
-        max_digits=8, decimal_places=2, null=True)
+    gas_price_gwei = models.DecimalField(max_digits=8, decimal_places=2, null=True)
+    gas_cost_eur = models.DecimalField(max_digits=8, decimal_places=2, null=True)
 
     # Security and limits
     daily_withdrawal_count = models.IntegerField(default=1)
@@ -413,12 +410,12 @@ class TeoCoinWithdrawalRequest(models.Model):
         verbose_name = "TeoCoin Withdrawal Request"
         verbose_name_plural = "TeoCoin Withdrawal Requests"
         db_table = "blockchain_teocoin_withdrawal_request"
-        ordering = ['-created_at']
+        ordering = ["-created_at"]
         indexes = [
-            models.Index(fields=['user', 'status']),
-            models.Index(fields=['metamask_address']),
-            models.Index(fields=['status', 'created_at']),
-            models.Index(fields=['daily_withdrawal_count']),
+            models.Index(fields=["user", "status"]),
+            models.Index(fields=["metamask_address"]),
+            models.Index(fields=["status", "created_at"]),
+            models.Index(fields=["daily_withdrawal_count"]),
         ]
 
     def __str__(self):
@@ -427,21 +424,21 @@ class TeoCoinWithdrawalRequest(models.Model):
     @property
     def is_processing_too_long(self):
         """Check if withdrawal has been processing for too long (>24h)"""
-        if self.status == 'processing':
+        if self.status == "processing":
             return timezone.now() - self.created_at > timezone.timedelta(hours=24)
         return False
 
     @property
     def can_be_cancelled(self):
         """Check if withdrawal can be cancelled by user"""
-        return self.status in ['pending', 'failed']
+        return self.status in ["pending", "failed"]
 
     @property
     def estimated_processing_time(self):
         """Estimated processing time for withdrawal"""
-        if self.status == 'pending':
+        if self.status == "pending":
             return "5-10 minutes"
-        elif self.status == 'processing':
+        elif self.status == "processing":
             return "1-5 minutes"
         else:
             return "Completed"

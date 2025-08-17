@@ -28,8 +28,11 @@ from django.utils import timezone
 if TYPE_CHECKING:
     pass
 
-from blockchain.models import (DBTeoCoinBalance, DBTeoCoinTransaction,
-                               TeoCoinWithdrawalRequest)
+from blockchain.models import (
+    DBTeoCoinBalance,
+    DBTeoCoinTransaction,
+    TeoCoinWithdrawalRequest,
+)
 from users.models import TeacherProfile
 
 User = get_user_model()
@@ -58,38 +61,39 @@ class DBTeoCoinService:
         balance_obj, created = DBTeoCoinBalance.objects.get_or_create(
             user=user,
             defaults={
-                'available_balance': Decimal('0.00'),
-                'staked_balance': Decimal('0.00'),
-                'pending_withdrawal': Decimal('0.00')
-            }
+                "available_balance": Decimal("0.00"),
+                "staked_balance": Decimal("0.00"),
+                "pending_withdrawal": Decimal("0.00"),
+            },
         )
 
         # For students, exclude staking completely (students don't stake)
-        if hasattr(user, 'role') and getattr(user, 'role', None) == 'student':
+        if hasattr(user, "role") and getattr(user, "role", None) == "student":
             return {
-                'available_balance': balance_obj.available_balance,
+                "available_balance": balance_obj.available_balance,
                 # Students don't have staking
-                'staked_balance': Decimal('0.00'),
-                'pending_withdrawal': balance_obj.pending_withdrawal,
-                'total_balance': balance_obj.available_balance + balance_obj.pending_withdrawal
+                "staked_balance": Decimal("0.00"),
+                "pending_withdrawal": balance_obj.pending_withdrawal,
+                "total_balance": balance_obj.available_balance
+                + balance_obj.pending_withdrawal,
             }
         else:
             # For teachers and admins, include staking
             return {
-                'available_balance': balance_obj.available_balance,
-                'staked_balance': balance_obj.staked_balance,
-                'pending_withdrawal': balance_obj.pending_withdrawal,
-                'total_balance': (
-                    balance_obj.available_balance +
-                    balance_obj.staked_balance +
-                    balance_obj.pending_withdrawal
-                )
+                "available_balance": balance_obj.available_balance,
+                "staked_balance": balance_obj.staked_balance,
+                "pending_withdrawal": balance_obj.pending_withdrawal,
+                "total_balance": (
+                    balance_obj.available_balance
+                    + balance_obj.staked_balance
+                    + balance_obj.pending_withdrawal
+                ),
             }
 
     def get_available_balance(self, user: User) -> Decimal:
         """Get user's available TeoCoin balance for spending"""
         balance_data = self.get_user_balance(user)
-        return balance_data['available_balance']
+        return balance_data["available_balance"]
 
     def get_balance(self, user: User) -> Decimal:
         """Alias for get_available_balance for compatibility"""
@@ -98,11 +102,17 @@ class DBTeoCoinService:
     def get_staked_balance(self, user: User) -> Decimal:
         """Get user's staked TeoCoin balance"""
         balance_data = self.get_user_balance(user)
-        return balance_data['staked_balance']
+        return balance_data["staked_balance"]
 
     @transaction.atomic
-    def add_balance(self, user: User, amount: Decimal, transaction_type: str,
-                    description: str = "", course=None) -> bool:
+    def add_balance(
+        self,
+        user: User,
+        amount: Decimal,
+        transaction_type: str,
+        description: str = "",
+        course=None,
+    ) -> bool:
         """
         Add TeoCoin to user's available balance
 
@@ -121,10 +131,10 @@ class DBTeoCoinService:
             balance_obj, created = DBTeoCoinBalance.objects.get_or_create(
                 user=user,
                 defaults={
-                    'available_balance': Decimal('0.00'),
-                    'staked_balance': Decimal('0.00'),
-                    'pending_withdrawal': Decimal('0.00')
-                }
+                    "available_balance": Decimal("0.00"),
+                    "staked_balance": Decimal("0.00"),
+                    "pending_withdrawal": Decimal("0.00"),
+                },
             )
 
             # Update available balance
@@ -138,7 +148,7 @@ class DBTeoCoinService:
                 transaction_type=transaction_type,
                 amount=amount,
                 description=description,
-                course=course
+                course=course,
             )
 
             return True
@@ -148,8 +158,14 @@ class DBTeoCoinService:
             return False
 
     @transaction.atomic
-    def deduct_balance(self, user: User, amount: Decimal, transaction_type: str,
-                       description: str = "", course=None) -> bool:
+    def deduct_balance(
+        self,
+        user: User,
+        amount: Decimal,
+        transaction_type: str,
+        description: str = "",
+        course=None,
+    ) -> bool:
         """
         Deduct TeoCoin from user's available balance
 
@@ -181,7 +197,7 @@ class DBTeoCoinService:
                 transaction_type=transaction_type,
                 amount=-amount,  # Negative for deduction
                 description=description,
-                course=course
+                course=course,
             )
 
             return True
@@ -209,9 +225,10 @@ class DBTeoCoinService:
         """
         try:
             # Students cannot stake tokens
-            if hasattr(user, 'role') and getattr(user, 'role', None) == 'student':
+            if hasattr(user, "role") and getattr(user, "role", None) == "student":
                 logger.warning(
-                    f"Student {user.email} attempted to stake tokens - not allowed")
+                    f"Student {user.email} attempted to stake tokens - not allowed"
+                )
                 return False
 
             balance_obj = DBTeoCoinBalance.objects.get(user=user)
@@ -229,9 +246,9 @@ class DBTeoCoinService:
             # Record transaction
             DBTeoCoinTransaction.objects.create(
                 user=user,
-                transaction_type='stake',
+                transaction_type="stake",
                 amount=amount,
-                description=f"Staked {amount} TEO"
+                description=f"Staked {amount} TEO",
             )
 
             # Update teacher tier and commission rate
@@ -264,9 +281,10 @@ class DBTeoCoinService:
         """
         try:
             # Students cannot unstake tokens (they shouldn't have any staked)
-            if hasattr(user, 'role') and getattr(user, 'role', None) == 'student':
+            if hasattr(user, "role") and getattr(user, "role", None) == "student":
                 logger.warning(
-                    f"Student {user.email} attempted to unstake tokens - not allowed")
+                    f"Student {user.email} attempted to unstake tokens - not allowed"
+                )
                 return False
 
             balance_obj = DBTeoCoinBalance.objects.get(user=user)
@@ -284,9 +302,9 @@ class DBTeoCoinService:
             # Record transaction
             DBTeoCoinTransaction.objects.create(
                 user=user,
-                transaction_type='unstake',
+                transaction_type="unstake",
                 amount=amount,
-                description=f"Unstaked {amount} TEO"
+                description=f"Unstaked {amount} TEO",
             )
 
             # Update teacher tier and commission rate
@@ -308,7 +326,7 @@ class DBTeoCoinService:
 
     from typing import Any, Dict
 
-    def calculate_discount(self, user: 'User', course_price: Decimal) -> Dict[str, Any]:
+    def calculate_discount(self, user: "User", course_price: Decimal) -> Dict[str, Any]:
         """
         Calculate TeoCoin discount for a course purchase
 
@@ -322,7 +340,7 @@ class DBTeoCoinService:
         available_balance = self.get_available_balance(user)
 
         # Maximum 50% discount
-        max_discount = course_price * Decimal('0.5')
+        max_discount = course_price * Decimal("0.5")
 
         # TEO exchange rate: 1 TEO = 1 EUR
         teo_available_for_discount = min(available_balance, max_discount)
@@ -331,16 +349,21 @@ class DBTeoCoinService:
         final_price = course_price - discount_amount
 
         return {
-            'discount_amount': discount_amount,
-            'final_price': final_price,
-            'teo_required': teo_available_for_discount,
-            'discount_percentage': (discount_amount / course_price * 100) if course_price > 0 else Decimal('0'),
-            'can_apply_discount': teo_available_for_discount > 0
+            "discount_amount": discount_amount,
+            "final_price": final_price,
+            "teo_required": teo_available_for_discount,
+            "discount_percentage": (
+                (discount_amount / course_price * 100)
+                if course_price > 0
+                else Decimal("0")
+            ),
+            "can_apply_discount": teo_available_for_discount > 0,
         }
 
     @transaction.atomic
-    def apply_course_discount(self, user: User, course_price: Decimal,
-                              course, course_title: str = "") -> Dict[str, Any]:
+    def apply_course_discount(
+        self, user: User, course_price: Decimal, course, course_title: str = ""
+    ) -> Dict[str, Any]:
         """
         Apply TeoCoin discount to a course purchase
 
@@ -354,44 +377,42 @@ class DBTeoCoinService:
             Dict with success status and transaction details
         """
         discount_info = self.calculate_discount(user, course_price)
-        teo_required = discount_info['teo_required']
+        teo_required = discount_info["teo_required"]
 
         if teo_required == 0:
             return {
-                'success': True,
-                'discount_applied': Decimal('0.00'),
-                'final_price': course_price,
-                'message': 'No TeoCoin available for discount'
+                "success": True,
+                "discount_applied": Decimal("0.00"),
+                "final_price": course_price,
+                "message": "No TeoCoin available for discount",
             }
 
         # Deduct TeoCoin for discount
         success = self.deduct_balance(
             user=user,
             amount=teo_required,
-            transaction_type='course_discount',
+            transaction_type="course_discount",
             description=f"Discount for course: {course_title}",
-            course=course
+            course=course,
         )
 
         if success:
             return {
-                'success': True,
-                'discount_applied': discount_info['discount_amount'],
-                'final_price': discount_info['final_price'],
-                'teo_used': teo_required,
-                'message': f'Applied {discount_info["discount_percentage"]:.1f}% discount'
+                "success": True,
+                "discount_applied": discount_info["discount_amount"],
+                "final_price": discount_info["final_price"],
+                "teo_used": teo_required,
+                "message": f'Applied {discount_info["discount_percentage"]:.1f}% discount',
             }
         else:
-            return {
-                'success': False,
-                'message': 'Failed to apply discount'
-            }
+            return {"success": False, "message": "Failed to apply discount"}
 
     # ========== TEACHER REWARDS ==========
 
     @transaction.atomic
-    def reward_teacher_lesson_completion(self, teacher: User, student: User,
-                                         lesson_reward: Decimal = Decimal('1.0')) -> bool:
+    def reward_teacher_lesson_completion(
+        self, teacher: User, student: User, lesson_reward: Decimal = Decimal("1.0")
+    ) -> bool:
         """
         Reward teacher when student completes a lesson
 
@@ -405,7 +426,7 @@ class DBTeoCoinService:
         """
         try:
             # Get teacher's commission rate (based on staking tier)
-            commission_rate = Decimal('0.50')  # Default 50%
+            commission_rate = Decimal("0.50")  # Default 50%
 
             try:
                 teacher_profile = TeacherProfile.objects.get(user=teacher)
@@ -421,14 +442,14 @@ class DBTeoCoinService:
             teacher_success = self.add_balance(
                 user=teacher,
                 amount=teacher_reward,
-                transaction_type='lesson_reward',
-                description=f"Lesson completion reward (student: {student.username})"
+                transaction_type="lesson_reward",
+                description=f"Lesson completion reward (student: {student.username})",
             )
 
             # Platform keeps commission (recorded for transparency)
             platform_success = self._record_platform_commission(
                 amount=platform_commission,
-                description=f"Platform commission from teacher {teacher.username}"
+                description=f"Platform commission from teacher {teacher.username}",
             )
 
             return teacher_success and platform_success
@@ -444,12 +465,12 @@ class DBTeoCoinService:
             # Note: We don't need a User for platform transactions
             DBTeoCoinTransaction.objects.create(
                 user=None,  # Platform transactions have no user
-                transaction_type='platform_commission',
+                transaction_type="platform_commission",
                 amount=amount,
                 # Platform balance not tracked in user system
-                balance_after=Decimal('0.00'),
+                balance_after=Decimal("0.00"),
                 description=description,
-                status='completed'
+                status="completed",
             )
             return True
         except Exception as e:
@@ -459,8 +480,9 @@ class DBTeoCoinService:
     # ========== WITHDRAWAL SYSTEM ==========
 
     @transaction.atomic
-    def request_withdrawal(self, user: User, amount: Decimal,
-                           metamask_address: str) -> Dict[str, Any]:
+    def request_withdrawal(
+        self, user: User, amount: Decimal, metamask_address: str
+    ) -> Dict[str, Any]:
         """
         Create withdrawal request to move TEO to MetaMask
 
@@ -478,8 +500,8 @@ class DBTeoCoinService:
 
             if available_balance < amount:
                 return {
-                    'success': False,
-                    'message': 'Insufficient balance for withdrawal'
+                    "success": False,
+                    "message": "Insufficient balance for withdrawal",
                 }
 
             # Move from available to pending withdrawal
@@ -493,30 +515,31 @@ class DBTeoCoinService:
                 user=user,
                 amount=amount,
                 metamask_address=metamask_address,
-                status='pending'
+                status="pending",
             )
 
             # Record transaction
             DBTeoCoinTransaction.objects.create(
                 user=user,
-                transaction_type='withdrawal_request',
+                transaction_type="withdrawal_request",
                 amount=-amount,
-                balance_after=balance_obj.available_balance + balance_obj.staked_balance,
+                balance_after=balance_obj.available_balance
+                + balance_obj.staked_balance,
                 description=f"Withdrawal request to {metamask_address}",
-                status='pending'
+                status="pending",
             )
 
             return {
-                'success': True,
-                'request_id': withdrawal_request.id,
-                'message': 'Withdrawal request created successfully'
+                "success": True,
+                "request_id": withdrawal_request.id,
+                "message": "Withdrawal request created successfully",
             }
 
         except Exception as e:
             print(f"Error creating withdrawal request: {e}")
             return {
-                'success': False,
-                'message': f'Error creating withdrawal request: {e}'
+                "success": False,
+                "message": f"Error creating withdrawal request: {e}",
             }
 
     def get_pending_withdrawals(self, user: Optional[User] = None) -> List[Dict]:
@@ -529,21 +552,21 @@ class DBTeoCoinService:
         Returns:
             List of withdrawal request dictionaries
         """
-        queryset = TeoCoinWithdrawalRequest.objects.filter(status='pending')
+        queryset = TeoCoinWithdrawalRequest.objects.filter(status="pending")
 
         if user:
             queryset = queryset.filter(user=user)
 
         return [
             {
-                'id': req.id,
-                'user': req.user.username if req.user else 'Unknown',
-                'amount': req.amount,
-                'metamask_address': req.metamask_address,
-                'created_at': req.created_at,
-                'status': req.status
+                "id": req.id,
+                "user": req.user.username if req.user else "Unknown",
+                "amount": req.amount,
+                "metamask_address": req.metamask_address,
+                "created_at": req.created_at,
+                "status": req.status,
             }
-            for req in queryset.order_by('-created_at')
+            for req in queryset.order_by("-created_at")
         ]
 
     # ========== TRANSACTION HISTORY ==========
@@ -559,17 +582,17 @@ class DBTeoCoinService:
         Returns:
             List of transaction dictionaries
         """
-        transactions = DBTeoCoinTransaction.objects.filter(
-            user=user
-        ).order_by('-created_at')[:limit]
+        transactions = DBTeoCoinTransaction.objects.filter(user=user).order_by(
+            "-created_at"
+        )[:limit]
 
         return [
             {
-                'id': tx.id,
-                'type': tx.transaction_type,
-                'amount': tx.amount,
-                'description': tx.description,
-                'created_at': tx.created_at
+                "id": tx.id,
+                "type": tx.transaction_type,
+                "amount": tx.amount,
+                "description": tx.description,
+                "created_at": tx.created_at,
             }
             for tx in transactions
         ]
@@ -577,8 +600,14 @@ class DBTeoCoinService:
     # ========== BURN DEPOSIT OPERATIONS ==========
 
     @transaction.atomic
-    def credit_user(self, user: User, amount: Decimal, transaction_type: str = 'deposit',
-                    description: str = "", metadata: Optional[Dict] = None) -> Dict[str, Any]:
+    def credit_user(
+        self,
+        user: User,
+        amount: Decimal,
+        transaction_type: str = "deposit",
+        description: str = "",
+        metadata: Optional[Dict] = None,
+    ) -> Dict[str, Any]:
         """
         Credit user's account with TeoCoin from burn deposit
 
@@ -597,10 +626,10 @@ class DBTeoCoinService:
             balance_obj, created = DBTeoCoinBalance.objects.get_or_create(
                 user=user,
                 defaults={
-                    'available_balance': Decimal('0.00'),
-                    'staked_balance': Decimal('0.00'),
-                    'pending_withdrawal': Decimal('0.00')
-                }
+                    "available_balance": Decimal("0.00"),
+                    "staked_balance": Decimal("0.00"),
+                    "pending_withdrawal": Decimal("0.00"),
+                },
             )
 
             # Update available balance
@@ -610,8 +639,8 @@ class DBTeoCoinService:
 
             # Extract transaction hash from metadata for storage
             tx_hash = None
-            if metadata and 'transaction_hash' in metadata:
-                tx_hash = metadata['transaction_hash']
+            if metadata and "transaction_hash" in metadata:
+                tx_hash = metadata["transaction_hash"]
 
             # Record transaction
             transaction_record = DBTeoCoinTransaction.objects.create(
@@ -619,24 +648,22 @@ class DBTeoCoinService:
                 transaction_type=transaction_type,
                 amount=amount,
                 description=description,
-                blockchain_tx_hash=tx_hash
+                blockchain_tx_hash=tx_hash,
             )
 
             logger.info(
-                f"✅ Credited {amount} TEO to {user.email} via {transaction_type}")
+                f"✅ Credited {amount} TEO to {user.email} via {transaction_type}"
+            )
 
             return {
-                'success': True,
-                'new_balance': balance_obj.available_balance,
-                'transaction_id': transaction_record.id
+                "success": True,
+                "new_balance": balance_obj.available_balance,
+                "transaction_id": transaction_record.id,
             }
 
         except Exception as e:
             logger.error(f"Error crediting user {user.email}: {e}")
-            return {
-                'success': False,
-                'error': str(e)
-            }
+            return {"success": False, "error": str(e)}
 
     # ========== ADMIN/PLATFORM OPERATIONS ==========
 
@@ -649,23 +676,26 @@ class DBTeoCoinService:
         """
         total_users = DBTeoCoinBalance.objects.count()
         total_circulating = DBTeoCoinBalance.objects.aggregate(
-            total_available=Sum('available_balance'),
-            total_staked=Sum('staked_balance'),
-            total_pending=Sum('pending_withdrawal')
+            total_available=Sum("available_balance"),
+            total_staked=Sum("staked_balance"),
+            total_pending=Sum("pending_withdrawal"),
         )
 
         total_transactions = DBTeoCoinTransaction.objects.count()
         pending_withdrawals = TeoCoinWithdrawalRequest.objects.filter(
-            status='pending'
+            status="pending"
         ).count()
 
         return {
-            'total_users_with_balance': total_users,
-            'total_available_balance': total_circulating['total_available'] or Decimal('0.00'),
-            'total_staked_balance': total_circulating['total_staked'] or Decimal('0.00'),
-            'total_pending_withdrawal': total_circulating['total_pending'] or Decimal('0.00'),
-            'total_transactions': total_transactions,
-            'pending_withdrawal_requests': pending_withdrawals
+            "total_users_with_balance": total_users,
+            "total_available_balance": total_circulating["total_available"]
+            or Decimal("0.00"),
+            "total_staked_balance": total_circulating["total_staked"]
+            or Decimal("0.00"),
+            "total_pending_withdrawal": total_circulating["total_pending"]
+            or Decimal("0.00"),
+            "total_transactions": total_transactions,
+            "pending_withdrawal_requests": pending_withdrawals,
         }
 
 

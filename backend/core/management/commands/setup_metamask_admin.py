@@ -11,7 +11,7 @@ from web3 import Web3
 
 # Setup Django
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'schoolplatform.settings')
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "schoolplatform.settings")
 django.setup()
 
 print("🔑 CONFIGURAZIONE CHIAVE PRIVATA METAMASK COME ADMIN KEY")
@@ -37,9 +37,8 @@ print("2. Incollala qui sotto quando richiesta")
 print("3. Verrà salvata nel file .env")
 
 # Input della chiave privata
-print("\n" + "="*60)
-private_key = input(
-    "Incolla la tua chiave privata MetaMask (senza 0x): ").strip()
+print("\n" + "=" * 60)
+private_key = input("Incolla la tua chiave privata MetaMask (senza 0x): ").strip()
 
 # Validazione
 if not private_key:
@@ -47,13 +46,12 @@ if not private_key:
     sys.exit(1)
 
 # Rimuovi 0x se presente
-if private_key.startswith('0x'):
+if private_key.startswith("0x"):
     private_key = private_key[2:]
 
 # Validazione lunghezza
 if len(private_key) != 64:
-    print(
-        f"❌ Chiave privata non valida. Lunghezza: {len(private_key)}, richiesta: 64")
+    print(f"❌ Chiave privata non valida. Lunghezza: {len(private_key)}, richiesta: 64")
     sys.exit(1)
 
 # Validazione formato esadecimale
@@ -75,48 +73,47 @@ except Exception as e:
     sys.exit(1)
 
 # Leggi il file .env esistente
-env_file = '/home/teo/Project/school/schoolplatform/.env'
+env_file = "/home/teo/Project/school/schoolplatform/.env"
 env_content = ""
 
 if os.path.exists(env_file):
-    with open(env_file, 'r') as f:
+    with open(env_file, "r") as f:
         env_content = f.read()
 
 # Aggiorna/aggiungi la chiave privata
-lines = env_content.split('\n')
+lines = env_content.split("\n")
 updated_lines = []
 admin_key_found = False
 
 for line in lines:
-    if line.startswith('ADMIN_PRIVATE_KEY='):
-        updated_lines.append(f'ADMIN_PRIVATE_KEY={private_key}')
+    if line.startswith("ADMIN_PRIVATE_KEY="):
+        updated_lines.append(f"ADMIN_PRIVATE_KEY={private_key}")
         admin_key_found = True
         print(f"🔄 Aggiornata ADMIN_PRIVATE_KEY esistente")
     else:
         updated_lines.append(line)
 
 if not admin_key_found:
-    updated_lines.append(f'ADMIN_PRIVATE_KEY={private_key}')
+    updated_lines.append(f"ADMIN_PRIVATE_KEY={private_key}")
     print(f"➕ Aggiunta nuova ADMIN_PRIVATE_KEY")
 
 # Assicurati che ci siano le altre configurazioni blockchain
 blockchain_configs = [
-    'POLYGON_AMOY_RPC_URL=https://rpc-amoy.polygon.technology/',
-    'TEOCOIN_CONTRACT_ADDRESS=0x20D6656A31297ab3b8A87291Ed562D4228Be9ff8'
+    "POLYGON_AMOY_RPC_URL=https://rpc-amoy.polygon.technology/",
+    "TEOCOIN_CONTRACT_ADDRESS=0x20D6656A31297ab3b8A87291Ed562D4228Be9ff8",
 ]
 
 for config in blockchain_configs:
-    config_name = config.split('=')[0]
-    config_found = any(line.startswith(
-        f'{config_name}=') for line in updated_lines)
+    config_name = config.split("=")[0]
+    config_found = any(line.startswith(f"{config_name}=") for line in updated_lines)
 
     if not config_found:
         updated_lines.append(config)
         print(f"➕ Aggiunta configurazione: {config_name}")
 
 # Salva il file .env aggiornato
-with open(env_file, 'w') as f:
-    f.write('\n'.join(updated_lines))
+with open(env_file, "w") as f:
+    f.write("\n".join(updated_lines))
 
 print(f"\n✅ File .env aggiornato: {env_file}")
 
@@ -128,7 +125,8 @@ try:
     pass
 
     from blockchain.blockchain import TeoCoinService
-    os.environ['ADMIN_PRIVATE_KEY'] = private_key
+
+    os.environ["ADMIN_PRIVATE_KEY"] = private_key
 
     service = TeoCoinService()
 
@@ -137,13 +135,12 @@ try:
 
         # Verifica admin address
         if service.admin_private_key:
-            admin_account = service.w3.eth.account.from_key(
-                service.admin_private_key)
+            admin_account = service.w3.eth.account.from_key(service.admin_private_key)
             print(f"✅ Admin address configurato: {admin_account.address}")
 
             # Controlla balance MATIC
             admin_balance = service.w3.eth.get_balance(admin_account.address)
-            admin_matic = service.w3.from_wei(admin_balance, 'ether')
+            admin_matic = service.w3.from_wei(admin_balance, "ether")
             print(f"💰 Balance MATIC: {admin_matic}")
 
             if admin_matic > 0:
@@ -151,13 +148,15 @@ try:
             else:
                 print("⚠️  Admin non ha MATIC per gas fees")
                 print(
-                    "   Aggiungi MATIC testnet dal faucet: https://faucet.polygon.technology/")
+                    "   Aggiungi MATIC testnet dal faucet: https://faucet.polygon.technology/"
+                )
 
             # Test info contratto
             try:
                 token_info = service.get_token_info()
                 print(
-                    f"🪙 Token: {token_info.get('name')} ({token_info.get('symbol')})")
+                    f"🪙 Token: {token_info.get('name')} ({token_info.get('symbol')})"
+                )
                 print(f"📊 Total Supply: {token_info.get('total_supply')}")
             except Exception as e:
                 print(f"⚠️  Errore lettura contratto: {e}")

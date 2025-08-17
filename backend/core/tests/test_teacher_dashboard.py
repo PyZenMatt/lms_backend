@@ -12,7 +12,7 @@ from rest_framework.test import APIClient
 
 # Setup Django environment
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'schoolplatform.settings')
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "schoolplatform.settings")
 django.setup()
 
 
@@ -22,7 +22,7 @@ User = get_user_model()
 def test_teacher_dashboard_api():
     """Test the teacher dashboard API endpoint"""
     # Get a test user with teacher role
-    teacher = User.objects.filter(role='teacher').first()
+    teacher = User.objects.filter(role="teacher").first()
 
     if not teacher:
         print("No teacher users found. Please create a teacher user first.")
@@ -38,7 +38,7 @@ def test_teacher_dashboard_api():
     print("\nMaking request to teacher dashboard API...")
 
     try:
-        response = client.get('/api/v1/dashboard/teacher/')
+        response = client.get("/api/v1/dashboard/teacher/")
         status_code = response.status_code
 
         print(f"Status code: {status_code}")
@@ -48,12 +48,9 @@ def test_teacher_dashboard_api():
             print("API response received successfully!")
             print(f"Blockchain balance: {data.get('blockchain_balance')}")
             print(f"Wallet address: {data.get('wallet_address')}")
-            print(
-                f"Total courses: {data.get('stats', {}).get('total_courses')}")
-            print(
-                f"Total earnings: {data.get('stats', {}).get('total_earnings')}")
-            print(
-                f"Active students: {data.get('stats', {}).get('active_students')}")
+            print(f"Total courses: {data.get('stats', {}).get('total_courses')}")
+            print(f"Total earnings: {data.get('stats', {}).get('total_earnings')}")
+            print(f"Active students: {data.get('stats', {}).get('active_students')}")
             print(f"Courses count: {len(data.get('courses', []))}")
             print(f"Transactions count: {len(data.get('transactions', []))}")
         else:

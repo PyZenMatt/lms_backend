@@ -4,6 +4,7 @@ Core Django app configuration for the TeoArt School Platform.
 This module configures the core Django application and handles initialization
 of signals and cache invalidation systems when the app is ready.
 """
+
 from django.apps import AppConfig
 
 
@@ -20,9 +21,9 @@ class CoreConfig(AppConfig):
     - Shared serializers and utilities
     """
 
-    default_auto_field = 'django.db.models.BigAutoField'
-    name = 'core'
-    verbose_name = 'Core Platform Services'
+    default_auto_field = "django.db.models.BigAutoField"
+    name = "core"
+    verbose_name = "Core Platform Services"
 
     def ready(self):
         """
@@ -40,5 +41,6 @@ class CoreConfig(AppConfig):
         except ImportError as e:
             # Log import errors but don't fail app startup
             import logging
-            logger = logging.getLogger('core')
+
+            logger = logging.getLogger("core")
             logger.warning(f"Failed to import some core modules: {e}")

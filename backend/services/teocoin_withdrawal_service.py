@@ -38,12 +38,12 @@ class TeoCoinWithdrawalService:
     """
 
     # Configuration constants
-    MIN_WITHDRAWAL_AMOUNT = Decimal('10.00')  # Minimum 10 TEO
+    MIN_WITHDRAWAL_AMOUNT = Decimal("10.00")  # Minimum 10 TEO
     # Maximum 10,000 TEO per transaction
-    MAX_WITHDRAWAL_AMOUNT = Decimal('10000.00')
+    MAX_WITHDRAWAL_AMOUNT = Decimal("10000.00")
     MAX_DAILY_WITHDRAWALS = 999999  # Essentially unlimited withdrawals per day per user
     # Maximum total TEO per day per user
-    MAX_DAILY_AMOUNT = Decimal('50000.00')
+    MAX_DAILY_AMOUNT = Decimal("50000.00")
 
     def __init__(self):
         self.db_service = db_teocoin_service
@@ -52,12 +52,16 @@ class TeoCoinWithdrawalService:
         self.web3 = None
         self.teo_contract = None
         self.platform_wallet_address = getattr(
-            settings, 'PLATFORM_WALLET_ADDRESS', None)
+            settings, "PLATFORM_WALLET_ADDRESS", None
+        )
 
         # Gas configuration for Polygon Amoy
-        self.polygon_rpc_url = getattr(settings, 'POLYGON_AMOY_RPC_URL', None)
-        self.teo_contract_address = getattr(settings, 'TEO_CONTRACT_ADDRESS',
-                                            '0x20D6656A31297ab3b8A87291Ed562D4228Be9ff8')
+        self.polygon_rpc_url = getattr(settings, "POLYGON_AMOY_RPC_URL", None)
+        self.teo_contract_address = getattr(
+            settings,
+            "TEO_CONTRACT_ADDRESS",
+            "0x20D6656A31297ab3b8A87291Ed562D4228Be9ff8",
+        )
 
         if self.polygon_rpc_url:
             try:
@@ -76,20 +80,19 @@ class TeoCoinWithdrawalService:
 
             # Load the actual TeoCoin ABI from your contract
             abi_path = os.path.join(
-                settings.BASE_DIR, 'blockchain', 'abi', 'teoCoin2_ABI.json')
+                settings.BASE_DIR, "blockchain", "abi", "teoCoin2_ABI.json"
+            )
 
             if os.path.exists(abi_path):
-                with open(abi_path, 'r') as f:
+                with open(abi_path, "r") as f:
                     contract_abi = json.load(f)
 
                 self.teo_contract = self.web3.eth.contract(
-                    address=Web3.to_checksum_address(
-                        self.teo_contract_address),
-                    abi=contract_abi
+                    address=Web3.to_checksum_address(self.teo_contract_address),
+                    abi=contract_abi,
                 )
 
-                logger.info(
-                    f"✅ TeoCoin contract loaded: {self.teo_contract_address}")
+                logger.info(f"✅ TeoCoin contract loaded: {self.teo_contract_address}")
             else:
                 logger.error(f"❌ ABI file not found: {abi_path}")
 
@@ -97,9 +100,14 @@ class TeoCoinWithdrawalService:
             logger.error(f"Failed to load TeoCoin contract: {e}")
 
     @transaction.atomic
-    def create_withdrawal_request(self, user, amount: Union[Decimal, float, str],
-                                  wallet_address: str, ip_address: str = None,
-                                  user_agent: str = "") -> Dict[str, Any]:
+    def create_withdrawal_request(
+        self,
+        user,
+        amount: Union[Decimal, float, str],
+        wallet_address: str,
+        ip_address: str = None,
+        user_agent: str = "",
+    ) -> Dict[str, Any]:
         """
         Create withdrawal request with comprehensive validation
 
@@ -121,41 +129,44 @@ class TeoCoinWithdrawalService:
                 user, amount_decimal, wallet_address
             )
 
-            if not validation_result['valid']:
+            if not validation_result["valid"]:
                 return {
-                    'success': False,
-                    'error': validation_result['reason'],
-                    'error_code': validation_result.get('code', 'VALIDATION_ERROR')
+                    "success": False,
+                    "error": validation_result["reason"],
+                    "error_code": validation_result.get("code", "VALIDATION_ERROR"),
                 }
 
             # Check user's available balance using atomic transaction
             balance_data = self.db_service.get_user_balance(user)
 
-            if balance_data['available_balance'] < amount_decimal:
+            if balance_data["available_balance"] < amount_decimal:
                 return {
-                    'success': False,
-                    'error': f'Insufficient balance. Available: {balance_data["available_balance"]} TEO',
-                    'error_code': 'INSUFFICIENT_BALANCE',
-                    'available_balance': str(balance_data['available_balance'])
+                    "success": False,
+                    "error": f'Insufficient balance. Available: {balance_data["available_balance"]} TEO',
+                    "error_code": "INSUFFICIENT_BALANCE",
+                    "available_balance": str(balance_data["available_balance"]),
                 }
 
             # ATOMIC balance update - get fresh object and validate again in transaction
-            balance_obj, created = DBTeoCoinBalance.objects.select_for_update().get_or_create(
+            (
+                balance_obj,
+                created,
+            ) = DBTeoCoinBalance.objects.select_for_update().get_or_create(
                 user=user,
                 defaults={
-                    'available_balance': Decimal('0.00'),
-                    'staked_balance': Decimal('0.00'),
-                    'pending_withdrawal': Decimal('0.00')
-                }
+                    "available_balance": Decimal("0.00"),
+                    "staked_balance": Decimal("0.00"),
+                    "pending_withdrawal": Decimal("0.00"),
+                },
             )
 
             # CRITICAL FIX: Re-validate balance with locked object to prevent race conditions
             if balance_obj.available_balance < amount_decimal:
                 return {
-                    'success': False,
-                    'error': f'Insufficient balance (race condition detected). Available: {balance_obj.available_balance} TEO',
-                    'error_code': 'INSUFFICIENT_BALANCE_RACE',
-                    'available_balance': str(balance_obj.available_balance)
+                    "success": False,
+                    "error": f"Insufficient balance (race condition detected). Available: {balance_obj.available_balance} TEO",
+                    "error_code": "INSUFFICIENT_BALANCE_RACE",
+                    "available_balance": str(balance_obj.available_balance),
                 }
 
             # Move from available to pending withdrawal
@@ -166,50 +177,53 @@ class TeoCoinWithdrawalService:
 
             # Get daily withdrawal count
             today = timezone.now().date()
-            daily_count = TeoCoinWithdrawalRequest.objects.filter(
-                user=user,
-                created_at__date=today
-            ).count() + 1
+            daily_count = (
+                TeoCoinWithdrawalRequest.objects.filter(
+                    user=user, created_at__date=today
+                ).count()
+                + 1
+            )
 
             # Create withdrawal request with enhanced fields
             withdrawal_request = TeoCoinWithdrawalRequest.objects.create(
                 user=user,
                 amount=amount_decimal,
                 metamask_address=wallet_address,
-                status='pending',
+                status="pending",
                 daily_withdrawal_count=daily_count,
                 ip_address=ip_address,
-                user_agent=user_agent
+                user_agent=user_agent,
             )
 
             # REMOVED: Double transaction recording bug - balance already updated above
             # DO NOT call add_balance again as it would double-deduct the amount!
 
             logger.info(
-                f"Withdrawal request created: #{withdrawal_request.pk} for {user.email}")
+                f"Withdrawal request created: #{withdrawal_request.pk} for {user.email}"
+            )
 
             return {
-                'success': True,
-                'withdrawal_id': withdrawal_request.pk,
-                'amount': str(amount_decimal),
-                'metamask_address': wallet_address,
-                'status': 'pending',
-                'estimated_processing_time': '1-24 hours',
-                'daily_withdrawal_count': daily_count,
-                'message': f'Withdrawal request created successfully for {amount_decimal} TEO'
+                "success": True,
+                "withdrawal_id": withdrawal_request.pk,
+                "amount": str(amount_decimal),
+                "metamask_address": wallet_address,
+                "status": "pending",
+                "estimated_processing_time": "1-24 hours",
+                "daily_withdrawal_count": daily_count,
+                "message": f"Withdrawal request created successfully for {amount_decimal} TEO",
             }
 
         except Exception as e:
-            logger.error(
-                f"Error creating withdrawal request for {user.email}: {e}")
+            logger.error(f"Error creating withdrawal request for {user.email}: {e}")
             return {
-                'success': False,
-                'error': f'Failed to create withdrawal request: {str(e)}',
-                'error_code': 'INTERNAL_ERROR'
+                "success": False,
+                "error": f"Failed to create withdrawal request: {str(e)}",
+                "error_code": "INTERNAL_ERROR",
             }
 
-    def _validate_withdrawal_request(self, user, amount: Decimal,
-                                     metamask_address: str) -> Dict[str, Any]:
+    def _validate_withdrawal_request(
+        self, user, amount: Decimal, metamask_address: str
+    ) -> Dict[str, Any]:
         """
         Comprehensive withdrawal request validation
 
@@ -220,65 +234,62 @@ class TeoCoinWithdrawalService:
         # Validate amount
         if amount < self.MIN_WITHDRAWAL_AMOUNT:
             return {
-                'valid': False,
-                'reason': f'Minimum withdrawal amount is {self.MIN_WITHDRAWAL_AMOUNT} TEO',
-                'code': 'AMOUNT_TOO_LOW'
+                "valid": False,
+                "reason": f"Minimum withdrawal amount is {self.MIN_WITHDRAWAL_AMOUNT} TEO",
+                "code": "AMOUNT_TOO_LOW",
             }
 
         if amount > self.MAX_WITHDRAWAL_AMOUNT:
             return {
-                'valid': False,
-                'reason': f'Maximum withdrawal amount is {self.MAX_WITHDRAWAL_AMOUNT} TEO',
-                'code': 'AMOUNT_TOO_HIGH'
+                "valid": False,
+                "reason": f"Maximum withdrawal amount is {self.MAX_WITHDRAWAL_AMOUNT} TEO",
+                "code": "AMOUNT_TOO_HIGH",
             }
 
         # Validate MetaMask address format
         if not self._is_valid_ethereum_address(metamask_address):
             return {
-                'valid': False,
-                'reason': 'Invalid MetaMask address format',
-                'code': 'INVALID_ADDRESS'
+                "valid": False,
+                "reason": "Invalid MetaMask address format",
+                "code": "INVALID_ADDRESS",
             }
 
         # Check daily limits
         today = timezone.now().date()
         daily_withdrawals = TeoCoinWithdrawalRequest.objects.filter(
-            user=user,
-            created_at__date=today
+            user=user, created_at__date=today
         )
 
         if daily_withdrawals.count() >= self.MAX_DAILY_WITHDRAWALS:
             return {
-                'valid': False,
-                'reason': f'Daily withdrawal limit reached ({self.MAX_DAILY_WITHDRAWALS} withdrawals per day)',
-                'code': 'DAILY_LIMIT_REACHED'
+                "valid": False,
+                "reason": f"Daily withdrawal limit reached ({self.MAX_DAILY_WITHDRAWALS} withdrawals per day)",
+                "code": "DAILY_LIMIT_REACHED",
             }
 
         # Check daily amount limit
         daily_amount = sum(w.amount for w in daily_withdrawals) + amount
         if daily_amount > self.MAX_DAILY_AMOUNT:
-            remaining = self.MAX_DAILY_AMOUNT - \
-                sum(w.amount for w in daily_withdrawals)
+            remaining = self.MAX_DAILY_AMOUNT - sum(w.amount for w in daily_withdrawals)
             return {
-                'valid': False,
-                'reason': f'Daily amount limit exceeded. Remaining today: {remaining} TEO',
-                'code': 'DAILY_AMOUNT_EXCEEDED'
+                "valid": False,
+                "reason": f"Daily amount limit exceeded. Remaining today: {remaining} TEO",
+                "code": "DAILY_AMOUNT_EXCEEDED",
             }
 
         # Check for pending withdrawals (limit concurrent withdrawals)
         pending_withdrawals = TeoCoinWithdrawalRequest.objects.filter(
-            user=user,
-            status__in=['pending', 'processing']
+            user=user, status__in=["pending", "processing"]
         ).count()
 
         if pending_withdrawals >= 3:  # Maximum 3 concurrent withdrawals
             return {
-                'valid': False,
-                'reason': 'You have too many pending withdrawals. Please wait for current withdrawals to complete.',
-                'code': 'TOO_MANY_PENDING'
+                "valid": False,
+                "reason": "You have too many pending withdrawals. Please wait for current withdrawals to complete.",
+                "code": "TOO_MANY_PENDING",
             }
 
-        return {'valid': True}
+        return {"valid": True}
 
     def _is_valid_ethereum_address(self, address: str) -> bool:
         """Validate Ethereum/Polygon address format"""
@@ -286,7 +297,7 @@ class TeoCoinWithdrawalService:
             return False
 
         # Check format: 0x followed by 40 hexadecimal characters
-        pattern = re.compile(r'^0x[a-fA-F0-9]{40}$')
+        pattern = re.compile(r"^0x[a-fA-F0-9]{40}$")
         return bool(pattern.match(address))
         """
         Create withdrawal request - moves TEO from available to pending_withdrawal
@@ -304,35 +315,33 @@ class TeoCoinWithdrawalService:
 
             # Validate amount
             if amount_decimal <= 0:
-                return {
-                    'success': False,
-                    'error': 'Amount must be greater than 0'
-                }
+                return {"success": False, "error": "Amount must be greater than 0"}
 
             # Validate wallet address
-            if not wallet_address or len(wallet_address) != 42 or not wallet_address.startswith('0x'):
-                return {
-                    'success': False,
-                    'error': 'Invalid wallet address format'
-                }
+            if (
+                not wallet_address
+                or len(wallet_address) != 42
+                or not wallet_address.startswith("0x")
+            ):
+                return {"success": False, "error": "Invalid wallet address format"}
 
             # Check user balance
             balance_data = self.db_service.get_user_balance(user)
 
-            if balance_data['available_balance'] < amount_decimal:
+            if balance_data["available_balance"] < amount_decimal:
                 return {
-                    'success': False,
-                    'error': f'Insufficient balance. Available: {balance_data["available_balance"]} TEO'
+                    "success": False,
+                    "error": f'Insufficient balance. Available: {balance_data["available_balance"]} TEO',
                 }
 
             # Move from available to pending withdrawal
             balance_obj, created = DBTeoCoinBalance.objects.get_or_create(
                 user=user,
                 defaults={
-                    'available_balance': Decimal('0.00'),
-                    'staked_balance': Decimal('0.00'),
-                    'pending_withdrawal': Decimal('0.00')
-                }
+                    "available_balance": Decimal("0.00"),
+                    "staked_balance": Decimal("0.00"),
+                    "pending_withdrawal": Decimal("0.00"),
+                },
             )
 
             balance_obj.available_balance -= amount_decimal
@@ -345,16 +354,16 @@ class TeoCoinWithdrawalService:
                 user=user,
                 amount=amount_decimal,
                 wallet_address=wallet_address,
-                status='pending'
+                status="pending",
             )
 
             # Record transaction
             success = self.db_service.add_balance(
                 user=user,
                 amount=-amount_decimal,  # Negative amount for withdrawal
-                transaction_type='withdrawal_request',
+                transaction_type="withdrawal_request",
                 description=f"Withdrawal request to {wallet_address}",
-                course_id=None
+                course_id=None,
             )
 
             if not success:
@@ -365,26 +374,25 @@ class TeoCoinWithdrawalService:
                 withdrawal_request.delete()
 
                 return {
-                    'success': False,
-                    'error': 'Failed to record withdrawal transaction'
+                    "success": False,
+                    "error": "Failed to record withdrawal transaction",
                 }
 
             return {
-                'success': True,
-                'withdrawal_id': withdrawal_request.id,
-                'amount': amount_decimal,
-                'wallet_address': wallet_address,
-                'status': 'pending',
-                'estimated_processing_time': '5-10 minutes',
-                'message': 'Withdrawal request created successfully'
+                "success": True,
+                "withdrawal_id": withdrawal_request.id,
+                "amount": amount_decimal,
+                "wallet_address": wallet_address,
+                "status": "pending",
+                "estimated_processing_time": "5-10 minutes",
+                "message": "Withdrawal request created successfully",
             }
 
         except Exception as e:
-            logger.error(
-                f"Error creating withdrawal request for {user.email}: {e}")
+            logger.error(f"Error creating withdrawal request for {user.email}: {e}")
             return {
-                'success': False,
-                'error': f'Failed to create withdrawal request: {str(e)}'
+                "success": False,
+                "error": f"Failed to create withdrawal request: {str(e)}",
             }
 
     def get_withdrawal_status(self, withdrawal_id: int, user) -> Dict[str, Any]:
@@ -400,44 +408,56 @@ class TeoCoinWithdrawalService:
         """
         try:
             withdrawal = TeoCoinWithdrawalRequest.objects.get(
-                id=withdrawal_id,
-                user=user
+                id=withdrawal_id, user=user
             )
 
             return {
-                'success': True,
-                'withdrawal': {
-                    'id': withdrawal.id,
-                    'amount': str(withdrawal.amount),
-                    'metamask_address': withdrawal.metamask_address,
-                    'status': withdrawal.status,
-                    'transaction_hash': withdrawal.transaction_hash,
-                    'error_message': withdrawal.error_message,
-                    'estimated_processing_time': withdrawal.estimated_processing_time,
-                    'created_at': withdrawal.created_at.isoformat(),
-                    'processed_at': withdrawal.processed_at.isoformat() if withdrawal.processed_at else None,
-                    'completed_at': withdrawal.completed_at.isoformat() if withdrawal.completed_at else None,
-                    'gas_cost_eur': str(withdrawal.gas_cost_eur) if withdrawal.gas_cost_eur else None,
-                    'can_cancel': withdrawal.can_be_cancelled
-                }
+                "success": True,
+                "withdrawal": {
+                    "id": withdrawal.id,
+                    "amount": str(withdrawal.amount),
+                    "metamask_address": withdrawal.metamask_address,
+                    "status": withdrawal.status,
+                    "transaction_hash": withdrawal.transaction_hash,
+                    "error_message": withdrawal.error_message,
+                    "estimated_processing_time": withdrawal.estimated_processing_time,
+                    "created_at": withdrawal.created_at.isoformat(),
+                    "processed_at": (
+                        withdrawal.processed_at.isoformat()
+                        if withdrawal.processed_at
+                        else None
+                    ),
+                    "completed_at": (
+                        withdrawal.completed_at.isoformat()
+                        if withdrawal.completed_at
+                        else None
+                    ),
+                    "gas_cost_eur": (
+                        str(withdrawal.gas_cost_eur)
+                        if withdrawal.gas_cost_eur
+                        else None
+                    ),
+                    "can_cancel": withdrawal.can_be_cancelled,
+                },
             }
 
         except TeoCoinWithdrawalRequest.DoesNotExist:
             return {
-                'success': False,
-                'error': 'Withdrawal request not found',
-                'error_code': 'NOT_FOUND'
+                "success": False,
+                "error": "Withdrawal request not found",
+                "error_code": "NOT_FOUND",
             }
         except Exception as e:
-            logger.error(
-                f"Error getting withdrawal status {withdrawal_id}: {e}")
+            logger.error(f"Error getting withdrawal status {withdrawal_id}: {e}")
             return {
-                'success': False,
-                'error': f'Failed to get withdrawal status: {str(e)}',
-                'error_code': 'INTERNAL_ERROR'
+                "success": False,
+                "error": f"Failed to get withdrawal status: {str(e)}",
+                "error_code": "INTERNAL_ERROR",
             }
 
-    def get_user_withdrawal_history(self, user, limit: int = 20, status: str = None) -> List[Dict]:
+    def get_user_withdrawal_history(
+        self, user, limit: int = 20, status: str = None
+    ) -> List[Dict]:
         """
         Get user's withdrawal history
 
@@ -457,41 +477,46 @@ class TeoCoinWithdrawalService:
             if status:
                 queryset = queryset.filter(status=status)
 
-            withdrawals = queryset.order_by('-created_at')[:limit]
-            logger.info(
-                f"📊 Found {len(withdrawals)} withdrawals for {user.email}")
+            withdrawals = queryset.order_by("-created_at")[:limit]
+            logger.info(f"📊 Found {len(withdrawals)} withdrawals for {user.email}")
 
             result = []
             for w in withdrawals:
                 try:
                     withdrawal_data = {
-                        'id': getattr(w, 'id', None),
-                        'amount': str(getattr(w, 'amount', 0)),
-                        'metamask_address': getattr(w, 'metamask_address', ''),
-                        'status': getattr(w, 'status', 'unknown'),
-                        'transaction_hash': getattr(w, 'transaction_hash', None),
-                        'error_message': getattr(w, 'error_message', None),
-                        'created_at': getattr(w, 'created_at', timezone.now()).isoformat(),
-                        'completed_at': getattr(w, 'completed_at', None).isoformat() if getattr(w, 'completed_at', None) else None,
-                        'estimated_processing_time': getattr(w, 'estimated_processing_time', 'Unknown'),
-                        'can_cancel': getattr(w, 'can_be_cancelled', False)
+                        "id": getattr(w, "id", None),
+                        "amount": str(getattr(w, "amount", 0)),
+                        "metamask_address": getattr(w, "metamask_address", ""),
+                        "status": getattr(w, "status", "unknown"),
+                        "transaction_hash": getattr(w, "transaction_hash", None),
+                        "error_message": getattr(w, "error_message", None),
+                        "created_at": getattr(
+                            w, "created_at", timezone.now()
+                        ).isoformat(),
+                        "completed_at": (
+                            getattr(w, "completed_at", None).isoformat()
+                            if getattr(w, "completed_at", None)
+                            else None
+                        ),
+                        "estimated_processing_time": getattr(
+                            w, "estimated_processing_time", "Unknown"
+                        ),
+                        "can_cancel": getattr(w, "can_be_cancelled", False),
                     }
                     result.append(withdrawal_data)
-                    logger.debug(
-                        f"✅ Processed withdrawal {withdrawal_data['id']}")
+                    logger.debug(f"✅ Processed withdrawal {withdrawal_data['id']}")
 
                 except Exception as attr_error:
-                    logger.error(
-                        f"❌ Error processing withdrawal {w}: {attr_error}")
+                    logger.error(f"❌ Error processing withdrawal {w}: {attr_error}")
                     continue
 
-            logger.info(
-                f"✅ Returning {len(result)} withdrawals for {user.email}")
+            logger.info(f"✅ Returning {len(result)} withdrawals for {user.email}")
             return result
 
         except Exception as e:
             logger.error(f"❌ Error getting withdrawals for {user.email}: {e}")
             import traceback
+
             logger.error(f"📜 Full traceback: {traceback.format_exc()}")
             return []
 
@@ -509,15 +534,14 @@ class TeoCoinWithdrawalService:
         """
         try:
             withdrawal = TeoCoinWithdrawalRequest.objects.get(
-                id=withdrawal_id,
-                user=user
+                id=withdrawal_id, user=user
             )
 
             if not withdrawal.can_be_cancelled:
                 return {
-                    'success': False,
-                    'error': f'Cannot cancel withdrawal with status: {withdrawal.status}',
-                    'error_code': 'CANNOT_CANCEL'
+                    "success": False,
+                    "error": f"Cannot cancel withdrawal with status: {withdrawal.status}",
+                    "error_code": "CANNOT_CANCEL",
                 }
 
             # Move amount back from pending to available
@@ -528,8 +552,8 @@ class TeoCoinWithdrawalService:
             balance_obj.save()
 
             # Update withdrawal status
-            withdrawal.status = 'cancelled'
-            withdrawal.error_message = 'Cancelled by user'
+            withdrawal.status = "cancelled"
+            withdrawal.error_message = "Cancelled by user"
             withdrawal.processed_at = timezone.now()
             withdrawal.save()
 
@@ -537,32 +561,31 @@ class TeoCoinWithdrawalService:
             self.db_service.add_balance(
                 user=user,
                 amount=withdrawal.amount,
-                transaction_type='withdrawal_cancelled',
+                transaction_type="withdrawal_cancelled",
                 description=f"Cancelled withdrawal to {withdrawal.metamask_address}",
-                course_id=None
+                course_id=None,
             )
 
-            logger.info(
-                f"Withdrawal #{withdrawal.id} cancelled by user {user.email}")
+            logger.info(f"Withdrawal #{withdrawal.id} cancelled by user {user.email}")
 
             return {
-                'success': True,
-                'message': 'Withdrawal request cancelled successfully',
-                'amount_returned': str(withdrawal.amount)
+                "success": True,
+                "message": "Withdrawal request cancelled successfully",
+                "amount_returned": str(withdrawal.amount),
             }
 
         except TeoCoinWithdrawalRequest.DoesNotExist:
             return {
-                'success': False,
-                'error': 'Withdrawal request not found',
-                'error_code': 'NOT_FOUND'
+                "success": False,
+                "error": "Withdrawal request not found",
+                "error_code": "NOT_FOUND",
             }
         except Exception as e:
             logger.error(f"Error cancelling withdrawal {withdrawal_id}: {e}")
             return {
-                'success': False,
-                'error': f'Failed to cancel withdrawal: {str(e)}',
-                'error_code': 'INTERNAL_ERROR'
+                "success": False,
+                "error": f"Failed to cancel withdrawal: {str(e)}",
+                "error_code": "INTERNAL_ERROR",
             }
 
     # ========== ADMIN/PLATFORM METHODS ==========
@@ -579,21 +602,23 @@ class TeoCoinWithdrawalService:
         """
         try:
             withdrawals = TeoCoinWithdrawalRequest.objects.filter(
-                status='pending'
-            ).order_by('created_at')[:limit]  # FIFO processing
+                status="pending"
+            ).order_by("created_at")[
+                :limit
+            ]  # FIFO processing
 
             return [
                 {
-                    'id': w.id,
-                    'user_email': w.user.email,
-                    'user_id': w.user.id,
-                    'amount': str(w.amount),
-                    'metamask_address': w.metamask_address,
-                    'status': w.status,
-                    'created_at': w.created_at.isoformat(),
-                    'age_hours': (timezone.now() - w.created_at).total_seconds() / 3600,
-                    'daily_withdrawal_count': w.daily_withdrawal_count,
-                    'ip_address': w.ip_address
+                    "id": w.id,
+                    "user_email": w.user.email,
+                    "user_id": w.user.id,
+                    "amount": str(w.amount),
+                    "metamask_address": w.metamask_address,
+                    "status": w.status,
+                    "created_at": w.created_at.isoformat(),
+                    "age_hours": (timezone.now() - w.created_at).total_seconds() / 3600,
+                    "daily_withdrawal_count": w.daily_withdrawal_count,
+                    "ip_address": w.ip_address,
                 }
                 for w in withdrawals
             ]
@@ -624,9 +649,9 @@ class TeoCoinWithdrawalService:
             )
 
             stats = queryset.aggregate(
-                total_requests=Count('id'),
-                total_amount=Sum('amount'),
-                average_amount=Avg('amount')
+                total_requests=Count("id"),
+                total_amount=Sum("amount"),
+                average_amount=Avg("amount"),
             )
 
             # Status breakdown
@@ -636,66 +661,54 @@ class TeoCoinWithdrawalService:
                 status_counts[status] = count
 
             # Success rate
-            completed = status_counts.get('completed', 0)
-            total = stats['total_requests'] or 0
+            completed = status_counts.get("completed", 0)
+            total = stats["total_requests"] or 0
             success_rate = (completed / total * 100) if total > 0 else 0
 
             return {
-                'period_days': days,
-                'total_requests': total,
-                'total_amount': str(stats['total_amount'] or Decimal('0.00')),
-                'average_amount': str(stats['average_amount'] or Decimal('0.00')),
-                'status_breakdown': status_counts,
-                'success_rate': round(success_rate, 2),
-                'pending_requests': status_counts.get('pending', 0),
-                'processing_requests': status_counts.get('processing', 0)
+                "period_days": days,
+                "total_requests": total,
+                "total_amount": str(stats["total_amount"] or Decimal("0.00")),
+                "average_amount": str(stats["average_amount"] or Decimal("0.00")),
+                "status_breakdown": status_counts,
+                "success_rate": round(success_rate, 2),
+                "pending_requests": status_counts.get("pending", 0),
+                "processing_requests": status_counts.get("processing", 0),
             }
 
         except Exception as e:
             logger.error(f"Error getting withdrawal statistics: {e}")
-            return {
-                'error': f'Failed to get statistics: {str(e)}'
-            }
+            return {"error": f"Failed to get statistics: {str(e)}"}
 
     def process_pending_withdrawals(self) -> Dict[str, Any]:
         """
         Process all pending withdrawal requests by minting tokens
         """
         if not self.web3 or not self.teo_contract:
-            return {
-                'success': False,
-                'error': 'Web3 or contract not initialized'
-            }
+            return {"success": False, "error": "Web3 or contract not initialized"}
 
-        pending_withdrawals = TeoCoinWithdrawalRequest.objects.filter(
-            status='pending')
-        results = {
-            'total_processed': 0,
-            'successful': 0,
-            'failed': 0,
-            'details': []
-        }
+        pending_withdrawals = TeoCoinWithdrawalRequest.objects.filter(status="pending")
+        results = {"total_processed": 0, "successful": 0, "failed": 0, "details": []}
 
         for withdrawal in pending_withdrawals:
             result = self._process_withdrawal_minting(withdrawal)
-            results['details'].append({
-                'withdrawal_id': withdrawal.pk,
-                'user': withdrawal.user.email,
-                'amount': str(withdrawal.amount),
-                'result': result
-            })
+            results["details"].append(
+                {
+                    "withdrawal_id": withdrawal.pk,
+                    "user": withdrawal.user.email,
+                    "amount": str(withdrawal.amount),
+                    "result": result,
+                }
+            )
 
-            if result['success']:
-                results['successful'] += 1
+            if result["success"]:
+                results["successful"] += 1
             else:
-                results['failed'] += 1
+                results["failed"] += 1
 
-            results['total_processed'] += 1
+            results["total_processed"] += 1
 
-        return {
-            'success': True,
-            'results': results
-        }
+        return {"success": True, "results": results}
 
     def _process_withdrawal_minting(self, withdrawal) -> Dict[str, Any]:
         """
@@ -703,21 +716,18 @@ class TeoCoinWithdrawalService:
         """
         try:
             if not self.web3 or not self.teo_contract:
-                return {
-                    'success': False,
-                    'error': 'Web3 or contract not initialized'
-                }
+                return {"success": False, "error": "Web3 or contract not initialized"}
 
             # Convert amount to Wei (18 decimals for TeoCoin)
-            amount_wei = self.web3.to_wei(withdrawal.amount, 'ether')
+            amount_wei = self.web3.to_wei(withdrawal.amount, "ether")
 
             # Get platform wallet address (the one with minting permissions)
-            platform_address = getattr(settings, 'PLATFORM_WALLET_ADDRESS')
+            platform_address = getattr(settings, "PLATFORM_WALLET_ADDRESS")
 
             if not platform_address:
                 return {
-                    'success': False,
-                    'error': 'Platform wallet address not configured'
+                    "success": False,
+                    "error": "Platform wallet address not configured",
                 }
 
             # Prepare minting transaction
@@ -725,7 +735,8 @@ class TeoCoinWithdrawalService:
             # For now, we'll just simulate the transaction structure
 
             logger.info(
-                f"🔄 Processing withdrawal: {withdrawal.amount} TEO to {withdrawal.metamask_address}")
+                f"🔄 Processing withdrawal: {withdrawal.amount} TEO to {withdrawal.metamask_address}"
+            )
             logger.info(f"💰 Amount in Wei: {amount_wei}")
             logger.info(f"🏛️ Platform wallet: {platform_address}")
 
@@ -735,32 +746,30 @@ class TeoCoinWithdrawalService:
 
             # Mark withdrawal as completed (simulation)
             with transaction.atomic():
-                withdrawal.status = 'completed'
+                withdrawal.status = "completed"
                 # Placeholder hash
                 withdrawal.transaction_hash = f"0x{''.join(['a'] * 64)}"
                 withdrawal.completed_at = timezone.now()
                 withdrawal.save()
 
                 # Update user balance - move from pending to completed
-                balance_obj = DBTeoCoinBalance.objects.get(
-                    user=withdrawal.user)
+                balance_obj = DBTeoCoinBalance.objects.get(user=withdrawal.user)
                 balance_obj.pending_withdrawal -= withdrawal.amount
                 balance_obj.save()
 
             return {
-                'success': True,
-                'transaction_hash': withdrawal.transaction_hash,
-                'message': f'Withdrawal completed: {withdrawal.amount} TEO minted to {withdrawal.metamask_address}'
+                "success": True,
+                "transaction_hash": withdrawal.transaction_hash,
+                "message": f"Withdrawal completed: {withdrawal.amount} TEO minted to {withdrawal.metamask_address}",
             }
 
         except Exception as e:
             logger.error(f"Error processing withdrawal {withdrawal.pk}: {e}")
-            return {
-                'success': False,
-                'error': str(e)
-            }
+            return {"success": False, "error": str(e)}
 
-    def mint_tokens_to_address(self, amount: Decimal, to_address: str, withdrawal_id: int = None) -> Dict[str, Any]:
+    def mint_tokens_to_address(
+        self, amount: Decimal, to_address: str, withdrawal_id: int = None
+    ) -> Dict[str, Any]:
         """
         Mint TeoCoin tokens directly to a MetaMask address
 
@@ -771,142 +780,150 @@ class TeoCoinWithdrawalService:
         """
         try:
             if not self.web3 or not self.teo_contract:
-                return {
-                    'success': False,
-                    'error': 'Web3 or contract not initialized'
-                }
+                return {"success": False, "error": "Web3 or contract not initialized"}
 
             # Convert amount to Wei
-            amount_wei = self.web3.to_wei(amount, 'ether')
+            amount_wei = self.web3.to_wei(amount, "ether")
 
             # Get platform wallet address
-            platform_address = getattr(settings, 'PLATFORM_WALLET_ADDRESS')
+            platform_address = getattr(settings, "PLATFORM_WALLET_ADDRESS")
 
             # Enhanced logging to debug the wallet address issue
             logger.info(
-                f"🔍 Raw PLATFORM_WALLET_ADDRESS from settings: {platform_address}")
+                f"🔍 Raw PLATFORM_WALLET_ADDRESS from settings: {platform_address}"
+            )
             logger.info(
-                f"🔍 Environment variable PLATFORM_WALLET_ADDRESS: {os.getenv('PLATFORM_WALLET_ADDRESS', 'NOT_SET')}")
+                f"🔍 Environment variable PLATFORM_WALLET_ADDRESS: {os.getenv('PLATFORM_WALLET_ADDRESS', 'NOT_SET')}"
+            )
             logger.info(
-                f"🔍 Settings.py default value: 0x3b72a4E942CF1467134510cA3952F01b63005044")
+                f"🔍 Settings.py default value: 0x3b72a4E942CF1467134510cA3952F01b63005044"
+            )
 
             # Validate addresses
             to_address_checksum = Web3.to_checksum_address(to_address)
-            platform_address_checksum = Web3.to_checksum_address(
-                platform_address)
+            platform_address_checksum = Web3.to_checksum_address(platform_address)
 
             logger.info(f"🎯 Minting {amount} TEO to {to_address_checksum}")
-            logger.info(
-                f"🏛️ From platform wallet: {platform_address_checksum}")
+            logger.info(f"🏛️ From platform wallet: {platform_address_checksum}")
 
             # Check if platform address matches the expected one from private key
-            private_key = getattr(settings, 'PLATFORM_PRIVATE_KEY', None)
+            private_key = getattr(settings, "PLATFORM_PRIVATE_KEY", None)
             if private_key:
                 # Derive address from private key for verification
                 try:
                     from eth_account import Account
+
                     derived_address = Account.from_key(private_key).address
                     logger.info(
-                        f"🔑 Address derived from private key: {derived_address}")
+                        f"🔑 Address derived from private key: {derived_address}"
+                    )
                     if derived_address.lower() != platform_address_checksum.lower():
                         logger.error(
-                            f"❌ WALLET MISMATCH! Config: {platform_address_checksum}, Key: {derived_address}")
+                            f"❌ WALLET MISMATCH! Config: {platform_address_checksum}, Key: {derived_address}"
+                        )
                         return {
-                            'success': False,
-                            'error': f'Wallet address mismatch. Config has {platform_address_checksum} but private key belongs to {derived_address}'
+                            "success": False,
+                            "error": f"Wallet address mismatch. Config has {platform_address_checksum} but private key belongs to {derived_address}",
                         }
                 except Exception as e:
-                    logger.warning(
-                        f"Could not verify address from private key: {e}")
+                    logger.warning(f"Could not verify address from private key: {e}")
             else:
                 logger.warning("🚨 PLATFORM_PRIVATE_KEY not configured")
 
             # Check if we have the mintTo function
-            if hasattr(self.teo_contract.functions, 'mintTo'):
+            if hasattr(self.teo_contract.functions, "mintTo"):
                 mint_function = self.teo_contract.functions.mintTo(
-                    to_address_checksum, amount_wei)
-            elif hasattr(self.teo_contract.functions, 'mint'):
+                    to_address_checksum, amount_wei
+                )
+            elif hasattr(self.teo_contract.functions, "mint"):
                 mint_function = self.teo_contract.functions.mint(
-                    to_address_checksum, amount_wei)
+                    to_address_checksum, amount_wei
+                )
             else:
                 return {
-                    'success': False,
-                    'error': 'Contract does not have mint or mintTo function'
+                    "success": False,
+                    "error": "Contract does not have mint or mintTo function",
                 }
 
             # Estimate gas
             try:
                 gas_estimate = mint_function.estimate_gas(
-                    {'from': platform_address_checksum})
+                    {"from": platform_address_checksum}
+                )
                 logger.info(f"⛽ Estimated gas: {gas_estimate}")
             except Exception as gas_error:
                 logger.error(f"Gas estimation failed: {gas_error}")
                 gas_estimate = 200000  # Default gas limit
 
             # Get private key from settings
-            private_key = getattr(settings, 'PLATFORM_PRIVATE_KEY', None)
+            private_key = getattr(settings, "PLATFORM_PRIVATE_KEY", None)
             if not private_key:
                 logger.warning(
-                    "PLATFORM_PRIVATE_KEY not configured - minting simulation mode")
+                    "PLATFORM_PRIVATE_KEY not configured - minting simulation mode"
+                )
                 return {
-                    'success': True,
-                    'simulation': True,
-                    'message': f'Simulation: Would mint {amount} TEO to {to_address_checksum}',
-                    'gas_estimate': gas_estimate,
-                    'from_address': platform_address_checksum,
-                    'to_address': to_address_checksum,
-                    'amount': str(amount)
+                    "success": True,
+                    "simulation": True,
+                    "message": f"Simulation: Would mint {amount} TEO to {to_address_checksum}",
+                    "gas_estimate": gas_estimate,
+                    "from_address": platform_address_checksum,
+                    "to_address": to_address_checksum,
+                    "amount": str(amount),
                 }
 
             # Build transaction
-            nonce = self.web3.eth.get_transaction_count(
-                platform_address_checksum)
-            transaction = mint_function.build_transaction({
-                'from': platform_address_checksum,
-                'gas': gas_estimate,
-                'gasPrice': self.web3.eth.gas_price,
-                'nonce': nonce,
-            })
+            nonce = self.web3.eth.get_transaction_count(platform_address_checksum)
+            transaction = mint_function.build_transaction(
+                {
+                    "from": platform_address_checksum,
+                    "gas": gas_estimate,
+                    "gasPrice": self.web3.eth.gas_price,
+                    "nonce": nonce,
+                }
+            )
 
             # Sign transaction
             signed_txn = self.web3.eth.account.sign_transaction(
-                transaction, private_key)
+                transaction, private_key
+            )
 
             # Send transaction (use raw_transaction for newer Web3 versions)
-            raw_transaction = signed_txn.raw_transaction if hasattr(
-                signed_txn, 'raw_transaction') else signed_txn.rawTransaction
+            raw_transaction = (
+                signed_txn.raw_transaction
+                if hasattr(signed_txn, "raw_transaction")
+                else signed_txn.rawTransaction
+            )
             tx_hash = self.web3.eth.send_raw_transaction(raw_transaction)
 
             # Wait for transaction receipt
             logger.info(f"📤 Transaction sent: {tx_hash.hex()}")
             receipt = self.web3.eth.wait_for_transaction_receipt(tx_hash)
 
-            if receipt['status'] == 1:
+            if receipt["status"] == 1:
                 logger.info(
-                    f"✅ Transaction successful: {receipt['transactionHash'].hex()}")
+                    f"✅ Transaction successful: {receipt['transactionHash'].hex()}"
+                )
                 return {
-                    'success': True,
-                    'transaction_hash': receipt['transactionHash'].hex(),
-                    'gas_used': receipt['gasUsed'],
-                    'minted_amount': str(amount),
-                    'to_address': to_address_checksum,
-                    'withdrawal_id': withdrawal_id
+                    "success": True,
+                    "transaction_hash": receipt["transactionHash"].hex(),
+                    "gas_used": receipt["gasUsed"],
+                    "minted_amount": str(amount),
+                    "to_address": to_address_checksum,
+                    "withdrawal_id": withdrawal_id,
                 }
             else:
                 logger.error(
-                    f"❌ Transaction failed: {receipt['transactionHash'].hex()}")
+                    f"❌ Transaction failed: {receipt['transactionHash'].hex()}"
+                )
                 return {
-                    'success': False,
-                    'error': f'Transaction failed: {receipt["transactionHash"].hex()}',
-                    'transaction_hash': receipt['transactionHash'].hex()
+                    "success": False,
+                    "error": f'Transaction failed: {receipt["transactionHash"].hex()}',
+                    "transaction_hash": receipt["transactionHash"].hex(),
                 }
 
         except Exception as e:
             logger.error(f"Error minting tokens: {e}")
-            return {
-                'success': False,
-                'error': str(e)
-            }
+            return {"success": False, "error": str(e)}
 
 
 # Singleton instance

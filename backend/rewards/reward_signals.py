@@ -38,14 +38,14 @@ def handle_lesson_completion_reward(sender, instance, created, **kwargs):
 
             # Check for achievements
             completed_courses = CourseEnrollment.objects.filter(
-                student=student,
-                completed=True
+                student=student, completed=True
             ).count()
 
             if completed_courses == 1:
                 # First course completed achievement
                 reward_system.award_achievement(
-                    student, 'first_course_completed', course)
+                    student, "first_course_completed", course
+                )
 
     except Exception as e:
         logger.error(f"Error in lesson completion reward handler: {e}")
@@ -65,7 +65,8 @@ def handle_course_enrollment_update(sender, instance, created, **kwargs):
             # This is just for additional tracking/notifications
 
             logger.info(
-                f"Course enrollment completed: {instance.student.username} -> {instance.course.title}")
+                f"Course enrollment completed: {instance.student.username} -> {instance.course.title}"
+            )
 
         except Exception as e:
             logger.error(f"Error in course enrollment handler: {e}")
@@ -83,45 +84,57 @@ def create_teocoin_notification(sender, instance, created, **kwargs):
     message = ""
 
     # Determina il tipo di notifica e il messaggio in base al tipo di transazione
-    if instance.transaction_type in ['earned', 'exercise_reward', 'review_reward', 'achievement_reward', 'bonus'] and instance.amount > 0:
-        notification_type = 'teocoins_earned'
-        if instance.transaction_type == 'exercise_reward':
+    if (
+        instance.transaction_type
+        in ["earned", "exercise_reward", "review_reward", "achievement_reward", "bonus"]
+        and instance.amount > 0
+    ):
+        notification_type = "teocoins_earned"
+        if instance.transaction_type == "exercise_reward":
             message = f"🎉 Hai guadagnato {instance.amount} TeoCoins per la valutazione del tuo esercizio!"
-        elif instance.transaction_type == 'review_reward':
+        elif instance.transaction_type == "review_reward":
             message = f"⭐ Hai guadagnato {instance.amount} TeoCoins per aver completato una review!"
-        elif instance.transaction_type == 'achievement_reward':
+        elif instance.transaction_type == "achievement_reward":
             message = f"🏆 Hai guadagnato {instance.amount} TeoCoins per un achievement sbloccato!"
-        elif instance.transaction_type == 'lesson_completion_reward':
+        elif instance.transaction_type == "lesson_completion_reward":
             message = f"📚 Hai guadagnato {instance.amount} TeoCoins per aver completato una lezione!"
-        elif instance.transaction_type == 'course_completion_bonus':
+        elif instance.transaction_type == "course_completion_bonus":
             message = f"🎓 Hai guadagnato {instance.amount} TeoCoins per aver completato un corso!"
-        elif instance.transaction_type == 'bonus':
+        elif instance.transaction_type == "bonus":
             message = f"🎁 Hai ricevuto un bonus di {instance.amount} TeoCoins!"
         else:
             message = f"💰 Hai guadagnato {instance.amount} TeoCoins!"
 
-    elif instance.transaction_type in ['course_earned', 'lesson_earned'] and instance.amount > 0:
-        notification_type = 'teocoins_earned'
-        if instance.transaction_type == 'course_earned':
+    elif (
+        instance.transaction_type in ["course_earned", "lesson_earned"]
+        and instance.amount > 0
+    ):
+        notification_type = "teocoins_earned"
+        if instance.transaction_type == "course_earned":
             message = f"📚 Hai guadagnato {instance.amount} TeoCoins dalla vendita di un corso!"
         else:
             message = f"📖 Hai guadagnato {instance.amount} TeoCoins dalla vendita di una lezione!"
 
-    elif instance.transaction_type in ['spent', 'course_purchase', 'lesson_purchase'] and instance.amount < 0:
-        notification_type = 'teocoins_spent'
-        if instance.transaction_type == 'course_purchase':
-            message = f"🛒 Hai speso {abs(instance.amount)} TeoCoins per acquistare un corso!"
-        elif instance.transaction_type == 'lesson_purchase':
+    elif (
+        instance.transaction_type in ["spent", "course_purchase", "lesson_purchase"]
+        and instance.amount < 0
+    ):
+        notification_type = "teocoins_spent"
+        if instance.transaction_type == "course_purchase":
+            message = (
+                f"🛒 Hai speso {abs(instance.amount)} TeoCoins per acquistare un corso!"
+            )
+        elif instance.transaction_type == "lesson_purchase":
             message = f"🛒 Hai speso {abs(instance.amount)} TeoCoins per acquistare una lezione!"
         else:
             message = f"💸 Hai speso {abs(instance.amount)} TeoCoins!"
 
-    elif instance.transaction_type == 'refund' and instance.amount > 0:
-        notification_type = 'bonus_received'
+    elif instance.transaction_type == "refund" and instance.amount > 0:
+        notification_type = "bonus_received"
         message = f"↩️ Hai ricevuto un rimborso di {instance.amount} TeoCoins!"
 
-    elif instance.transaction_type == 'penalty' and instance.amount < 0:
-        notification_type = 'teocoins_spent'
+    elif instance.transaction_type == "penalty" and instance.amount < 0:
+        notification_type = "teocoins_spent"
         message = f"⚠️ Ti sono stati detratti {abs(instance.amount)} TeoCoins per una penalità!"
 
     # Crea la notifica se abbiamo un tipo valido
@@ -131,5 +144,5 @@ def create_teocoin_notification(sender, instance, created, **kwargs):
             message=message,
             notification_type=notification_type,
             # Usiamo l'amount come related_object_id per le notifiche TeoCoin
-            related_object_id=instance.amount
+            related_object_id=instance.amount,
         )

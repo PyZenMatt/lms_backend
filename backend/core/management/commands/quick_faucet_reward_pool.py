@@ -11,15 +11,17 @@ import webbrowser
 import requests
 
 # Setup Django
-sys.path.append('/home/teo/Project/school/schoolplatform')
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'schoolplatform.settings')
+sys.path.append("/home/teo/Project/school/schoolplatform")
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "schoolplatform.settings")
 
 try:
     import django
+
     django.setup()
     from web3 import Web3
 
     from blockchain.blockchain import TeoCoinService
+
     DJANGO_AVAILABLE = True
 except:
     DJANGO_AVAILABLE = False
@@ -29,14 +31,16 @@ except:
 def get_reward_pool_info():
     """Ottieni informazioni sulla reward pool"""
     reward_pool_address = os.getenv(
-        'REWARD_POOL_ADDRESS', '0x3b72a4E942CF1467134510cA3952F01b63005044')
+        "REWARD_POOL_ADDRESS", "0x3b72a4E942CF1467134510cA3952F01b63005044"
+    )
 
     if DJANGO_AVAILABLE:
         try:
             tcs = TeoCoinService()
             balance_wei = tcs.w3.eth.get_balance(
-                Web3.to_checksum_address(reward_pool_address))
-            balance_matic = float(tcs.w3.from_wei(balance_wei, 'ether'))
+                Web3.to_checksum_address(reward_pool_address)
+            )
+            balance_matic = float(tcs.w3.from_wei(balance_wei, "ether"))
             return reward_pool_address, balance_matic
         except Exception as e:
             print(f"⚠️ Errore nel controllo balance: {e}")
@@ -54,22 +58,17 @@ def request_polygon_faucet(address: str) -> bool:
 
     # Prima prova con API diretta
     try:
-        payload = {
-            "network": "amoy",
-            "address": address,
-            "token": "maticToken"
-        }
+        payload = {"network": "amoy", "address": address, "token": "maticToken"}
 
         headers = {
-            'Content-Type': 'application/json',
-            'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-            'Accept': 'application/json',
-            'Origin': 'https://faucet.polygon.technology',
-            'Referer': 'https://faucet.polygon.technology/'
+            "Content-Type": "application/json",
+            "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+            "Accept": "application/json",
+            "Origin": "https://faucet.polygon.technology",
+            "Referer": "https://faucet.polygon.technology/",
         }
 
-        response = requests.post(
-            api_url, json=payload, headers=headers, timeout=30)
+        response = requests.post(api_url, json=payload, headers=headers, timeout=30)
 
         if response.status_code == 200:
             result = response.json()
@@ -94,7 +93,7 @@ def open_faucet_browser(address: str):
         ("Polygon Faucet (Ufficiale)", "https://faucet.polygon.technology/"),
         ("Alchemy Faucet", "https://www.alchemy.com/faucets/polygon-amoy"),
         ("QuickNode Faucet", "https://faucet.quicknode.com/polygon/amoy"),
-        ("Chainlink Faucet", "https://faucets.chain.link/polygon-amoy")
+        ("Chainlink Faucet", "https://faucets.chain.link/polygon-amoy"),
     ]
 
     for i, (name, url) in enumerate(faucets, 1):
@@ -135,9 +134,8 @@ def monitor_balance_changes(address: str, initial_balance: float, timeout: int =
         # Controlla ogni 15 secondi
         if time.time() - last_check >= 15:
             try:
-                balance_wei = tcs.w3.eth.get_balance(
-                    Web3.to_checksum_address(address))
-                current_balance = float(tcs.w3.from_wei(balance_wei, 'ether'))
+                balance_wei = tcs.w3.eth.get_balance(Web3.to_checksum_address(address))
+                current_balance = float(tcs.w3.from_wei(balance_wei, "ether"))
 
                 if current_balance > initial_balance:
                     received = current_balance - initial_balance
@@ -167,11 +165,9 @@ def main():
     print(f"💰 Balance attuale: {current_balance:.6f} MATIC")
 
     if current_balance >= 0.01:  # Soglia minima
-        print(
-            f"✅ La reward pool ha già abbastanza MATIC ({current_balance:.6f})")
-        response = input(
-            "Vuoi comunque richiedere più MATIC? (y/N): ").strip().lower()
-        if response not in ['y', 'yes', 'si', 's']:
+        print(f"✅ La reward pool ha già abbastanza MATIC ({current_balance:.6f})")
+        response = input("Vuoi comunque richiedere più MATIC? (y/N): ").strip().lower()
+        if response not in ["y", "yes", "si", "s"]:
             print("👋 Operazione annullata")
             return
 
@@ -183,8 +179,7 @@ def main():
     if api_success:
         print("✅ Richiesta API inviata con successo!")
         # Monitora per vedere se arrivano i fondi
-        success = monitor_balance_changes(
-            reward_pool_address, current_balance, 180)
+        success = monitor_balance_changes(reward_pool_address, current_balance, 180)
         if success:
             print("\n🎉 === FAUCET COMPLETATO CON SUCCESSO ===")
             return
@@ -199,7 +194,8 @@ def main():
 
         # Monitora i cambiamenti
         success = monitor_balance_changes(
-            reward_pool_address, current_balance, 300)  # 5 minuti
+            reward_pool_address, current_balance, 300
+        )  # 5 minuti
 
         if success:
             print("\n🎉 === FAUCET COMPLETATO CON SUCCESSO ===")

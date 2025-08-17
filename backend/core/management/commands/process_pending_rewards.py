@@ -9,7 +9,7 @@ from django.utils import timezone
 from rewards.models import BlockchainTransaction
 
 # Setup Django
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'schoolplatform.settings')
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "schoolplatform.settings")
 django.setup()
 
 
@@ -27,9 +27,8 @@ def process_reward_transactions():
 
     # Get pending reward transactions only
     pending_rewards = BlockchainTransaction.objects.filter(
-        status='pending',
-        transaction_type__in=['exercise_reward', 'review_reward']
-    ).order_by('created_at')
+        status="pending", transaction_type__in=["exercise_reward", "review_reward"]
+    ).order_by("created_at")
 
     print(f"📊 Found {pending_rewards.count()} pending reward transactions")
 
@@ -43,30 +42,33 @@ def process_reward_transactions():
     for tx in pending_rewards:
         try:
             print(
-                f"\n🔄 Processing: {tx.user.username} - {tx.amount} TEO ({tx.transaction_type})")
+                f"\n🔄 Processing: {tx.user.username} - {tx.amount} TEO ({tx.transaction_type})"
+            )
 
             # Check if user has wallet address
             if not tx.user.wallet_address:
                 print(f"❌ User {tx.user.username} has no wallet address")
-                tx.status = 'failed'
-                tx.error_message = 'User has no wallet address'
+                tx.status = "failed"
+                tx.error_message = "User has no wallet address"
                 tx.save()
                 failed += 1
                 continue
 
             # Mint tokens to user's wallet
-            description = f"{tx.transaction_type.replace('_', ' ').title()} - {tx.notes}"
+            description = (
+                f"{tx.transaction_type.replace('_', ' ').title()} - {tx.notes}"
+            )
 
             try:
                 tx_hash = mint_tokens(
                     wallet_address=tx.user.wallet_address,
                     amount=tx.amount,
-                    description=description
+                    description=description,
                 )
 
                 if tx_hash:
                     # Update transaction with success
-                    tx.status = 'completed'
+                    tx.status = "completed"
                     tx.tx_hash = tx_hash
                     tx.transaction_hash = tx_hash
                     tx.confirmed_at = timezone.now()
@@ -76,8 +78,10 @@ def process_reward_transactions():
                     processed += 1
                 else:
                     # Mark as failed
-                    tx.status = 'failed'
-                    tx.error_message = 'Blockchain transaction failed - no tx hash returned'
+                    tx.status = "failed"
+                    tx.error_message = (
+                        "Blockchain transaction failed - no tx hash returned"
+                    )
                     tx.save()
 
                     print(f"❌ Failed: No tx hash returned")
@@ -85,8 +89,8 @@ def process_reward_transactions():
 
             except Exception as blockchain_error:
                 # Mark as failed with error
-                tx.status = 'failed'
-                tx.error_message = f'Blockchain error: {str(blockchain_error)}'
+                tx.status = "failed"
+                tx.error_message = f"Blockchain error: {str(blockchain_error)}"
                 tx.save()
 
                 print(f"❌ Blockchain error: {blockchain_error}")
@@ -107,9 +111,9 @@ def process_reward_transactions():
     try:
         # Get all pending reward transactions
         pending_rewards = BlockchainTransaction.objects.filter(
-            status='pending',
-            transaction_type__in=['exercise_reward', 'review_reward', 'reward']
-        ).order_by('created_at')
+            status="pending",
+            transaction_type__in=["exercise_reward", "review_reward", "reward"],
+        ).order_by("created_at")
 
         print(f"📋 Found {pending_rewards.count()} pending reward transactions")
 
@@ -145,14 +149,13 @@ def process_reward_transactions():
                 mint_amount = int(tx.amount * 1000000)
 
                 result = teocoin_service.mint_to_address(
-                    tx.user.wallet_address,
-                    mint_amount
+                    tx.user.wallet_address, mint_amount
                 )
 
-                if result and result.get('success'):
+                if result and result.get("success"):
                     # Update transaction as confirmed
-                    tx.status = 'confirmed'
-                    tx.tx_hash = result.get('tx_hash')
+                    tx.status = "confirmed"
+                    tx.tx_hash = result.get("tx_hash")
                     tx.confirmed_at = timezone.now()
                     tx.save()
 
@@ -160,17 +163,16 @@ def process_reward_transactions():
                     successful += 1
                 else:
                     # Mark as failed
-                    tx.status = 'failed'
-                    tx.error_message = result.get('error', 'Unknown error')
+                    tx.status = "failed"
+                    tx.error_message = result.get("error", "Unknown error")
                     tx.save()
 
-                    print(
-                        f"   ❌ Failed: {result.get('error', 'Unknown error')}")
+                    print(f"   ❌ Failed: {result.get('error', 'Unknown error')}")
                     failed += 1
 
             except Exception as e:
                 # Mark transaction as failed
-                tx.status = 'failed'
+                tx.status = "failed"
                 tx.error_message = str(e)
                 tx.save()
 
@@ -183,14 +185,15 @@ def process_reward_transactions():
         print(f"📋 Total processed: {successful + failed}")
 
         return {
-            'successful': successful,
-            'failed': failed,
-            'total': successful + failed
+            "successful": successful,
+            "failed": failed,
+            "total": successful + failed,
         }
 
     except Exception as e:
         print(f"❌ Error processing pending transactions: {e}")
         import traceback
+
         traceback.print_exc()
         return None
 
@@ -203,13 +206,14 @@ def process_recent_rewards_only():
     print("=" * 50)
 
     from datetime import timedelta
+
     yesterday = timezone.now() - timedelta(days=1)
 
     recent_pending = BlockchainTransaction.objects.filter(
-        status='pending',
-        transaction_type__in=['exercise_reward', 'review_reward'],
-        created_at__gte=yesterday
-    ).order_by('created_at')
+        status="pending",
+        transaction_type__in=["exercise_reward", "review_reward"],
+        created_at__gte=yesterday,
+    ).order_by("created_at")
 
     print(f"📋 Found {recent_pending.count()} recent pending rewards")
 
@@ -226,7 +230,7 @@ def process_recent_rewards_only():
             print(f"   Amount: {tx.amount} TEO")
             print(f"   Type: {tx.transaction_type}")
 
-            tx.status = 'completed'
+            tx.status = "completed"
             tx.confirmed_at = timezone.now()
             # Fake hash for testing
             tx.tx_hash = f"0x{'test' + str(tx.id).zfill(60)}"

@@ -12,8 +12,8 @@ from django.contrib.auth import get_user_model
 from rewards.models import BlockchainTransaction
 
 # Setup Django
-sys.path.append('/home/teo/Project/school/schoolplatform')
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'schoolplatform.settings')
+sys.path.append("/home/teo/Project/school/schoolplatform")
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "schoolplatform.settings")
 django.setup()
 
 
@@ -28,14 +28,16 @@ def create_missing_enrollment():
 
     try:
         # Get the student and course from the transaction
-        student = User.objects.get(username='student1')
+        student = User.objects.get(username="student1")
 
         # Find the recent course purchase transaction
-        purchase_tx = BlockchainTransaction.objects.filter(
-            user=student,
-            transaction_type='course_purchase',
-            status='completed'
-        ).order_by('-created_at').first()
+        purchase_tx = (
+            BlockchainTransaction.objects.filter(
+                user=student, transaction_type="course_purchase", status="completed"
+            )
+            .order_by("-created_at")
+            .first()
+        )
 
         if not purchase_tx:
             print("❌ No completed purchase transaction found")
@@ -51,8 +53,7 @@ def create_missing_enrollment():
 
         # Check if enrollment already exists
         existing_enrollment = CourseEnrollment.objects.filter(
-            student=student,
-            course=course
+            student=student, course=course
         ).first()
 
         if existing_enrollment:
@@ -61,9 +62,7 @@ def create_missing_enrollment():
 
         # Create the enrollment
         enrollment = CourseEnrollment.objects.create(
-            student=student,
-            course=course,
-            completed=False
+            student=student, course=course, completed=False
         )
 
         print(f"✅ Created enrollment: {enrollment}")
@@ -76,6 +75,7 @@ def create_missing_enrollment():
     except Exception as e:
         print(f"❌ Error: {e}")
         import traceback
+
         traceback.print_exc()
         return None
 

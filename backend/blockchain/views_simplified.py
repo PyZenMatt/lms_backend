@@ -3,7 +3,7 @@ Simplified Blockchain API Views for TeoCoin System
 
 This module provides essential REST API endpoints for blockchain operations:
 - Wallet balance queries (for MetaMask integration)
-- Token information (for frontend display)  
+- Token information (for frontend display)
 - Transaction status checking (for burn deposit verification)
 
 All complex course payment, staking, and reward pool functionality has been
@@ -27,7 +27,7 @@ from services.consolidated_teocoin_service import teocoin_service
 logger = logging.getLogger(__name__)
 
 
-@api_view(['GET'])
+@api_view(["GET"])
 @permission_classes([IsAuthenticated])
 def get_wallet_balance(request):
     """
@@ -49,6 +49,7 @@ def get_wallet_balance(request):
         - 500: Blockchain query error
     """
     import time
+
     start_time = time.time()
 
     user = request.user
@@ -59,10 +60,12 @@ def get_wallet_balance(request):
 
         response_time = time.time() - start_time
         logger.info(
-            f"Balance API completed in {response_time:.3f}s via BlockchainService")
+            f"Balance API completed in {response_time:.3f}s via BlockchainService"
+        )
         if response_time > 1.0:
             logger.warning(
-                f"Slow Balance API: {response_time:.3f}s for user {user.username}")
+                f"Slow Balance API: {response_time:.3f}s for user {user.username}"
+            )
 
         return Response(result)
 
@@ -73,19 +76,16 @@ def get_wallet_balance(request):
         # Fallback to old logic for safety during transition
         if not user.wallet_address:
             response_time = time.time() - start_time
-            logger.info(
-                f"Balance API (no wallet) completed in {response_time:.3f}s")
-            return Response({
-                'error': 'Wallet not linked',
-                'balance': '0',
-                'wallet_address': None
-            }, status=status.HTTP_400_BAD_REQUEST)
+            logger.info(f"Balance API (no wallet) completed in {response_time:.3f}s")
+            return Response(
+                {"error": "Wallet not linked", "balance": "0", "wallet_address": None},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
         try:
             # First check if we have a cached balance that's recent enough
             token_balance, created = TokenBalance.objects.get_or_create(
-                user=user,
-                defaults={'balance': Decimal('0')}
+                user=user, defaults={"balance": Decimal("0")}
             )
 
             # Only query blockchain if:
@@ -96,37 +96,42 @@ def get_wallet_balance(request):
                 token_balance.balance = balance
                 token_balance.save()
                 logger.info(
-                    f"Updated blockchain balance for {user.username} from RPC call")
+                    f"Updated blockchain balance for {user.username} from RPC call"
+                )
             else:
                 balance = token_balance.balance
                 logger.info(
-                    f"Using cached blockchain balance for {user.username} (last updated: {token_balance.last_updated})")
+                    f"Using cached blockchain balance for {user.username} (last updated: {token_balance.last_updated})"
+                )
 
-            return Response({
-                'balance': str(balance),
-                'wallet_address': user.wallet_address,
-                'token_info': teocoin_service.get_token_info(),
-                'user_id': user.id,  # Add user ID for frontend verification
-                'username': user.username,  # Add username for debugging
-                # Indicate if we used the cache
-                'cached': not created and not token_balance.is_stale(minutes=5)
-            })
+            return Response(
+                {
+                    "balance": str(balance),
+                    "wallet_address": user.wallet_address,
+                    "token_info": teocoin_service.get_token_info(),
+                    "user_id": user.id,  # Add user ID for frontend verification
+                    "username": user.username,  # Add username for debugging
+                    # Indicate if we used the cache
+                    "cached": not created and not token_balance.is_stale(minutes=5),
+                }
+            )
 
         except Exception as e2:
             logger.error(f"Error retrieving balance for {user.email}: {e2}")
-            return Response({
-                'error': 'Error retrieving wallet balance',
-                'balance': '0'
-            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return Response(
+                {"error": "Error retrieving wallet balance", "balance": "0"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
         finally:
             response_time = time.time() - start_time
             logger.info(f"Balance API completed in {response_time:.3f}s")
             if response_time > 1.0:
                 logger.warning(
-                    f"Slow Balance API: {response_time:.3f}s for user {user.username}")
+                    f"Slow Balance API: {response_time:.3f}s for user {user.username}"
+                )
 
 
-@api_view(['GET'])
+@api_view(["GET"])
 def get_token_info(request):
     """
     Get general information about the TeoCoin token.
@@ -150,12 +155,13 @@ def get_token_info(request):
         return Response(token_info)
     except Exception as e:
         logger.error(f"Error retrieving token info: {e}")
-        return Response({
-            'error': 'Error retrieving token information'
-        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        return Response(
+            {"error": "Error retrieving token information"},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        )
 
 
-@api_view(['POST'])
+@api_view(["POST"])
 @permission_classes([IsAuthenticated])
 def check_transaction_status(request):
     """
@@ -179,12 +185,12 @@ def check_transaction_status(request):
         - 400: Missing tx_hash parameter
         - 500: Blockchain query error
     """
-    tx_hash = request.data.get('tx_hash')
+    tx_hash = request.data.get("tx_hash")
 
     if not tx_hash:
-        return Response({
-            'error': 'tx_hash is required'
-        }, status=status.HTTP_400_BAD_REQUEST)
+        return Response(
+            {"error": "tx_hash is required"}, status=status.HTTP_400_BAD_REQUEST
+        )
 
     try:
         receipt = teocoin_service.get_transaction_receipt(tx_hash)
@@ -192,33 +198,34 @@ def check_transaction_status(request):
         if receipt:
             # Update transaction status in database if record exists
             try:
-                blockchain_tx = BlockchainTransaction.objects.get(
-                    tx_hash=tx_hash)
-                if receipt['status'] == 1:
-                    blockchain_tx.status = 'confirmed'
-                    blockchain_tx.block_number = receipt['block_number']
-                    blockchain_tx.gas_used = receipt['gas_used']
+                blockchain_tx = BlockchainTransaction.objects.get(tx_hash=tx_hash)
+                if receipt["status"] == 1:
+                    blockchain_tx.status = "confirmed"
+                    blockchain_tx.block_number = receipt["block_number"]
+                    blockchain_tx.gas_used = receipt["gas_used"]
                 else:
-                    blockchain_tx.status = 'failed'
+                    blockchain_tx.status = "failed"
                 blockchain_tx.save()
             except BlockchainTransaction.DoesNotExist:
                 # Transaction not found in our database - this is OK
                 pass
 
-            return Response({
-                'status': 'confirmed' if receipt['status'] == 1 else 'failed',
-                'block_number': receipt['block_number'],
-                'gas_used': receipt['gas_used'],
-                'transaction_hash': receipt['transaction_hash']
-            })
+            return Response(
+                {
+                    "status": "confirmed" if receipt["status"] == 1 else "failed",
+                    "block_number": receipt["block_number"],
+                    "gas_used": receipt["gas_used"],
+                    "transaction_hash": receipt["transaction_hash"],
+                }
+            )
         else:
-            return Response({
-                'status': 'pending',
-                'message': 'Transaction still in progress'
-            })
+            return Response(
+                {"status": "pending", "message": "Transaction still in progress"}
+            )
 
     except Exception as e:
         logger.error(f"Error checking transaction status {tx_hash}: {e}")
-        return Response({
-            'error': 'Error checking transaction status'
-        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        return Response(
+            {"error": "Error checking transaction status"},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        )

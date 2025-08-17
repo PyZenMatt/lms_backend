@@ -21,33 +21,33 @@ logger = logging.getLogger(__name__)
 
 
 class Command(BaseCommand):
-    help = 'Process pending TeoCoin withdrawal requests (Phase 1 - Ready for blockchain integration)'
+    help = "Process pending TeoCoin withdrawal requests (Phase 1 - Ready for blockchain integration)"
 
     def add_arguments(self, parser):
         parser.add_argument(
-            '--limit',
+            "--limit",
             type=int,
             default=50,
-            help='Maximum number of withdrawals to process (default: 50)'
+            help="Maximum number of withdrawals to process (default: 50)",
         )
         parser.add_argument(
-            '--dry-run',
-            action='store_true',
-            help='Show what would be processed without making changes'
+            "--dry-run",
+            action="store_true",
+            help="Show what would be processed without making changes",
         )
         parser.add_argument(
-            '--force',
-            action='store_true',
-            help='Process withdrawals even if blockchain connection is not available'
+            "--force",
+            action="store_true",
+            help="Process withdrawals even if blockchain connection is not available",
         )
 
     def handle(self, *args, **options):
         """
         Main command handler for processing withdrawals
         """
-        limit = options['limit']
-        dry_run = options['dry_run']
-        force = options['force']
+        limit = options["limit"]
+        dry_run = options["dry_run"]
+        force = options["force"]
 
         self.stdout.write(
             self.style.SUCCESS(
@@ -64,8 +64,8 @@ class Command(BaseCommand):
         try:
             # Get pending withdrawals
             pending_withdrawals = TeoCoinWithdrawalRequest.objects.filter(
-                status='pending'
-            ).order_by('created_at')[:limit]
+                status="pending"
+            ).order_by("created_at")[:limit]
 
             if not pending_withdrawals.exists():
                 self.stdout.write(
@@ -74,7 +74,8 @@ class Command(BaseCommand):
                 return
 
             self.stdout.write(
-                f"📋 Found {pending_withdrawals.count()} pending withdrawals")
+                f"📋 Found {pending_withdrawals.count()} pending withdrawals"
+            )
 
             # Check blockchain connection (for future implementation)
             blockchain_ready = self._check_blockchain_connection()
@@ -95,8 +96,7 @@ class Command(BaseCommand):
                     if dry_run:
                         self._show_withdrawal_info(withdrawal)
                     else:
-                        success = self._process_withdrawal(
-                            withdrawal, blockchain_ready)
+                        success = self._process_withdrawal(withdrawal, blockchain_ready)
                         if success:
                             processed_count += 1
                             self.stdout.write(
@@ -144,7 +144,7 @@ class Command(BaseCommand):
         try:
             # This will be implemented in Phase 2 when we add blockchain integration
             web3_service = teocoin_withdrawal_service.web3
-            if web3_service and hasattr(web3_service, 'isConnected'):
+            if web3_service and hasattr(web3_service, "isConnected"):
                 return web3_service.isConnected()
 
             # For Phase 1, return False (not yet implemented)
@@ -175,7 +175,7 @@ class Command(BaseCommand):
         """
         try:
             # Phase 1: Update status to processing
-            withdrawal.status = 'processing'
+            withdrawal.status = "processing"
             withdrawal.processed_at = timezone.now()
             withdrawal.save()
 
@@ -186,21 +186,20 @@ class Command(BaseCommand):
 
                 if success:
                     # Mark as completed
-                    withdrawal.status = 'completed'
+                    withdrawal.status = "completed"
                     withdrawal.completed_at = timezone.now()
                     withdrawal.save()
 
                     # Update user's pending withdrawal balance
-                    balance_obj = DBTeoCoinBalance.objects.get(
-                        user=withdrawal.user)
+                    balance_obj = DBTeoCoinBalance.objects.get(user=withdrawal.user)
                     balance_obj.pending_withdrawal -= withdrawal.amount
                     balance_obj.save()
 
                     return True
                 else:
                     # Mark as failed
-                    withdrawal.status = 'failed'
-                    withdrawal.error_message = 'Blockchain minting failed'
+                    withdrawal.status = "failed"
+                    withdrawal.error_message = "Blockchain minting failed"
                     withdrawal.save()
 
                     # Return funds to available balance
@@ -218,8 +217,8 @@ class Command(BaseCommand):
 
         except Exception as e:
             # Mark as failed and refund
-            withdrawal.status = 'failed'
-            withdrawal.error_message = f'Processing error: {str(e)}'
+            withdrawal.status = "failed"
+            withdrawal.error_message = f"Processing error: {str(e)}"
             withdrawal.save()
 
             self._refund_withdrawal(withdrawal)
@@ -245,8 +244,8 @@ class Command(BaseCommand):
 
         # Simulate gas cost tracking
         withdrawal.gas_used = 21000  # Typical gas for token mint
-        withdrawal.gas_price_gwei = Decimal('20.0')  # 20 Gwei
-        withdrawal.gas_cost_eur = Decimal('0.001')  # ~$0.001 on Polygon
+        withdrawal.gas_price_gwei = Decimal("20.0")  # 20 Gwei
+        withdrawal.gas_cost_eur = Decimal("0.001")  # ~$0.001 on Polygon
         withdrawal.transaction_hash = f"0x{'0' * 64}"  # Placeholder hash
         withdrawal.save()
 
@@ -264,15 +263,15 @@ class Command(BaseCommand):
 
             # Record refund transaction
             from services.db_teocoin_service import db_teocoin_service
+
             db_teocoin_service.add_balance(
                 user=withdrawal.user,
                 amount=withdrawal.amount,
-                transaction_type='withdrawal_refund',
-                description=f"Refund for failed withdrawal #{withdrawal.id}"
+                transaction_type="withdrawal_refund",
+                description=f"Refund for failed withdrawal #{withdrawal.id}",
             )
 
-            logger.info(
-                f"Refunded {withdrawal.amount} TEO to {withdrawal.user.email}")
+            logger.info(f"Refunded {withdrawal.amount} TEO to {withdrawal.user.email}")
 
         except Exception as e:
             logger.error(f"Withdrawal refund error: {e}")

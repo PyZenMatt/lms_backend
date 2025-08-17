@@ -15,23 +15,52 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.CreateModel(
-            name='UserWallet',
+            name="UserWallet",
             fields=[
-                ('id', models.BigAutoField(auto_created=True,
-                 primary_key=True, serialize=False, verbose_name='ID')),
-                ('address', models.CharField(
-                    help_text='Public Ethereum/Polygon wallet address (0x...)', max_length=42, unique=True)),
-                ('private_key', models.CharField(
-                    help_text='Private key for wallet - SECURITY WARNING: stored in plain text!', max_length=66)),
-                ('created_at', models.DateTimeField(auto_now_add=True,
-                 help_text='Timestamp when wallet was created')),
-                ('user', models.OneToOneField(help_text='User associated with this wallet',
-                 on_delete=django.db.models.deletion.CASCADE, related_name='blockchain_wallet', to=settings.AUTH_USER_MODEL)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "address",
+                    models.CharField(
+                        help_text="Public Ethereum/Polygon wallet address (0x...)",
+                        max_length=42,
+                        unique=True,
+                    ),
+                ),
+                (
+                    "private_key",
+                    models.CharField(
+                        help_text="Private key for wallet - SECURITY WARNING: stored in plain text!",
+                        max_length=66,
+                    ),
+                ),
+                (
+                    "created_at",
+                    models.DateTimeField(
+                        auto_now_add=True, help_text="Timestamp when wallet was created"
+                    ),
+                ),
+                (
+                    "user",
+                    models.OneToOneField(
+                        help_text="User associated with this wallet",
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="blockchain_wallet",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'User Wallet',
-                'verbose_name_plural': 'User Wallets',
-                'db_table': 'blockchain_user_wallet',
+                "verbose_name": "User Wallet",
+                "verbose_name_plural": "User Wallets",
+                "db_table": "blockchain_user_wallet",
             },
         ),
     ]

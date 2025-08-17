@@ -13,11 +13,11 @@ from django.urls import path
 
 from .views import check_transaction_status, get_token_info, get_wallet_balance
 
-app_name = 'blockchain'
+app_name = "blockchain"
 
 urlpatterns = [
     # Essential blockchain queries
-    path('balance/', get_wallet_balance, name='get_balance'),
-    path('token-info/', get_token_info, name='token_info'),
-    path('tx-status/', check_transaction_status, name='transaction_status'),
+    path("balance/", get_wallet_balance, name="get_balance"),
+    path("token-info/", get_token_info, name="token_info"),
+    path("tx-status/", check_transaction_status, name="transaction_status"),
 ]

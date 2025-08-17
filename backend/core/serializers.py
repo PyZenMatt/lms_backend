@@ -8,6 +8,7 @@ Classes:
     BlockchainTransactionSerializer: For blockchain transaction data
     TeacherCourseSerializer: For teacher course management data
 """
+
 from courses.models import Course
 from rest_framework import serializers
 from rewards.models import BlockchainTransaction
@@ -32,14 +33,21 @@ class BlockchainTransactionSerializer(serializers.ModelSerializer):
         - tx_hash: Blockchain transaction hash
         - status: Transaction status
     """
+
     buyer = serializers.SerializerMethodField()
     description = serializers.SerializerMethodField()
 
     class Meta:
         model = BlockchainTransaction
         fields = [
-            'id', 'created_at', 'amount', 'transaction_type',
-            'buyer', 'description', 'tx_hash', 'status'
+            "id",
+            "created_at",
+            "amount",
+            "transaction_type",
+            "buyer",
+            "description",
+            "tx_hash",
+            "status",
         ]
 
     def get_buyer(self, obj):
@@ -53,16 +61,20 @@ class BlockchainTransactionSerializer(serializers.ModelSerializer):
             str: Username of the buyer or None
         """
         # For course earnings, show who bought the course
-        if obj.transaction_type == 'course_earned' and obj.related_object_id:
-            purchase = BlockchainTransaction.objects.filter(
-                transaction_type='course_purchase',
-                related_object_id=obj.related_object_id
-            ).order_by('-created_at').first()
+        if obj.transaction_type == "course_earned" and obj.related_object_id:
+            purchase = (
+                BlockchainTransaction.objects.filter(
+                    transaction_type="course_purchase",
+                    related_object_id=obj.related_object_id,
+                )
+                .order_by("-created_at")
+                .first()
+            )
             if purchase and purchase.user:
                 return purchase.user.username
 
         # For course purchases, the buyer is the user
-        if obj.transaction_type == 'course_purchase' and obj.user:
+        if obj.transaction_type == "course_purchase" and obj.user:
             return obj.user.username
 
         return None
@@ -79,7 +91,7 @@ class BlockchainTransactionSerializer(serializers.ModelSerializer):
         """
         try:
             # Handle course purchase transactions
-            if obj.transaction_type == 'course_purchase':
+            if obj.transaction_type == "course_purchase":
                 if obj.related_object_id:
                     try:
                         course = Course.objects.get(id=obj.related_object_id)
@@ -89,7 +101,7 @@ class BlockchainTransactionSerializer(serializers.ModelSerializer):
                 return "Acquisto corso"
 
             # Handle course earning transactions (teacher revenue)
-            if obj.transaction_type == 'course_earned':
+            if obj.transaction_type == "course_earned":
                 if obj.related_object_id:
                     try:
                         course = Course.objects.get(id=obj.related_object_id)
@@ -99,14 +111,14 @@ class BlockchainTransactionSerializer(serializers.ModelSerializer):
                 return "Vendita corso"
 
             # Handle exercise and review rewards
-            if obj.transaction_type == 'exercise_reward':
+            if obj.transaction_type == "exercise_reward":
                 return f"Premio esercizio (ID: {obj.related_object_id})"
 
-            if obj.transaction_type == 'review_reward':
+            if obj.transaction_type == "review_reward":
                 return f"Premio valutazione (ID: {obj.related_object_id})"
 
             # Default: convert transaction type to readable format
-            return obj.transaction_type.replace('_', ' ').title()
+            return obj.transaction_type.replace("_", " ").title()
 
         except Exception:
             # Fallback description in case of any errors
@@ -130,14 +142,21 @@ class TeacherCourseSerializer(serializers.ModelSerializer):
         - created_at: Course creation timestamp
         - updated_at: Last update timestamp
     """
+
     students_count = serializers.SerializerMethodField()
     teacher = UserSerializer(read_only=True)
 
     class Meta:
         model = Course
         fields = [
-            'id', 'title', 'description', 'price', 'teacher',
-            'students_count', 'created_at', 'updated_at'
+            "id",
+            "title",
+            "description",
+            "price",
+            "teacher",
+            "students_count",
+            "created_at",
+            "updated_at",
         ]
 
     def get_students_count(self, obj):

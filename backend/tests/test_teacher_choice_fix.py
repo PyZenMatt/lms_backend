@@ -14,7 +14,7 @@ from services.db_teocoin_service import DBTeoCoinService
 from users.models import User
 
 # Setup Django
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'schoolplatform.settings')
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "schoolplatform.settings")
 django.setup()
 
 
@@ -28,7 +28,7 @@ def test_teacher_teocoin_acceptance():
     factory = APIRequestFactory()
 
     # 2. Trova teacher per test
-    teacher = User.objects.filter(role='teacher').first()
+    teacher = User.objects.filter(role="teacher").first()
     if not teacher:
         teacher = User.objects.filter(is_staff=True).first()
 
@@ -54,19 +54,20 @@ def test_teacher_teocoin_acceptance():
     print("-" * 40)
 
     try:
-        test_amount = Decimal('5.0')
+        test_amount = Decimal("5.0")
         success = db_service.add_balance(
             user=teacher,
             amount=test_amount,
-            transaction_type='test_credit',
-            description='Test direct TeoCoin credit'
+            transaction_type="test_credit",
+            description="Test direct TeoCoin credit",
         )
 
         if success:
             intermediate_balance = db_service.get_balance(teacher)
             difference1 = intermediate_balance - initial_balance
             print(
-                f"   ✅ Direct credit successful: {initial_balance} → {intermediate_balance} TEO (+{difference1})")
+                f"   ✅ Direct credit successful: {initial_balance} → {intermediate_balance} TEO (+{difference1})"
+            )
         else:
             print("   ❌ Direct credit failed")
             return False
@@ -82,17 +83,15 @@ def test_teacher_teocoin_acceptance():
     try:
         # Simula request POST per scelta TEO
         request_data = {
-            'absorption_id': 'test_notification_123',
-            'choice': 'teo',
-            'amount': 10.0,
-            'transaction_type': 'discount_absorption',
-            'description': 'Test teacher choice endpoint'
+            "absorption_id": "test_notification_123",
+            "choice": "teo",
+            "amount": 10.0,
+            "transaction_type": "discount_absorption",
+            "description": "Test teacher choice endpoint",
         }
 
         request = factory.post(
-            '/api/v1/teocoin/teacher/choice/',
-            data=request_data,
-            format='json'
+            "/api/v1/teocoin/teacher/choice/", data=request_data, format="json"
         )
         request.user = teacher
 
@@ -104,7 +103,7 @@ def test_teacher_teocoin_acceptance():
         print(f"   📥 Response status: {response.status_code}")
         print(f"   📋 Response data: {response.data}")
 
-        if response.status_code == 200 and response.data.get('success'):
+        if response.status_code == 200 and response.data.get("success"):
             # Verifica nuovo balance
             final_balance = db_service.get_balance(teacher)
             difference2 = final_balance - intermediate_balance
@@ -112,12 +111,13 @@ def test_teacher_teocoin_acceptance():
 
             print(f"   ✅ Teacher choice TEO successful!")
             print(
-                f"   💰 Balance: {intermediate_balance} → {final_balance} TEO (+{difference2})")
+                f"   💰 Balance: {intermediate_balance} → {final_balance} TEO (+{difference2})"
+            )
             print(f"   📊 Total test increase: +{total_difference} TEO")
 
             # Verifica dati nella response
-            if 'amount_credited' in response.data:
-                credited = response.data['amount_credited']
+            if "amount_credited" in response.data:
+                credited = response.data["amount_credited"]
                 print(f"   🎁 Amount credited per response: {credited} TEO")
 
         else:
@@ -127,6 +127,7 @@ def test_teacher_teocoin_acceptance():
     except Exception as e:
         print(f"   ❌ Teacher choice endpoint error: {e}")
         import traceback
+
         traceback.print_exc()
         return False
 
@@ -137,17 +138,15 @@ def test_teacher_teocoin_acceptance():
     try:
         # Simula request POST per scelta EUR
         request_data_eur = {
-            'absorption_id': 'test_notification_456',
-            'choice': 'eur',
-            'amount': 0,
-            'transaction_type': 'discount_declined',
-            'description': 'Test teacher choice endpoint EUR'
+            "absorption_id": "test_notification_456",
+            "choice": "eur",
+            "amount": 0,
+            "transaction_type": "discount_declined",
+            "description": "Test teacher choice endpoint EUR",
         }
 
         request_eur = factory.post(
-            '/api/v1/teocoin/teacher/choice/',
-            data=request_data_eur,
-            format='json'
+            "/api/v1/teocoin/teacher/choice/", data=request_data_eur, format="json"
         )
         request_eur.user = teacher
 
@@ -158,17 +157,17 @@ def test_teacher_teocoin_acceptance():
         print(f"   📥 Response status: {response_eur.status_code}")
         print(f"   📋 Response data: {response_eur.data}")
 
-        if response_eur.status_code == 200 and response_eur.data.get('success'):
+        if response_eur.status_code == 200 and response_eur.data.get("success"):
             print(f"   ✅ Teacher choice EUR successful!")
 
             # Verifica che il balance NON sia cambiato
             eur_balance = db_service.get_balance(teacher)
             if eur_balance == final_balance:
-                print(
-                    f"   ✅ Balance unchanged for EUR choice: {eur_balance} TEO")
+                print(f"   ✅ Balance unchanged for EUR choice: {eur_balance} TEO")
             else:
                 print(
-                    f"   ⚠️  Balance changed unexpectedly: {final_balance} → {eur_balance} TEO")
+                    f"   ⚠️  Balance changed unexpectedly: {final_balance} → {eur_balance} TEO"
+                )
 
         else:
             print(f"   ❌ Teacher choice EUR failed: {response_eur.data}")
@@ -189,16 +188,15 @@ def test_teacher_teocoin_acceptance():
             # Conta transazioni teacher
             cursor.execute(
                 "SELECT COUNT(*) FROM blockchain_dbteocointransaction WHERE user_id = %s",
-                [teacher.id]
+                [teacher.id],
             )
             teacher_transactions = cursor.fetchone()[0]
-            print(
-                f"   📊 Teacher total transactions in DB: {teacher_transactions}")
+            print(f"   📊 Teacher total transactions in DB: {teacher_transactions}")
 
             # Ultime transazioni teacher
             cursor.execute(
                 "SELECT transaction_type, amount, description FROM blockchain_dbteocointransaction WHERE user_id = %s ORDER BY created_at DESC LIMIT 5",
-                [teacher.id]
+                [teacher.id],
             )
             recent_transactions = cursor.fetchall()
 

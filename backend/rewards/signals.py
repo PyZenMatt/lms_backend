@@ -34,41 +34,53 @@ def create_blockchain_notification(sender, instance, created, **kwargs):
     message = ""
 
     # Determina il tipo di notifica e il messaggio in base al tipo di transazione
-    if instance.transaction_type in ['earned', 'exercise_reward', 'review_reward', 'achievement_reward', 'bonus'] and instance.amount > 0:
-        notification_type = 'teocoins_earned'
-        if instance.transaction_type == 'exercise_reward':
+    if (
+        instance.transaction_type
+        in ["earned", "exercise_reward", "review_reward", "achievement_reward", "bonus"]
+        and instance.amount > 0
+    ):
+        notification_type = "teocoins_earned"
+        if instance.transaction_type == "exercise_reward":
             message = f"🎉 Hai guadagnato {instance.amount} TeoCoins per la valutazione del tuo esercizio!"
-        elif instance.transaction_type == 'review_reward':
+        elif instance.transaction_type == "review_reward":
             message = f"⭐ Hai guadagnato {instance.amount} TeoCoins per aver completato una review!"
-        elif instance.transaction_type == 'achievement_reward':
+        elif instance.transaction_type == "achievement_reward":
             message = f"🏆 Hai guadagnato {instance.amount} TeoCoins per un achievement sbloccato!"
-        elif instance.transaction_type == 'bonus':
+        elif instance.transaction_type == "bonus":
             message = f"🎁 Hai ricevuto un bonus di {instance.amount} TeoCoins!"
         else:
             message = f"💰 Hai guadagnato {instance.amount} TeoCoins!"
 
-    elif instance.transaction_type in ['course_earned', 'lesson_earned'] and instance.amount > 0:
-        notification_type = 'teocoins_earned'
-        if instance.transaction_type == 'course_earned':
+    elif (
+        instance.transaction_type in ["course_earned", "lesson_earned"]
+        and instance.amount > 0
+    ):
+        notification_type = "teocoins_earned"
+        if instance.transaction_type == "course_earned":
             message = f"📚 Hai guadagnato {instance.amount} TeoCoins dalla vendita di un corso!"
         else:
             message = f"📖 Hai guadagnato {instance.amount} TeoCoins dalla vendita di una lezione!"
 
-    elif instance.transaction_type in ['spent', 'course_purchase', 'lesson_purchase'] and instance.amount < 0:
-        notification_type = 'teocoins_spent'
-        if instance.transaction_type == 'course_purchase':
-            message = f"🛒 Hai speso {abs(instance.amount)} TeoCoins per acquistare un corso!"
-        elif instance.transaction_type == 'lesson_purchase':
+    elif (
+        instance.transaction_type in ["spent", "course_purchase", "lesson_purchase"]
+        and instance.amount < 0
+    ):
+        notification_type = "teocoins_spent"
+        if instance.transaction_type == "course_purchase":
+            message = (
+                f"🛒 Hai speso {abs(instance.amount)} TeoCoins per acquistare un corso!"
+            )
+        elif instance.transaction_type == "lesson_purchase":
             message = f"🛒 Hai speso {abs(instance.amount)} TeoCoins per acquistare una lezione!"
         else:
             message = f"💸 Hai speso {abs(instance.amount)} TeoCoins!"
 
-    elif instance.transaction_type == 'refund' and instance.amount > 0:
-        notification_type = 'bonus_received'
+    elif instance.transaction_type == "refund" and instance.amount > 0:
+        notification_type = "bonus_received"
         message = f"↩️ Hai ricevuto un rimborso di {instance.amount} TeoCoins!"
 
-    elif instance.transaction_type == 'penalty' and instance.amount < 0:
-        notification_type = 'teocoins_spent'
+    elif instance.transaction_type == "penalty" and instance.amount < 0:
+        notification_type = "teocoins_spent"
         message = f"⚠️ Ti sono stati detratti {abs(instance.amount)} TeoCoins per una penalità!"
 
     # Crea la notifica se abbiamo un tipo valido
@@ -88,8 +100,9 @@ def create_blockchain_notification(sender, instance, created, **kwargs):
             user=instance.user,
             message=message,
             notification_type=notification_type,
-            related_object_id=related_id
+            related_object_id=related_id,
         )
+
 
 # ========== AUTOMATIC REWARD PROCESSING ==========
 
@@ -103,15 +116,16 @@ def auto_process_reward_transaction(sender, instance, created, **kwargs):
         return
 
     # Only process reward transactions
-    if instance.transaction_type not in ['exercise_reward', 'review_reward']:
+    if instance.transaction_type not in ["exercise_reward", "review_reward"]:
         return
 
     # Only process pending transactions
-    if instance.status != 'pending':
+    if instance.status != "pending":
         return
 
     logger.info(
-        f"Auto-processing reward transaction {instance.id} for {instance.user.username}")
+        f"Auto-processing reward transaction {instance.id} for {instance.user.username}"
+    )
 
     try:
         # Import here to avoid circular imports
@@ -120,10 +134,11 @@ def auto_process_reward_transaction(sender, instance, created, **kwargs):
         # Check if user has wallet address
         if not instance.user.wallet_address:
             logger.warning(
-                f"User {instance.user.username} has no wallet address for transaction {instance.id}")
-            instance.status = 'failed'
-            instance.error_message = 'User has no wallet address'
-            instance.save(update_fields=['status', 'error_message'])
+                f"User {instance.user.username} has no wallet address for transaction {instance.id}"
+            )
+            instance.status = "failed"
+            instance.error_message = "User has no wallet address"
+            instance.save(update_fields=["status", "error_message"])
             return
 
         # Mint tokens to user's wallet
@@ -132,46 +147,57 @@ def auto_process_reward_transaction(sender, instance, created, **kwargs):
         try:
             teocoin_service = TeoCoinService()
             tx_hash = teocoin_service.mint_tokens(
-                instance.user.wallet_address,
-                instance.amount
+                instance.user.wallet_address, instance.amount
             )
 
             if tx_hash:
                 # Update transaction with success
-                instance.status = 'completed'
+                instance.status = "completed"
                 instance.tx_hash = tx_hash
                 instance.transaction_hash = tx_hash
                 instance.confirmed_at = timezone.now()
                 instance.save(
-                    update_fields=['status', 'tx_hash', 'transaction_hash', 'confirmed_at'])
+                    update_fields=[
+                        "status",
+                        "tx_hash",
+                        "transaction_hash",
+                        "confirmed_at",
+                    ]
+                )
 
                 logger.info(
-                    f"✅ Auto-processed reward transaction {instance.id} - TX Hash: {tx_hash}")
+                    f"✅ Auto-processed reward transaction {instance.id} - TX Hash: {tx_hash}"
+                )
             else:
                 # Mark as failed
-                instance.status = 'failed'
-                instance.error_message = 'Blockchain transaction failed - no tx hash returned'
-                instance.save(update_fields=['status', 'error_message'])
+                instance.status = "failed"
+                instance.error_message = (
+                    "Blockchain transaction failed - no tx hash returned"
+                )
+                instance.save(update_fields=["status", "error_message"])
 
                 logger.error(
-                    f"❌ Failed to auto-process reward transaction {instance.id} - no tx hash returned")
+                    f"❌ Failed to auto-process reward transaction {instance.id} - no tx hash returned"
+                )
 
         except Exception as blockchain_error:
             # Mark as failed with error
-            instance.status = 'failed'
-            instance.error_message = f'Blockchain error: {str(blockchain_error)}'
-            instance.save(update_fields=['status', 'error_message'])
+            instance.status = "failed"
+            instance.error_message = f"Blockchain error: {str(blockchain_error)}"
+            instance.save(update_fields=["status", "error_message"])
 
             logger.error(
-                f"❌ Blockchain error processing transaction {instance.id}: {blockchain_error}")
+                f"❌ Blockchain error processing transaction {instance.id}: {blockchain_error}"
+            )
             # Don't re-raise the exception - let the review complete successfully
 
     except Exception as e:
         logger.error(
-            f"❌ Unexpected error auto-processing transaction {instance.id}: {e}")
-        instance.status = 'failed'
-        instance.error_message = f'Processing error: {str(e)}'
-        instance.save(update_fields=['status', 'error_message'])
+            f"❌ Unexpected error auto-processing transaction {instance.id}: {e}"
+        )
+        instance.status = "failed"
+        instance.error_message = f"Processing error: {str(e)}"
+        instance.save(update_fields=["status", "error_message"])
         # Don't re-raise the exception - let the review complete successfully
 
 
@@ -219,13 +245,13 @@ def log_blockchain_transaction(sender, instance, created, **kwargs):
             f"{instance.amount} TEO for user {instance.user.email}"
         )
 
-    elif instance.status == 'confirmed':
+    elif instance.status == "confirmed":
         logger.info(
             f"Blockchain transaction confirmed: {instance.tx_hash} - "
             f"{instance.amount} TEO for user {instance.user.email}"
         )
 
-    elif instance.status == 'failed':
+    elif instance.status == "failed":
         logger.error(
             f"Blockchain transaction failed: {instance.error_message} - "
             f"{instance.amount} TEO for user {instance.user.email}"

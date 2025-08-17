@@ -8,20 +8,25 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('users', '0004_alter_teacherprofile_options_and_more'),
+        ("users", "0004_alter_teacherprofile_options_and_more"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='teacherprofile',
-            name='total_courses',
+            model_name="teacherprofile",
+            name="total_courses",
             field=models.PositiveIntegerField(
-                default=0, help_text='Total number of courses created by this teacher'),
+                default=0, help_text="Total number of courses created by this teacher"
+            ),
         ),
         migrations.AddField(
-            model_name='teacherprofile',
-            name='total_earnings',
-            field=models.DecimalField(decimal_places=2, default=Decimal(
-                '0.00'), help_text='Combined total earnings (EUR equivalent)', max_digits=12),
+            model_name="teacherprofile",
+            name="total_earnings",
+            field=models.DecimalField(
+                decimal_places=2,
+                default=Decimal("0.00"),
+                help_text="Combined total earnings (EUR equivalent)",
+                max_digits=12,
+            ),
         ),
     ]

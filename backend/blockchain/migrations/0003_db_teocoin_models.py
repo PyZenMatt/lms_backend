@@ -11,86 +11,217 @@ class Migration(migrations.Migration):
 
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-        ('courses', '0006_teacherchoicepreference_teacherdiscountdecision'),
-        ('blockchain', '0002_teocoindiscountrequest'),
+        ("courses", "0006_teacherchoicepreference_teacherdiscountdecision"),
+        ("blockchain", "0002_teocoindiscountrequest"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='DBTeoCoinBalance',
+            name="DBTeoCoinBalance",
             fields=[
-                ('id', models.BigAutoField(auto_created=True,
-                 primary_key=True, serialize=False, verbose_name='ID')),
-                ('available_balance', models.DecimalField(decimal_places=2, default=Decimal(
-                    '0.00'), help_text='TEO available for spending (discounts/staking)', max_digits=12)),
-                ('staked_balance', models.DecimalField(decimal_places=2, default=Decimal(
-                    '0.00'), help_text='TEO currently staked (affects commission rates)', max_digits=12)),
-                ('pending_withdrawal', models.DecimalField(decimal_places=2, default=Decimal(
-                    '0.00'), help_text='TEO pending withdrawal to MetaMask', max_digits=12)),
-                ('last_blockchain_sync', models.DateTimeField(blank=True, null=True)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
-                ('user', models.OneToOneField(on_delete=django.db.models.deletion.CASCADE,
-                 related_name='db_teocoin_balance', to=settings.AUTH_USER_MODEL)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "available_balance",
+                    models.DecimalField(
+                        decimal_places=2,
+                        default=Decimal("0.00"),
+                        help_text="TEO available for spending (discounts/staking)",
+                        max_digits=12,
+                    ),
+                ),
+                (
+                    "staked_balance",
+                    models.DecimalField(
+                        decimal_places=2,
+                        default=Decimal("0.00"),
+                        help_text="TEO currently staked (affects commission rates)",
+                        max_digits=12,
+                    ),
+                ),
+                (
+                    "pending_withdrawal",
+                    models.DecimalField(
+                        decimal_places=2,
+                        default=Decimal("0.00"),
+                        help_text="TEO pending withdrawal to MetaMask",
+                        max_digits=12,
+                    ),
+                ),
+                ("last_blockchain_sync", models.DateTimeField(blank=True, null=True)),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("updated_at", models.DateTimeField(auto_now=True)),
+                (
+                    "user",
+                    models.OneToOneField(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="db_teocoin_balance",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'DB TeoCoin Balance',
-                'verbose_name_plural': 'DB TeoCoin Balances',
-                'db_table': 'blockchain_db_teocoin_balance',
+                "verbose_name": "DB TeoCoin Balance",
+                "verbose_name_plural": "DB TeoCoin Balances",
+                "db_table": "blockchain_db_teocoin_balance",
             },
         ),
         migrations.CreateModel(
-            name='TeoCoinWithdrawalRequest',
+            name="TeoCoinWithdrawalRequest",
             fields=[
-                ('id', models.BigAutoField(auto_created=True,
-                 primary_key=True, serialize=False, verbose_name='ID')),
-                ('amount', models.DecimalField(decimal_places=2, max_digits=12)),
-                ('wallet_address', models.CharField(max_length=42)),
-                ('status', models.CharField(choices=[('pending', 'Pending'), ('processing', 'Processing'), (
-                    'completed', 'Completed'), ('failed', 'Failed')], default='pending', max_length=20)),
-                ('blockchain_tx_hash', models.CharField(
-                    blank=True, max_length=66, null=True)),
-                ('gas_fee_paid', models.DecimalField(
-                    blank=True, decimal_places=6, max_digits=8, null=True)),
-                ('error_message', models.TextField(blank=True, null=True)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('completed_at', models.DateTimeField(blank=True, null=True)),
-                ('user', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE,
-                 related_name='withdrawal_requests', to=settings.AUTH_USER_MODEL)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("amount", models.DecimalField(decimal_places=2, max_digits=12)),
+                ("wallet_address", models.CharField(max_length=42)),
+                (
+                    "status",
+                    models.CharField(
+                        choices=[
+                            ("pending", "Pending"),
+                            ("processing", "Processing"),
+                            ("completed", "Completed"),
+                            ("failed", "Failed"),
+                        ],
+                        default="pending",
+                        max_length=20,
+                    ),
+                ),
+                (
+                    "blockchain_tx_hash",
+                    models.CharField(blank=True, max_length=66, null=True),
+                ),
+                (
+                    "gas_fee_paid",
+                    models.DecimalField(
+                        blank=True, decimal_places=6, max_digits=8, null=True
+                    ),
+                ),
+                ("error_message", models.TextField(blank=True, null=True)),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("completed_at", models.DateTimeField(blank=True, null=True)),
+                (
+                    "user",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="withdrawal_requests",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'TeoCoin Withdrawal Request',
-                'verbose_name_plural': 'TeoCoin Withdrawal Requests',
-                'db_table': 'blockchain_teocoin_withdrawal_request',
-                'ordering': ['-created_at'],
-                'indexes': [models.Index(fields=['user', 'status'], name='blockchain__user_id_71662f_idx'), models.Index(fields=['created_at'], name='blockchain__created_5fe99f_idx'), models.Index(fields=['status'], name='blockchain__status_a2ec7b_idx')],
+                "verbose_name": "TeoCoin Withdrawal Request",
+                "verbose_name_plural": "TeoCoin Withdrawal Requests",
+                "db_table": "blockchain_teocoin_withdrawal_request",
+                "ordering": ["-created_at"],
+                "indexes": [
+                    models.Index(
+                        fields=["user", "status"], name="blockchain__user_id_71662f_idx"
+                    ),
+                    models.Index(
+                        fields=["created_at"], name="blockchain__created_5fe99f_idx"
+                    ),
+                    models.Index(
+                        fields=["status"], name="blockchain__status_a2ec7b_idx"
+                    ),
+                ],
             },
         ),
         migrations.CreateModel(
-            name='DBTeoCoinTransaction',
+            name="DBTeoCoinTransaction",
             fields=[
-                ('id', models.BigAutoField(auto_created=True,
-                 primary_key=True, serialize=False, verbose_name='ID')),
-                ('transaction_type', models.CharField(choices=[('earned', 'Earned (Rewards/Teaching)'), ('spent_discount', 'Spent on Discount'), ('staked', 'Staked for Commission'), ('unstaked', 'Unstaked'), (
-                    'withdrawn', 'Withdrawn to MetaMask'), ('deposit', 'Deposited from MetaMask'), ('bonus', 'Platform Bonus'), ('migration', 'Migrated from Blockchain')], max_length=20)),
-                ('amount', models.DecimalField(decimal_places=2, max_digits=12)),
-                ('description', models.TextField()),
-                ('blockchain_tx_hash', models.CharField(
-                    blank=True, max_length=66, null=True)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('course', models.ForeignKey(blank=True, null=True,
-                 on_delete=django.db.models.deletion.SET_NULL, to='courses.course')),
-                ('related_user', models.ForeignKey(blank=True, help_text='Other user involved (e.g., teacher in discount)', null=True,
-                 on_delete=django.db.models.deletion.SET_NULL, related_name='related_teocoin_transactions', to=settings.AUTH_USER_MODEL)),
-                ('user', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE,
-                 related_name='db_teocoin_transactions', to=settings.AUTH_USER_MODEL)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "transaction_type",
+                    models.CharField(
+                        choices=[
+                            ("earned", "Earned (Rewards/Teaching)"),
+                            ("spent_discount", "Spent on Discount"),
+                            ("staked", "Staked for Commission"),
+                            ("unstaked", "Unstaked"),
+                            ("withdrawn", "Withdrawn to MetaMask"),
+                            ("deposit", "Deposited from MetaMask"),
+                            ("bonus", "Platform Bonus"),
+                            ("migration", "Migrated from Blockchain"),
+                        ],
+                        max_length=20,
+                    ),
+                ),
+                ("amount", models.DecimalField(decimal_places=2, max_digits=12)),
+                ("description", models.TextField()),
+                (
+                    "blockchain_tx_hash",
+                    models.CharField(blank=True, max_length=66, null=True),
+                ),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                (
+                    "course",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        to="courses.course",
+                    ),
+                ),
+                (
+                    "related_user",
+                    models.ForeignKey(
+                        blank=True,
+                        help_text="Other user involved (e.g., teacher in discount)",
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        related_name="related_teocoin_transactions",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
+                (
+                    "user",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="db_teocoin_transactions",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'DB TeoCoin Transaction',
-                'verbose_name_plural': 'DB TeoCoin Transactions',
-                'db_table': 'blockchain_db_teocoin_transaction',
-                'ordering': ['-created_at'],
-                'indexes': [models.Index(fields=['user', 'transaction_type'], name='blockchain__user_id_cfb30e_idx'), models.Index(fields=['created_at'], name='blockchain__created_1e2fcd_idx'), models.Index(fields=['blockchain_tx_hash'], name='blockchain__blockch_da6d96_idx')],
+                "verbose_name": "DB TeoCoin Transaction",
+                "verbose_name_plural": "DB TeoCoin Transactions",
+                "db_table": "blockchain_db_teocoin_transaction",
+                "ordering": ["-created_at"],
+                "indexes": [
+                    models.Index(
+                        fields=["user", "transaction_type"],
+                        name="blockchain__user_id_cfb30e_idx",
+                    ),
+                    models.Index(
+                        fields=["created_at"], name="blockchain__created_1e2fcd_idx"
+                    ),
+                    models.Index(
+                        fields=["blockchain_tx_hash"],
+                        name="blockchain__blockch_da6d96_idx",
+                    ),
+                ],
             },
         ),
     ]

@@ -14,8 +14,8 @@ from django.test import Client
 from rest_framework_simplejwt.tokens import RefreshToken
 
 # Setup Django
-sys.path.append('/home/teo/Project/school/schoolplatform')
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'schoolplatform.settings')
+sys.path.append("/home/teo/Project/school/schoolplatform")
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "schoolplatform.settings")
 django.setup()
 
 
@@ -32,7 +32,7 @@ def test_student_dashboard_api():
 
     try:
         # Get student and token
-        user = User.objects.get(username='student1')
+        user = User.objects.get(username="student1")
         token = RefreshToken.for_user(user).access_token
 
         print(f"👤 Testing for user: {user.username}")
@@ -42,12 +42,12 @@ def test_student_dashboard_api():
         print(f"📚 Direct DB enrollments: {enrollments.count()}")
         for enrollment in enrollments:
             print(
-                f"   - Course: {enrollment.course.title} (ID: {enrollment.course.id})")
+                f"   - Course: {enrollment.course.title} (ID: {enrollment.course.id})"
+            )
 
         # Test API endpoint
         response = client.get(
-            '/api/v1/dashboard/student/',
-            HTTP_AUTHORIZATION=f'Bearer {token}'
+            "/api/v1/dashboard/student/", HTTP_AUTHORIZATION=f"Bearer {token}"
         )
 
         print(f"\n🔍 API Response Status: {response.status_code}")
@@ -61,14 +61,14 @@ def test_student_dashboard_api():
             print(f"   - Balance: {data.get('blockchain_balance')}")
             print(f"   - Courses: {len(data.get('courses', []))}")
 
-            for course in data.get('courses', []):
+            for course in data.get("courses", []):
                 print(f"     * {course.get('title')} (ID: {course.get('id')})")
                 print(
-                    f"       Teacher: {course.get('teacher', {}).get('username', 'N/A')}")
+                    f"       Teacher: {course.get('teacher', {}).get('username', 'N/A')}"
+                )
                 print(f"       Price: {course.get('price', 'N/A')}")
 
-            print(
-                f"   - Transactions: {len(data.get('recent_transactions', []))}")
+            print(f"   - Transactions: {len(data.get('recent_transactions', []))}")
             print(f"   - Notifications: {len(data.get('notifications', []))}")
 
             # Pretty print the full response for debugging
@@ -81,6 +81,7 @@ def test_student_dashboard_api():
     except Exception as e:
         print(f"❌ Error: {e}")
         import traceback
+
         traceback.print_exc()
 
 

@@ -12,40 +12,37 @@ logger = logging.getLogger(__name__)
 
 
 class Command(BaseCommand):
-    help = 'Clear all pending TeoCoin withdrawals and return amounts to user balances'
+    help = "Clear all pending TeoCoin withdrawals and return amounts to user balances"
 
     def add_arguments(self, parser):
         parser.add_argument(
-            '--user-id',
+            "--user-id",
             type=int,
-            help='Clear pending withdrawals for specific user ID only'
+            help="Clear pending withdrawals for specific user ID only",
         )
         parser.add_argument(
-            '--dry-run',
-            action='store_true',
-            help='Show what would be done without making changes'
+            "--dry-run",
+            action="store_true",
+            help="Show what would be done without making changes",
         )
 
     def handle(self, *args, **options):
-        user_id = options.get('user_id')
-        dry_run = options.get('dry_run')
+        user_id = options.get("user_id")
+        dry_run = options.get("dry_run")
 
         # Get pending withdrawals
         pending_withdrawals = TeoCoinWithdrawalRequest.objects.filter(
-            status__in=['pending', 'processing']
+            status__in=["pending", "processing"]
         )
 
         if user_id:
             pending_withdrawals = pending_withdrawals.filter(user_id=user_id)
 
         if not pending_withdrawals.exists():
-            self.stdout.write(
-                self.style.SUCCESS('No pending withdrawals found.')
-            )
+            self.stdout.write(self.style.SUCCESS("No pending withdrawals found."))
             return
 
-        self.stdout.write(
-            f"Found {pending_withdrawals.count()} pending withdrawals:")
+        self.stdout.write(f"Found {pending_withdrawals.count()} pending withdrawals:")
 
         total_returned = 0
 
@@ -59,16 +56,19 @@ class Command(BaseCommand):
         if dry_run:
             self.stdout.write(
                 self.style.WARNING(
-                    f"\nDRY RUN: Would return {total_returned} TEO to user balances")
+                    f"\nDRY RUN: Would return {total_returned} TEO to user balances"
+                )
             )
             return
 
         # Confirm action
-        if not options.get('user_id'):
-            confirm = input(f"\nThis will cancel {pending_withdrawals.count()} withdrawals "
-                            f"and return {total_returned} TEO to user balances. Continue? (y/N): ")
-            if confirm.lower() not in ['y', 'yes']:
-                self.stdout.write(self.style.WARNING('Operation cancelled.'))
+        if not options.get("user_id"):
+            confirm = input(
+                f"\nThis will cancel {pending_withdrawals.count()} withdrawals "
+                f"and return {total_returned} TEO to user balances. Continue? (y/N): "
+            )
+            if confirm.lower() not in ["y", "yes"]:
+                self.stdout.write(self.style.WARNING("Operation cancelled."))
                 return
 
         # Process withdrawals
@@ -80,8 +80,7 @@ class Command(BaseCommand):
                 try:
                     # Get or create user balance
                     balance, created = DBTeoCoinBalance.objects.get_or_create(
-                        user=withdrawal.user,
-                        defaults={'available_balance': 0}
+                        user=withdrawal.user, defaults={"available_balance": 0}
                     )
 
                     # Return amount to balance
@@ -89,7 +88,7 @@ class Command(BaseCommand):
                     balance.save()
 
                     # Mark withdrawal as cancelled
-                    withdrawal.status = 'cancelled'
+                    withdrawal.status = "cancelled"
                     withdrawal.save()
 
                     cancelled_count += 1
@@ -101,11 +100,11 @@ class Command(BaseCommand):
                     )
 
                 except Exception as e:
-                    logger.error(
-                        f"Failed to cancel withdrawal {withdrawal.id}: {e}")
+                    logger.error(f"Failed to cancel withdrawal {withdrawal.id}: {e}")
                     self.stdout.write(
                         self.style.ERROR(
-                            f"✗ Failed to cancel withdrawal {withdrawal.id}: {e}")
+                            f"✗ Failed to cancel withdrawal {withdrawal.id}: {e}"
+                        )
                     )
 
         self.stdout.write(

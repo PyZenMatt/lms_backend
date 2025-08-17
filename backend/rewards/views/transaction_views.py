@@ -8,12 +8,13 @@ from ..serializers import BlockchainTransactionSerializer
 
 class TransactionHistoryView(generics.ListAPIView):
     """List view for user's blockchain transaction history with filtering"""
+
     serializer_class = BlockchainTransactionSerializer
     permission_classes = [IsAuthenticated]
     filter_backends = [drf_filters.SearchFilter, drf_filters.OrderingFilter]
-    search_fields = ['transaction_type']
-    ordering_fields = ['created_at', 'amount']
-    ordering = ['-created_at']  # Default ordering
+    search_fields = ["transaction_type"]
+    ordering_fields = ["created_at", "amount"]
+    ordering = ["-created_at"]  # Default ordering
 
     def get_queryset(self):  # type: ignore
         """Filter transactions by authenticated user and optional date range"""
@@ -21,10 +22,11 @@ class TransactionHistoryView(generics.ListAPIView):
         queryset = BlockchainTransaction.objects.filter(user=user)
 
         # Handle date filtering safely for both DRF and regular Django requests
-        query_params = getattr(self.request, 'query_params',
-                               getattr(self.request, 'GET', {}))
-        date_from = query_params.get('from')
-        date_to = query_params.get('to')
+        query_params = getattr(
+            self.request, "query_params", getattr(self.request, "GET", {})
+        )
+        date_from = query_params.get("from")
+        date_to = query_params.get("to")
 
         if date_from:
             queryset = queryset.filter(created_at__gte=date_from)

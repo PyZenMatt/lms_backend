@@ -10,8 +10,8 @@ import django
 from account.models import CustomUser
 
 # Setup Django
-sys.path.append('/home/teo/Project/school/schoolplatform')
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'schoolplatform.settings')
+sys.path.append("/home/teo/Project/school/schoolplatform")
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "schoolplatform.settings")
 django.setup()
 
 
@@ -21,7 +21,7 @@ def verify_frontend_integration():
 
     try:
         # Get student1
-        student1 = CustomUser.objects.get(username='student1')
+        student1 = CustomUser.objects.get(username="student1")
         student_wallet = student1.wallet_address
 
         print(f"👤 Student1 wallet address: {student_wallet}")
@@ -49,7 +49,9 @@ def verify_frontend_integration():
 
         print("\n🔧 Key changes made:")
         print("1. CourseCheckoutModal.jsx: Shows student TEO and MATIC balances")
-        print("2. web3Service.js: getBalance() and getMaticBalance() use student address")
+        print(
+            "2. web3Service.js: getBalance() and getMaticBalance() use student address"
+        )
         print("3. Removed testing/simulation logic")
         print("4. Clean UI with proper balance checks")
 

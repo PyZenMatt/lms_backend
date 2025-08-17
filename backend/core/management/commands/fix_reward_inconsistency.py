@@ -13,7 +13,7 @@ from rewards.models import BlockchainTransaction
 from users.models import User
 
 # Setup Django
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'schoolplatform.settings')
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "schoolplatform.settings")
 django.setup()
 
 
@@ -25,9 +25,12 @@ def fix_reward_inconsistency():
 
     try:
         # Trova il corso con il problema
-        student1 = User.objects.get(username='student1')
-        submission = ExerciseSubmission.objects.filter(
-            student=student1).order_by('-submitted_at').first()
+        student1 = User.objects.get(username="student1")
+        submission = (
+            ExerciseSubmission.objects.filter(student=student1)
+            .order_by("-submitted_at")
+            .first()
+        )
         course = submission.exercise.lesson.course
 
         print(f"Course: {course.title}")
@@ -41,8 +44,7 @@ def fix_reward_inconsistency():
         submission_ids = [s.id for s in all_submissions]
 
         exercise_rewards = BlockchainTransaction.objects.filter(
-            transaction_type='exercise_reward',
-            related_object_id__in=submission_ids
+            transaction_type="exercise_reward", related_object_id__in=submission_ids
         )
 
         print(f"\nSubmissions for this course: {len(all_submissions)}")
@@ -50,11 +52,11 @@ def fix_reward_inconsistency():
 
         # Calcola il totale realmente distribuito
         total_distributed = sum(
-            r.amount for r in exercise_rewards if r.status == 'completed')
+            r.amount for r in exercise_rewards if r.status == "completed"
+        )
         print(f"Total actually distributed: {total_distributed} TEO")
         print(f"Recorded in course: {course.reward_distributed} TEO")
-        print(
-            f"Difference: {course.reward_distributed - total_distributed} TEO")
+        print(f"Difference: {course.reward_distributed - total_distributed} TEO")
 
         if total_distributed != course.reward_distributed:
             print("\n🔧 FIXING INCONSISTENCY...")
@@ -62,9 +64,8 @@ def fix_reward_inconsistency():
             with transaction.atomic():
                 # Reset reward_distributed to actual amount
                 course.reward_distributed = total_distributed
-                course.save(update_fields=['reward_distributed'])
-                print(
-                    f"✅ Reset course.reward_distributed to {total_distributed} TEO")
+                course.save(update_fields=["reward_distributed"])
+                print(f"✅ Reset course.reward_distributed to {total_distributed} TEO")
 
                 # Now there should be room for new rewards
                 reward_max = int(course.price * 0.15)
@@ -74,7 +75,8 @@ def fix_reward_inconsistency():
 
                 if reward_remaining > 0:
                     print(
-                        f"✅ Now there are {reward_remaining} TEO available for new rewards!")
+                        f"✅ Now there are {reward_remaining} TEO available for new rewards!"
+                    )
 
                     # Check if student1's submission deserves a reward
                     if submission.passed and submission.is_approved:
@@ -87,29 +89,32 @@ def fix_reward_inconsistency():
 
                         # Create the reward transaction
                         from rewards.utils import create_reward_transaction
+
                         exercise_reward = create_reward_transaction(
                             submission.student,
                             reward_amount,
-                            'exercise_reward',
-                            submission.id
+                            "exercise_reward",
+                            submission.id,
                         )
 
                         # Update the course and submission
                         course.reward_distributed = total_distributed + reward_amount
-                        course.save(update_fields=['reward_distributed'])
+                        course.save(update_fields=["reward_distributed"])
 
                         submission.reward_amount = reward_amount
-                        submission.save(update_fields=['reward_amount'])
+                        submission.save(update_fields=["reward_amount"])
 
+                        print(f"✅ Exercise reward created: ID {exercise_reward.id}")
                         print(
-                            f"✅ Exercise reward created: ID {exercise_reward.id}")
+                            f"✅ Course reward_distributed updated to: {course.reward_distributed} TEO"
+                        )
                         print(
-                            f"✅ Course reward_distributed updated to: {course.reward_distributed} TEO")
-                        print(
-                            f"✅ Submission reward_amount set to: {submission.reward_amount} TEO")
+                            f"✅ Submission reward_amount set to: {submission.reward_amount} TEO"
+                        )
                     else:
                         print(
-                            "⚠️  Student1's submission doesn't qualify for reward (not passed or approved)")
+                            "⚠️  Student1's submission doesn't qualify for reward (not passed or approved)"
+                        )
                 else:
                     print("⚠️  No reward remaining even after correction")
         else:
@@ -121,18 +126,20 @@ def fix_reward_inconsistency():
 
         # Count final rewards
         final_rewards = BlockchainTransaction.objects.filter(
-            transaction_type='exercise_reward',
-            related_object_id__in=submission_ids
+            transaction_type="exercise_reward", related_object_id__in=submission_ids
         )
-        final_total = sum(r.amount for r in final_rewards if r.status in [
-                          'completed', 'pending'])
+        final_total = sum(
+            r.amount for r in final_rewards if r.status in ["completed", "pending"]
+        )
         print(f"Total exercise rewards: {final_total} TEO")
         print(
-            f"Status: {'✅ CONSISTENT' if final_total == course.reward_distributed else '❌ STILL INCONSISTENT'}")
+            f"Status: {'✅ CONSISTENT' if final_total == course.reward_distributed else '❌ STILL INCONSISTENT'}"
+        )
 
     except Exception as e:
         print(f"❌ Error: {e}")
         import traceback
+
         traceback.print_exc()
 
 

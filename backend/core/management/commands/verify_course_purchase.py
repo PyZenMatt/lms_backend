@@ -15,8 +15,8 @@ from rewards.models import BlockchainTransaction
 from blockchain.blockchain import teocoin_service
 
 # Setup Django
-sys.path.append('/home/teo/Project/school/schoolplatform')
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'schoolplatform.settings')
+sys.path.append("/home/teo/Project/school/schoolplatform")
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "schoolplatform.settings")
 django.setup()
 
 
@@ -33,7 +33,7 @@ def verify_course_purchase():
     one_hour_ago = datetime.now() - timedelta(hours=1)
     recent_txs = BlockchainTransaction.objects.filter(
         created_at__gte=one_hour_ago
-    ).order_by('-created_at')
+    ).order_by("-created_at")
 
     print(f"📊 Transazioni ultime ora ({len(recent_txs)} trovate):")
     print("-" * 30)
@@ -49,7 +49,7 @@ def verify_course_purchase():
         print(f"   📝 Note: {tx.notes}")
         print(f"   ✅ Status: {tx.status}")
 
-        if tx.transaction_type == 'course_purchase':
+        if tx.transaction_type == "course_purchase":
             course_purchase_tx = tx
 
         print()
@@ -57,7 +57,7 @@ def verify_course_purchase():
     # 2. Ultimi enrollment
     recent_enrollments = CourseEnrollment.objects.filter(
         enrolled_at__gte=one_hour_ago
-    ).order_by('-enrolled_at')
+    ).order_by("-enrolled_at")
 
     print(f"📚 Enrollment ultime ora ({len(recent_enrollments)} trovati):")
     print("-" * 30)
@@ -74,7 +74,7 @@ def verify_course_purchase():
     print("💼 Bilanci attuali:")
     print("-" * 20)
 
-    student = User.objects.filter(username='student1').first()
+    student = User.objects.filter(username="student1").first()
     if student and student.wallet_address:
         student_balance = teocoin_service.get_balance(student.wallet_address)
         print(f"👤 Student1: {student_balance} TEO ({student.wallet_address})")
@@ -82,13 +82,14 @@ def verify_course_purchase():
     # Trova teacher del corso acquistato
     if course_purchase_tx and course_purchase_tx.related_object_id:
         try:
-            course = Course.objects.get(
-                id=course_purchase_tx.related_object_id)
+            course = Course.objects.get(id=course_purchase_tx.related_object_id)
             if course.teacher.wallet_address:
                 teacher_balance = teocoin_service.get_balance(
-                    course.teacher.wallet_address)
+                    course.teacher.wallet_address
+                )
                 print(
-                    f"👨‍🏫 {course.teacher.username}: {teacher_balance} TEO ({course.teacher.wallet_address})")
+                    f"👨‍🏫 {course.teacher.username}: {teacher_balance} TEO ({course.teacher.wallet_address})"
+                )
         except Course.DoesNotExist:
             pass
 
@@ -121,19 +122,23 @@ def verify_course_purchase():
                 for i, log in enumerate(receipt.logs):
                     try:
                         # Decodifica evento Transfer (topic[0] = Transfer signature)
-                        if len(log.topics) >= 3 and log.topics[0].hex() == '0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef':
-                            from_addr = '0x' + log.topics[1].hex()[26:]
-                            to_addr = '0x' + log.topics[2].hex()[26:]
+                        if (
+                            len(log.topics) >= 3
+                            and log.topics[0].hex()
+                            == "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef"
+                        ):
+                            from_addr = "0x" + log.topics[1].hex()[26:]
+                            to_addr = "0x" + log.topics[2].hex()[26:]
                             amount_wei = int(log.data.hex(), 16)
                             amount_teo = teocoin_service.w3.from_wei(
-                                amount_wei, 'ether')
+                                amount_wei, "ether"
+                            )
 
                             print(f"  {i+1}. Transfer: {amount_teo} TEO")
                             print(f"     From: {from_addr}")
                             print(f"     To: {to_addr}")
                     except Exception as e:
-                        print(
-                            f"  {i+1}. Log non decodificabile: {str(e)[:50]}")
+                        print(f"  {i+1}. Log non decodificabile: {str(e)[:50]}")
 
         except Exception as e:
             print(f"❌ Errore verifica blockchain: {e}")

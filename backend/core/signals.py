@@ -8,6 +8,7 @@ and business logic processing.
 Signal Handlers:
     - handle_exercise_graded: Creates notifications when exercises are graded
 """
+
 import logging
 
 from courses.models import Exercise
@@ -15,7 +16,7 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 from notifications.models import Notification
 
-logger = logging.getLogger('signals')
+logger = logging.getLogger("signals")
 
 
 @receiver(post_save, sender=Exercise)
@@ -33,13 +34,13 @@ def handle_exercise_graded(sender, instance, created, **kwargs):
         **kwargs: Additional signal arguments
     """
     # Only create notification for reviewed exercises (not new ones)
-    if not created and instance.status == 'reviewed' and instance.score is not None:
+    if not created and instance.status == "reviewed" and instance.score is not None:
         try:
             Notification.objects.create(
                 user=instance.student,
                 message=f"Esercizio '{instance.lesson.title}' valutato: {instance.score}/100",
-                notification_type='exercise_graded',
-                related_object_id=instance.id
+                notification_type="exercise_graded",
+                related_object_id=instance.id,
             )
 
             logger.info(
@@ -50,5 +51,5 @@ def handle_exercise_graded(sender, instance, created, **kwargs):
         except Exception as e:
             logger.error(
                 f"Failed to create exercise graded notification for exercise {instance.id}: {e}",
-                exc_info=True
+                exc_info=True,
             )

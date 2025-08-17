@@ -11,8 +11,8 @@ import django
 from blockchain.blockchain import teocoin_service
 
 # Setup Django
-sys.path.append('/home/teo/Project/school/schoolplatform')
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'schoolplatform.settings')
+sys.path.append("/home/teo/Project/school/schoolplatform")
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "schoolplatform.settings")
 django.setup()
 
 
@@ -34,7 +34,8 @@ def check_transaction_status(tx_hash):
         print(f"🏠 From: {transaction['from']}")
         print(f"🎯 To: {transaction['to']}")
         print(
-            f"💰 Value: {teocoin_service.w3.from_wei(transaction['value'], 'ether')} MATIC")
+            f"💰 Value: {teocoin_service.w3.from_wei(transaction['value'], 'ether')} MATIC"
+        )
         print(f"📝 Input data length: {len(transaction['input'])} bytes")
 
         if receipt.status == 1:
@@ -46,18 +47,25 @@ def check_transaction_status(tx_hash):
                 for i, log in enumerate(receipt.logs):
                     try:
                         # Decodifica evento Transfer
-                        if len(log.topics) >= 3 and log.topics[0].hex() == '0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef':
-                            from_addr = '0x' + log.topics[1].hex()[26:]
-                            to_addr = '0x' + log.topics[2].hex()[26:]
+                        if (
+                            len(log.topics) >= 3
+                            and log.topics[0].hex()
+                            == "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef"
+                        ):
+                            from_addr = "0x" + log.topics[1].hex()[26:]
+                            to_addr = "0x" + log.topics[2].hex()[26:]
                             amount_wei = int(log.data.hex(), 16)
                             amount_teo = teocoin_service.w3.from_wei(
-                                amount_wei, 'ether')
+                                amount_wei, "ether"
+                            )
 
                             print(
-                                f"  🔄 Transfer #{i+1}: {amount_teo} TEO from {from_addr} to {to_addr}")
+                                f"  🔄 Transfer #{i+1}: {amount_teo} TEO from {from_addr} to {to_addr}"
+                            )
                     except Exception:
                         print(
-                            f"  ❓ Log #{i+1}: {log.topics[0].hex() if log.topics else 'No topics'}")
+                            f"  ❓ Log #{i+1}: {log.topics[0].hex() if log.topics else 'No topics'}"
+                        )
             else:
                 print("📋 Nessun evento trovato")
         else:
@@ -82,7 +90,7 @@ def check_latest_balances():
     addresses = {
         "Student": "0x61CA0280cE520a8eB7e4ee175A30C768A5d144D4",
         "Teacher": "0xE2fA8AfbF1B795f5dEd1a33aa360872E9020a9A0",
-        "Reward Pool": "0x3b72a4E942CF1467134510cA3952F01b63005044"
+        "Reward Pool": "0x3b72a4E942CF1467134510cA3952F01b63005044",
     }
 
     for name, addr in addresses.items():

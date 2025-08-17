@@ -8,5 +8,6 @@ class AuthenticationConfig(AppConfig):
     This app handles user authentication, registration, email verification,
     and JWT token management for the school platform.
     """
-    default_auto_field = 'django.db.models.BigAutoField'
-    name = 'authentication'
+
+    default_auto_field = "django.db.models.BigAutoField"
+    name = "authentication"

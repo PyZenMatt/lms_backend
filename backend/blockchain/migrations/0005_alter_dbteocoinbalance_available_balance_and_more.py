@@ -8,20 +8,28 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('blockchain', '0004_enhance_withdrawal_model_phase1'),
+        ("blockchain", "0004_enhance_withdrawal_model_phase1"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='dbteocoinbalance',
-            name='available_balance',
-            field=models.DecimalField(decimal_places=2, default=Decimal(
-                '0.00'), help_text='TEO available for spending (discounts for students, staking for teachers)', max_digits=12),
+            model_name="dbteocoinbalance",
+            name="available_balance",
+            field=models.DecimalField(
+                decimal_places=2,
+                default=Decimal("0.00"),
+                help_text="TEO available for spending (discounts for students, staking for teachers)",
+                max_digits=12,
+            ),
         ),
         migrations.AlterField(
-            model_name='dbteocoinbalance',
-            name='staked_balance',
-            field=models.DecimalField(decimal_places=2, default=Decimal(
-                '0.00'), help_text='TEO currently staked (Teachers only - affects commission rates)', max_digits=12),
+            model_name="dbteocoinbalance",
+            name="staked_balance",
+            field=models.DecimalField(
+                decimal_places=2,
+                default=Decimal("0.00"),
+                help_text="TEO currently staked (Teachers only - affects commission rates)",
+                max_digits=12,
+            ),
         ),
     ]

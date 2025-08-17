@@ -6,93 +6,103 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('blockchain', '0003_db_teocoin_models'),
+        ("blockchain", "0003_db_teocoin_models"),
     ]
 
     operations = [
         migrations.RemoveIndex(
-            model_name='teocoinwithdrawalrequest',
-            name='blockchain__created_5fe99f_idx',
+            model_name="teocoinwithdrawalrequest",
+            name="blockchain__created_5fe99f_idx",
         ),
         migrations.RemoveIndex(
-            model_name='teocoinwithdrawalrequest',
-            name='blockchain__status_a2ec7b_idx',
+            model_name="teocoinwithdrawalrequest",
+            name="blockchain__status_a2ec7b_idx",
         ),
         migrations.RenameField(
-            model_name='teocoinwithdrawalrequest',
-            old_name='wallet_address',
-            new_name='metamask_address',
+            model_name="teocoinwithdrawalrequest",
+            old_name="wallet_address",
+            new_name="metamask_address",
         ),
         migrations.RenameField(
-            model_name='teocoinwithdrawalrequest',
-            old_name='blockchain_tx_hash',
-            new_name='transaction_hash',
+            model_name="teocoinwithdrawalrequest",
+            old_name="blockchain_tx_hash",
+            new_name="transaction_hash",
         ),
         migrations.RemoveField(
-            model_name='teocoinwithdrawalrequest',
-            name='gas_fee_paid',
+            model_name="teocoinwithdrawalrequest",
+            name="gas_fee_paid",
         ),
         migrations.AddField(
-            model_name='teocoinwithdrawalrequest',
-            name='daily_withdrawal_count',
+            model_name="teocoinwithdrawalrequest",
+            name="daily_withdrawal_count",
             field=models.IntegerField(default=1),
         ),
         migrations.AddField(
-            model_name='teocoinwithdrawalrequest',
-            name='gas_cost_eur',
-            field=models.DecimalField(
-                decimal_places=2, max_digits=8, null=True),
+            model_name="teocoinwithdrawalrequest",
+            name="gas_cost_eur",
+            field=models.DecimalField(decimal_places=2, max_digits=8, null=True),
         ),
         migrations.AddField(
-            model_name='teocoinwithdrawalrequest',
-            name='gas_price_gwei',
-            field=models.DecimalField(
-                decimal_places=2, max_digits=8, null=True),
+            model_name="teocoinwithdrawalrequest",
+            name="gas_price_gwei",
+            field=models.DecimalField(decimal_places=2, max_digits=8, null=True),
         ),
         migrations.AddField(
-            model_name='teocoinwithdrawalrequest',
-            name='gas_used',
+            model_name="teocoinwithdrawalrequest",
+            name="gas_used",
             field=models.BigIntegerField(blank=True, null=True),
         ),
         migrations.AddField(
-            model_name='teocoinwithdrawalrequest',
-            name='ip_address',
+            model_name="teocoinwithdrawalrequest",
+            name="ip_address",
             field=models.GenericIPAddressField(blank=True, null=True),
         ),
         migrations.AddField(
-            model_name='teocoinwithdrawalrequest',
-            name='processed_at',
+            model_name="teocoinwithdrawalrequest",
+            name="processed_at",
             field=models.DateTimeField(blank=True, null=True),
         ),
         migrations.AddField(
-            model_name='teocoinwithdrawalrequest',
-            name='retry_count',
+            model_name="teocoinwithdrawalrequest",
+            name="retry_count",
             field=models.IntegerField(default=0),
         ),
         migrations.AddField(
-            model_name='teocoinwithdrawalrequest',
-            name='user_agent',
+            model_name="teocoinwithdrawalrequest",
+            name="user_agent",
             field=models.TextField(blank=True),
         ),
         migrations.AlterField(
-            model_name='teocoinwithdrawalrequest',
-            name='status',
-            field=models.CharField(choices=[('pending', 'Pending'), ('processing', 'Processing'), (
-                'completed', 'Completed'), ('failed', 'Failed'), ('cancelled', 'Cancelled')], default='pending', max_length=20),
+            model_name="teocoinwithdrawalrequest",
+            name="status",
+            field=models.CharField(
+                choices=[
+                    ("pending", "Pending"),
+                    ("processing", "Processing"),
+                    ("completed", "Completed"),
+                    ("failed", "Failed"),
+                    ("cancelled", "Cancelled"),
+                ],
+                default="pending",
+                max_length=20,
+            ),
         ),
         migrations.AddIndex(
-            model_name='teocoinwithdrawalrequest',
+            model_name="teocoinwithdrawalrequest",
             index=models.Index(
-                fields=['metamask_address'], name='blockchain__metamas_bb4227_idx'),
+                fields=["metamask_address"], name="blockchain__metamas_bb4227_idx"
+            ),
         ),
         migrations.AddIndex(
-            model_name='teocoinwithdrawalrequest',
+            model_name="teocoinwithdrawalrequest",
             index=models.Index(
-                fields=['status', 'created_at'], name='blockchain__status_09d5fc_idx'),
+                fields=["status", "created_at"], name="blockchain__status_09d5fc_idx"
+            ),
         ),
         migrations.AddIndex(
-            model_name='teocoinwithdrawalrequest',
+            model_name="teocoinwithdrawalrequest",
             index=models.Index(
-                fields=['daily_withdrawal_count'], name='blockchain__daily_w_1908bf_idx'),
+                fields=["daily_withdrawal_count"], name="blockchain__daily_w_1908bf_idx"
+            ),
         ),
     ]

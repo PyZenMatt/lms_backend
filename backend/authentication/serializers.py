@@ -31,20 +31,21 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
         token = super().get_token(user)
 
         # Add custom claims to the token payload
-        token['username'] = user.username
-        token['role'] = user.role
+        token["username"] = user.username
+        token["role"] = user.role
 
         # Get TEO balance from blockchain if wallet is connected
         teo_balance = 0
         if user.wallet_address:
             try:
                 from blockchain.blockchain import teocoin_service
+
                 balance = teocoin_service.get_balance(user.wallet_address)
                 teo_balance = float(balance) if balance else 0
             except Exception:
                 teo_balance = 0
 
-        token['teo_coins'] = teo_balance
+        token["teo_coins"] = teo_balance
 
         return token
 
@@ -56,11 +57,12 @@ class RegisterSerializer(serializers.ModelSerializer):
     Handles the creation of new user accounts with email verification.
     Password is write-only for security purposes.
     """
+
     password = serializers.CharField(write_only=True)
 
     class Meta:
         model = User
-        fields = ('username', 'email', 'password', 'role')
+        fields = ("username", "email", "password", "role")
 
     def create(self, validated_data):
         """
@@ -73,23 +75,24 @@ class RegisterSerializer(serializers.ModelSerializer):
             Created User instance
         """
         import logging
+
         logger = logging.getLogger(__name__)
 
         try:
             # Create new user with provided data
             user = User.objects.create_user(
-                username=validated_data['username'],
-                email=validated_data['email'],
-                password=validated_data['password'],
-                first_name=validated_data.get('first_name', ''),
-                last_name=validated_data.get('last_name', ''),
-                role=validated_data['role'],
+                username=validated_data["username"],
+                email=validated_data["email"],
+                password=validated_data["password"],
+                first_name=validated_data.get("first_name", ""),
+                last_name=validated_data.get("last_name", ""),
+                role=validated_data["role"],
                 is_active=True,  # User is active but email not verified
             )
             logger.info(f"✅ User created successfully: {user.username}")
 
             # Send email verification
-            request = self.context.get('request')
+            request = self.context.get("request")
             uid = urlsafe_base64_encode(force_bytes(user.pk))
             token = default_token_generator.make_token(user)
             # type: ignore
@@ -98,14 +101,15 @@ class RegisterSerializer(serializers.ModelSerializer):
             # Send verification email to user
             try:
                 user.email_user(
-                    subject='Verifica la tua email',  # Subject: Verify your email
+                    subject="Verifica la tua email",  # Subject: Verify your email
                     # Message: Visit URL to verify email
-                    message=f'Visita {verify_url} per verificare la tua email.'
+                    message=f"Visita {verify_url} per verificare la tua email.",
                 )
                 logger.info(f"✅ Email sent successfully to {user.email}")
             except Exception as email_error:
                 logger.warning(
-                    f"⚠️ Email sending failed: {email_error}, but user was created successfully")
+                    f"⚠️ Email sending failed: {email_error}, but user was created successfully"
+                )
                 # Don't fail the registration if email fails
 
             return user
@@ -121,6 +125,7 @@ class EmailVerifySerializer(serializers.Serializer):
 
     Validates the UID and token sent via email verification link.
     """
+
     uid = serializers.CharField()  # Base64 encoded user ID
     token = serializers.CharField()  # Email verification token
 
@@ -131,6 +136,7 @@ class LoginSerializer(serializers.Serializer):
 
     Validates email and password for authentication.
     """
+
     email = serializers.EmailField()
     password = serializers.CharField(write_only=True)
 
@@ -141,4 +147,5 @@ class LogoutSerializer(serializers.Serializer):
 
     Handles the refresh token for JWT token blacklisting.
     """
+
     refresh = serializers.CharField()  # JWT refresh token to be blacklisted

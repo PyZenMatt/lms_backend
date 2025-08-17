@@ -10,8 +10,8 @@ import django
 from web3 import Web3
 
 # Setup Django
-sys.path.append('/home/teo/Project/school/schoolplatform')
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'schoolplatform.settings')
+sys.path.append("/home/teo/Project/school/schoolplatform")
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "schoolplatform.settings")
 django.setup()
 
 
@@ -52,17 +52,16 @@ def check_current_setup():
 
     try:
         from blockchain.blockchain import TeoCoinService
+
         service = TeoCoinService()
 
         has_admin = bool(service.admin_private_key)
-        print(
-            f"Admin Key: {'✅ Configurata' if has_admin else '❌ Non configurata'}")
+        print(f"Admin Key: {'✅ Configurata' if has_admin else '❌ Non configurata'}")
 
         if has_admin:
-            admin_account = service.w3.eth.account.from_key(
-                service.admin_private_key)
+            admin_account = service.w3.eth.account.from_key(service.admin_private_key)
             balance = service.w3.eth.get_balance(admin_account.address)
-            matic_balance = service.w3.from_wei(balance, 'ether')
+            matic_balance = service.w3.from_wei(balance, "ether")
 
             print(f"Admin Address: {admin_account.address}")
             print(f"MATIC Balance: {matic_balance}")
@@ -97,7 +96,7 @@ SECRET_KEY=your_secret_key_here
     env_path = "/home/teo/Project/school/schoolplatform/.env"
 
     if not os.path.exists(env_path):
-        with open(env_path, 'w') as f:
+        with open(env_path, "w") as f:
             f.write(env_content)
         print(f"✅ File .env creato: {env_path}")
     else:
@@ -124,7 +123,7 @@ def test_minting():
 
         # Prova minting di test (1 TEO)
         test_address = "0x742d35Cc6cF000000000000000000001"
-        test_amount = Decimal('1')
+        test_amount = Decimal("1")
 
         print(f"Tentativo minting {test_amount} TEO a {test_address}...")
 
@@ -150,11 +149,10 @@ def main():
     is_configured = check_current_setup()
 
     if not is_configured:
-        print("\n" + "="*50)
-        choice = input(
-            "\nVuoi generare un nuovo wallet admin? (y/n): ").lower()
+        print("\n" + "=" * 50)
+        choice = input("\nVuoi generare un nuovo wallet admin? (y/n): ").lower()
 
-        if choice == 'y':
+        if choice == "y":
             # Genera wallet
             address, private_key = generate_admin_wallet()
 
@@ -179,7 +177,9 @@ def main():
 
     print(f"\n📚 DOCUMENTAZIONE:")
     print(f"• Polygon Amoy Faucet: https://faucet.polygon.technology/")
-    print(f"• Contract Explorer: https://amoy.polygonscan.com/address/0x20D6656A31297ab3b8A87291Ed562D4228Be9ff8")
+    print(
+        f"• Contract Explorer: https://amoy.polygonscan.com/address/0x20D6656A31297ab3b8A87291Ed562D4228Be9ff8"
+    )
 
 
 if __name__ == "__main__":

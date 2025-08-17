@@ -15,24 +15,70 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.CreateModel(
-            name='Notification',
+            name="Notification",
             fields=[
-                ('id', models.BigAutoField(auto_created=True,
-                 primary_key=True, serialize=False, verbose_name='ID')),
-                ('message', models.TextField()),
-                ('notification_type', models.CharField(choices=[('lesson_purchased', 'Acquisto Lezione'), ('course_purchased', 'Acquisto Corso'), ('course_sold', 'Corso Venduto'), ('lesson_sold', 'Lezione Venduta'), ('exercise_graded', 'Esercizio Valutato'), ('review_assigned', 'Esercizio da valutare'), ('review_completed', 'Review Completata'), ('review_expired', 'Review scaduta'), ('review_replaced', 'Reviewer rimpiazzato'), ('course_completed', 'Corso Completato'), ('teacher_approved', 'Teacher approvato'), ('teacher_rejected', 'Teacher rifiutato'), (
-                    'course_approved', 'Corso approvato'), ('course_rejected', 'Corso rifiutato'), ('teocoins_earned', 'TeoCoins Guadagnati'), ('teocoins_spent', 'TeoCoins Spesi'), ('reward_earned', 'Premio Ottenuto'), ('bonus_received', 'Bonus Ricevuto'), ('new_course_published', 'Nuovo Corso Pubblicato'), ('new_lesson_added', 'Nuova Lezione Aggiunta'), ('course_updated', 'Corso Aggiornato'), ('achievement_unlocked', 'Achievement Sbloccato'), ('level_up', 'Livello Aumentato'), ('system_message', 'Messaggio di Sistema'), ('welcome_message', 'Messaggio di Benvenuto')], max_length=30)),
-                ('read', models.BooleanField(default=False)),
-                ('related_object_id', models.PositiveIntegerField(
-                    blank=True, null=True)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('user', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE,
-                 related_name='notifications', to=settings.AUTH_USER_MODEL)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("message", models.TextField()),
+                (
+                    "notification_type",
+                    models.CharField(
+                        choices=[
+                            ("lesson_purchased", "Acquisto Lezione"),
+                            ("course_purchased", "Acquisto Corso"),
+                            ("course_sold", "Corso Venduto"),
+                            ("lesson_sold", "Lezione Venduta"),
+                            ("exercise_graded", "Esercizio Valutato"),
+                            ("review_assigned", "Esercizio da valutare"),
+                            ("review_completed", "Review Completata"),
+                            ("review_expired", "Review scaduta"),
+                            ("review_replaced", "Reviewer rimpiazzato"),
+                            ("course_completed", "Corso Completato"),
+                            ("teacher_approved", "Teacher approvato"),
+                            ("teacher_rejected", "Teacher rifiutato"),
+                            ("course_approved", "Corso approvato"),
+                            ("course_rejected", "Corso rifiutato"),
+                            ("teocoins_earned", "TeoCoins Guadagnati"),
+                            ("teocoins_spent", "TeoCoins Spesi"),
+                            ("reward_earned", "Premio Ottenuto"),
+                            ("bonus_received", "Bonus Ricevuto"),
+                            ("new_course_published", "Nuovo Corso Pubblicato"),
+                            ("new_lesson_added", "Nuova Lezione Aggiunta"),
+                            ("course_updated", "Corso Aggiornato"),
+                            ("achievement_unlocked", "Achievement Sbloccato"),
+                            ("level_up", "Livello Aumentato"),
+                            ("system_message", "Messaggio di Sistema"),
+                            ("welcome_message", "Messaggio di Benvenuto"),
+                        ],
+                        max_length=30,
+                    ),
+                ),
+                ("read", models.BooleanField(default=False)),
+                (
+                    "related_object_id",
+                    models.PositiveIntegerField(blank=True, null=True),
+                ),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                (
+                    "user",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="notifications",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Notifica',
-                'verbose_name_plural': 'Notifiche',
-                'ordering': ['-created_at'],
+                "verbose_name": "Notifica",
+                "verbose_name_plural": "Notifiche",
+                "ordering": ["-created_at"],
             },
         ),
     ]

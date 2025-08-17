@@ -12,8 +12,8 @@ from web3 import Web3
 from blockchain.blockchain import teocoin_service
 
 # Setup Django
-sys.path.append('/home/teo/Project/school/schoolplatform')
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'schoolplatform.settings')
+sys.path.append("/home/teo/Project/school/schoolplatform")
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "schoolplatform.settings")
 django.setup()
 
 
@@ -63,8 +63,9 @@ def check_transaction(tx_hash):
         checksum_reward_pool = Web3.to_checksum_address(reward_pool_address)
 
         allowance_wei = contract.functions.allowance(
-            checksum_student, checksum_reward_pool).call()
-        allowance = Web3.from_wei(allowance_wei, 'ether')
+            checksum_student, checksum_reward_pool
+        ).call()
+        allowance = Web3.from_wei(allowance_wei, "ether")
 
         print(f"💳 Allowance attuale: {allowance} TEO")
 
@@ -80,6 +81,7 @@ def check_transaction(tx_hash):
     except Exception as e:
         print(f"❌ Errore nella verifica: {e}")
         import traceback
+
         traceback.print_exc()
 
 

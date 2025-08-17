@@ -7,7 +7,7 @@ from courses.models import ExerciseReview, ExerciseSubmission
 from rewards.models import BlockchainTransaction
 
 # Setup Django
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'schoolplatform.settings')
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "schoolplatform.settings")
 django.setup()
 
 
@@ -21,7 +21,7 @@ def create_reward_transaction(user, amount, transaction_type, submission_id):
         amount=amount,
         related_object_id=str(submission_id),
         notes=f"{transaction_type.replace('_', ' ').title()} for submission {submission_id}",
-        status='pending'
+        status="pending",
     )
     return transaction
 
@@ -61,7 +61,8 @@ def fix_submission_58():
         existing_users = set()
         for reward in existing_rewards:
             print(
-                f"  - {reward.user.username}: {reward.amount} TEO ({reward.transaction_type})")
+                f"  - {reward.user.username}: {reward.amount} TEO ({reward.transaction_type})"
+            )
             existing_users.add((reward.user.id, reward.transaction_type))
 
         # Calculate missing rewards
@@ -71,10 +72,11 @@ def fix_submission_58():
         passed = submission.average_score >= 6
         if passed:
             student_has_exercise_reward = (
-                submission.student.id, 'exercise_reward') in existing_users
+                submission.student.id,
+                "exercise_reward",
+            ) in existing_users
             if not student_has_exercise_reward:
-                print(
-                    f"❌ Missing exercise_reward for {submission.student.username}")
+                print(f"❌ Missing exercise_reward for {submission.student.username}")
 
                 # Calculate reward
                 reward_cap = int(course.price * 0.05)
@@ -82,20 +84,19 @@ def fix_submission_58():
 
                 print(f"💰 Creating exercise_reward: {reward_amount} TEO")
                 create_reward_transaction(
-                    submission.student,
-                    reward_amount,
-                    'exercise_reward',
-                    submission.id
+                    submission.student, reward_amount, "exercise_reward", submission.id
                 )
                 submission.reward_amount = reward_amount
                 submission.save()
                 print(f"✅ Exercise reward created!")
             else:
                 print(
-                    f"✅ Exercise reward already exists for {submission.student.username}")
+                    f"✅ Exercise reward already exists for {submission.student.username}"
+                )
         else:
             print(
-                f"❌ Student didn't pass (score: {submission.average_score}), no exercise reward")
+                f"❌ Student didn't pass (score: {submission.average_score}), no exercise reward"
+            )
 
         # 2. Review rewards for all reviewers
         reviewer_reward = max(1, int(course.price * 0.005))
@@ -103,21 +104,18 @@ def fix_submission_58():
 
         for review in reviews:
             reviewer_has_reward = (
-                review.reviewer.id, 'review_reward') in existing_users
+                review.reviewer.id,
+                "review_reward",
+            ) in existing_users
             if not reviewer_has_reward:
-                print(
-                    f"❌ Missing review_reward for {review.reviewer.username}")
+                print(f"❌ Missing review_reward for {review.reviewer.username}")
                 print(f"💰 Creating review_reward: {reviewer_reward} TEO")
                 create_reward_transaction(
-                    review.reviewer,
-                    reviewer_reward,
-                    'review_reward',
-                    submission.id
+                    review.reviewer, reviewer_reward, "review_reward", submission.id
                 )
                 print(f"✅ Review reward created!")
             else:
-                print(
-                    f"✅ Review reward already exists for {review.reviewer.username}")
+                print(f"✅ Review reward already exists for {review.reviewer.username}")
 
         # Mark submission as reviewed
         if not submission.reviewed:
@@ -132,12 +130,13 @@ def fix_submission_58():
         print(f"\n📊 FINAL VERIFICATION")
         final_rewards = BlockchainTransaction.objects.filter(
             related_object_id=str(submission.id)
-        ).order_by('-created_at')
+        ).order_by("-created_at")
 
         print(f"Total rewards now: {final_rewards.count()}")
         for reward in final_rewards:
             print(
-                f"  - {reward.user.username}: {reward.amount} TEO ({reward.transaction_type}) - {reward.status}")
+                f"  - {reward.user.username}: {reward.amount} TEO ({reward.transaction_type}) - {reward.status}"
+            )
 
         return True
 
@@ -147,6 +146,7 @@ def fix_submission_58():
     except Exception as e:
         print(f"❌ Error: {e}")
         import traceback
+
         traceback.print_exc()
         return False
 

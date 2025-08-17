@@ -27,18 +27,15 @@ class BaseService(ABC):
 
     def log_info(self, message: str, **kwargs):
         """Log info message with service context"""
-        self.logger.info(
-            f"[{self.__class__.__name__}] {message}", extra=kwargs)
+        self.logger.info(f"[{self.__class__.__name__}] {message}", extra=kwargs)
 
     def log_error(self, message: str, **kwargs):
         """Log error message with service context"""
-        self.logger.error(
-            f"[{self.__class__.__name__}] {message}", extra=kwargs)
+        self.logger.error(f"[{self.__class__.__name__}] {message}", extra=kwargs)
 
     def log_debug(self, message: str, **kwargs):
         """Log debug message with service context"""
-        self.logger.debug(
-            f"[{self.__class__.__name__}] {message}", extra=kwargs)
+        self.logger.debug(f"[{self.__class__.__name__}] {message}", extra=kwargs)
 
 
 class TransactionalService(BaseService):
@@ -64,13 +61,14 @@ class TransactionalService(BaseService):
         """
         try:
             with transaction.atomic():
-                self.log_debug(
-                    f"Starting transaction for {operation_func.__name__}")
+                self.log_debug(f"Starting transaction for {operation_func.__name__}")
                 result = operation_func(*args, **kwargs)
                 self.log_debug(
-                    f"Transaction completed successfully for {operation_func.__name__}")
+                    f"Transaction completed successfully for {operation_func.__name__}"
+                )
                 return result
         except Exception as e:
             self.log_error(
-                f"Transaction failed for {operation_func.__name__}: {str(e)}")
+                f"Transaction failed for {operation_func.__name__}: {str(e)}"
+            )
             raise

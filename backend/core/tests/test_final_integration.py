@@ -12,8 +12,8 @@ from eth_account import Account
 from blockchain.blockchain import TeoCoinService
 
 # Setup Django
-sys.path.append('/home/teo/Project/school/schoolplatform')
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'schoolplatform.settings')
+sys.path.append("/home/teo/Project/school/schoolplatform")
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "schoolplatform.settings")
 django.setup()
 
 
@@ -28,11 +28,11 @@ def test_final_integration():
 
     # Verifica che tutti i metodi necessari esistano
     required_methods = [
-        'get_optimized_gas_price',
-        'check_course_payment_prerequisites',
-        'process_course_payment',
-        'get_balance',
-        'get_reward_pool_balance'
+        "get_optimized_gas_price",
+        "check_course_payment_prerequisites",
+        "process_course_payment",
+        "get_balance",
+        "get_reward_pool_balance",
     ]
 
     for method in required_methods:
@@ -53,7 +53,8 @@ def test_final_integration():
     print("\n🔍 Test prerequisiti con account vuoto...")
     empty_account = Account.create()
     result = tcs.check_course_payment_prerequisites(
-        empty_account.address, Decimal('20.0'))
+        empty_account.address, Decimal("20.0")
+    )
 
     print(f"🎯 Pronto per pagamento: {result.get('ready', False)}")
     print(f"📋 Errori: {result.get('errors', [])}")

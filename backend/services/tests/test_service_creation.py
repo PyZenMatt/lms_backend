@@ -10,8 +10,8 @@ import django
 from blockchain.blockchain import TeoCoinService
 
 # Setup Django
-sys.path.append('/home/teo/Project/school/schoolplatform')
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'schoolplatform.settings')
+sys.path.append("/home/teo/Project/school/schoolplatform")
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "schoolplatform.settings")
 django.setup()
 
 
@@ -23,7 +23,7 @@ def test_service_creation():
         print("✅ TeoCoinService creato correttamente")
 
         # Verifica che il metodo esista
-        if hasattr(tcs, 'get_optimized_gas_price'):
+        if hasattr(tcs, "get_optimized_gas_price"):
             print("✅ Metodo get_optimized_gas_price trovato")
 
             # Prova a chiamare il metodo
@@ -34,12 +34,13 @@ def test_service_creation():
             print("❌ Metodo get_optimized_gas_price NON trovato")
 
         # Lista tutti i metodi
-        methods = [method for method in dir(tcs) if not method.startswith('_')]
+        methods = [method for method in dir(tcs) if not method.startswith("_")]
         print(f"📋 Metodi disponibili: {', '.join(methods)}")
 
     except Exception as e:
         print(f"❌ Errore nella creazione del servizio: {e}")
         import traceback
+
         traceback.print_exc()
 
 

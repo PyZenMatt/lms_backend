@@ -18,6 +18,7 @@ def test_exercise_system():
         from rewards.blockchain_rewards import BlockchainRewards
         from services.db_teocoin_service import DBTeoCoinService
         from users.models import User
+
         print("✅ 1. Imports: SUCCESS")
     except Exception as e:
         print(f"❌ 1. Imports: FAILED - {e}")
@@ -35,13 +36,13 @@ def test_exercise_system():
     # Test 3: Find test data
     try:
         # Find a student
-        student = User.objects.filter(role='student').first()
+        student = User.objects.filter(role="student").first()
         if not student:
             print("❌ 3. No student found")
             return False
 
         # Find a teacher/reviewer
-        teacher = User.objects.filter(role='teacher').first()
+        teacher = User.objects.filter(role="teacher").first()
         if not teacher:
             teacher = User.objects.filter(is_staff=True).first()
         if not teacher:
@@ -50,14 +51,14 @@ def test_exercise_system():
 
         # Find a course with exercises
         course = Course.objects.filter(
-            lessons_in_course__exercises__isnull=False).first()
+            lessons_in_course__exercises__isnull=False
+        ).first()
         if not course:
             print("❌ 3. No course with exercises found")
             return False
 
         # Find an exercise
-        lesson = course.lessons_in_course.filter(
-            exercises__isnull=False).first()
+        lesson = course.lessons_in_course.filter(exercises__isnull=False).first()
         if not lesson:
             print("❌ 3. No lesson with exercises found")
             return False
@@ -92,13 +93,13 @@ def test_exercise_system():
     # Test 5: Check existing submission
     try:
         existing_submission = ExerciseSubmission.objects.filter(
-            exercise=exercise,
-            student=student
+            exercise=exercise, student=student
         ).first()
 
         if existing_submission:
             print(
-                f"✅ 5. Found existing submission: ID {existing_submission.id}, Status: {existing_submission.status}")
+                f"✅ 5. Found existing submission: ID {existing_submission.id}, Status: {existing_submission.status}"
+            )
             submission = existing_submission
         else:
             print("✅ 5. No existing submission found - will create new one")
@@ -115,7 +116,7 @@ def test_exercise_system():
                 exercise=exercise,
                 student=student,
                 content="Test submission content for production debugging",
-                status='submitted'
+                status="submitted",
             )
             print(f"✅ 6. Created new submission: ID {submission.id}")
         except Exception as e:
@@ -130,15 +131,17 @@ def test_exercise_system():
 
         # Check if already rewarded
         from blockchain.models import BlockchainTransaction
+
         existing_reward = BlockchainTransaction.objects.filter(
             user=student,
-            transaction_type='exercise_completion',
-            related_object_id=str(submission.id)
+            transaction_type="exercise_completion",
+            related_object_id=str(submission.id),
         ).first()
 
         if existing_reward:
             print(
-                f"   ⚠️  Exercise already rewarded (Transaction ID: {existing_reward.id})")
+                f"   ⚠️  Exercise already rewarded (Transaction ID: {existing_reward.id})"
+            )
             print(f"   💰 Reward amount: {existing_reward.amount} TEO")
         else:
             print("   🎯 No existing reward found - testing reward system...")
@@ -153,18 +156,20 @@ def test_exercise_system():
                 student_new_balance = db_service.get_balance(student)
                 balance_change = student_new_balance - student_initial_balance
                 print(
-                    f"   💰 Student balance: {student_initial_balance} → {student_new_balance} TEO ({'+' if balance_change >= 0 else ''}{balance_change})")
+                    f"   💰 Student balance: {student_initial_balance} → {student_new_balance} TEO ({'+' if balance_change >= 0 else ''}{balance_change})"
+                )
 
                 # Check if transaction was created
                 new_reward = BlockchainTransaction.objects.filter(
                     user=student,
-                    transaction_type='exercise_completion',
-                    related_object_id=str(submission.id)
+                    transaction_type="exercise_completion",
+                    related_object_id=str(submission.id),
                 ).first()
 
                 if new_reward:
                     print(
-                        f"   ✅ Transaction created: ID {new_reward.id}, Amount: {new_reward.amount} TEO")
+                        f"   ✅ Transaction created: ID {new_reward.id}, Amount: {new_reward.amount} TEO"
+                    )
                 else:
                     print("   ⚠️  No transaction record found")
 
@@ -176,6 +181,7 @@ def test_exercise_system():
     except Exception as e:
         print(f"❌ 7. Exercise reward test: FAILED - {e}")
         import traceback
+
         traceback.print_exc()
         return False
 
@@ -185,14 +191,15 @@ def test_exercise_system():
 
         # Check if submission has reviews
         from courses.models import ExerciseReview
+
         existing_review = ExerciseReview.objects.filter(
-            submission=submission,
-            reviewer=teacher
+            submission=submission, reviewer=teacher
         ).first()
 
         if existing_review:
             print(
-                f"   📝 Found existing review: ID {existing_review.id}, Status: {existing_review.status}")
+                f"   📝 Found existing review: ID {existing_review.id}, Status: {existing_review.status}"
+            )
             review = existing_review
         else:
             print("   📝 Creating test review...")
@@ -201,20 +208,21 @@ def test_exercise_system():
                 reviewer=teacher,
                 content="Test review for production debugging",
                 rating=5,
-                status='completed'
+                status="completed",
             )
             print(f"   ✅ Created review: ID {review.id}")
 
         # Test review reward
         existing_review_reward = BlockchainTransaction.objects.filter(
             user=teacher,
-            transaction_type='review_completion',
-            related_object_id=str(review.id)
+            transaction_type="review_completion",
+            related_object_id=str(review.id),
         ).first()
 
         if existing_review_reward:
             print(
-                f"   ⚠️  Review already rewarded (Transaction ID: {existing_review_reward.id})")
+                f"   ⚠️  Review already rewarded (Transaction ID: {existing_review_reward.id})"
+            )
             print(f"   💰 Reward amount: {existing_review_reward.amount} TEO")
         else:
             print("   🎯 No existing review reward - testing review reward...")
@@ -228,18 +236,20 @@ def test_exercise_system():
                 teacher_new_balance = db_service.get_balance(teacher)
                 teacher_balance_change = teacher_new_balance - teacher_initial_balance
                 print(
-                    f"   💰 Teacher balance: {teacher_initial_balance} → {teacher_new_balance} TEO ({'+' if teacher_balance_change >= 0 else ''}{teacher_balance_change})")
+                    f"   💰 Teacher balance: {teacher_initial_balance} → {teacher_new_balance} TEO ({'+' if teacher_balance_change >= 0 else ''}{teacher_balance_change})"
+                )
 
                 # Check transaction
                 new_review_reward = BlockchainTransaction.objects.filter(
                     user=teacher,
-                    transaction_type='review_completion',
-                    related_object_id=str(review.id)
+                    transaction_type="review_completion",
+                    related_object_id=str(review.id),
                 ).first()
 
                 if new_review_reward:
                     print(
-                        f"   ✅ Review transaction created: ID {new_review_reward.id}, Amount: {new_review_reward.amount} TEO")
+                        f"   ✅ Review transaction created: ID {new_review_reward.id}, Amount: {new_review_reward.amount} TEO"
+                    )
                 else:
                     print("   ⚠️  No review transaction record found")
 
@@ -251,6 +261,7 @@ def test_exercise_system():
     except Exception as e:
         print(f"❌ 8. Review reward test: FAILED - {e}")
         import traceback
+
         traceback.print_exc()
         # Non-critical, continue
 
@@ -266,15 +277,19 @@ def test_exercise_system():
         teacher_total_change = teacher_final_balance - teacher_initial_balance
 
         print(
-            f"   👨‍🎓 Student: {student_initial_balance} → {student_final_balance} TEO ({'+' if student_total_change >= 0 else ''}{student_total_change})")
+            f"   👨‍🎓 Student: {student_initial_balance} → {student_final_balance} TEO ({'+' if student_total_change >= 0 else ''}{student_total_change})"
+        )
         print(
-            f"   👨‍🏫 Teacher: {teacher_initial_balance} → {teacher_final_balance} TEO ({'+' if teacher_total_change >= 0 else ''}{teacher_total_change})")
+            f"   👨‍🏫 Teacher: {teacher_initial_balance} → {teacher_final_balance} TEO ({'+' if teacher_total_change >= 0 else ''}{teacher_total_change})"
+        )
 
         # Transaction count
         student_transactions = BlockchainTransaction.objects.filter(
-            user=student).count()
+            user=student
+        ).count()
         teacher_transactions = BlockchainTransaction.objects.filter(
-            user=teacher).count()
+            user=teacher
+        ).count()
 
         print(f"   📊 Student transactions: {student_transactions}")
         print(f"   📊 Teacher transactions: {teacher_transactions}")
@@ -290,6 +305,6 @@ def test_exercise_system():
     return True
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     success = test_exercise_system()
     exit(0 if success else 1)

@@ -6,7 +6,7 @@ from courses.models import ExerciseReview, ExerciseSubmission
 from django.contrib.auth import get_user_model
 from rewards.models import BlockchainTransaction
 
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'schoolplatform.settings')
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "schoolplatform.settings")
 django.setup()
 
 
@@ -18,15 +18,18 @@ def debug_submission_reward_logic():
 
     # Get student1
     try:
-        student1 = User.objects.get(username='student1')
+        student1 = User.objects.get(username="student1")
         print(f"Student1: {student1.username}")
     except User.DoesNotExist:
         print("❌ Student1 not found")
         return
 
     # Get last submission
-    submission = ExerciseSubmission.objects.filter(
-        student=student1).order_by('-submitted_at').first()
+    submission = (
+        ExerciseSubmission.objects.filter(student=student1)
+        .order_by("-submitted_at")
+        .first()
+    )
 
     if not submission:
         print("❌ No submissions found for student1")
@@ -57,9 +60,9 @@ def debug_submission_reward_logic():
     # Check course and pricing
     course = None
     try:
-        if hasattr(submission.exercise, 'lesson') and submission.exercise.lesson:
+        if hasattr(submission.exercise, "lesson") and submission.exercise.lesson:
             course = submission.exercise.lesson.course
-        elif hasattr(submission.exercise, 'course') and submission.exercise.course:
+        elif hasattr(submission.exercise, "course") and submission.exercise.course:
             course = submission.exercise.course
     except AttributeError:
         pass
@@ -68,12 +71,11 @@ def debug_submission_reward_logic():
         print(f"\nCourse details:")
         print(f"  Title: {course.title}")
         print(f"  Price: {course.price}")
-        print(
-            f"  Reward distributed: {getattr(course, 'reward_distributed', 'N/A')}")
+        print(f"  Reward distributed: {getattr(course, 'reward_distributed', 'N/A')}")
 
         # Calculate expected rewards
         reward_max = int(course.price * 0.15)
-        reward_distributed = getattr(course, 'reward_distributed', 0)
+        reward_distributed = getattr(course, "reward_distributed", 0)
         reward_remaining = reward_max - reward_distributed
         reward_cap = max(1, int(course.price * 0.05))
 
@@ -86,32 +88,34 @@ def debug_submission_reward_logic():
             print(f"  ✅ Should create exercise reward")
         else:
             print(
-                f"  ❌ Should NOT create exercise reward (passed={passed_calculated}, remaining={reward_remaining})")
+                f"  ❌ Should NOT create exercise reward (passed={passed_calculated}, remaining={reward_remaining})"
+            )
     else:
         print(f"\n❌ No course found for submission")
 
     # Check existing rewards
     exercise_rewards = BlockchainTransaction.objects.filter(
         user=student1,
-        transaction_type='exercise_reward',
-        related_object_id=submission.id
+        transaction_type="exercise_reward",
+        related_object_id=submission.id,
     )
 
     review_rewards = BlockchainTransaction.objects.filter(
-        transaction_type='review_reward',
-        related_object_id=submission.id
+        transaction_type="review_reward", related_object_id=submission.id
     )
 
     print(f"\nExisting rewards:")
     print(f"  Exercise rewards for student1: {exercise_rewards.count()}")
     for reward in exercise_rewards:
         print(
-            f"    - Amount: {reward.amount}, Status: {reward.status}, Created: {reward.created_at}")
+            f"    - Amount: {reward.amount}, Status: {reward.status}, Created: {reward.created_at}"
+        )
 
     print(f"  Review rewards: {review_rewards.count()}")
     for reward in review_rewards:
         print(
-            f"    - User: {reward.user.username}, Amount: {reward.amount}, Status: {reward.status}")
+            f"    - User: {reward.user.username}, Amount: {reward.amount}, Status: {reward.status}"
+        )
 
 
 if __name__ == "__main__":

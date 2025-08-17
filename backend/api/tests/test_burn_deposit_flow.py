@@ -12,8 +12,8 @@ import django
 from blockchain.models import DBTeoCoinBalance
 from users.models import User
 
-sys.path.append('.')
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'schoolplatform.settings.dev')
+sys.path.append(".")
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "schoolplatform.settings.dev")
 django.setup()
 
 
@@ -22,22 +22,22 @@ def setup_test_user_balance():
 
     # Get student1 user
     try:
-        user = User.objects.get(email='student1@teoart.it')
+        user = User.objects.get(email="student1@teoart.it")
         print(f"👤 Found user: {user.email}")
 
         # Get or create balance
         balance, created = DBTeoCoinBalance.objects.get_or_create(
             user=user,
             defaults={
-                'available_balance': Decimal('100.0'),
-                'staked_balance': Decimal('0.0'),
-                'pending_withdrawal': Decimal('0.0')
-            }
+                "available_balance": Decimal("100.0"),
+                "staked_balance": Decimal("0.0"),
+                "pending_withdrawal": Decimal("0.0"),
+            },
         )
 
         if not created:
             # Add some balance if user already exists
-            balance.available_balance += Decimal('100.0')
+            balance.available_balance += Decimal("100.0")
             balance.save()
 
         print(f"💰 User balance: {balance.available_balance} TEO available")
@@ -58,22 +58,28 @@ def check_burn_deposit_api():
     client = Client()
 
     # Test login
-    response = client.post('/api/v1/login/', {
-        'email': 'student1@teoart.it',
-        'password': 'testpassword'
-    }, content_type='application/json')
+    response = client.post(
+        "/api/v1/login/",
+        {"email": "student1@teoart.it", "password": "testpassword"},
+        content_type="application/json",
+    )
 
     if response.status_code == 200:
         data = response.json()
-        token = data.get('access')
+        token = data.get("access")
         print(f"✅ Login successful, token received")
 
         # Test burn deposit endpoint (should fail with fake tx)
-        response2 = client.post('/api/v1/teocoin/burn-deposit/', {
-            'transaction_hash': '0xfake',
-            'amount': '1.0',
-            'metamask_address': '0x742d35Cc6475C1C2C6b2FF4a4F5D6f'
-        }, content_type='application/json', HTTP_AUTHORIZATION=f'Bearer {token}')
+        response2 = client.post(
+            "/api/v1/teocoin/burn-deposit/",
+            {
+                "transaction_hash": "0xfake",
+                "amount": "1.0",
+                "metamask_address": "0x742d35Cc6475C1C2C6b2FF4a4F5D6f",
+            },
+            content_type="application/json",
+            HTTP_AUTHORIZATION=f"Bearer {token}",
+        )
 
         print(f"🔥 Burn deposit API status: {response2.status_code}")
         print(f"📄 Response: {response2.content.decode()}")

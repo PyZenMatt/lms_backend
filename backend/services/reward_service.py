@@ -19,8 +19,7 @@ from notifications.models import Notification
 from rewards.models import BlockchainTransaction, TokenBalance
 
 from .base import TransactionalService
-from .exceptions import (CourseNotFoundError, TeoArtServiceException,
-                         UserNotFoundError)
+from .exceptions import CourseNotFoundError, TeoArtServiceException, UserNotFoundError
 
 User = get_user_model()
 
@@ -40,20 +39,16 @@ class RewardService(TransactionalService):
     """
 
     # Reward configuration
-    LESSON_COMPLETION_REWARD_RATE = Decimal(
-        '0.02')  # 2% of course price per lesson
+    LESSON_COMPLETION_REWARD_RATE = Decimal("0.02")  # 2% of course price per lesson
     # 10% bonus for completing entire course
-    COURSE_COMPLETION_BONUS_RATE = Decimal('0.10')
+    COURSE_COMPLETION_BONUS_RATE = Decimal("0.10")
 
     def __init__(self):
         super().__init__()
         self.service_name = "RewardService"
 
     def process_lesson_completion_reward(
-        self,
-        user_id: int,
-        lesson_id: int,
-        course_id: Optional[int] = None
+        self, user_id: int, lesson_id: int, course_id: Optional[int] = None
     ) -> Dict[str, Any]:
         """
         Process reward for lesson completion.
@@ -66,6 +61,7 @@ class RewardService(TransactionalService):
         Returns:
             Dict with reward details and transaction info
         """
+
         def _process_lesson_reward():
             # Validate user
             try:
@@ -75,46 +71,43 @@ class RewardService(TransactionalService):
 
             # Validate lesson
             try:
-                lesson = Lesson.objects.select_related(
-                    'course').get(id=lesson_id)
+                lesson = Lesson.objects.select_related("course").get(id=lesson_id)
             except Lesson.DoesNotExist:
-                raise TeoArtServiceException(
-                    f"Lesson with ID {lesson_id} not found")
+                raise TeoArtServiceException(f"Lesson with ID {lesson_id} not found")
 
             # Get course
             course = lesson.course
             if not course:
-                raise TeoArtServiceException(
-                    "Lesson is not associated with any course")
+                raise TeoArtServiceException("Lesson is not associated with any course")
 
             # Validate course_id if provided
             if course_id and course.id != course_id:
                 raise TeoArtServiceException(
-                    f"Lesson {lesson_id} does not belong to course {course_id}")
+                    f"Lesson {lesson_id} does not belong to course {course_id}"
+                )
 
             # Check if user is enrolled in course
             if not course.students.filter(id=user_id).exists():
-                raise TeoArtServiceException(
-                    "User is not enrolled in this course")
+                raise TeoArtServiceException("User is not enrolled in this course")
 
             # Check if lesson completion already exists
             existing_completion = LessonCompletion.objects.filter(
-                student=user,
-                lesson=lesson
+                student=user, lesson=lesson
             ).first()
 
             if existing_completion:
                 # Check if reward already processed by looking for existing transaction
                 existing_transaction = BlockchainTransaction.objects.filter(
                     user=user,
-                    transaction_type='lesson_reward',
+                    transaction_type="lesson_reward",
                     related_object_id=str(lesson.id),
-                    status='completed'
+                    status="completed",
                 ).first()
 
                 if existing_transaction:
                     raise TeoArtServiceException(
-                        "Lesson completion reward already processed")
+                        "Lesson completion reward already processed"
+                    )
 
             # Calculate reward amount
             reward_amount = self._calculate_lesson_reward(course, lesson)
@@ -122,26 +115,25 @@ class RewardService(TransactionalService):
             if reward_amount <= 0:
                 self.log_info(f"No reward calculated for lesson {lesson_id}")
                 return {
-                    'reward_processed': False,
-                    'reason': 'No reward amount calculated',
-                    'lesson_id': lesson_id,
-                    'course_id': course.id,
-                    'user_id': user_id
+                    "reward_processed": False,
+                    "reason": "No reward amount calculated",
+                    "lesson_id": lesson_id,
+                    "course_id": course.id,
+                    "user_id": user_id,
                 }
 
             # Create lesson completion record
             completion, created = LessonCompletion.objects.get_or_create(
-                student=user,
-                lesson=lesson
+                student=user, lesson=lesson
             )
 
             # Process reward
             reward_tx = self._create_reward_transaction(
                 user=user,
                 amount=reward_amount,
-                transaction_type='lesson_reward',
+                transaction_type="lesson_reward",
                 related_object_id=str(lesson_id),
-                notes=f"Lesson completion reward: {lesson.title}"
+                notes=f"Lesson completion reward: {lesson.title}",
             )
 
             # Send notification
@@ -149,7 +141,7 @@ class RewardService(TransactionalService):
                 user=user,
                 amount=reward_amount,
                 message=f"Congratulazioni! Hai ricevuto {float(reward_amount)} TeoCoins per aver completato la lezione '{lesson.title}'",
-                notification_type='lesson_reward'
+                notification_type="lesson_reward",
             )
 
             # Check for course completion bonus
@@ -159,47 +151,46 @@ class RewardService(TransactionalService):
             if course_completed:
                 try:
                     course_bonus = self.process_course_completion_bonus(
-                        user_id, course.id)
+                        user_id, course.id
+                    )
                 except Exception as e:
-                    self.log_error(
-                        f"Failed to process course completion bonus: {e}")
+                    self.log_error(f"Failed to process course completion bonus: {e}")
                     # Don't fail lesson reward if bonus fails
 
             self.log_info(
-                f"Lesson reward processed: user {user_id}, lesson {lesson_id}, amount {reward_amount}")
+                f"Lesson reward processed: user {user_id}, lesson {lesson_id}, amount {reward_amount}"
+            )
 
             result = {
-                'reward_processed': True,
-                'lesson_id': lesson_id,
-                'course_id': course.id,
-                'user_id': user_id,
-                'lesson_title': lesson.title,
-                'course_title': course.title,
-                'reward_amount': float(reward_amount),
-                'reward_transaction_id': reward_tx.id,
-                'course_completed': course_completed
+                "reward_processed": True,
+                "lesson_id": lesson_id,
+                "course_id": course.id,
+                "user_id": user_id,
+                "lesson_title": lesson.title,
+                "course_title": course.title,
+                "reward_amount": float(reward_amount),
+                "reward_transaction_id": reward_tx.id,
+                "course_completed": course_completed,
             }
 
             if course_bonus:
-                result['course_completion_bonus'] = course_bonus
+                result["course_completion_bonus"] = course_bonus
 
             return result
 
         try:
             return self.execute_in_transaction(_process_lesson_reward)
         except Exception as e:
-            self.log_error(
-                f"Failed to process lesson completion reward: {str(e)}")
+            self.log_error(f"Failed to process lesson completion reward: {str(e)}")
             raise
 
     def process_course_completion_bonus(
-        self,
-        user_id: int,
-        course_id: int
+        self, user_id: int, course_id: int
     ) -> Dict[str, Any]:
         """
         Process bonus reward for course completion.
         """
+
         def _process_course_bonus():
             # Validate user
             try:
@@ -211,8 +202,7 @@ class RewardService(TransactionalService):
             try:
                 course = Course.objects.get(id=course_id)
             except Course.DoesNotExist:
-                raise CourseNotFoundError(
-                    f"Course with ID {course_id} not found")
+                raise CourseNotFoundError(f"Course with ID {course_id} not found")
 
             # Check if user completed all lessons
             if not self._check_course_completion(user, course):
@@ -221,14 +211,15 @@ class RewardService(TransactionalService):
             # Check if bonus already processed
             existing_bonus = BlockchainTransaction.objects.filter(
                 user=user,
-                transaction_type='course_completion_bonus',
+                transaction_type="course_completion_bonus",
                 related_object_id=str(course_id),
-                status='completed'
+                status="completed",
             ).first()
 
             if existing_bonus:
                 raise TeoArtServiceException(
-                    "Course completion bonus already processed")
+                    "Course completion bonus already processed"
+                )
 
             # Calculate bonus amount
             bonus_amount = course.price * self.COURSE_COMPLETION_BONUS_RATE
@@ -237,9 +228,9 @@ class RewardService(TransactionalService):
             bonus_tx = self._create_reward_transaction(
                 user=user,
                 amount=bonus_amount,
-                transaction_type='course_completion_bonus',
+                transaction_type="course_completion_bonus",
                 related_object_id=str(course_id),
-                notes=f"Course completion bonus: {course.title}"
+                notes=f"Course completion bonus: {course.title}",
             )
 
             # Send notification
@@ -247,32 +238,30 @@ class RewardService(TransactionalService):
                 user=user,
                 amount=bonus_amount,
                 message=f"Fantastico! Hai completato il corso '{course.title}' e ricevuto {float(bonus_amount)} TeoCoins bonus!",
-                notification_type='course_completion_bonus'
+                notification_type="course_completion_bonus",
             )
 
             result = {
-                'amount': float(bonus_amount),
-                'course_id': course_id,
-                'course_title': course.title,
-                'transaction_id': bonus_tx.id,
-                'user_id': user_id
+                "amount": float(bonus_amount),
+                "course_id": course_id,
+                "course_title": course.title,
+                "transaction_id": bonus_tx.id,
+                "user_id": user_id,
             }
 
             self.log_info(
-                f"Course completion bonus processed: user {user_id}, course {course_id}, amount {bonus_amount}")
+                f"Course completion bonus processed: user {user_id}, course {course_id}, amount {bonus_amount}"
+            )
             return result
 
         try:
             return self.execute_in_transaction(_process_course_bonus)
         except Exception as e:
-            self.log_error(
-                f"Failed to process course completion bonus: {str(e)}")
+            self.log_error(f"Failed to process course completion bonus: {str(e)}")
             raise
 
     def get_user_rewards_summary(
-        self,
-        user_id: int,
-        time_period: str = 'all'
+        self, user_id: int, time_period: str = "all"
     ) -> Dict[str, Any]:
         """
         Get comprehensive rewards summary for a user.
@@ -292,51 +281,51 @@ class RewardService(TransactionalService):
             now = timezone.now()
             date_filter = Q()
 
-            if time_period == 'week':
+            if time_period == "week":
                 date_filter = Q(created_at__gte=now - timedelta(days=7))
-            elif time_period == 'month':
+            elif time_period == "month":
                 date_filter = Q(created_at__gte=now - timedelta(days=30))
-            elif time_period == 'year':
+            elif time_period == "year":
                 date_filter = Q(created_at__gte=now - timedelta(days=365))
 
             # Get reward transactions
-            reward_transactions = BlockchainTransaction.objects.filter(
-                user=user,
-                transaction_type__in=[
-                    'lesson_reward', 'course_completion_bonus'],
-                status='completed'
-            ).filter(date_filter).order_by('-created_at')
+            reward_transactions = (
+                BlockchainTransaction.objects.filter(
+                    user=user,
+                    transaction_type__in=["lesson_reward", "course_completion_bonus"],
+                    status="completed",
+                )
+                .filter(date_filter)
+                .order_by("-created_at")
+            )
 
             # Calculate totals
-            total_rewards = reward_transactions.aggregate(
-                total=Sum('amount')
-            )['total'] or Decimal('0')
+            total_rewards = reward_transactions.aggregate(total=Sum("amount"))[
+                "total"
+            ] or Decimal("0")
 
             lesson_rewards = reward_transactions.filter(
-                transaction_type='lesson_reward'
-            ).aggregate(total=Sum('amount'))['total'] or Decimal('0')
+                transaction_type="lesson_reward"
+            ).aggregate(total=Sum("amount"))["total"] or Decimal("0")
 
             course_bonuses = reward_transactions.filter(
-                transaction_type='course_completion_bonus'
-            ).aggregate(total=Sum('amount'))['total'] or Decimal('0')
+                transaction_type="course_completion_bonus"
+            ).aggregate(total=Sum("amount"))["total"] or Decimal("0")
 
             # Get completed lessons count
-            completed_lessons_query = LessonCompletion.objects.filter(
-                student=user)
-            if time_period != 'all':
+            completed_lessons_query = LessonCompletion.objects.filter(student=user)
+            if time_period != "all":
                 # Use completed_at field instead of created_at for LessonCompletion
                 completed_at_filter = Q()
-                if time_period == 'week':
-                    completed_at_filter = Q(
-                        completed_at__gte=now - timedelta(days=7))
-                elif time_period == 'month':
-                    completed_at_filter = Q(
-                        completed_at__gte=now - timedelta(days=30))
-                elif time_period == 'year':
-                    completed_at_filter = Q(
-                        completed_at__gte=now - timedelta(days=365))
+                if time_period == "week":
+                    completed_at_filter = Q(completed_at__gte=now - timedelta(days=7))
+                elif time_period == "month":
+                    completed_at_filter = Q(completed_at__gte=now - timedelta(days=30))
+                elif time_period == "year":
+                    completed_at_filter = Q(completed_at__gte=now - timedelta(days=365))
                 completed_lessons_query = completed_lessons_query.filter(
-                    completed_at_filter)
+                    completed_at_filter
+                )
             completed_lessons_count = completed_lessons_query.count()
 
             # Get completed courses count
@@ -348,38 +337,37 @@ class RewardService(TransactionalService):
             # Format recent rewards
             recent_rewards = []
             for tx in reward_transactions[:10]:  # Last 10 transactions
-                recent_rewards.append({
-                    'amount': float(tx.amount),
-                    'type': tx.transaction_type,
-                    'date': tx.created_at.isoformat(),
-                    'notes': tx.notes or '',
-                    'related_object_id': tx.related_object_id
-                })
+                recent_rewards.append(
+                    {
+                        "amount": float(tx.amount),
+                        "type": tx.transaction_type,
+                        "date": tx.created_at.isoformat(),
+                        "notes": tx.notes or "",
+                        "related_object_id": tx.related_object_id,
+                    }
+                )
 
             return {
-                'user_id': user_id,
-                'username': user.username,
-                'time_period': time_period,
-                'summary': {
-                    'total_rewards_earned': float(total_rewards),
-                    'lesson_rewards': float(lesson_rewards),
-                    'course_completion_bonuses': float(course_bonuses),
-                    'current_balance': float(current_balance),
-                    'completed_lessons': completed_lessons_count,
-                    'completed_courses': completed_courses,
-                    'total_transactions': reward_transactions.count()
+                "user_id": user_id,
+                "username": user.username,
+                "time_period": time_period,
+                "summary": {
+                    "total_rewards_earned": float(total_rewards),
+                    "lesson_rewards": float(lesson_rewards),
+                    "course_completion_bonuses": float(course_bonuses),
+                    "current_balance": float(current_balance),
+                    "completed_lessons": completed_lessons_count,
+                    "completed_courses": completed_courses,
+                    "total_transactions": reward_transactions.count(),
                 },
-                'recent_rewards': recent_rewards
+                "recent_rewards": recent_rewards,
             }
 
         except Exception as e:
             self.log_error(f"Failed to get user rewards summary: {str(e)}")
             raise
 
-    def get_reward_leaderboard(
-        self,
-        limit: int = 10
-    ) -> List[Dict[str, Any]]:
+    def get_reward_leaderboard(self, limit: int = 10) -> List[Dict[str, Any]]:
         """
         Get reward leaderboard showing top earners.
 
@@ -388,27 +376,31 @@ class RewardService(TransactionalService):
         """
         try:
             # Get users with their total rewards
-            user_rewards = BlockchainTransaction.objects.filter(
-                transaction_type__in=[
-                    'lesson_reward', 'course_completion_bonus'],
-                status='completed'
-            ).values('user').annotate(
-                total_rewards=Sum('amount'),
-                reward_count=Count('id')
-            ).order_by('-total_rewards')[:limit]
+            user_rewards = (
+                BlockchainTransaction.objects.filter(
+                    transaction_type__in=["lesson_reward", "course_completion_bonus"],
+                    status="completed",
+                )
+                .values("user")
+                .annotate(total_rewards=Sum("amount"), reward_count=Count("id"))
+                .order_by("-total_rewards")[:limit]
+            )
 
             leaderboard = []
             for i, entry in enumerate(user_rewards, 1):
                 try:
-                    user = User.objects.get(id=entry['user'])
-                    leaderboard.append({
-                        'rank': i,
-                        'user_id': user.id,
-                        'username': user.username,
-                        'full_name': f"{user.first_name} {user.last_name}".strip() or user.username,
-                        'total_rewards': float(entry['total_rewards']),
-                        'reward_count': entry['reward_count']
-                    })
+                    user = User.objects.get(id=entry["user"])
+                    leaderboard.append(
+                        {
+                            "rank": i,
+                            "user_id": user.id,
+                            "username": user.username,
+                            "full_name": f"{user.first_name} {user.last_name}".strip()
+                            or user.username,
+                            "total_rewards": float(entry["total_rewards"]),
+                            "reward_count": entry["reward_count"],
+                        }
+                    )
                 except User.DoesNotExist:
                     continue
 
@@ -421,7 +413,7 @@ class RewardService(TransactionalService):
     def _calculate_lesson_reward(self, course: Course, lesson: Lesson) -> Decimal:
         """Calculate reward amount for lesson completion"""
         if not course.price or course.price <= 0:
-            return Decimal('0')
+            return Decimal("0")
 
         return course.price * self.LESSON_COMPLETION_REWARD_RATE
 
@@ -432,8 +424,7 @@ class RewardService(TransactionalService):
             return False
 
         completed_lessons = LessonCompletion.objects.filter(
-            student=user,
-            lesson__course=course
+            student=user, lesson__course=course
         ).count()
 
         return completed_lessons >= total_lessons
@@ -444,7 +435,7 @@ class RewardService(TransactionalService):
             balance_obj = TokenBalance.objects.get(user=user)
             return balance_obj.balance
         except TokenBalance.DoesNotExist:
-            return Decimal('0')
+            return Decimal("0")
 
     def _get_completed_courses_count(self, user: User) -> int:
         """Get count of completed courses for user"""
@@ -463,7 +454,7 @@ class RewardService(TransactionalService):
         amount: Decimal,
         transaction_type: str,
         related_object_id: str,
-        notes: str
+        notes: str,
     ) -> BlockchainTransaction:
         """Create a reward transaction record"""
         import hashlib
@@ -477,20 +468,16 @@ class RewardService(TransactionalService):
             user=user,
             amount=amount,
             transaction_type=transaction_type,
-            status='completed',
+            status="completed",
             transaction_hash=tx_hash,
             from_address="reward_pool",
             to_address=user.wallet_address or "pending_wallet",
             related_object_id=related_object_id,
-            notes=notes
+            notes=notes,
         )
 
     def _send_reward_notification(
-        self,
-        user: User,
-        amount: Decimal,
-        message: str,
-        notification_type: str
+        self, user: User, amount: Decimal, message: str, notification_type: str
     ):
         """Send notification for reward"""
         try:
@@ -499,7 +486,7 @@ class RewardService(TransactionalService):
                 message=message,
                 notification_type=notification_type,
                 # Convert to int for notification field
-                related_object_id=str(int(amount))
+                related_object_id=str(int(amount)),
             )
             self.log_info(f"Sent reward notification to user {user.id}")
         except Exception as e:

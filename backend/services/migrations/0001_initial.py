@@ -15,23 +15,46 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.CreateModel(
-            name='TeoEarning',
+            name="TeoEarning",
             fields=[
-                ('id', models.BigAutoField(auto_created=True,
-                 primary_key=True, serialize=False, verbose_name='ID')),
-                ('earning_type', models.CharField(max_length=50)),
-                ('amount', models.DecimalField(decimal_places=8, max_digits=18)),
-                ('source_id', models.IntegerField(blank=True, null=True)),
-                ('transaction_hash', models.CharField(
-                    blank=True, max_length=66, null=True)),
-                ('reason', models.TextField()),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('user', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE,
-                 related_name='teo_earnings', to=settings.AUTH_USER_MODEL)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("earning_type", models.CharField(max_length=50)),
+                ("amount", models.DecimalField(decimal_places=8, max_digits=18)),
+                ("source_id", models.IntegerField(blank=True, null=True)),
+                (
+                    "transaction_hash",
+                    models.CharField(blank=True, max_length=66, null=True),
+                ),
+                ("reason", models.TextField()),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                (
+                    "user",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="teo_earnings",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
             ],
             options={
-                'db_table': 'teo_earnings',
-                'indexes': [models.Index(fields=['user', 'earning_type'], name='teo_earning_user_id_005b12_idx'), models.Index(fields=['created_at'], name='teo_earning_created_2e9065_idx')],
+                "db_table": "teo_earnings",
+                "indexes": [
+                    models.Index(
+                        fields=["user", "earning_type"],
+                        name="teo_earning_user_id_005b12_idx",
+                    ),
+                    models.Index(
+                        fields=["created_at"], name="teo_earning_created_2e9065_idx"
+                    ),
+                ],
             },
         ),
     ]

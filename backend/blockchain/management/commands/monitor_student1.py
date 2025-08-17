@@ -13,8 +13,8 @@ from web3 import Web3
 from blockchain.blockchain import TeoCoinService
 
 # Setup Django
-sys.path.append('/home/teo/Project/school/schoolplatform')
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'schoolplatform.settings')
+sys.path.append("/home/teo/Project/school/schoolplatform")
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "schoolplatform.settings")
 django.setup()
 
 
@@ -36,7 +36,7 @@ def monitor_student1_matic():
         while True:
             # Controlla balance
             balance_wei = service.w3.eth.get_balance(student1_checksum)
-            balance_matic = float(service.w3.from_wei(balance_wei, 'ether'))
+            balance_matic = float(service.w3.from_wei(balance_wei, "ether"))
 
             if balance_matic != initial_balance:
                 print(f"💎 Balance changed: {balance_matic} MATIC")
@@ -50,11 +50,12 @@ def monitor_student1_matic():
 
                     # Calcola quante transazioni può fare
                     gas_price = service.w3.eth.gas_price
-                    tx_cost = service.w3.from_wei(gas_price * 80000, 'ether')
+                    tx_cost = service.w3.from_wei(gas_price * 80000, "ether")
                     possible_txs = int(balance_matic / float(tx_cost))
 
                     print(
-                        f"⛽ Gas price: {service.w3.from_wei(gas_price, 'gwei')} Gwei")
+                        f"⛽ Gas price: {service.w3.from_wei(gas_price, 'gwei')} Gwei"
+                    )
                     print(f"💰 Cost per transaction: {tx_cost} MATIC")
                     print(f"🔢 Possible transactions: {possible_txs}")
 
@@ -66,7 +67,8 @@ def monitor_student1_matic():
                 initial_balance = balance_matic
             else:
                 print(
-                    f"⏳ Current balance: {balance_matic} MATIC - waiting for faucet...")
+                    f"⏳ Current balance: {balance_matic} MATIC - waiting for faucet..."
+                )
 
             time.sleep(10)
 

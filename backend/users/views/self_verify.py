@@ -10,7 +10,11 @@ class SelfVerifyView(APIView):
     def post(self, request):
         user = request.user
         if user.is_approved:
-            return Response({'detail': 'Utente già verificato.'}, status=status.HTTP_200_OK)
+            return Response(
+                {"detail": "Utente già verificato."}, status=status.HTTP_200_OK
+            )
         user.is_approved = True
         user.save()
-        return Response({'detail': 'Utente verificato con successo.'}, status=status.HTTP_200_OK)
+        return Response(
+            {"detail": "Utente verificato con successo."}, status=status.HTTP_200_OK
+        )

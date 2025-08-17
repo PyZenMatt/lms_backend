@@ -17,193 +17,485 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.CreateModel(
-            name='Course',
+            name="Course",
             fields=[
-                ('id', models.BigAutoField(auto_created=True,
-                 primary_key=True, serialize=False, verbose_name='ID')),
-                ('title', models.CharField(max_length=200)),
-                ('description', models.TextField()),
-                ('category', models.CharField(choices=[('disegno', '✏️ Disegno'), ('pittura-olio', '🎨 Pittura ad Olio'), ('acquerello', '💧 Acquerello'), ('tempera', '🖌️ Tempera'), ('acrilico', '🌈 Pittura Acrilica'), ('scultura', '🗿 Scultura'), ('storia-arte', "📚 Storia dell'Arte"), ('fotografia', '📸 Fotografia Artistica'), ('illustrazione', '🖊️ Illustrazione'), ('arte-digitale', '💻 Arte Digitale'), ('ceramica', '🏺 Ceramica e Terracotta'), (
-                    'incisione', '⚱️ Incisione e Stampa'), ('mosaico', '🔷 Mosaico'), ('restauro', '🛠️ Restauro Artistico'), ('calligrafia', '✒️ Calligrafia'), ('fumetto', '💭 Fumetto e Graphic Novel'), ('design-grafico', '🎨 Design Grafico'), ('arte-contemporanea', '🆕 Arte Contemporanea'), ('arte-classica', '🏛️ Arte Classica'), ('other', '🎭 Altro')], default='other', help_text='Categoria del corso per facilitare la navigazione', max_length=20)),
-                ('cover_image', models.ImageField(
-                    blank=True, help_text='Immagine di copertina del corso (opzionale)', null=True, upload_to='course_covers/')),
-                ('price', models.PositiveIntegerField(default=0, validators=[
-                 django.core.validators.MinValueValidator(0, message='Il prezzo non può essere negativo')])),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
-                ('is_approved', models.BooleanField(default=False,
-                 help_text='Il corso deve essere approvato da un admin prima di essere messo in vendita.')),
-                ('reward_distributed', models.PositiveIntegerField(
-                    default=0, help_text='Totale TeoCoins distribuiti come ricompensa per questo corso')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("title", models.CharField(max_length=200)),
+                ("description", models.TextField()),
+                (
+                    "category",
+                    models.CharField(
+                        choices=[
+                            ("disegno", "✏️ Disegno"),
+                            ("pittura-olio", "🎨 Pittura ad Olio"),
+                            ("acquerello", "💧 Acquerello"),
+                            ("tempera", "🖌️ Tempera"),
+                            ("acrilico", "🌈 Pittura Acrilica"),
+                            ("scultura", "🗿 Scultura"),
+                            ("storia-arte", "📚 Storia dell'Arte"),
+                            ("fotografia", "📸 Fotografia Artistica"),
+                            ("illustrazione", "🖊️ Illustrazione"),
+                            ("arte-digitale", "💻 Arte Digitale"),
+                            ("ceramica", "🏺 Ceramica e Terracotta"),
+                            ("incisione", "⚱️ Incisione e Stampa"),
+                            ("mosaico", "🔷 Mosaico"),
+                            ("restauro", "🛠️ Restauro Artistico"),
+                            ("calligrafia", "✒️ Calligrafia"),
+                            ("fumetto", "💭 Fumetto e Graphic Novel"),
+                            ("design-grafico", "🎨 Design Grafico"),
+                            ("arte-contemporanea", "🆕 Arte Contemporanea"),
+                            ("arte-classica", "🏛️ Arte Classica"),
+                            ("other", "🎭 Altro"),
+                        ],
+                        default="other",
+                        help_text="Categoria del corso per facilitare la navigazione",
+                        max_length=20,
+                    ),
+                ),
+                (
+                    "cover_image",
+                    models.ImageField(
+                        blank=True,
+                        help_text="Immagine di copertina del corso (opzionale)",
+                        null=True,
+                        upload_to="course_covers/",
+                    ),
+                ),
+                (
+                    "price",
+                    models.PositiveIntegerField(
+                        default=0,
+                        validators=[
+                            django.core.validators.MinValueValidator(
+                                0, message="Il prezzo non può essere negativo"
+                            )
+                        ],
+                    ),
+                ),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("updated_at", models.DateTimeField(auto_now=True)),
+                (
+                    "is_approved",
+                    models.BooleanField(
+                        default=False,
+                        help_text="Il corso deve essere approvato da un admin prima di essere messo in vendita.",
+                    ),
+                ),
+                (
+                    "reward_distributed",
+                    models.PositiveIntegerField(
+                        default=0,
+                        help_text="Totale TeoCoins distribuiti come ricompensa per questo corso",
+                    ),
+                ),
             ],
         ),
         migrations.CreateModel(
-            name='Exercise',
+            name="Exercise",
             fields=[
-                ('id', models.BigAutoField(auto_created=True,
-                 primary_key=True, serialize=False, verbose_name='ID')),
-                ('title', models.CharField(max_length=255)),
-                ('description', models.TextField(blank=True, null=True)),
-                ('exercise_type', models.CharField(choices=[('practical', 'Pratico'), ('study', 'Studio'), ('technique', 'Tecnica'), (
-                    'creative', 'Creativo')], default='practical', help_text='Tipo di esercizio', max_length=20)),
-                ('difficulty', models.CharField(choices=[('beginner', 'Principiante'), ('intermediate', 'Intermedio'), (
-                    'advanced', 'Avanzato')], default='beginner', help_text='Livello di difficoltà', max_length=20)),
-                ('time_estimate', models.PositiveIntegerField(
-                    default=60, help_text="Tempo stimato per completare l'esercizio (in minuti)")),
-                ('materials', models.TextField(blank=True,
-                 help_text="Lista dei materiali necessari per l'esercizio")),
-                ('instructions', models.TextField(blank=True,
-                 help_text="Istruzioni dettagliate per svolgere l'esercizio")),
-                ('reference_image', models.ImageField(
-                    blank=True, help_text="Immagine di riferimento per l'esercizio (opzionale)", null=True, upload_to='exercise_references/')),
-                ('status', models.CharField(choices=[('created', 'Creato'), ('submitted', 'Inviato'), (
-                    'reviewed', 'Valutato')], default='created', max_length=20)),
-                ('score', models.PositiveIntegerField(blank=True, null=True)),
-                ('feedback', models.TextField(blank=True, null=True)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("title", models.CharField(max_length=255)),
+                ("description", models.TextField(blank=True, null=True)),
+                (
+                    "exercise_type",
+                    models.CharField(
+                        choices=[
+                            ("practical", "Pratico"),
+                            ("study", "Studio"),
+                            ("technique", "Tecnica"),
+                            ("creative", "Creativo"),
+                        ],
+                        default="practical",
+                        help_text="Tipo di esercizio",
+                        max_length=20,
+                    ),
+                ),
+                (
+                    "difficulty",
+                    models.CharField(
+                        choices=[
+                            ("beginner", "Principiante"),
+                            ("intermediate", "Intermedio"),
+                            ("advanced", "Avanzato"),
+                        ],
+                        default="beginner",
+                        help_text="Livello di difficoltà",
+                        max_length=20,
+                    ),
+                ),
+                (
+                    "time_estimate",
+                    models.PositiveIntegerField(
+                        default=60,
+                        help_text="Tempo stimato per completare l'esercizio (in minuti)",
+                    ),
+                ),
+                (
+                    "materials",
+                    models.TextField(
+                        blank=True,
+                        help_text="Lista dei materiali necessari per l'esercizio",
+                    ),
+                ),
+                (
+                    "instructions",
+                    models.TextField(
+                        blank=True,
+                        help_text="Istruzioni dettagliate per svolgere l'esercizio",
+                    ),
+                ),
+                (
+                    "reference_image",
+                    models.ImageField(
+                        blank=True,
+                        help_text="Immagine di riferimento per l'esercizio (opzionale)",
+                        null=True,
+                        upload_to="exercise_references/",
+                    ),
+                ),
+                (
+                    "status",
+                    models.CharField(
+                        choices=[
+                            ("created", "Creato"),
+                            ("submitted", "Inviato"),
+                            ("reviewed", "Valutato"),
+                        ],
+                        default="created",
+                        max_length=20,
+                    ),
+                ),
+                ("score", models.PositiveIntegerField(blank=True, null=True)),
+                ("feedback", models.TextField(blank=True, null=True)),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("updated_at", models.DateTimeField(auto_now=True)),
             ],
             options={
-                'verbose_name': 'Esercizio',
-                'verbose_name_plural': 'Esercizi',
+                "verbose_name": "Esercizio",
+                "verbose_name_plural": "Esercizi",
             },
         ),
         migrations.CreateModel(
-            name='Lesson',
+            name="Lesson",
             fields=[
-                ('id', models.BigAutoField(auto_created=True,
-                 primary_key=True, serialize=False, verbose_name='ID')),
-                ('title', models.CharField(max_length=200)),
-                ('content', models.TextField()),
-                ('lesson_type', models.CharField(choices=[('theory', 'Teoria'), ('practical', 'Pratica'), (
-                    'video', 'Video'), ('mixed', 'Mista')], default='theory', help_text='Tipo di lezione', max_length=20)),
-                ('video_file', models.FileField(blank=True, help_text='File video per lezioni video (max 200MB, formati: MP4, AVI, MOV, WMV, FLV, WebM, MKV)',
-                 null=True, upload_to='lesson_videos/', validators=[courses.validators.validate_video_file])),
-                ('duration', models.PositiveIntegerField(
-                    default=0, help_text='Durata in minuti')),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
-                ('materials', models.JSONField(blank=True, default=list,
-                 help_text='Lista di URL per materiali di supporto (immagini, PDF).')),
-                ('order', models.PositiveIntegerField(default=1,
-                 help_text="Posizione della lezione all'interno del corso.")),
-                ('course', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE,
-                 related_name='lessons_in_course', to='courses.course')),
-                ('teacher', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE,
-                 related_name='lessons', to=settings.AUTH_USER_MODEL)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("title", models.CharField(max_length=200)),
+                ("content", models.TextField()),
+                (
+                    "lesson_type",
+                    models.CharField(
+                        choices=[
+                            ("theory", "Teoria"),
+                            ("practical", "Pratica"),
+                            ("video", "Video"),
+                            ("mixed", "Mista"),
+                        ],
+                        default="theory",
+                        help_text="Tipo di lezione",
+                        max_length=20,
+                    ),
+                ),
+                (
+                    "video_file",
+                    models.FileField(
+                        blank=True,
+                        help_text="File video per lezioni video (max 200MB, formati: MP4, AVI, MOV, WMV, FLV, WebM, MKV)",
+                        null=True,
+                        upload_to="lesson_videos/",
+                        validators=[courses.validators.validate_video_file],
+                    ),
+                ),
+                (
+                    "duration",
+                    models.PositiveIntegerField(
+                        default=0, help_text="Durata in minuti"
+                    ),
+                ),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("updated_at", models.DateTimeField(auto_now=True)),
+                (
+                    "materials",
+                    models.JSONField(
+                        blank=True,
+                        default=list,
+                        help_text="Lista di URL per materiali di supporto (immagini, PDF).",
+                    ),
+                ),
+                (
+                    "order",
+                    models.PositiveIntegerField(
+                        default=1,
+                        help_text="Posizione della lezione all'interno del corso.",
+                    ),
+                ),
+                (
+                    "course",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="lessons_in_course",
+                        to="courses.course",
+                    ),
+                ),
+                (
+                    "teacher",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="lessons",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
             ],
             options={
-                'ordering': ['order'],
+                "ordering": ["order"],
             },
         ),
         migrations.CreateModel(
-            name='ReviewerReputation',
+            name="ReviewerReputation",
             fields=[
-                ('id', models.BigAutoField(auto_created=True,
-                 primary_key=True, serialize=False, verbose_name='ID')),
-                ('reputation_score', models.FloatField(default=5.0)),
-                ('reviewer', models.OneToOneField(on_delete=django.db.models.deletion.CASCADE,
-                 related_name='reputation', to=settings.AUTH_USER_MODEL)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("reputation_score", models.FloatField(default=5.0)),
+                (
+                    "reviewer",
+                    models.OneToOneField(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="reputation",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
             ],
         ),
         migrations.CreateModel(
-            name='ExerciseSubmission',
+            name="ExerciseSubmission",
             fields=[
-                ('id', models.BigAutoField(auto_created=True,
-                 primary_key=True, serialize=False, verbose_name='ID')),
-                ('content', models.TextField()),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('average_score', models.FloatField(default=0)),
-                ('is_approved', models.BooleanField(default=False)),
-                ('submitted_at', models.DateTimeField(auto_now_add=True)),
-                ('reviewed', models.BooleanField(default=False)),
-                ('passed', models.BooleanField(default=False)),
-                ('reward_amount', models.PositiveIntegerField(default=0)),
-                ('exercise', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE,
-                 related_name='submissions', to='courses.exercise')),
-                ('reviewers', models.ManyToManyField(
-                    related_name='assigned_reviews', to=settings.AUTH_USER_MODEL)),
-                ('student', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE,
-                 related_name='submissions', to=settings.AUTH_USER_MODEL)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("content", models.TextField()),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("average_score", models.FloatField(default=0)),
+                ("is_approved", models.BooleanField(default=False)),
+                ("submitted_at", models.DateTimeField(auto_now_add=True)),
+                ("reviewed", models.BooleanField(default=False)),
+                ("passed", models.BooleanField(default=False)),
+                ("reward_amount", models.PositiveIntegerField(default=0)),
+                (
+                    "exercise",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="submissions",
+                        to="courses.exercise",
+                    ),
+                ),
+                (
+                    "reviewers",
+                    models.ManyToManyField(
+                        related_name="assigned_reviews", to=settings.AUTH_USER_MODEL
+                    ),
+                ),
+                (
+                    "student",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="submissions",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
             ],
         ),
         migrations.CreateModel(
-            name='ExerciseReview',
+            name="ExerciseReview",
             fields=[
-                ('id', models.BigAutoField(auto_created=True,
-                 primary_key=True, serialize=False, verbose_name='ID')),
-                ('assigned_at', models.DateTimeField(auto_now_add=True)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('score', models.IntegerField(blank=True, null=True)),
-                ('reviewed_at', models.DateTimeField(blank=True, null=True)),
-                ('reviewer', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE,
-                 related_name='reviews', to=settings.AUTH_USER_MODEL)),
-                ('submission', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE,
-                 related_name='reviews', to='courses.exercisesubmission')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("assigned_at", models.DateTimeField(auto_now_add=True)),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("score", models.IntegerField(blank=True, null=True)),
+                ("reviewed_at", models.DateTimeField(blank=True, null=True)),
+                (
+                    "reviewer",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="reviews",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
+                (
+                    "submission",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="reviews",
+                        to="courses.exercisesubmission",
+                    ),
+                ),
             ],
         ),
         migrations.AddField(
-            model_name='exercise',
-            name='lesson',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE,
-                                    related_name='exercises', to='courses.lesson'),
+            model_name="exercise",
+            name="lesson",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="exercises",
+                to="courses.lesson",
+            ),
         ),
         migrations.AddField(
-            model_name='exercise',
-            name='student',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE,
-                                    related_name='exercises', to=settings.AUTH_USER_MODEL),
+            model_name="exercise",
+            name="student",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="exercises",
+                to=settings.AUTH_USER_MODEL,
+            ),
         ),
         migrations.CreateModel(
-            name='CourseEnrollment',
+            name="CourseEnrollment",
             fields=[
-                ('id', models.BigAutoField(auto_created=True,
-                 primary_key=True, serialize=False, verbose_name='ID')),
-                ('enrolled_at', models.DateTimeField(auto_now_add=True)),
-                ('completed', models.BooleanField(default=False,
-                 help_text='Flag che indica se lo studente ha completato tutte le lezioni (per il certificato).')),
-                ('course', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE,
-                 related_name='enrollments', to='courses.course')),
-                ('student', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE,
-                 related_name='enrollments', to=settings.AUTH_USER_MODEL)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("enrolled_at", models.DateTimeField(auto_now_add=True)),
+                (
+                    "completed",
+                    models.BooleanField(
+                        default=False,
+                        help_text="Flag che indica se lo studente ha completato tutte le lezioni (per il certificato).",
+                    ),
+                ),
+                (
+                    "course",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="enrollments",
+                        to="courses.course",
+                    ),
+                ),
+                (
+                    "student",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="enrollments",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
             ],
             options={
-                'unique_together': {('student', 'course')},
+                "unique_together": {("student", "course")},
             },
         ),
         migrations.AddField(
-            model_name='course',
-            name='lessons',
+            model_name="course",
+            name="lessons",
             field=models.ManyToManyField(
-                related_name='courses_included', to='courses.lesson'),
+                related_name="courses_included", to="courses.lesson"
+            ),
         ),
         migrations.AddField(
-            model_name='course',
-            name='students',
+            model_name="course",
+            name="students",
             field=models.ManyToManyField(
-                related_name='core_students', through='courses.CourseEnrollment', to=settings.AUTH_USER_MODEL),
+                related_name="core_students",
+                through="courses.CourseEnrollment",
+                to=settings.AUTH_USER_MODEL,
+            ),
         ),
         migrations.AddField(
-            model_name='course',
-            name='teacher',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE,
-                                    related_name='courses_created', to=settings.AUTH_USER_MODEL),
+            model_name="course",
+            name="teacher",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="courses_created",
+                to=settings.AUTH_USER_MODEL,
+            ),
         ),
         migrations.CreateModel(
-            name='LessonCompletion',
+            name="LessonCompletion",
             fields=[
-                ('id', models.BigAutoField(auto_created=True,
-                 primary_key=True, serialize=False, verbose_name='ID')),
-                ('completed_at', models.DateTimeField(auto_now_add=True)),
-                ('lesson', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE,
-                 related_name='completions', to='courses.lesson')),
-                ('student', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE,
-                 related_name='completed_lessons', to=settings.AUTH_USER_MODEL)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("completed_at", models.DateTimeField(auto_now_add=True)),
+                (
+                    "lesson",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="completions",
+                        to="courses.lesson",
+                    ),
+                ),
+                (
+                    "student",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="completed_lessons",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Completamento Lezione',
-                'verbose_name_plural': 'Completamenti Lezioni',
-                'unique_together': {('student', 'lesson')},
+                "verbose_name": "Completamento Lezione",
+                "verbose_name_plural": "Completamenti Lezioni",
+                "unique_together": {("student", "lesson")},
             },
         ),
     ]

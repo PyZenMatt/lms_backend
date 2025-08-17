@@ -10,8 +10,8 @@ import django
 from services.teocoin_discount_service import teocoin_discount_service
 
 # Setup Django environment
-sys.path.append('/home/teo/Project/school/schoolplatform')
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'schoolplatform.settings')
+sys.path.append("/home/teo/Project/school/schoolplatform")
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "schoolplatform.settings")
 django.setup()
 
 
@@ -50,14 +50,13 @@ def test_signature_generation():
 
         print(f"\n🔏 Signature Data:")
         print(f"   Message Hash: {signature_data.get('message_hash', 'N/A')}")
+        print(f"   Signable Message: {signature_data.get('signable_message', 'N/A')}")
+        print(f"   TEO Cost (for display): {signature_data.get('teo_cost', 'N/A')}")
         print(
-            f"   Signable Message: {signature_data.get('signable_message', 'N/A')}")
-        print(
-            f"   TEO Cost (for display): {signature_data.get('teo_cost', 'N/A')}")
-        print(
-            f"   TEO Cost (tokens for signature): {signature_data.get('teo_cost_tokens', 'N/A')}")
+            f"   TEO Cost (tokens for signature): {signature_data.get('teo_cost_tokens', 'N/A')}"
+        )
 
-        if 'error' in signature_data:
+        if "error" in signature_data:
             print(f"   ❌ Error: {signature_data['error']}")
             return False
         else:
@@ -75,19 +74,17 @@ def test_decimal_precision():
 
     # Test edge cases
     test_cases = [
-        (Decimal("9.99"), 10),    # €9.99 with 10% discount
-        (Decimal("99.99"), 15),   # €99.99 with 15% discount
-        (Decimal("199.00"), 5),   # €199.00 with 5% discount
+        (Decimal("9.99"), 10),  # €9.99 with 10% discount
+        (Decimal("99.99"), 15),  # €99.99 with 15% discount
+        (Decimal("199.00"), 5),  # €199.00 with 5% discount
     ]
 
     for price, discount in test_cases:
         try:
-            teo_cost, _ = teocoin_discount_service.calculate_teo_cost(
-                price, discount)
+            teo_cost, _ = teocoin_discount_service.calculate_teo_cost(price, discount)
             teo_tokens = teo_cost // 10**18
 
-            print(
-                f"   €{price} @ {discount}% → {teo_cost} wei → {teo_tokens} tokens")
+            print(f"   €{price} @ {discount}% → {teo_cost} wei → {teo_tokens} tokens")
 
             # Simulate what smart contract would calculate
             price_cents = int(price * 100)
@@ -98,13 +95,15 @@ def test_decimal_precision():
             contract_teo_tokens = contract_teo_cost_wei / 10**18
 
             print(
-                f"     Contract calculation: {price_cents} cents → {discount_value_cents} discount → {contract_teo_cost_wei} wei = {contract_teo_tokens} tokens")
+                f"     Contract calculation: {price_cents} cents → {discount_value_cents} discount → {contract_teo_cost_wei} wei = {contract_teo_tokens} tokens"
+            )
 
             if teo_tokens == contract_teo_tokens:
                 print(f"     ✅ Match!")
             else:
                 print(
-                    f"     ❌ Mismatch! Backend: {teo_tokens}, Contract: {contract_teo_tokens}")
+                    f"     ❌ Mismatch! Backend: {teo_tokens}, Contract: {contract_teo_tokens}"
+                )
 
         except Exception as e:
             print(f"     ❌ Error: {e}")

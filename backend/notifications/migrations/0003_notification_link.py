@@ -6,14 +6,18 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('notifications', '0002_alter_notification_notification_type'),
+        ("notifications", "0002_alter_notification_notification_type"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='notification',
-            name='link',
+            model_name="notification",
+            name="link",
             field=models.CharField(
-                blank=True, help_text='URL di destinazione per azione diretta', max_length=255, null=True),
+                blank=True,
+                help_text="URL di destinazione per azione diretta",
+                max_length=255,
+                null=True,
+            ),
         ),
     ]

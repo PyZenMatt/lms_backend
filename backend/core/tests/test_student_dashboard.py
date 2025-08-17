@@ -14,7 +14,7 @@ from rest_framework.test import APIClient
 
 # Setup Django environment
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'schoolplatform.settings')
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "schoolplatform.settings")
 django.setup()
 
 
@@ -24,7 +24,7 @@ User = get_user_model()
 def test_student_dashboard_api():
     """Test the student dashboard API endpoint"""
     # Get a test user with student role
-    user = User.objects.filter(role='student').first()
+    user = User.objects.filter(role="student").first()
 
     if not user:
         print("No student users found. Please create a student user first.")
@@ -40,7 +40,7 @@ def test_student_dashboard_api():
     print("\nMaking request to student dashboard API...")
 
     try:
-        response = client.get('/api/v1/dashboard/student/')
+        response = client.get("/api/v1/dashboard/student/")
         status_code = response.status_code
 
         print(f"Status code: {status_code}")
@@ -52,8 +52,7 @@ def test_student_dashboard_api():
             print(f"Blockchain balance: {data.get('blockchain_balance')}")
             print(f"Wallet address: {data.get('wallet_address')}")
             print(f"Courses count: {len(data.get('courses', []))}")
-            print(
-                f"Transactions count: {len(data.get('recent_transactions', []))}")
+            print(f"Transactions count: {len(data.get('recent_transactions', []))}")
         else:
             print(f"Error response: {response.content.decode()}")
     except Exception as e:

@@ -12,8 +12,8 @@ from web3 import Web3
 from blockchain.blockchain import TeoCoinService
 
 # Setup Django
-sys.path.append('/home/teo/Project/school/schoolplatform')
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'schoolplatform.settings')
+sys.path.append("/home/teo/Project/school/schoolplatform")
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "schoolplatform.settings")
 django.setup()
 
 
@@ -24,12 +24,14 @@ def emergency_fund_reward_pool():
     tcs = TeoCoinService()
 
     # Indirizzi
-    admin_address = os.getenv('ADMIN_WALLET_ADDRESS')
-    reward_pool_address = os.getenv('REWARD_POOL_ADDRESS')
-    admin_private_key = os.getenv('ADMIN_PRIVATE_KEY')
+    admin_address = os.getenv("ADMIN_WALLET_ADDRESS")
+    reward_pool_address = os.getenv("REWARD_POOL_ADDRESS")
+    admin_private_key = os.getenv("ADMIN_PRIVATE_KEY")
 
     if not all([admin_address, reward_pool_address, admin_private_key]):
-        print("❌ Variabili d'ambiente mancanti (ADMIN_WALLET_ADDRESS, REWARD_POOL_ADDRESS, ADMIN_PRIVATE_KEY)")
+        print(
+            "❌ Variabili d'ambiente mancanti (ADMIN_WALLET_ADDRESS, REWARD_POOL_ADDRESS, ADMIN_PRIVATE_KEY)"
+        )
         return False
 
     print(f"👤 Admin: {admin_address}")
@@ -38,12 +40,14 @@ def emergency_fund_reward_pool():
     # Controlla balance attuali
     try:
         admin_balance_wei = tcs.w3.eth.get_balance(
-            Web3.to_checksum_address(admin_address))
-        admin_balance = float(tcs.w3.from_wei(admin_balance_wei, 'ether'))
+            Web3.to_checksum_address(admin_address)
+        )
+        admin_balance = float(tcs.w3.from_wei(admin_balance_wei, "ether"))
 
         pool_balance_wei = tcs.w3.eth.get_balance(
-            Web3.to_checksum_address(reward_pool_address))
-        pool_balance = float(tcs.w3.from_wei(pool_balance_wei, 'ether'))
+            Web3.to_checksum_address(reward_pool_address)
+        )
+        pool_balance = float(tcs.w3.from_wei(pool_balance_wei, "ether"))
 
         print(f"💰 Admin MATIC: {admin_balance:.6f}")
         print(f"💰 Reward Pool MATIC: {pool_balance:.6f}")
@@ -58,13 +62,15 @@ def emergency_fund_reward_pool():
 
     if pool_balance >= min_required:
         print(
-            f"✅ Reward pool ha già abbastanza MATIC ({pool_balance:.6f} >= {min_required})")
+            f"✅ Reward pool ha già abbastanza MATIC ({pool_balance:.6f} >= {min_required})"
+        )
         return True
 
     if admin_balance < transfer_amount + 0.01:  # Lascia almeno 0.01 per gas
         print(f"❌ Admin non ha abbastanza MATIC per il trasferimento")
         print(
-            f"   Necessari: {transfer_amount + 0.01:.6f}, Disponibili: {admin_balance:.6f}")
+            f"   Necessari: {transfer_amount + 0.01:.6f}, Disponibili: {admin_balance:.6f}"
+        )
         return False
 
     print(f"\n🔄 Trasferimento di {transfer_amount} MATIC...")
@@ -78,12 +84,12 @@ def emergency_fund_reward_pool():
         gas_price = tcs.get_optimized_gas_price()
 
         tx = {
-            'to': pool_checksum,
-            'value': Web3.to_wei(transfer_amount, 'ether'),
-            'gas': 21000,
-            'gasPrice': gas_price,
-            'nonce': nonce,
-            'chainId': 80002  # Polygon Amoy
+            "to": pool_checksum,
+            "value": Web3.to_wei(transfer_amount, "ether"),
+            "gas": 21000,
+            "gasPrice": gas_price,
+            "nonce": nonce,
+            "chainId": 80002,  # Polygon Amoy
         }
 
         # Firma e invia
@@ -96,24 +102,24 @@ def emergency_fund_reward_pool():
         print("⏳ Attendo conferma...")
         receipt = tcs.w3.eth.wait_for_transaction_receipt(tx_hash, timeout=120)
 
-        if receipt['status'] == 1:
+        if receipt["status"] == 1:
             print(f"🎉 Trasferimento completato!")
             print(f"📋 Block: {receipt['blockNumber']}")
             print(f"⛽ Gas usato: {receipt['gasUsed']}")
 
             # Verifica balance finali
-            new_admin_balance = float(tcs.w3.from_wei(
-                tcs.w3.eth.get_balance(admin_checksum), 'ether'
-            ))
-            new_pool_balance = float(tcs.w3.from_wei(
-                tcs.w3.eth.get_balance(pool_checksum), 'ether'
-            ))
+            new_admin_balance = float(
+                tcs.w3.from_wei(tcs.w3.eth.get_balance(admin_checksum), "ether")
+            )
+            new_pool_balance = float(
+                tcs.w3.from_wei(tcs.w3.eth.get_balance(pool_checksum), "ether")
+            )
 
             print(f"\n💳 === BALANCE FINALI ===")
+            print(f"👤 Admin: {new_admin_balance:.6f} MATIC (era {admin_balance:.6f})")
             print(
-                f"👤 Admin: {new_admin_balance:.6f} MATIC (era {admin_balance:.6f})")
-            print(
-                f"🏦 Reward Pool: {new_pool_balance:.6f} MATIC (era {pool_balance:.6f})")
+                f"🏦 Reward Pool: {new_pool_balance:.6f} MATIC (era {pool_balance:.6f})"
+            )
 
             return True
         else:
@@ -132,18 +138,17 @@ def check_all_balances():
     tcs = TeoCoinService()
 
     wallets = {
-        'Admin': os.getenv('ADMIN_WALLET_ADDRESS'),
-        'Reward Pool': os.getenv('REWARD_POOL_ADDRESS'),
-        'Minter': os.getenv('MINTER_ADDRESS')
+        "Admin": os.getenv("ADMIN_WALLET_ADDRESS"),
+        "Reward Pool": os.getenv("REWARD_POOL_ADDRESS"),
+        "Minter": os.getenv("MINTER_ADDRESS"),
     }
 
     for name, address in wallets.items():
         if address:
             try:
                 # MATIC balance
-                balance_wei = tcs.w3.eth.get_balance(
-                    Web3.to_checksum_address(address))
-                matic_balance = float(tcs.w3.from_wei(balance_wei, 'ether'))
+                balance_wei = tcs.w3.eth.get_balance(Web3.to_checksum_address(address))
+                matic_balance = float(tcs.w3.from_wei(balance_wei, "ether"))
 
                 # TeoCoins balance
                 teo_balance = tcs.get_balance(address)
@@ -160,12 +165,13 @@ def check_all_balances():
 def main():
     import argparse
 
-    parser = argparse.ArgumentParser(
-        description='Gestione emergenza fondi reward pool')
-    parser.add_argument('--check', action='store_true',
-                        help='Solo controlla i balance')
-    parser.add_argument('--force', action='store_true',
-                        help='Forza il trasferimento anche se non necessario')
+    parser = argparse.ArgumentParser(description="Gestione emergenza fondi reward pool")
+    parser.add_argument("--check", action="store_true", help="Solo controlla i balance")
+    parser.add_argument(
+        "--force",
+        action="store_true",
+        help="Forza il trasferimento anche se non necessario",
+    )
 
     args = parser.parse_args()
 

@@ -12,8 +12,8 @@ from services.teocoin_discount_service import teocoin_discount_service
 from blockchain.blockchain import TeoCoinService
 
 # Setup Django environment
-sys.path.append('/home/teo/Project/school/schoolplatform')
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'schoolplatform.settings')
+sys.path.append("/home/teo/Project/school/schoolplatform")
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "schoolplatform.settings")
 django.setup()
 
 
@@ -56,15 +56,18 @@ def test_approval_requirement():
 
         # Check allowance
         try:
-            discount_contract_address = teocoin_discount_service.discount_contract.address if teocoin_discount_service.discount_contract else "N/A"
+            discount_contract_address = (
+                teocoin_discount_service.discount_contract.address
+                if teocoin_discount_service.discount_contract
+                else "N/A"
+            )
             print(f"🏭 Discount Contract: {discount_contract_address}")
 
             if discount_contract_address != "N/A":
                 # Try to check allowance (this will show why approval is needed)
                 try:
                     allowance = teo_service.teocoin_contract.functions.allowance(
-                        student_address,
-                        discount_contract_address
+                        student_address, discount_contract_address
                     ).call()
 
                     allowance_teo = allowance / 10**18
@@ -75,15 +78,19 @@ def test_approval_requirement():
 
                     if allowance >= teo_cost:
                         print(
-                            f"✅ Sufficient allowance - discount request would succeed")
+                            f"✅ Sufficient allowance - discount request would succeed"
+                        )
                         return True
                     else:
                         print(
-                            f"❌ INSUFFICIENT ALLOWANCE - this is why the transaction fails!")
+                            f"❌ INSUFFICIENT ALLOWANCE - this is why the transaction fails!"
+                        )
                         print(
-                            f"💡 Student needs to approve {required_teo:.4f} TEO spending")
+                            f"💡 Student needs to approve {required_teo:.4f} TEO spending"
+                        )
                         print(
-                            f"🔧 Frontend fix: Add approveTeoCoin() call before createDiscountRequest()")
+                            f"🔧 Frontend fix: Add approveTeoCoin() call before createDiscountRequest()"
+                        )
                         return False
 
                 except Exception as allowance_error:

@@ -14,8 +14,8 @@ from users.models import User
 from blockchain.blockchain import TeoCoinService
 
 # Setup Django
-sys.path.append('/home/teo/Project/school/schoolplatform')
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'schoolplatform.settings')
+sys.path.append("/home/teo/Project/school/schoolplatform")
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "schoolplatform.settings")
 django.setup()
 
 
@@ -45,8 +45,9 @@ def test_student1_setup():
 
         # Controlla balance admin
         admin_balance_wei = service.w3.eth.get_balance(
-            service.w3.to_checksum_address(admin_wallet.address))
-        admin_balance_matic = service.w3.from_wei(admin_balance_wei, 'ether')
+            service.w3.to_checksum_address(admin_wallet.address)
+        )
+        admin_balance_matic = service.w3.from_wei(admin_balance_wei, "ether")
         print(f"💳 Admin MATIC balance: {admin_balance_matic}")
 
         admin_teo_balance = service.get_balance(admin_wallet.address)
@@ -58,8 +59,7 @@ def test_student1_setup():
 
         # Controlla balance student1 (prima)
         student1_balance_wei = service.w3.eth.get_balance(student1_checksum)
-        student1_balance_matic = service.w3.from_wei(
-            student1_balance_wei, 'ether')
+        student1_balance_matic = service.w3.from_wei(student1_balance_wei, "ether")
         student1_teo_balance = service.get_balance(student1_address)
 
         print(f"\n📊 STUDENT1 BALANCE (BEFORE):")
@@ -71,7 +71,7 @@ def test_student1_setup():
         teo_tx = service.transfer_tokens(
             from_private_key=admin_wallet.private_key,
             to_address=student1_address,
-            amount=Decimal('50.0')
+            amount=Decimal("50.0"),
         )
 
         if teo_tx:
@@ -84,61 +84,63 @@ def test_student1_setup():
         print(f"\n🚀 Step 2: Sending 0.01 MATIC to student1...")
 
         # Prepara transazione MATIC
-        from_account = service.w3.eth.account.from_key(
-            admin_wallet.private_key)
+        from_account = service.w3.eth.account.from_key(admin_wallet.private_key)
 
         # Ottieni gas price ottimizzato
         try:
             gas_price = service.w3.eth.gas_price
-            min_gas_price = service.w3.to_wei('30', 'gwei')
+            min_gas_price = service.w3.to_wei("30", "gwei")
             if gas_price < min_gas_price:
                 gas_price = min_gas_price
-            max_gas_price = service.w3.to_wei('50', 'gwei')
+            max_gas_price = service.w3.to_wei("50", "gwei")
             if gas_price > max_gas_price:
                 gas_price = max_gas_price
         except:
-            gas_price = service.w3.to_wei('30', 'gwei')
+            gas_price = service.w3.to_wei("30", "gwei")
 
         # Transazione MATIC nativa
         matic_tx = {
-            'to': student1_checksum,
-            'value': service.w3.to_wei('0.01', 'ether'),
-            'gas': 21000,  # Gas standard per transfer MATIC
-            'gasPrice': gas_price,
-            'nonce': service.w3.eth.get_transaction_count(from_account.address),
+            "to": student1_checksum,
+            "value": service.w3.to_wei("0.01", "ether"),
+            "gas": 21000,  # Gas standard per transfer MATIC
+            "gasPrice": gas_price,
+            "nonce": service.w3.eth.get_transaction_count(from_account.address),
         }
 
         # Firma e invia transazione MATIC
         signed_matic_tx = service.w3.eth.account.sign_transaction(
-            matic_tx, admin_wallet.private_key)
+            matic_tx, admin_wallet.private_key
+        )
         matic_tx_hash = service.w3.eth.send_raw_transaction(
-            signed_matic_tx.raw_transaction)
+            signed_matic_tx.raw_transaction
+        )
 
         print(f"✅ MATIC transfer successful! TX: {matic_tx_hash.hex()}")
 
         # Aspetta un po' per conferme
         print(f"\n⏳ Waiting for transaction confirmations...")
         import time
+
         time.sleep(10)
 
         # Controlla balance student1 (dopo)
-        student1_balance_wei_after = service.w3.eth.get_balance(
-            student1_checksum)
+        student1_balance_wei_after = service.w3.eth.get_balance(student1_checksum)
         student1_balance_matic_after = service.w3.from_wei(
-            student1_balance_wei_after, 'ether')
+            student1_balance_wei_after, "ether"
+        )
         student1_teo_balance_after = service.get_balance(student1_address)
 
         print(f"\n📊 STUDENT1 BALANCE (AFTER):")
         print(
-            f"💳 MATIC: {student1_balance_matic_after} (was {student1_balance_matic})")
-        print(
-            f"🪙 TEO: {student1_teo_balance_after} (was {student1_teo_balance})")
+            f"💳 MATIC: {student1_balance_matic_after} (was {student1_balance_matic})"
+        )
+        print(f"🪙 TEO: {student1_teo_balance_after} (was {student1_teo_balance})")
 
         # Verifica successo
-        matic_received = float(student1_balance_matic_after) - \
-            float(student1_balance_matic)
-        teo_received = float(student1_teo_balance_after) - \
-            float(student1_teo_balance)
+        matic_received = float(student1_balance_matic_after) - float(
+            student1_balance_matic
+        )
+        teo_received = float(student1_teo_balance_after) - float(student1_teo_balance)
 
         print(f"\n✅ SUMMARY:")
         print(f"💳 MATIC received: +{matic_received:.6f}")
@@ -153,6 +155,7 @@ def test_student1_setup():
     except Exception as e:
         print(f"❌ Error: {e}")
         import traceback
+
         traceback.print_exc()
 
 

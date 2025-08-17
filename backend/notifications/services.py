@@ -33,14 +33,14 @@ class TeoCoinDiscountNotificationService:
         teo_cost: float,
         teacher_bonus: float,
         request_id: int,
-        expires_at: timezone.datetime
+        expires_at: timezone.datetime,
     ) -> bool:
         """
         Notify teacher that a student received a discount and they need to choose EUR vs TEO
 
         Args:
             teacher: Teacher user
-            student: Student user  
+            student: Student user
             course_title: Course title
             discount_percent: Discount percentage
             teo_cost: TEO cost from student
@@ -54,8 +54,7 @@ class TeoCoinDiscountNotificationService:
         try:
             # Calculate time remaining
             time_remaining = expires_at - timezone.now()
-            hours_remaining = max(
-                0, int(time_remaining.total_seconds() / 3600))
+            hours_remaining = max(0, int(time_remaining.total_seconds() / 3600))
 
             # Create in-app notification
             message = (
@@ -70,12 +69,12 @@ class TeoCoinDiscountNotificationService:
             notification = Notification.objects.create(
                 user=teacher,
                 message=message,
-                notification_type='teocoin_discount_pending',
-                related_object_id=request_id
+                notification_type="teocoin_discount_pending",
+                related_object_id=request_id,
             )
 
             # Send email notification if enabled
-            if getattr(settings, 'SEND_DISCOUNT_EMAILS', True):
+            if getattr(settings, "SEND_DISCOUNT_EMAILS", True):
                 self._send_teacher_email_notification(
                     teacher=teacher,
                     student=student,
@@ -83,11 +82,12 @@ class TeoCoinDiscountNotificationService:
                     discount_percent=discount_percent,
                     teo_cost=teo_cost,
                     teacher_bonus=teacher_bonus,
-                    hours_remaining=hours_remaining
+                    hours_remaining=hours_remaining,
                 )
 
             self.logger.info(
-                f"Teacher discount notification sent to {teacher.username} for request {request_id}")
+                f"Teacher discount notification sent to {teacher.username} for request {request_id}"
+            )
             return True
 
         except Exception as e:
@@ -100,7 +100,7 @@ class TeoCoinDiscountNotificationService:
         teacher: User,
         course_title: str,
         decision: str,  # 'accepted' or 'declined'
-        teo_amount: Optional[float] = None
+        teo_amount: Optional[float] = None,
     ) -> bool:
         """
         Notify student of teacher's EUR vs TEO decision
@@ -116,7 +116,7 @@ class TeoCoinDiscountNotificationService:
             bool: Success status
         """
         try:
-            if decision == 'accepted':
+            if decision == "accepted":
                 message = (
                     f"🎉 Great news! Teacher {teacher.get_full_name() or teacher.username} "
                     f"accepted your {teo_amount:.2f} TEO payment for '{course_title}'!\n\n"
@@ -124,7 +124,7 @@ class TeoCoinDiscountNotificationService:
                     f"🪙 Your TEO tokens are being used for teacher staking benefits\n"
                     f"📚 You have full access to the course"
                 )
-                notification_type = 'teocoin_discount_accepted'
+                notification_type = "teocoin_discount_accepted"
             else:
                 message = (
                     f"📊 Teacher {teacher.get_full_name() or teacher.username} chose EUR payment "
@@ -133,21 +133,19 @@ class TeoCoinDiscountNotificationService:
                     f"🪙 Your TEO tokens have been returned\n"
                     f"📚 You have full access to the course"
                 )
-                notification_type = 'teocoin_discount_rejected'
+                notification_type = "teocoin_discount_rejected"
 
             notification = Notification.objects.create(
-                user=student,
-                message=message,
-                notification_type=notification_type
+                user=student, message=message, notification_type=notification_type
             )
 
             self.logger.info(
-                f"Student decision notification sent to {student.username}: {decision}")
+                f"Student decision notification sent to {student.username}: {decision}"
+            )
             return True
 
         except Exception as e:
-            self.logger.error(
-                f"Failed to send student decision notification: {e}")
+            self.logger.error(f"Failed to send student decision notification: {e}")
             return False
 
     def notify_teacher_timeout_warning(
@@ -156,7 +154,7 @@ class TeoCoinDiscountNotificationService:
         student: User,
         course_title: str,
         request_id: int,
-        minutes_remaining: int
+        minutes_remaining: int,
     ) -> bool:
         """
         Send timeout warning to teacher
@@ -182,17 +180,17 @@ class TeoCoinDiscountNotificationService:
             notification = Notification.objects.create(
                 user=teacher,
                 message=message,
-                notification_type='teocoin_discount_pending',
-                related_object_id=request_id
+                notification_type="teocoin_discount_pending",
+                related_object_id=request_id,
             )
 
             # Send urgent email
-            if getattr(settings, 'SEND_URGENT_EMAILS', True):
-                self._send_urgent_email(
-                    teacher, course_title, minutes_remaining)
+            if getattr(settings, "SEND_URGENT_EMAILS", True):
+                self._send_urgent_email(teacher, course_title, minutes_remaining)
 
             self.logger.info(
-                f"Timeout warning sent to {teacher.username} for request {request_id}")
+                f"Timeout warning sent to {teacher.username} for request {request_id}"
+            )
             return True
 
         except Exception as e:
@@ -200,11 +198,7 @@ class TeoCoinDiscountNotificationService:
             return False
 
     def notify_request_expired(
-        self,
-        teacher: User,
-        student: User,
-        course_title: str,
-        request_id: int
+        self, teacher: User, student: User, course_title: str, request_id: int
     ) -> bool:
         """
         Notify about expired request (auto-EUR selection)
@@ -230,8 +224,8 @@ class TeoCoinDiscountNotificationService:
             Notification.objects.create(
                 user=teacher,
                 message=teacher_message,
-                notification_type='teocoin_discount_expired',
-                related_object_id=request_id
+                notification_type="teocoin_discount_expired",
+                related_object_id=request_id,
             )
 
             # Notify student
@@ -246,22 +240,17 @@ class TeoCoinDiscountNotificationService:
             Notification.objects.create(
                 user=student,
                 message=student_message,
-                notification_type='teocoin_discount_expired'
+                notification_type="teocoin_discount_expired",
             )
 
-            self.logger.info(
-                f"Expiration notifications sent for request {request_id}")
+            self.logger.info(f"Expiration notifications sent for request {request_id}")
             return True
 
         except Exception as e:
             self.logger.error(f"Failed to send expiration notifications: {e}")
             return False
 
-    def create_teacher_staking_reminder(
-        self,
-        teacher: User,
-        teo_amount: float
-    ) -> bool:
+    def create_teacher_staking_reminder(self, teacher: User, teo_amount: float) -> bool:
         """
         Remind teacher about staking benefits after accepting TEO
 
@@ -283,9 +272,7 @@ class TeoCoinDiscountNotificationService:
             )
 
             notification = Notification.objects.create(
-                user=teacher,
-                message=message,
-                notification_type='bonus_received'
+                user=teacher, message=message, notification_type="bonus_received"
             )
 
             self.logger.info(f"Staking reminder sent to {teacher.username}")
@@ -305,28 +292,30 @@ class TeoCoinDiscountNotificationService:
         discount_percent: int,
         teo_cost: float,
         teacher_bonus: float,
-        hours_remaining: int
+        hours_remaining: int,
     ):
         """Send email notification to teacher"""
         try:
             subject = f"Student discount decision needed - {course_title}"
 
             context = {
-                'teacher_name': teacher.get_full_name() or teacher.username,
-                'student_name': student.get_full_name() or student.username,
-                'course_title': course_title,
-                'discount_percent': discount_percent,
-                'teo_cost': teo_cost,
-                'teacher_bonus': teacher_bonus,
-                'total_teo': teo_cost + teacher_bonus,
-                'hours_remaining': hours_remaining,
-                'dashboard_url': f"{getattr(settings, 'FRONTEND_URL', 'http://localhost:3000')}/teacher/dashboard"
+                "teacher_name": teacher.get_full_name() or teacher.username,
+                "student_name": student.get_full_name() or student.username,
+                "course_title": course_title,
+                "discount_percent": discount_percent,
+                "teo_cost": teo_cost,
+                "teacher_bonus": teacher_bonus,
+                "total_teo": teo_cost + teacher_bonus,
+                "hours_remaining": hours_remaining,
+                "dashboard_url": f"{getattr(settings, 'FRONTEND_URL', 'http://localhost:3000')}/teacher/dashboard",
             }
 
             html_message = render_to_string(
-                'emails/teacher_discount_decision.html', context)
+                "emails/teacher_discount_decision.html", context
+            )
             plain_message = render_to_string(
-                'emails/teacher_discount_decision.txt', context)
+                "emails/teacher_discount_decision.txt", context
+            )
 
             send_mail(
                 subject=subject,
@@ -334,13 +323,15 @@ class TeoCoinDiscountNotificationService:
                 from_email=settings.DEFAULT_FROM_EMAIL,
                 recipient_list=[teacher.email],
                 html_message=html_message,
-                fail_silently=False
+                fail_silently=False,
             )
 
         except Exception as e:
             self.logger.error(f"Failed to send teacher email: {e}")
 
-    def _send_urgent_email(self, teacher: User, course_title: str, minutes_remaining: int):
+    def _send_urgent_email(
+        self, teacher: User, course_title: str, minutes_remaining: int
+    ):
         """Send urgent timeout warning email"""
         try:
             subject = f"URGENT: {minutes_remaining} minutes left - {course_title}"
@@ -359,7 +350,7 @@ class TeoCoinDiscountNotificationService:
                 message=message,
                 from_email=settings.DEFAULT_FROM_EMAIL,
                 recipient_list=[teacher.email],
-                fail_silently=False
+                fail_silently=False,
             )
 
         except Exception as e:

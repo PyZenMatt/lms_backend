@@ -10,8 +10,8 @@ import django
 from services.teocoin_discount_service import teocoin_discount_service
 
 # Setup Django environment
-sys.path.append('/home/teo/Project/school/schoolplatform')
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'schoolplatform.settings')
+sys.path.append("/home/teo/Project/school/schoolplatform")
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "schoolplatform.settings")
 django.setup()
 
 
@@ -45,24 +45,22 @@ def test_full_discount_flow():
 
         print(f"   💎 TEO Cost: {teo_cost / 10**18:.4f} TEO")
         print(f"   🎁 Teacher Bonus: {teacher_bonus / 10**18:.4f} TEO")
-        print(
-            f"   🔏 Message Hash: {signature_data.get('message_hash', 'ERROR')}")
+        print(f"   🔏 Message Hash: {signature_data.get('message_hash', 'ERROR')}")
 
-        if 'error' in signature_data:
-            print(
-                f"   ❌ Signature generation failed: {signature_data['error']}")
+        if "error" in signature_data:
+            print(f"   ❌ Signature generation failed: {signature_data['error']}")
             return False
 
         # Step 2: Simulate what frontend would do with MetaMask
         print(f"\n🦊 Step 2: Simulate Frontend Signature")
         print(
-            f"   📝 Frontend would call: signer.signMessage('{signature_data['signable_message']}')")
+            f"   📝 Frontend would call: signer.signMessage('{signature_data['signable_message']}')"
+        )
         print(f"   🔐 This creates a signature that smart contract can verify")
 
         # Simulate a signature (in real world, MetaMask would provide this)
         mock_signature = "0x" + "a" * 130  # Mock signature for testing
-        print(
-            f"   📋 Mock Signature: {mock_signature[:20]}...{mock_signature[-10:]}")
+        print(f"   📋 Mock Signature: {mock_signature[:20]}...{mock_signature[-10:]}")
 
         # Step 3: Test the create request (this would call the smart contract)
         print(f"\n🚀 Step 3: Create Discount Request")
@@ -79,7 +77,8 @@ def test_full_discount_flow():
         print(f"\n🔍 Step 4: Signature Validation Check")
         print(f"   Smart contract will verify signature against:")
         print(
-            f"      keccak256(student={student_address}, courseId={course_id}, teoCost={teo_cost}, contract=<discount_contract>)")
+            f"      keccak256(student={student_address}, courseId={course_id}, teoCost={teo_cost}, contract=<discount_contract>)"
+        )
         print(f"   Our generated hash: {signature_data['message_hash']}")
         print(f"   ✅ Parameters match smart contract expectations")
 

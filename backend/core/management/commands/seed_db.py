@@ -1,11 +1,10 @@
-
 from courses.models import Course, Exercise, Lesson
 from django.core.management.base import BaseCommand
 from users.models import User
 
 
 class Command(BaseCommand):
-    help = 'Popola il database con dati demo'
+    help = "Popola il database con dati demo"
 
     def handle(self, *args, **options):
         self.stdout.write("Creazione utenti demo...")
@@ -14,15 +13,15 @@ class Command(BaseCommand):
         teachers = []
         for i in range(1, 6):  # 5 insegnanti
             teacher, created = User.objects.get_or_create(
-                username=f'teacher{i}',
+                username=f"teacher{i}",
                 defaults={
-                    'email': f'teacher{i}@teoart.it',
-                    'role': 'teacher',
-                    'teo_coins': 0
-                }
+                    "email": f"teacher{i}@teoart.it",
+                    "role": "teacher",
+                    "teo_coins": 0,
+                },
             )
             if created:
-                teacher.set_password('testpass123')
+                teacher.set_password("testpass123")
                 teacher.save()
                 self.stdout.write(f"Insegnante creato: {teacher.username}")
             teachers.append(teacher)
@@ -31,15 +30,15 @@ class Command(BaseCommand):
         students = []
         for i in range(1, 21):  # 20 studenti
             student, created = User.objects.get_or_create(
-                username=f'student{i}',
+                username=f"student{i}",
                 defaults={
-                    'email': f'student{i}@teoart.it',
-                    'role': 'student',
-                    'teo_coins': 500
-                }
+                    "email": f"student{i}@teoart.it",
+                    "role": "student",
+                    "teo_coins": 500,
+                },
             )
             if created:
-                student.set_password('testpass123')
+                student.set_password("testpass123")
                 student.save()
                 self.stdout.write(f"Studente creato: {student.username}")
             students.append(student)
@@ -52,10 +51,10 @@ class Command(BaseCommand):
                 course, created = Course.objects.get_or_create(
                     title=course_title,
                     defaults={
-                        'description': f"Descrizione del {course_title}",
-                        'teacher': teacher,
-                        'price': 100,
-                    }
+                        "description": f"Descrizione del {course_title}",
+                        "teacher": teacher,
+                        "price": 100,
+                    },
                 )
                 if created:
                     self.stdout.write(f"Corso creato: {course.title}")
@@ -66,10 +65,10 @@ class Command(BaseCommand):
                     lesson, created = Lesson.objects.get_or_create(
                         title=lesson_title,
                         defaults={
-                            'content': f"Contenuto della {lesson_title}",
-                            'teacher': teacher,  # Associa l'insegnante del corso
-                            'course': course,  # Associa la lezione al corso
-                        }
+                            "content": f"Contenuto della {lesson_title}",
+                            "teacher": teacher,  # Associa l'insegnante del corso
+                            "course": course,  # Associa la lezione al corso
+                        },
                     )
                     if created:
                         self.stdout.write(f"Lezione creata: {lesson.title}")
@@ -80,13 +79,12 @@ class Command(BaseCommand):
                         exercise, created = Exercise.objects.get_or_create(
                             lesson=lesson,
                             defaults={
-                                'title': exercise_title,
-                                'description': f"Descrizione dell'{exercise_title}",
-                                'status': 'created',
-                            }
+                                "title": exercise_title,
+                                "description": f"Descrizione dell'{exercise_title}",
+                                "status": "created",
+                            },
                         )
                         if created:
-                            self.stdout.write(
-                                f"Esercizio creato: {exercise.title}")
+                            self.stdout.write(f"Esercizio creato: {exercise.title}")
 
         self.stdout.write("Popolamento del database completato!")
