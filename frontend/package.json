@@ -1,3 +1,13 @@
+"scripts": {
+  "dev": "vite",
+  "build": "vite build",
+  "preview": "vite preview",
+  "test": "vitest",
+  "lint": "eslint .",
+  "typecheck:e2e": "tsc -p tsconfig.e2e.json --noEmit",
+  "e2e:ci": "npm run typecheck:e2e && playwright test --reporter=html",
+  "e2e:report": "playwright show-report"
+}
 {
   "lint-staged": {
     "**/*.{js,jsx,ts,tsx}": [
@@ -6,5 +16,9 @@
     "**/*.{md,json,yml,yaml}": [
       "prettier --write"
     ]
+  },
+  "devDependencies": {
+    "@types/node": "^24.3.0",
+    "typescript": "^5.9.2"
   }
 }
