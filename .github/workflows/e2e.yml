@@ -76,3 +76,7 @@ jobs:
         if: always()
         run: |
           if [ -f /tmp/httpserver.pid ]; then kill $(cat /tmp/httpserver.pid) || true; fi
+    
+      - name: Type check (tests only)
+        run: npm run typecheck:e2e
+        working-directory: frontend
