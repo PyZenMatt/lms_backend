@@ -72,7 +72,7 @@ export default defineConfig({
     webServer: {
       command: process.env.CI ? 'npx http-server ./dist --port 3000' : 'npm run dev',
       url: 'http://localhost:3000',
-    reuseExistingServer: true,
+  reuseExistingServer: false,
       timeout: 120000,
     },
 });
