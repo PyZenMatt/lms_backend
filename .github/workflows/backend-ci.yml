@@ -33,7 +33,6 @@ jobs:
       - name: Run lint
         run: flake8 backend/
       - name: Run tests
-      - name: Run tests
         working-directory: backend
         env:
           DJANGO_SETTINGS_MODULE: backend.schoolplatform.settings.ci
