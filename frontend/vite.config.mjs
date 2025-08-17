@@ -1,7 +1,6 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import jsconfigPaths from 'vite-jsconfig-paths';
-import { splitVendorChunkPlugin } from 'vite';
 
 export default defineConfig({
   server: {
@@ -70,8 +69,7 @@ export default defineConfig({
         ].filter(Boolean)
       }
     }), 
-    jsconfigPaths(),
-    splitVendorChunkPlugin()
+    jsconfigPaths()
   ],
   build: {
     // Production build optimizations
