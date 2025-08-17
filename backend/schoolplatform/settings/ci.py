@@ -43,6 +43,31 @@ LOGGING = {
     "root": {"handlers": ["console"], "level": "WARNING"},
 }
 
+# Django core apps
+INSTALLED_APPS = [
+    'django.contrib.admin',
+    'django.contrib.auth',
+    'django.contrib.contenttypes',
+    'django.contrib.sessions',
+    'django.contrib.messages',
+    'django.contrib.staticfiles',
+
+    # Third-party apps (add as needed)
+    # 'rest_framework',
+    # 'rest_framework_simplejwt',
+
+    # Project apps
+    'backend.api',
+    'backend.blockchain',
+    'backend.core',
+    'backend.courses',
+    'backend.notifications',
+    'backend.payments',
+    'backend.rewards',
+    'backend.services',
+    'backend.users',
+]
+
 # ⚠️ Blocca chiavi/valori dev: in dev.py c'erano default hardcoded per key/wallet.
 # In CI NON mettiamo default: se servono, arrivano via env/Secrets.
 PLATFORM_PRIVATE_KEY = os.environ.get("PLATFORM_PRIVATE_KEY")
