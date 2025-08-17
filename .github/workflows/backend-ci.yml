@@ -36,5 +36,5 @@ jobs:
           name: coverage-html
           path: htmlcov/
       - name: Install requirements
-        run: pip install -r requirements.txt
+        run: pip install -r backend/requirements.txt
         working-directory: backend
