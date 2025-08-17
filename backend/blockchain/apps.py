@@ -18,7 +18,7 @@ class BlockchainConfig(AppConfig):
     """
 
     default_auto_field = "django.db.models.BigAutoField"
-    name = "blockchain"
+    name = "backend.blockchain"
     verbose_name = "Blockchain & TeoCoin Management"
 
     def ready(self):
