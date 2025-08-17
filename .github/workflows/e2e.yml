@@ -1,0 +1,78 @@
+name: E2E (prod build)
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  e2e:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    env:
+      # fallback locale se non imposti il secret
+      E2E_BASE_URL: ${{ secrets.E2E_BASE_URL || 'http://localhost:3000' }}
+      E2E_USER: ${{ secrets.E2E_USER }}
+      E2E_PASS: ${{ secrets.E2E_PASS }}
+      E2E_IGNORED_CONSOLE_PATTERNS: ${{ secrets.E2E_IGNORED_CONSOLE_PATTERNS }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install deps (frontend)
+        working-directory: frontend
+        run: npm ci
+
+      - name: Install Playwright browsers
+        working-directory: frontend
+        run: npx playwright install --with-deps
+
+      - name: Typecheck (tests only)
+        working-directory: frontend
+        run: npx tsc -p tsconfig.e2e.json --noEmit
+
+      - name: Build (prod)
+        working-directory: frontend
+        run: |
+          npm run build || npx vite build
+
+      - name: Serve dist on :3000 (background)
+        working-directory: frontend
+        run: |
+          npx http-server ./dist -p 3000 & \
+          echo $! > /tmp/httpserver.pid
+
+      - name: Wait for server
+        run: |
+          for i in {1..60}; do
+            curl -fsS $E2E_BASE_URL >/dev/null && exit 0
+            sleep 1
+          done
+          echo "Server not responding on $E2E_BASE_URL" >&2
+          exit 1
+
+      - name: Run Playwright (HTML report)
+        working-directory: frontend
+        run: npx playwright test --reporter=html
+
+      - name: Upload Playwright report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: frontend/playwright-report
+          retention-days: 7
+
+      - name: Stop http-server
+        if: always()
+        run: |
+          if [ -f /tmp/httpserver.pid ]; then kill $(cat /tmp/httpserver.pid) || true; fi
