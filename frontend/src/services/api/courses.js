@@ -21,7 +21,7 @@ const setCachedResponse = (key, data) => {
 
 export const fetchCourses = async (params = {}) => {
   const searchParams = new URLSearchParams();
-  
+
   // Aggiungi parametri di filtro se presenti
   if (params.category && params.category !== 'all') {
     searchParams.append('category', params.category);
@@ -32,10 +32,10 @@ export const fetchCourses = async (params = {}) => {
   if (params.ordering) {
     searchParams.append('ordering', params.ordering);
   }
-  
+
   const queryString = searchParams.toString();
   const endpoint = queryString ? `courses/?${queryString}` : 'courses/';
-  
+
   return api.get(endpoint);
 };
 
@@ -51,7 +51,7 @@ export const createCourse = async (data) => {
   const config = {};
   if (data instanceof FormData) {
     config.headers = {
-      'Content-Type': 'multipart/form-data',
+      'Content-Type': 'multipart/form-data'
     };
   }
   return api.post('courses/', data, config);
@@ -63,7 +63,7 @@ export const createLesson = async (data) => {
   const config = {};
   if (data instanceof FormData) {
     config.headers = {
-      'Content-Type': 'multipart/form-data',
+      'Content-Type': 'multipart/form-data'
     };
   }
   return api.post('lessons/create/', data, config);
@@ -79,7 +79,7 @@ export const createExercise = async (data) => {
   const config = {};
   if (data instanceof FormData) {
     config.headers = {
-      'Content-Type': 'multipart/form-data',
+      'Content-Type': 'multipart/form-data'
     };
   }
   return api.post('exercises/create/', data, config);
@@ -121,13 +121,13 @@ export const confirmPayment = async (courseId, paymentIntentId) => {
   const response = await api.post(`courses/${courseId}/confirm-payment/`, {
     payment_intent_id: paymentIntentId
   });
-  
+
   // ⚡ PERFORMANCE: Invalidate payment summary cache after successful payment
   if (response.data.success) {
     const cacheKey = `payment_summary_${courseId}`;
     apiCache.delete(cacheKey);
   }
-  
+
   return response;
 };
 
@@ -135,31 +135,31 @@ export const getPaymentSummary = async (courseId) => {
   // ⚡ PERFORMANCE: Try cache first for payment summary
   const cacheKey = `payment_summary_${courseId}`;
   const cached = getCachedResponse(cacheKey);
-  
+
   if (cached) {
     return cached;
   }
-  
+
   const response = await api.get(`courses/${courseId}/payment-summary/`);
-  
+
   // Cache successful responses
   if (response.data.success) {
     setCachedResponse(cacheKey, response);
   }
-  
+
   return response;
 };
 
 export const completeHybridPayment = async (courseId, paymentIntentId) => {
   console.log('🔄 Calling completeHybridPayment API:', { courseId, paymentIntentId });
-  
+
   // Call the backend completion endpoint that triggers TeoCoin transfer and teacher notification
   const response = await api.put(`courses/${courseId}/hybrid-payment/`, {
     payment_intent_id: paymentIntentId
   });
-  
+
   console.log('✅ Hybrid payment completion response:', response.data);
-  
+
   return response;
 };
 

@@ -1,16 +1,15 @@
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
-/**
- * 🎉 Development Status Dashboard
- * 
- * Shows implementation status and handles development mode gracefully
- */
-
 import React, { useState, useEffect } from 'react';
-import { Helmet } from "react-helmet";
+import { Helmet } from 'react-helmet';
 import { Container, Row, Col, Card, Alert, Badge, Button, Accordion, ProgressBar } from 'react-bootstrap';
 import { useTheme } from '../../contexts/ThemeContext';
 import ThemeToggle from '../../components/ui/ThemeToggle';
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
+/**
+ * 🎉 Development Status Dashboard
+ * Shows implementation status and handles development mode gracefully
+ */
 const DevelopmentStatusDashboard = () => {
   const { isDark } = useTheme();
   const [apiStatus, setApiStatus] = useState({
@@ -27,13 +26,13 @@ const DevelopmentStatusDashboard = () => {
   const checkAPIStatus = async () => {
     const checks = {
       websocket: 'unavailable',
-      activity: 'unavailable', 
+      activity: 'unavailable',
       staking: 'unavailable',
       notifications: 'unavailable'
     };
 
     try {
-      // Quick API checks (these will fail in development)
+      // Quick API checks (possono fallire in dev)
       const responses = await Promise.allSettled([
         fetch(`${API_BASE_URL}/api/v1/activity/feed/`, { method: 'HEAD' }),
         fetch(`${API_BASE_URL}/api/v1/teocoin/staking-info/`, { method: 'HEAD' }),
@@ -43,26 +42,17 @@ const DevelopmentStatusDashboard = () => {
       checks.activity = responses[0].status === 'fulfilled' && responses[0].value.ok ? 'available' : 'mock';
       checks.staking = responses[1].status === 'fulfilled' && responses[1].value.ok ? 'available' : 'mock';
       checks.notifications = responses[2].status === 'fulfilled' && responses[2].value.ok ? 'available' : 'mock';
-      checks.websocket = 'mock'; // WebSocket always falls back to mock in development
 
-    } catch (error) {
-      // All services are using mock data
-      Object.keys(checks).forEach(key => {
-        checks[key] = 'mock';
-      });
+      // In dev il websocket resta mock
+      checks.websocket = 'mock';
+    } catch (_err) {
+      // fallback mock per tutto
+      Object.keys(checks).forEach((k) => (checks[k] = 'mock'));
     }
 
-    // Helmet per il titolo
-    const helmet = (
-      <Helmet>
-        <title>SchoolPlatform Development Dashboard</title>
-      </Helmet>
-    );
     setApiStatus(checks);
   };
-      <>
-        {helmet}
-        <Container fluid className="p-4">
+
   const features = [
     {
       name: '🌙 Dark Theme System',
@@ -135,13 +125,7 @@ const DevelopmentStatusDashboard = () => {
       status: 'complete',
       description: 'Progressive Web App capabilities',
       progress: 100,
-      details: [
-        'Service worker implementation',
-        'Offline functionality',
-        'App manifest',
-        'Installation prompts',
-        'Background sync'
-      ]
+      details: ['Service worker implementation', 'Offline functionality', 'App manifest', 'Installation prompts', 'Background sync']
     }
   ];
 
@@ -173,6 +157,10 @@ const DevelopmentStatusDashboard = () => {
 
   return (
     <Container fluid className="p-4">
+      <Helmet>
+        <title>SchoolPlatform Development Dashboard</title>
+      </Helmet>
+
       <Row>
         <Col lg={12}>
           <Card className="border-0 shadow-sm mb-4">
@@ -180,11 +168,9 @@ const DevelopmentStatusDashboard = () => {
               <div className="d-flex align-items-center justify-content-between">
                 <div>
                   <h3 className="mb-1">🎉 SchoolPlatform Development Status</h3>
-                  <p className="text-muted mb-0">
-                    Phase 4 implementation complete with comprehensive features
-                  </p>
+                  <p className="text-muted mb-0">Phase 4 implementation complete with comprehensive features</p>
                 </div>
-                <ThemeToggle size="lg" showLabel={true} />
+                <ThemeToggle size="lg" showLabel />
               </div>
             </Card.Header>
 
@@ -192,17 +178,16 @@ const DevelopmentStatusDashboard = () => {
               {/* Development Mode Notice */}
               <Alert variant={isDark ? 'info' : 'primary'} className="mb-4">
                 <div className="d-flex align-items-start">
-                  <div className="me-3" style={{ fontSize: '1.5rem' }}>🔧</div>
+                  <div className="me-3" style={{ fontSize: '1.5rem' }}>
+                    🔧
+                  </div>
                   <div className="flex-grow-1">
                     <h5 className="mb-2">Development Mode Active</h5>
                     <p className="mb-2">
-                      The application is running in development mode with mock data services. 
-                      All UI features are fully functional for demonstration purposes.
+                      The application is running in development mode with mock data services. All UI features are fully functional for
+                      demonstration purposes.
                     </p>
-      </>
-                    <small>
-                      🎭 Mock services provide realistic data simulation when backend is not available.
-                    </small>
+                    <small>🎭 Mock services provide realistic data simulation when backend is not available.</small>
                   </div>
                 </div>
               </Alert>
@@ -238,8 +223,8 @@ const DevelopmentStatusDashboard = () => {
                           {getStatusBadge(feature.status)}
                         </div>
                         <div className="text-end" style={{ minWidth: '100px' }}>
-                          <ProgressBar 
-                            now={feature.progress} 
+                          <ProgressBar
+                            now={feature.progress}
                             style={{ height: '8px', width: '80px' }}
                             variant={feature.progress === 100 ? 'success' : 'warning'}
                           />
@@ -252,7 +237,9 @@ const DevelopmentStatusDashboard = () => {
                       <h6>Implemented Features:</h6>
                       <ul className="mb-0">
                         {feature.details.map((detail, idx) => (
-                          <li key={idx} className="text-muted">{detail}</li>
+                          <li key={idx} className="text-muted">
+                            {detail}
+                          </li>
                         ))}
                       </ul>
                     </Accordion.Body>
@@ -265,29 +252,17 @@ const DevelopmentStatusDashboard = () => {
                 <h5 className="mb-3">🧭 Quick Navigation</h5>
                 <Row>
                   <Col md={4} className="mb-2">
-                    <Button 
-                      variant="outline-primary" 
-                      href="/profile/settings/theme"
-                      className="w-100"
-                    >
+                    <Button variant="outline-primary" href="/profile/settings/theme" className="w-100">
                       🌙 Theme Settings
                     </Button>
                   </Col>
                   <Col md={4} className="mb-2">
-                    <Button 
-                      variant="outline-success" 
-                      href="/demo/dark-theme"
-                      className="w-100"
-                    >
+                    <Button variant="outline-success" href="/demo/dark-theme" className="w-100">
                       🎨 Theme Showcase
                     </Button>
                   </Col>
                   <Col md={4} className="mb-2">
-                    <Button 
-                      variant="outline-info" 
-                      href="/dashboard/teacher"
-                      className="w-100"
-                    >
+                    <Button variant="outline-info" href="/dashboard/teacher" className="w-100">
                       📊 Teacher Dashboard
                     </Button>
                   </Col>
@@ -298,11 +273,21 @@ const DevelopmentStatusDashboard = () => {
               <Alert variant="light" className="mt-4">
                 <h6>📝 Development Notes:</h6>
                 <ul className="mb-0 small">
-                  <li><strong>Mock Data:</strong> All APIs use realistic mock data when backend is unavailable</li>
-                  <li><strong>Error Handling:</strong> Graceful fallbacks prevent application crashes</li>
-                  <li><strong>Theme System:</strong> Complete dark/light theme with persistence</li>
-                  <li><strong>Real-time Features:</strong> Simulated WebSocket events for demonstration</li>
-                  <li><strong>PWA Ready:</strong> Service worker and offline functionality implemented</li>
+                  <li>
+                    <strong>Mock Data:</strong> All APIs use realistic mock data when backend is unavailable
+                  </li>
+                  <li>
+                    <strong>Error Handling:</strong> Graceful fallbacks prevent application crashes
+                  </li>
+                  <li>
+                    <strong>Theme System:</strong> Complete dark/light theme with persistence
+                  </li>
+                  <li>
+                    <strong>Real-time Features:</strong> Simulated WebSocket events for demonstration
+                  </li>
+                  <li>
+                    <strong>PWA Ready:</strong> Service worker and offline functionality implemented
+                  </li>
                 </ul>
               </Alert>
             </Card.Body>

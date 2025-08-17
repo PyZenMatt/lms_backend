@@ -12,21 +12,19 @@ export const scrollToSectionByText = (text, headerSelector = 'h2, h3, h4, h5, h6
     block: 'center',
     inline: 'nearest'
   };
-  
+
   const scrollOptions = { ...defaultOptions, ...options };
-  
+
   try {
     // Find header containing the text
     const headers = document.querySelectorAll(headerSelector);
-    const targetHeader = Array.from(headers).find(header => 
-      header.textContent.includes(text)
-    );
-    
+    const targetHeader = Array.from(headers).find((header) => header.textContent.includes(text));
+
     if (targetHeader) {
       targetHeader.scrollIntoView(scrollOptions);
       return true;
     }
-    
+
     console.warn(`No header found containing text: "${text}"`);
     return false;
   } catch (error) {
@@ -46,25 +44,25 @@ export const scrollToElementByTitle = (titleValue, options = {}) => {
     block: 'center',
     inline: 'nearest'
   };
-  
+
   const scrollOptions = { ...defaultOptions, ...options };
-  
+
   try {
     // Try title attribute first
     let element = document.querySelector(`[title="${titleValue}"]`);
-    
+
     // If not found, try data-title attribute
     if (!element) {
       element = document.querySelector(`[data-title="${titleValue}"]`);
     }
-    
+
     // If found, find the closest container
     if (element) {
       const container = element.closest('.col-md-4, .col-md-6, .col-md-8, .card, .widget') || element;
       container.scrollIntoView(scrollOptions);
       return true;
     }
-    
+
     console.warn(`No element found with title: "${titleValue}"`);
     return false;
   } catch (error) {
@@ -83,14 +81,13 @@ export const scrollToTop = (options = {}) => {
     block: 'start',
     inline: 'nearest'
   };
-  
+
   const scrollOptions = { ...defaultOptions, ...options };
-  
+
   try {
     // Try to find main container
-    const container = document.querySelector('.container, .container-fluid, main, #main') || 
-                     document.body;
-    
+    const container = document.querySelector('.container, .container-fluid, main, #main') || document.body;
+
     container.scrollIntoView(scrollOptions);
     return true;
   } catch (error) {
@@ -110,10 +107,10 @@ export const scrollToSelector = (selectors, options = {}) => {
     block: 'center',
     inline: 'nearest'
   };
-  
+
   const scrollOptions = { ...defaultOptions, ...options };
   const selectorArray = Array.isArray(selectors) ? selectors : [selectors];
-  
+
   try {
     for (const selector of selectorArray) {
       const element = document.querySelector(selector);
@@ -122,7 +119,7 @@ export const scrollToSelector = (selectors, options = {}) => {
         return true;
       }
     }
-    
+
     console.warn('No element found for selectors:', selectorArray);
     return false;
   } catch (error) {
@@ -156,7 +153,7 @@ export const scrollWithFallback = (scrollAction, fallbackUrl = null) => {
   try {
     // Check if we're on the dashboard page
     const isDashboardPage = window.location.pathname.includes('/dashboard');
-    
+
     // If we're already on the dashboard page, try to scroll
     if (isDashboardPage) {
       const success = scrollAction();
@@ -211,81 +208,86 @@ const getUserTypeFromURL = () => {
 export const dashboardScrollActions = {
   // Student Dashboard
   student: {
-    overview: () => scrollWithFallback(
-      () => scrollToTop(),
-      '/dashboard/student'
-    ),
-    balance: () => scrollWithFallback(
-      () => scrollToElementByTitle('Saldo TeoCoin') || scrollToSectionByText('Saldo TeoCoin'),
-      '/dashboard/student#balance'
-    ),
-    courses: () => scrollWithFallback(
-      () => scrollToSectionByText('Corsi acquistati') || scrollToSectionByText('I Miei Corsi'),
-      '/dashboard/student#courses'
-    ),
-    transactions: () => scrollWithFallback(
-      () => scrollToSectionByText('Ultime Transazioni') || scrollToSectionByText('Transazioni'),
-      '/dashboard/student#transactions'
-    ),
-    exercises: () => scrollWithFallback(
-      () => scrollToSectionByText('I miei esercizi') || scrollToSectionByText('Esercizi'),
-      '/dashboard/student#exercises'
-    )
+    overview: () => scrollWithFallback(() => scrollToTop(), '/dashboard/student'),
+    balance: () =>
+      scrollWithFallback(
+        () => scrollToElementByTitle('Saldo TeoCoin') || scrollToSectionByText('Saldo TeoCoin'),
+        '/dashboard/student#balance'
+      ),
+    courses: () =>
+      scrollWithFallback(
+        () => scrollToSectionByText('Corsi acquistati') || scrollToSectionByText('I Miei Corsi'),
+        '/dashboard/student#courses'
+      ),
+    transactions: () =>
+      scrollWithFallback(
+        () => scrollToSectionByText('Ultime Transazioni') || scrollToSectionByText('Transazioni'),
+        '/dashboard/student#transactions'
+      ),
+    exercises: () =>
+      scrollWithFallback(
+        () => scrollToSectionByText('I miei esercizi') || scrollToSectionByText('Esercizi'),
+        '/dashboard/student#exercises'
+      )
   },
-  
+
   // Teacher Dashboard
   teacher: {
-    overview: () => scrollWithFallback(
-      () => scrollToTop(),
-      '/dashboard/teacher'
-    ),
-    balance: () => scrollWithFallback(
-      () => scrollToElementByTitle('Saldo TeoCoin') || scrollToSectionByText('Saldo TeoCoin'),
-      '/dashboard/teacher#balance'
-    ),
-    sales: () => scrollWithFallback(
-      () => scrollToSectionByText('Vendite') || scrollToSelector(['.dash-sales', '[data-section="sales"]']),
-      '/dashboard/teacher#sales'
-    ),
-    courses: () => scrollWithFallback(
-      () => scrollToSectionByText('Corsi creati') || scrollToSectionByText('I Miei Corsi'),
-      '/dashboard/teacher#courses'
-    ),
-    lessons: () => scrollWithFallback(
-      () => scrollToSectionByText('Lezioni') || scrollToSelector(['[data-section="lessons"]']),
-      '/dashboard/teacher#lessons'
-    ),
-    transactions: () => scrollWithFallback(
-      () => scrollToSectionByText('Ultime Transazioni') || scrollToSectionByText('Transazioni'),
-      '/dashboard/teacher#transactions'
-    ),
-    smartContracts: () => scrollWithFallback(
-      () => scrollToSectionByText('Smart Contract') || scrollToSelector(['[data-section="contracts"]']),
-      '/dashboard/teacher#contracts'
-    )
+    overview: () => scrollWithFallback(() => scrollToTop(), '/dashboard/teacher'),
+    balance: () =>
+      scrollWithFallback(
+        () => scrollToElementByTitle('Saldo TeoCoin') || scrollToSectionByText('Saldo TeoCoin'),
+        '/dashboard/teacher#balance'
+      ),
+    sales: () =>
+      scrollWithFallback(
+        () => scrollToSectionByText('Vendite') || scrollToSelector(['.dash-sales', '[data-section="sales"]']),
+        '/dashboard/teacher#sales'
+      ),
+    courses: () =>
+      scrollWithFallback(
+        () => scrollToSectionByText('Corsi creati') || scrollToSectionByText('I Miei Corsi'),
+        '/dashboard/teacher#courses'
+      ),
+    lessons: () =>
+      scrollWithFallback(
+        () => scrollToSectionByText('Lezioni') || scrollToSelector(['[data-section="lessons"]']),
+        '/dashboard/teacher#lessons'
+      ),
+    transactions: () =>
+      scrollWithFallback(
+        () => scrollToSectionByText('Ultime Transazioni') || scrollToSectionByText('Transazioni'),
+        '/dashboard/teacher#transactions'
+      ),
+    smartContracts: () =>
+      scrollWithFallback(
+        () => scrollToSectionByText('Smart Contract') || scrollToSelector(['[data-section="contracts"]']),
+        '/dashboard/teacher#contracts'
+      )
   },
-  
+
   // Admin Dashboard
   admin: {
-    overview: () => scrollWithFallback(
-      () => scrollToTop(),
-      '/dashboard/admin'
-    ),
-    balance: () => scrollWithFallback(
-      () => scrollToElementByTitle('Saldo TeoCoin') || scrollToSectionByText('Saldo TeoCoin'),
-      '/dashboard/admin#balance'
-    ),
-    pendingTeachers: () => scrollWithFallback(
-      () => scrollToSectionByText('Docenti Pending') || scrollToSectionByText('Maestri in attesa'),
-      '/dashboard/admin#pending-teachers'
-    ),
-    pendingCourses: () => scrollWithFallback(
-      () => scrollToSectionByText('Corsi Pending') || scrollToSectionByText('Corsi in attesa'),
-      '/dashboard/admin#pending-courses'
-    ),
-    userManagement: () => scrollWithFallback(
-      () => scrollToSectionByText('User Management') || scrollToSectionByText('Gestione Utenti'),
-      '/dashboard/admin#user-management'
-    )
+    overview: () => scrollWithFallback(() => scrollToTop(), '/dashboard/admin'),
+    balance: () =>
+      scrollWithFallback(
+        () => scrollToElementByTitle('Saldo TeoCoin') || scrollToSectionByText('Saldo TeoCoin'),
+        '/dashboard/admin#balance'
+      ),
+    pendingTeachers: () =>
+      scrollWithFallback(
+        () => scrollToSectionByText('Docenti Pending') || scrollToSectionByText('Maestri in attesa'),
+        '/dashboard/admin#pending-teachers'
+      ),
+    pendingCourses: () =>
+      scrollWithFallback(
+        () => scrollToSectionByText('Corsi Pending') || scrollToSectionByText('Corsi in attesa'),
+        '/dashboard/admin#pending-courses'
+      ),
+    userManagement: () =>
+      scrollWithFallback(
+        () => scrollToSectionByText('User Management') || scrollToSectionByText('Gestione Utenti'),
+        '/dashboard/admin#user-management'
+      )
   }
 };

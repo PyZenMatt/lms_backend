@@ -32,46 +32,49 @@ export const transformProgressData = (backendData) => {
       hoursLearned: backendData.total_hours || 0,
       averageScore: backendData.average_score || 0
     },
-    categories: backendData.categories?.map(cat => ({
-      id: cat.slug || (cat.name || '').toLowerCase(),
-      name: cat.name,
-      icon: getCategoryIcon(cat.name),
-      progress: Math.round(cat.progress_percentage || 0),
-      coursesCompleted: cat.completed_courses || 0,
-      totalCourses: cat.total_courses || 0,
-      color: getCategoryColor(cat.name)
-    })) || [],
-    achievements: backendData.achievements?.map(achievement => ({
-      id: achievement.id,
-      title: achievement.title,
-      description: achievement.description,
-      earned: achievement.earned,
-      earnedDate: achievement.earned_date,
-      progress: achievement.progress,
-      icon: achievement.icon || 'award',
-      color: achievement.color || '#feca57'
-    })) || [],
-    recentActivity: backendData.recent_activities?.map(activity => ({
-      id: activity.id,
-      type: activity.type,
-      title: activity.title,
-      date: activity.date,
-      score: activity.score,
-      icon: getActivityIcon(activity.type)
-    })) || []
+    categories:
+      backendData.categories?.map((cat) => ({
+        id: cat.slug || (cat.name || '').toLowerCase(),
+        name: cat.name,
+        icon: getCategoryIcon(cat.name),
+        progress: Math.round(cat.progress_percentage || 0),
+        coursesCompleted: cat.completed_courses || 0,
+        totalCourses: cat.total_courses || 0,
+        color: getCategoryColor(cat.name)
+      })) || [],
+    achievements:
+      backendData.achievements?.map((achievement) => ({
+        id: achievement.id,
+        title: achievement.title,
+        description: achievement.description,
+        earned: achievement.earned,
+        earnedDate: achievement.earned_date,
+        progress: achievement.progress,
+        icon: achievement.icon || 'award',
+        color: achievement.color || '#feca57'
+      })) || [],
+    recentActivity:
+      backendData.recent_activities?.map((activity) => ({
+        id: activity.id,
+        type: activity.type,
+        title: activity.title,
+        date: activity.date,
+        score: activity.score,
+        icon: getActivityIcon(activity.type)
+      })) || []
   };
 };
 
 // Helper function to get category icons
 const getCategoryIcon = (categoryName) => {
   const iconMap = {
-    'Pittura': 'image',
-    'Scultura': 'box',
-    'Disegno': 'edit-3',
+    Pittura: 'image',
+    Scultura: 'box',
+    Disegno: 'edit-3',
     'Arte Digitale': 'monitor',
-    'Fotografia': 'camera',
-    'Ceramica': 'circle',
-    'Gioielleria': 'star'
+    Fotografia: 'camera',
+    Ceramica: 'circle',
+    Gioielleria: 'star'
   };
   return iconMap[categoryName] || 'book';
 };
@@ -79,13 +82,13 @@ const getCategoryIcon = (categoryName) => {
 // Helper function to get category colors
 const getCategoryColor = (categoryName) => {
   const colorMap = {
-    'Pittura': '#ff6b6b',
-    'Scultura': '#4ecdc4',
-    'Disegno': '#45b7d1',
+    Pittura: '#ff6b6b',
+    Scultura: '#4ecdc4',
+    Disegno: '#45b7d1',
     'Arte Digitale': '#f9ca24',
-    'Fotografia': '#a55eea',
-    'Ceramica': '#26de81',
-    'Gioielleria': '#fd79a8'
+    Fotografia: '#a55eea',
+    Ceramica: '#26de81',
+    Gioielleria: '#fd79a8'
   };
   return colorMap[categoryName] || '#6c5ce7';
 };
@@ -93,11 +96,11 @@ const getCategoryColor = (categoryName) => {
 // Helper function to get activity icons
 const getActivityIcon = (activityType) => {
   const iconMap = {
-    'course_completed': 'check-circle',
-    'lesson_completed': 'play-circle',
-    'exercise_completed': 'edit',
-    'achievement_earned': 'award',
-    'quiz_completed': 'help-circle'
+    course_completed: 'check-circle',
+    lesson_completed: 'play-circle',
+    exercise_completed: 'edit',
+    achievement_earned: 'award',
+    quiz_completed: 'help-circle'
   };
   return iconMap[activityType] || 'activity';
 };

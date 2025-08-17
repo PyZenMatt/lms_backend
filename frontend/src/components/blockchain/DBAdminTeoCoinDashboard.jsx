@@ -5,7 +5,6 @@ import PendingWithdrawals from './PendingWithdrawals';
 import BurnDepositInterface from './BurnDepositInterface';
 import { useAuth } from '../../contexts/AuthContext';
 
-
 const DBAdminTeoCoinDashboard = ({ onWithdrawalClick }) => {
   const { user } = useAuth();
   const [dashboardData, setDashboardData] = useState({
@@ -16,7 +15,7 @@ const DBAdminTeoCoinDashboard = ({ onWithdrawalClick }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-useEffect(() => {
+  useEffect(() => {
     loadDashboardData();
   }, []);
 
@@ -28,17 +27,17 @@ useEffect(() => {
       if (!token) throw new Error('No authentication token found');
       const statsResponse = await fetch('/teocoin/statistics/', {
         headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
       });
       if (!statsResponse.ok) throw new Error('Failed to fetch platform statistics');
       const statsData = await statsResponse.json();
       const adminResponse = await fetch('/teocoin/admin/platform/stats/', {
         headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
       });
       const adminData = adminResponse.ok ? await adminResponse.json() : {};
       setDashboardData({
@@ -53,9 +52,14 @@ useEffect(() => {
     }
   };
 
-  const formatDate = (dateString) => new Date(dateString).toLocaleDateString('it-IT', {
-    day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit'
-  });
+  const formatDate = (dateString) =>
+    new Date(dateString).toLocaleDateString('it-IT', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
   const formatTeoCoin = (amount) => parseFloat(amount || 0).toFixed(2);
 
   if (loading) {

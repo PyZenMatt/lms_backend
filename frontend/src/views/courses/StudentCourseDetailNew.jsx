@@ -1,10 +1,10 @@
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { Row, Col, Card, Button, Spinner, Alert } from 'react-bootstrap';
 import { fetchUserRole } from '../../services/api/auth';
 import api from '../../services/core/axiosClient';
 import MainCard from '../../components/Card/MainCard';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 const StudentCourseDetailNew = () => {
   const { courseId } = useParams();
@@ -26,7 +26,7 @@ const StudentCourseDetailNew = () => {
         console.error('❌ Error fetching course:', error);
       }
     };
-    
+
     const fetchLessons = async () => {
       try {
         console.log('🔍 Fetching lessons for course:', courseId);
@@ -38,7 +38,7 @@ const StudentCourseDetailNew = () => {
         setLessons([]);
       }
     };
-    
+
     const fetchRole = async () => {
       try {
         const role = await fetchUserRole();
@@ -47,7 +47,7 @@ const StudentCourseDetailNew = () => {
         setUserRole('');
       }
     };
-    
+
     fetchCourse();
     fetchLessons();
     fetchRole();
@@ -61,7 +61,7 @@ const StudentCourseDetailNew = () => {
       </div>
     );
   }
-  
+
   if (!course) {
     return (
       <div className="d-flex justify-content-center align-items-center" style={{ minHeight: '60vh' }}>
@@ -81,14 +81,17 @@ const StudentCourseDetailNew = () => {
           <div className="text-center">
             <div className="mb-3" style={{ maxWidth: '200px', margin: '0 auto' }}>
               {course.cover ? (
-                <img 
-                  src={course.cover.startsWith('http') ? course.cover : `http://127.0.0.1:8000${course.cover}`} 
-                  alt={course.title} 
+                <img
+                  src={course.cover.startsWith('http') ? course.cover : `http://127.0.0.1:8000${course.cover}`}
+                  alt={course.title}
                   className="img-fluid rounded"
                   style={{ border: '4px solid #fff', boxShadow: '0 10px 20px rgba(0,0,0,0.1)' }}
                 />
               ) : (
-                <div className="d-flex justify-content-center align-items-center bg-primary-light rounded" style={{ height: '200px', width: '200px' }}>
+                <div
+                  className="d-flex justify-content-center align-items-center bg-primary-light rounded"
+                  style={{ height: '200px', width: '200px' }}
+                >
                   <i className="feather icon-book-open" style={{ fontSize: '4rem' }}></i>
                 </div>
               )}
@@ -110,7 +113,10 @@ const StudentCourseDetailNew = () => {
             <Card className="shadow-sm h-100">
               <Card.Body className="text-center">
                 <div className="d-flex justify-content-center align-items-center mb-3">
-                  <div className="rounded-circle bg-primary text-white d-flex justify-content-center align-items-center" style={{ width: '60px', height: '60px' }}>
+                  <div
+                    className="rounded-circle bg-primary text-white d-flex justify-content-center align-items-center"
+                    style={{ width: '60px', height: '60px' }}
+                  >
                     <i className="feather icon-play-circle" style={{ fontSize: '1.5rem' }}></i>
                   </div>
                 </div>
@@ -119,50 +125,53 @@ const StudentCourseDetailNew = () => {
               </Card.Body>
             </Card>
           </Col>
-          
+
           <Col sm={6} md={3} className="mb-3">
             <Card className="shadow-sm h-100">
               <Card.Body className="text-center">
                 <div className="d-flex justify-content-center align-items-center mb-3">
-                  <div className="rounded-circle bg-primary text-white d-flex justify-content-center align-items-center" style={{ width: '60px', height: '60px' }}>
+                  <div
+                    className="rounded-circle bg-primary text-white d-flex justify-content-center align-items-center"
+                    style={{ width: '60px', height: '60px' }}
+                  >
                     <i className="feather icon-clock" style={{ fontSize: '1.5rem' }}></i>
                   </div>
                 </div>
-                <h3 className="mb-1">
-                  {lessons.reduce((total, lesson) => total + (lesson.duration || 0), 0)}
-                </h3>
+                <h3 className="mb-1">{lessons.reduce((total, lesson) => total + (lesson.duration || 0), 0)}</h3>
                 <p className="text-muted mb-0 small text-uppercase">Minuti Totali</p>
               </Card.Body>
             </Card>
           </Col>
-          
+
           <Col sm={6} md={3} className="mb-3">
             <Card className="shadow-sm h-100">
               <Card.Body className="text-center">
                 <div className="d-flex justify-content-center align-items-center mb-3">
-                  <div className="rounded-circle bg-primary text-white d-flex justify-content-center align-items-center" style={{ width: '60px', height: '60px' }}>
+                  <div
+                    className="rounded-circle bg-primary text-white d-flex justify-content-center align-items-center"
+                    style={{ width: '60px', height: '60px' }}
+                  >
                     <i className="feather icon-award" style={{ fontSize: '1.5rem' }}></i>
                   </div>
                 </div>
-                <h3 className="mb-1">
-                  {course.difficulty || 'Intermedio'}
-                </h3>
+                <h3 className="mb-1">{course.difficulty || 'Intermedio'}</h3>
                 <p className="text-muted mb-0 small text-uppercase">Livello</p>
               </Card.Body>
             </Card>
           </Col>
-          
+
           <Col sm={6} md={3} className="mb-3">
             <Card className="shadow-sm h-100">
               <Card.Body className="text-center">
                 <div className="d-flex justify-content-center align-items-center mb-3">
-                  <div className="rounded-circle bg-primary text-white d-flex justify-content-center align-items-center" style={{ width: '60px', height: '60px' }}>
+                  <div
+                    className="rounded-circle bg-primary text-white d-flex justify-content-center align-items-center"
+                    style={{ width: '60px', height: '60px' }}
+                  >
                     <i className="feather icon-users" style={{ fontSize: '1.5rem' }}></i>
                   </div>
                 </div>
-                <h3 className="mb-1">
-                  {course.enrolled_students_count || 0}
-                </h3>
+                <h3 className="mb-1">{course.enrolled_students_count || 0}</h3>
                 <p className="text-muted mb-0 small text-uppercase">Studenti</p>
               </Card.Body>
             </Card>
@@ -172,14 +181,19 @@ const StudentCourseDetailNew = () => {
         {/* Lessons Content */}
         <Row>
           <Col md={12}>
-            <MainCard title={
-              <span>
-                <i className="feather icon-list text-primary mr-2"></i>
-                Lezioni del Corso
-              </span>
-            }>
+            <MainCard
+              title={
+                <span>
+                  <i className="feather icon-list text-primary mr-2"></i>
+                  Lezioni del Corso
+                </span>
+              }
+            >
               {lessons.length === 0 ? (
-                <div className="text-center p-5 bg-light border border-2 border-secondary border-opacity-25 rounded" style={{ borderStyle: 'dashed' }}>
+                <div
+                  className="text-center p-5 bg-light border border-2 border-secondary border-opacity-25 rounded"
+                  style={{ borderStyle: 'dashed' }}
+                >
                   <i className="feather icon-book text-primary mb-3" style={{ fontSize: '4rem', display: 'block' }}></i>
                   <h4 className="text-dark mb-3">Nessuna lezione disponibile</h4>
                   <p className="text-muted">Le lezioni per questo corso non sono ancora state pubblicate.</p>
@@ -191,12 +205,15 @@ const StudentCourseDetailNew = () => {
                       <Card className="shadow-sm h-100">
                         <Card.Body className="position-relative">
                           <div className="position-absolute" style={{ top: '10px', right: '10px' }}>
-                            <div className="badge badge-primary rounded-circle" style={{ width: '30px', height: '30px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <div
+                              className="badge badge-primary rounded-circle"
+                              style={{ width: '30px', height: '30px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                            >
                               {lesson.order || index + 1}
                             </div>
                           </div>
                           <h5 className="mb-3 pr-4">{lesson.title}</h5>
-                          
+
                           <div className="d-flex mb-3 text-muted small">
                             {lesson.duration && (
                               <div className="mr-3">
@@ -211,14 +228,11 @@ const StudentCourseDetailNew = () => {
                               </div>
                             )}
                           </div>
-                          
+
                           <div className="progress mb-3" style={{ height: '4px' }}>
-                            <div 
-                              className="progress-bar bg-primary" 
-                              style={{width: `${Math.random() * 100}%`}}
-                            ></div>
+                            <div className="progress-bar bg-primary" style={{ width: `${Math.random() * 100}%` }}></div>
                           </div>
-                          
+
                           {Math.random() > 0.7 ? (
                             <div className="badge badge-success">Completata</div>
                           ) : Math.random() > 0.4 ? (
@@ -226,7 +240,7 @@ const StudentCourseDetailNew = () => {
                           ) : (
                             <div className="badge badge-light">Da Iniziare</div>
                           )}
-                          
+
                           <div className="mt-3">
                             <Link to={`/lezioni/${lesson.id}`} className="btn btn-primary btn-sm">
                               Visualizza Lezione
@@ -245,14 +259,16 @@ const StudentCourseDetailNew = () => {
         {/* Navigation */}
         <Row className="mt-4 mb-5">
           <Col className="text-center">
-            <Link 
-              to={userRole === 'admin' ? "/dashboard/admin" : 
-                  userRole === 'teacher' ? "/dashboard/teacher" : "/dashboard/student"} 
+            <Link
+              to={userRole === 'admin' ? '/dashboard/admin' : userRole === 'teacher' ? '/dashboard/teacher' : '/dashboard/student'}
               className="btn btn-primary"
             >
               <i className="feather icon-arrow-left mr-2"></i>
-              {userRole === 'admin' ? 'Torna alla dashboard admin' : 
-               userRole === 'teacher' ? 'Torna alla dashboard docente' : 'Torna alla dashboard studente'}
+              {userRole === 'admin'
+                ? 'Torna alla dashboard admin'
+                : userRole === 'teacher'
+                  ? 'Torna alla dashboard docente'
+                  : 'Torna alla dashboard studente'}
             </Link>
           </Col>
         </Row>
@@ -260,19 +276,24 @@ const StudentCourseDetailNew = () => {
         {completed && (
           <Row className="mb-4">
             <Col md={12}>
-              <MainCard title={
-                <span>
-                  <i className="feather icon-target text-primary mr-2"></i>
-                  Esercizi della lezione
-                </span>
-              }>
+              <MainCard
+                title={
+                  <span>
+                    <i className="feather icon-target text-primary mr-2"></i>
+                    Esercizi della lezione
+                  </span>
+                }
+              >
                 {exercises.length === 0 ? (
-                  <div className="text-center p-5 bg-light border border-2 border-secondary border-opacity-25 rounded" style={{ borderStyle: 'dashed' }}>
+                  <div
+                    className="text-center p-5 bg-light border border-2 border-secondary border-opacity-25 rounded"
+                    style={{ borderStyle: 'dashed' }}
+                  >
                     <p className="text-muted">Nessun esercizio disponibile per questa lezione.</p>
                   </div>
                 ) : (
                   <Row>
-                    {exercises.map(ex => (
+                    {exercises.map((ex) => (
                       <Col md={6} xl={4} key={ex.id} className="mb-3">
                         <Card className="shadow-sm h-100">
                           <Card.Body>

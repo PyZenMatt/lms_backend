@@ -18,17 +18,17 @@ const NavRight = () => {
     <React.Fragment>
       <ListGroup as="ul" bsPrefix=" " className="navbar-nav ml-auto" id="navbar-right">
         {/* Removed duplicate Teacher TeoCoin navbar widget to avoid double processing; use sidebar dashboard instead */}
-        
+
         {/* Theme Toggle */}
         <ListGroup.Item as="li" bsPrefix=" ">
           <ThemeToggle size="sm" />
         </ListGroup.Item>
-        
+
         {/* Notifications dropdown with Accept/Decline actions for teachers */}
         <ListGroup.Item as="li" bsPrefix=" ">
           <UnifiedTeacherNotifications />
         </ListGroup.Item>
-        
+
         <ListGroup.Item as="li" bsPrefix=" ">
           <Dropdown>
             <Dropdown.Toggle as={Link} variant="link" to="#" id="dropdown-basic">

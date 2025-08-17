@@ -1,7 +1,7 @@
 import React from 'react';
 import { Alert } from 'react-bootstrap';
 
-const ErrorDisplay = ({ errors, className = "" }) => {
+const ErrorDisplay = ({ errors, className = '' }) => {
   if (!errors || Object.keys(errors).length === 0) {
     return null;
   }
@@ -17,9 +17,7 @@ const ErrorDisplay = ({ errors, className = "" }) => {
             <div>{errorList[0][1]}</div>
           ) : (
             <>
-              <div className="fw-semibold mb-2">
-                Correggi i seguenti errori:
-              </div>
+              <div className="fw-semibold mb-2">Correggi i seguenti errori:</div>
               <ul className="mb-0 ps-3">
                 {errorList.map(([field, message], index) => (
                   <li key={index} className="mb-1">
@@ -50,7 +48,7 @@ const getFieldDisplayName = (field) => {
     exerciseType: 'Tipo esercizio',
     difficulty: 'Difficoltà'
   };
-  
+
   return fieldNames[field] || field;
 };
 

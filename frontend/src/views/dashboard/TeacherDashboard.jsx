@@ -35,13 +35,13 @@ const TeacherDashboard = () => {
   const [editingCourseId, setEditingCourseId] = useState(null);
   const [userProfile, setUserProfile] = useState(null);
   const [withdrawalOpen, setWithdrawalOpen] = useState(false);
-  
+
   // Course expansion and lesson management
   const [expandedCourse, setExpandedCourse] = useState(null);
   const [courseLessons, setCourseLessons] = useState({});
   const [loadingLessons, setLoadingLessons] = useState({});
   const [showLessonModal, setShowLessonModal] = useState({});
-  
+
   // Exercise management
   const [showExerciseModal, setShowExerciseModal] = useState({});
   const [selectedLesson, setSelectedLesson] = useState(null);
@@ -128,11 +128,11 @@ const TeacherDashboard = () => {
   const handleShowLessonModal = (courseId) => {
     setShowLessonModal((prev) => ({ ...prev, [courseId]: true }));
   };
-  
+
   const handleHideLessonModal = (courseId) => {
     setShowLessonModal((prev) => ({ ...prev, [courseId]: false }));
   };
-  
+
   const handleLessonCreated = async (courseId) => {
     // Refresh lessons for the course
     try {
@@ -151,14 +151,14 @@ const TeacherDashboard = () => {
   // Load exercises for a lesson
   const loadExercisesForLesson = async (lessonId) => {
     try {
-  setLoadingExercises((prev) => ({ ...prev, [lessonId]: true }));
-  const res = await fetchExercisesForLesson(lessonId);
-  setLessonExercises((prev) => ({ ...prev, [lessonId]: res.data }));
+      setLoadingExercises((prev) => ({ ...prev, [lessonId]: true }));
+      const res = await fetchExercisesForLesson(lessonId);
+      setLessonExercises((prev) => ({ ...prev, [lessonId]: res.data }));
     } catch (error) {
       console.error('Error loading exercises:', error);
-  setLessonExercises((prev) => ({ ...prev, [lessonId]: [] }));
+      setLessonExercises((prev) => ({ ...prev, [lessonId]: [] }));
     } finally {
-  setLoadingExercises((prev) => ({ ...prev, [lessonId]: false }));
+      setLoadingExercises((prev) => ({ ...prev, [lessonId]: false }));
     }
   };
 
@@ -166,7 +166,7 @@ const TeacherDashboard = () => {
   const handleShowExerciseModal = (lesson) => {
     console.log('🎯 Selected lesson for exercise creation:', lesson);
     setSelectedLesson(lesson);
-  setShowExerciseModal((prev) => ({ ...prev, [lesson.id]: true }));
+    setShowExerciseModal((prev) => ({ ...prev, [lesson.id]: true }));
   };
 
   const handleHideExerciseModal = (lessonId) => {
@@ -225,9 +225,9 @@ const TeacherDashboard = () => {
 
   // Enhanced Dashboard stats data with better calculations and icons
   const dashStatsData = [
-    { 
-      title: 'Corsi Attivi', 
-      value: courses.length.toString(), 
+    {
+      title: 'Corsi Attivi',
+      value: courses.length.toString(),
       icon: 'book-open',
       percentage: Math.min(courses.length * 10, 100), // More realistic percentage
       progressColor: 'progress-c-theme',
@@ -235,9 +235,9 @@ const TeacherDashboard = () => {
       description: 'Corsi pubblicati e disponibili',
       bgGradient: 'linear-gradient(135deg, rgba(4, 169, 245, 0.1) 0%, rgba(4, 169, 245, 0.05) 100%)'
     },
-    { 
-      title: 'Guadagni Mensili', 
-      value: `€${sales.monthly}`, 
+    {
+      title: 'Guadagni Mensili',
+      value: `€${sales.monthly}`,
       icon: 'trending-up',
       percentage: Math.min((sales.monthly / 1000) * 100, 100), // Percentage based on 1k target
       progressColor: 'progress-c-theme2',
@@ -245,9 +245,9 @@ const TeacherDashboard = () => {
       description: 'Ricavi del mese corrente',
       bgGradient: 'linear-gradient(135deg, rgba(29, 233, 182, 0.1) 0%, rgba(29, 233, 182, 0.05) 100%)'
     },
-    { 
-      title: 'Fatturato Totale', 
-      value: `€${sales.yearly}`, 
+    {
+      title: 'Fatturato Totale',
+      value: `€${sales.yearly}`,
       icon: 'dollar-sign',
       percentage: Math.min((sales.yearly / 5000) * 100, 100), // Percentage based on 5k target
       progressColor: 'progress-c-theme3',
@@ -303,206 +303,195 @@ const TeacherDashboard = () => {
 
         {/* 🔥 PHASE 4: Enhanced Notification System */}
         <EnhancedNotificationSystem />
-      
-      {/* Enhanced Welcome Section */}
-      <Row className="mb-4">
-        <Col md={12}>
-          <Card className="border-0 shadow-sm">
-            <Card.Body className="text-center py-5" style={{
-              background: 'linear-gradient(135deg, rgba(4, 169, 245, 0.1) 0%, rgba(29, 233, 182, 0.1) 100%)'
-            }}>
-              <div className="d-flex align-items-center justify-content-center mb-3">
-                <div className="avatar-lg me-3">
-                  <div className="d-flex align-items-center justify-content-center bg-primary rounded-circle text-white" style={{ width: '70px', height: '70px' }}>
-                    <i className="feather icon-award" style={{ fontSize: '2rem' }} />
-                  </div>
-                </div>
-                <div className="text-start">
-                  <h2 className="fw-bold mb-1 text-dark">
-                    Benvenuto, {userProfile?.first_name || userProfile?.username || 'Insegnante'}!
-                  </h2>
-                  <p className="text-muted mb-0">Gestisci i tuoi corsi e monitora le tue performance</p>
-                </div>
-              </div>
-              
-              {/* Quick Action Buttons */}
-              <div className="d-flex gap-3 justify-content-center flex-wrap mt-4">
-                <Button 
-                  variant="primary" 
-                  className="rounded-pill px-4 py-2"
-                  onClick={() => setShowCreateModal(true)}
-                >
-                  <i className="feather icon-plus me-2"></i>
-                  Nuovo Corso
-                </Button>
-                {courses.length > 0 && (
-                  <Button 
-                    variant="outline-primary" 
-                    className="rounded-pill px-4 py-2"
-                    onClick={() => handleViewCourse(courses[0].id)}
-                  >
-                    <i className="feather icon-edit me-2"></i>
-                    Gestisci Corsi
-                  </Button>
-                )}
-                <Link to="/profilo" className="btn btn-outline-secondary rounded-pill px-4 py-2">
-                  <i className="feather icon-settings me-2"></i>
-                  Profilo
-                </Link>
-              </div>
-            </Card.Body>
-          </Card>
-        </Col>
-      </Row>
 
-      {/* Enhanced Stats Cards */}
-      <Row>
-        {dashStatsData.map((data, index) => (
-          <Col key={index} md={6} xl={4}>
-            <Card className="dashboard-stat-card border-0 shadow-sm h-100">
-              <Card.Body style={{ background: data.bgGradient }}>
-                <div className="d-flex align-items-center justify-content-between mb-3">
-                  <div className="stat-icon">
-                    <i className={`feather icon-${data.icon} ${data.iconColor}`} style={{ fontSize: '2.5rem' }} />
+        {/* Enhanced Welcome Section */}
+        <Row className="mb-4">
+          <Col md={12}>
+            <Card className="border-0 shadow-sm">
+              <Card.Body
+                className="text-center py-5"
+                style={{
+                  background: 'linear-gradient(135deg, rgba(4, 169, 245, 0.1) 0%, rgba(29, 233, 182, 0.1) 100%)'
+                }}
+              >
+                <div className="d-flex align-items-center justify-content-center mb-3">
+                  <div className="avatar-lg me-3">
+                    <div
+                      className="d-flex align-items-center justify-content-center bg-primary rounded-circle text-white"
+                      style={{ width: '70px', height: '70px' }}
+                    >
+                      <i className="feather icon-award" style={{ fontSize: '2rem' }} />
+                    </div>
                   </div>
-                  <div className="text-end">
-                    <h3 className="mb-0 fw-bold text-dark">{data.value}</h3>
-                    <small className="text-muted">{data.percentage}% obiettivo</small>
+                  <div className="text-start">
+                    <h2 className="fw-bold mb-1 text-dark">
+                      Benvenuto, {userProfile?.first_name || userProfile?.username || 'Insegnante'}!
+                    </h2>
+                    <p className="text-muted mb-0">Gestisci i tuoi corsi e monitora le tue performance</p>
                   </div>
                 </div>
-                <h6 className="mb-2 fw-semibold text-dark">{data.title}</h6>
-                <p className="text-muted mb-3 small">{data.description}</p>
-                <div className="progress mb-0" style={{ height: '6px' }}>
-                  <div
-                    className={`progress-bar ${data.progressColor}`}
-                    role="progressbar"
-                    style={{ width: data.percentage + '%' }}
-                    aria-valuenow={data.percentage}
-                    aria-valuemin="0"
-                    aria-valuemax="100"
-                  />
+
+                {/* Quick Action Buttons */}
+                <div className="d-flex gap-3 justify-content-center flex-wrap mt-4">
+                  <Button variant="primary" className="rounded-pill px-4 py-2" onClick={() => setShowCreateModal(true)}>
+                    <i className="feather icon-plus me-2"></i>
+                    Nuovo Corso
+                  </Button>
+                  {courses.length > 0 && (
+                    <Button variant="outline-primary" className="rounded-pill px-4 py-2" onClick={() => handleViewCourse(courses[0].id)}>
+                      <i className="feather icon-edit me-2"></i>
+                      Gestisci Corsi
+                    </Button>
+                  )}
+                  <Link to="/profilo" className="btn btn-outline-secondary rounded-pill px-4 py-2">
+                    <i className="feather icon-settings me-2"></i>
+                    Profilo
+                  </Link>
                 </div>
               </Card.Body>
             </Card>
           </Col>
-        ))}
-      </Row>
+        </Row>
 
+        {/* Enhanced Stats Cards */}
+        <Row>
+          {dashStatsData.map((data, index) => (
+            <Col key={index} md={6} xl={4}>
+              <Card className="dashboard-stat-card border-0 shadow-sm h-100">
+                <Card.Body style={{ background: data.bgGradient }}>
+                  <div className="d-flex align-items-center justify-content-between mb-3">
+                    <div className="stat-icon">
+                      <i className={`feather icon-${data.icon} ${data.iconColor}`} style={{ fontSize: '2.5rem' }} />
+                    </div>
+                    <div className="text-end">
+                      <h3 className="mb-0 fw-bold text-dark">{data.value}</h3>
+                      <small className="text-muted">{data.percentage}% obiettivo</small>
+                    </div>
+                  </div>
+                  <h6 className="mb-2 fw-semibold text-dark">{data.title}</h6>
+                  <p className="text-muted mb-3 small">{data.description}</p>
+                  <div className="progress mb-0" style={{ height: '6px' }}>
+                    <div
+                      className={`progress-bar ${data.progressColor}`}
+                      role="progressbar"
+                      style={{ width: data.percentage + '%' }}
+                      aria-valuenow={data.percentage}
+                      aria-valuemin="0"
+                      aria-valuemax="100"
+                    />
+                  </div>
+                </Card.Body>
+              </Card>
+            </Col>
+          ))}
+        </Row>
 
+        {/* Sezione credito, burn e deposit */}
+        <Row>
+          <Col xs={12} md={6} lg={6} className="mb-4">
+            <TeoCoinBalanceWidget userProfile={userProfile} onWithdrawalClick={() => setWithdrawalOpen(true)} />
+          </Col>
+          <Col xs={12} md={6} lg={6} className="mb-4">
+            <MetaMaskDeposit userProfile={userProfile} />
+          </Col>
+        </Row>
 
-      {/* Sezione credito, burn e deposit */}
-      <Row>
-        <Col xs={12} md={6} lg={6} className="mb-4">
-          <TeoCoinBalanceWidget 
-            userProfile={userProfile} 
-            onWithdrawalClick={() => setWithdrawalOpen(true)}
+        {/* Sezione Staking - larghezza piena su schermi grandi */}
+        <Row className="mb-4">
+          <Col xs={12}>
+            <DatabaseStaking userProfile={userProfile} />
+          </Col>
+        </Row>
+
+        {/* Tabella corsi docente */}
+        <Row className="mb-4">
+          <Col md={12}>
+            <Card className="border-0 shadow-sm">
+              <Card.Header className="bg-transparent border-0 pb-0">
+                <h5 className="card-title mb-0">I tuoi corsi</h5>
+              </Card.Header>
+              <Card.Body>
+                <CoursesTable
+                  courses={courses}
+                  onExpandCourse={handleExpandCourse}
+                  expandedCourse={expandedCourse}
+                  courseLessons={courseLessons}
+                  loadingLessons={loadingLessons}
+                  onCreateLesson={handleShowLessonModal}
+                  onCreateExercise={handleShowExerciseModal}
+                  lessonExercises={lessonExercises}
+                  loadingExercises={loadingExercises}
+                  onLoadExercises={loadExercisesForLesson}
+                  onViewCourse={handleViewCourse}
+                  onViewLessons={handleExpandCourse}
+                  onViewLesson={handleViewLesson}
+                  onEditCourse={handleEditCourse}
+                  onEditLesson={handleEditLesson}
+                  onViewExercise={handleViewExercise}
+                  onEditExercise={handleEditExercise}
+                />
+              </Card.Body>
+            </Card>
+          </Col>
+        </Row>
+
+        {/* Modals */}
+        <CourseCreateModal
+          show={showCreateModal}
+          onHide={() => setShowCreateModal(false)}
+          onCreated={async (course) => {
+            console.log('✅ Course created successfully:', course);
+            setShowCreateModal(false);
+
+            // Add the new course to the existing courses list instead of reloading
+            setCourses((prevCourses) => [...prevCourses, course]);
+
+            // Optional: Refresh dashboard data if needed
+            // You could also just add the course to the state without reloading
+            // setTimeout(() => {
+            //   window.location.reload(); // or implement a more elegant refresh
+            // }, 1000);
+          }}
+        />
+
+        {/* Lesson Creation Modals */}
+        {Object.keys(showLessonModal).map((courseId) => (
+          <LessonCreateModal
+            key={`lesson-${courseId}`}
+            show={showLessonModal[courseId]}
+            onHide={() => handleHideLessonModal(courseId)}
+            courseId={courseId}
+            onCreated={() => handleLessonCreated(courseId)}
           />
-        </Col>
-        <Col xs={12} md={6} lg={6} className="mb-4">
-          <MetaMaskDeposit userProfile={userProfile} />
-        </Col>
-      </Row>
+        ))}
 
-      {/* Sezione Staking - larghezza piena su schermi grandi */}
-      <Row className="mb-4">
-        <Col xs={12}>
-          <DatabaseStaking userProfile={userProfile} />
-        </Col>
-      </Row>
+        {/* Exercise Creation Modals */}
+        {Object.keys(showExerciseModal).map((lessonId) => (
+          <ExerciseCreateModal
+            key={`exercise-${lessonId}`}
+            show={showExerciseModal[lessonId]}
+            onHide={() => handleHideExerciseModal(lessonId)}
+            lessonId={selectedLesson?.id}
+            courseId={selectedLesson?.course_id || selectedLesson?.course}
+            lesson={selectedLesson}
+            onCreated={() => handleExerciseCreated(lessonId, selectedLesson?.course_id || selectedLesson?.course)}
+          />
+        ))}
 
-      {/* Tabella corsi docente */}
-      <Row className="mb-4">
-        <Col md={12}>
-          <Card className="border-0 shadow-sm">
-            <Card.Header className="bg-transparent border-0 pb-0">
-              <h5 className="card-title mb-0">I tuoi corsi</h5>
-            </Card.Header>
-            <Card.Body>
-              <CoursesTable
-                courses={courses}
-                onExpandCourse={handleExpandCourse}
-                expandedCourse={expandedCourse}
-                courseLessons={courseLessons}
-                loadingLessons={loadingLessons}
-                onCreateLesson={handleShowLessonModal}
-                onCreateExercise={handleShowExerciseModal}
-                lessonExercises={lessonExercises}
-                loadingExercises={loadingExercises}
-                onLoadExercises={loadExercisesForLesson}
-                onViewCourse={handleViewCourse}
-                onViewLessons={handleExpandCourse}
-                onViewLesson={handleViewLesson}
-                onEditCourse={handleEditCourse}
-                onEditLesson={handleEditLesson}
-                onViewExercise={handleViewExercise}
-                onEditExercise={handleEditExercise}
-              />
-            </Card.Body>
-          </Card>
-        </Col>
-      </Row>
+        {/* TeoCoin Withdrawal Modal */}
+        <TeoCoinWithdrawal open={withdrawalOpen} onClose={() => setWithdrawalOpen(false)} userBalance={userProfile?.teocoin_balance || 0} />
 
-      {/* Modals */}
-      <CourseCreateModal 
-        show={showCreateModal} 
-        onHide={() => setShowCreateModal(false)} 
-        onCreated={async (course) => {
-          console.log('✅ Course created successfully:', course);
-          setShowCreateModal(false);
-          
-          // Add the new course to the existing courses list instead of reloading
-          setCourses(prevCourses => [...prevCourses, course]);
-          
-          // Optional: Refresh dashboard data if needed
-          // You could also just add the course to the state without reloading
-          // setTimeout(() => {
-          //   window.location.reload(); // or implement a more elegant refresh
-          // }, 1000);
-        }}
-      />
-      
-      {/* Lesson Creation Modals */}
-      {Object.keys(showLessonModal).map(courseId => (
-        <LessonCreateModal
-          key={`lesson-${courseId}`}
-          show={showLessonModal[courseId]}
-          onHide={() => handleHideLessonModal(courseId)}
-          courseId={courseId}
-          onCreated={() => handleLessonCreated(courseId)}
+        {/* Course Edit Modal */}
+        <CourseEditModal
+          show={showEditModal}
+          onHide={() => {
+            setShowEditModal(false);
+            setEditingCourseId(null);
+          }}
+          courseId={editingCourseId}
+          onCourseUpdated={handleCourseUpdated}
         />
-      ))}
-      
-      {/* Exercise Creation Modals */}
-      {Object.keys(showExerciseModal).map(lessonId => (
-        <ExerciseCreateModal
-          key={`exercise-${lessonId}`}
-          show={showExerciseModal[lessonId]}
-          onHide={() => handleHideExerciseModal(lessonId)}
-          lessonId={selectedLesson?.id}
-          courseId={selectedLesson?.course_id || selectedLesson?.course}
-          lesson={selectedLesson}
-          onCreated={() => handleExerciseCreated(lessonId, selectedLesson?.course_id || selectedLesson?.course)}
-        />
-      ))}
-      
-      {/* TeoCoin Withdrawal Modal */}
-      <TeoCoinWithdrawal
-        open={withdrawalOpen}
-        onClose={() => setWithdrawalOpen(false)}
-        userBalance={userProfile?.teocoin_balance || 0}
-      />
-      
-      {/* Course Edit Modal */}
-      <CourseEditModal
-        show={showEditModal}
-        onHide={() => {
-          setShowEditModal(false);
-          setEditingCourseId(null);
-        }}
-        courseId={editingCourseId}
-        onCourseUpdated={handleCourseUpdated}
-      />
-    </React.Fragment>
+      </React.Fragment>
     </RoleGuard>
   );
 };

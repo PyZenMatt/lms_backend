@@ -39,17 +39,17 @@ export const Web3Provider = ({ children }) => {
     setIsConnecting(true);
     try {
       // Request account access
-      const accounts = await window.ethereum.request({ 
-        method: 'eth_requestAccounts' 
+      const accounts = await window.ethereum.request({
+        method: 'eth_requestAccounts'
       });
-      
+
       if (accounts.length === 0) {
         throw new Error('No accounts found');
       }
 
       const provider = new ethers.BrowserProvider(window.ethereum);
       const network = await provider.getNetwork();
-      
+
       setAccount(accounts[0]);
       setWeb3Provider(provider);
       setChainId(network.chainId);
@@ -61,7 +61,6 @@ export const Web3Provider = ({ children }) => {
 
       // Fetch TEO balance
       await fetchTeoBalance(accounts[0], provider);
-
     } catch (error) {
       console.error('Failed to connect wallet:', error);
       throw error;
@@ -75,24 +74,26 @@ export const Web3Provider = ({ children }) => {
     try {
       await window.ethereum.request({
         method: 'wallet_switchEthereumChain',
-        params: [{ chainId: '0x13882' }], // 80002 in hex
+        params: [{ chainId: '0x13882' }] // 80002 in hex
       });
     } catch (switchError) {
       // Network not added, try to add it
       if (switchError.code === 4902) {
         await window.ethereum.request({
           method: 'wallet_addEthereumChain',
-          params: [{
-            chainId: '0x13882',
-            chainName: 'Polygon Amoy Testnet',
-            nativeCurrency: {
-              name: 'MATIC',
-              symbol: 'MATIC',
-              decimals: 18,
-            },
-            rpcUrls: ['https://rpc-amoy.polygon.technology/'],
-            blockExplorerUrls: ['https://amoy.polygonscan.com/'],
-          }],
+          params: [
+            {
+              chainId: '0x13882',
+              chainName: 'Polygon Amoy Testnet',
+              nativeCurrency: {
+                name: 'MATIC',
+                symbol: 'MATIC',
+                decimals: 18
+              },
+              rpcUrls: ['https://rpc-amoy.polygon.technology/'],
+              blockExplorerUrls: ['https://amoy.polygonscan.com/']
+            }
+          ]
         });
       } else {
         throw switchError;
@@ -167,17 +168,17 @@ export const Web3Provider = ({ children }) => {
     const autoConnect = async () => {
       if (window.ethereum) {
         try {
-          const accounts = await window.ethereum.request({ 
-            method: 'eth_accounts' 
+          const accounts = await window.ethereum.request({
+            method: 'eth_accounts'
           });
           if (accounts.length > 0) {
             const provider = new ethers.BrowserProvider(window.ethereum);
             const network = await provider.getNetwork();
-            
+
             setAccount(accounts[0]);
             setWeb3Provider(provider);
             setChainId(network.chainId);
-            
+
             if (network.chainId === POLYGON_AMOY_CHAIN_ID) {
               await fetchTeoBalance(accounts[0], provider);
             }
@@ -207,9 +208,5 @@ export const Web3Provider = ({ children }) => {
     POLYGON_AMOY_CHAIN_ID
   };
 
-  return (
-    <Web3Context.Provider value={value}>
-      {children}
-    </Web3Context.Provider>
-  );
+  return <Web3Context.Provider value={value}>{children}</Web3Context.Provider>;
 };

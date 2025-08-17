@@ -1,6 +1,6 @@
 /**
  * 🔥 PHASE 4: Advanced Analytics Dashboard Component
- * 
+ *
  * Real-time analytics with:
  * - Live performance metrics
  * - Interactive charts
@@ -84,9 +84,9 @@ const AdvancedAnalyticsDashboard = () => {
       const token = localStorage.getItem('accessToken');
       const response = await fetch(`/api/v1/analytics/dashboard/?time_range=${timeRange}`, {
         headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
       });
 
       if (!response.ok) {
@@ -97,7 +97,6 @@ const AdvancedAnalyticsDashboard = () => {
       setAnalytics(data);
       setPredictions(data.predictions || {});
       setCustomMetrics(data.custom_metrics || []);
-
     } catch (error) {
       console.error('❌ Error loading analytics:', error);
       setError(error.message);
@@ -121,7 +120,7 @@ const AdvancedAnalyticsDashboard = () => {
    */
   const getKPICards = () => {
     const { summary = {} } = analytics;
-    
+
     return [
       {
         title: 'Total Revenue',
@@ -159,18 +158,18 @@ const AdvancedAnalyticsDashboard = () => {
    */
   const getRevenueChartData = () => {
     const { revenue_data = [] } = analytics;
-    
+
     return {
-      labels: revenue_data.map(item => 
-        new Date(item.date).toLocaleDateString('it-IT', { 
-          month: 'short', 
-          day: 'numeric' 
+      labels: revenue_data.map((item) =>
+        new Date(item.date).toLocaleDateString('it-IT', {
+          month: 'short',
+          day: 'numeric'
         })
       ),
       datasets: [
         {
           label: 'Revenue (€)',
-          data: revenue_data.map(item => item.amount),
+          data: revenue_data.map((item) => item.amount),
           borderColor: 'rgb(75, 192, 192)',
           backgroundColor: 'rgba(75, 192, 192, 0.1)',
           fill: true,
@@ -194,7 +193,7 @@ const AdvancedAnalyticsDashboard = () => {
    */
   const getUserEngagementData = () => {
     const { user_engagement = {} } = analytics;
-    
+
     return {
       labels: ['Course Views', 'Lesson Completions', 'TeoCoin Transactions', 'Social Interactions'],
       datasets: [
@@ -206,12 +205,7 @@ const AdvancedAnalyticsDashboard = () => {
             user_engagement.teocoin_transactions || 0,
             user_engagement.social_interactions || 0
           ],
-          backgroundColor: [
-            'rgba(255, 99, 132, 0.8)',
-            'rgba(54, 162, 235, 0.8)',
-            'rgba(255, 205, 86, 0.8)',
-            'rgba(75, 192, 192, 0.8)'
-          ]
+          backgroundColor: ['rgba(255, 99, 132, 0.8)', 'rgba(54, 162, 235, 0.8)', 'rgba(255, 205, 86, 0.8)', 'rgba(75, 192, 192, 0.8)']
         }
       ]
     };
@@ -222,16 +216,9 @@ const AdvancedAnalyticsDashboard = () => {
    */
   const getPerformanceRadarData = () => {
     const { performance_metrics = {} } = analytics;
-    
+
     return {
-      labels: [
-        'Student Satisfaction',
-        'Course Quality',
-        'Engagement Rate',
-        'Completion Rate',
-        'Revenue Growth',
-        'Platform Usage'
-      ],
+      labels: ['Student Satisfaction', 'Course Quality', 'Engagement Rate', 'Completion Rate', 'Revenue Growth', 'Platform Usage'],
       datasets: [
         {
           label: 'Current Performance',
@@ -266,13 +253,11 @@ const AdvancedAnalyticsDashboard = () => {
    * Generate real-time activity chart
    */
   const getRealTimeActivityData = () => {
-    const last24Hours = realTimeData.filter(
-      item => Date.now() - item.timestamp < 24 * 60 * 60 * 1000
-    );
+    const last24Hours = realTimeData.filter((item) => Date.now() - item.timestamp < 24 * 60 * 60 * 1000);
 
     // Group by hour
     const hourlyData = {};
-    last24Hours.forEach(item => {
+    last24Hours.forEach((item) => {
       const hour = new Date(item.timestamp).getHours();
       hourlyData[hour] = (hourlyData[hour] || 0) + 1;
     });
@@ -303,11 +288,11 @@ const AdvancedAnalyticsDashboard = () => {
     maintainAspectRatio: false,
     plugins: {
       legend: {
-        position: 'top',
+        position: 'top'
       },
       tooltip: {
         mode: 'index',
-        intersect: false,
+        intersect: false
       }
     },
     scales: {
@@ -336,7 +321,7 @@ const AdvancedAnalyticsDashboard = () => {
     maintainAspectRatio: false,
     plugins: {
       legend: {
-        position: 'top',
+        position: 'top'
       }
     },
     scales: {
@@ -376,7 +361,7 @@ const AdvancedAnalyticsDashboard = () => {
             </h3>
             <p className="text-muted mb-0">Real-time insights and performance metrics</p>
           </div>
-          
+
           <div className="d-flex gap-2">
             <Dropdown>
               <Dropdown.Toggle variant="outline-primary" size="sm">
@@ -385,22 +370,14 @@ const AdvancedAnalyticsDashboard = () => {
               </Dropdown.Toggle>
               <Dropdown.Menu>
                 {Object.entries(timeRanges).map(([key, label]) => (
-                  <Dropdown.Item
-                    key={key}
-                    active={timeRange === key}
-                    onClick={() => setTimeRange(key)}
-                  >
+                  <Dropdown.Item key={key} active={timeRange === key} onClick={() => setTimeRange(key)}>
                     {label}
                   </Dropdown.Item>
                 ))}
               </Dropdown.Menu>
             </Dropdown>
-            
-            <Button 
-              variant="outline-secondary" 
-              size="sm"
-              onClick={loadAnalytics}
-            >
+
+            <Button variant="outline-secondary" size="sm" onClick={loadAnalytics}>
               <i className="fas fa-sync-alt"></i>
             </Button>
           </div>
@@ -454,7 +431,7 @@ const AdvancedAnalyticsDashboard = () => {
             </Card.Body>
           </Card>
         </Col>
-        
+
         <Col lg={4}>
           <Card className="chart-card">
             <Card.Header>
@@ -489,7 +466,7 @@ const AdvancedAnalyticsDashboard = () => {
             </Card.Body>
           </Card>
         </Col>
-        
+
         <Col lg={6}>
           <Card className="chart-card">
             <Card.Header>

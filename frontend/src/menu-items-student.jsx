@@ -54,7 +54,7 @@ const studentMenuItems = {
       children: [
         {
           id: 'browse-courses',
-          title: 'Esplora Corsi d\'Arte',
+          title: "Esplora Corsi d'Arte",
           type: 'item',
           icon: 'feather icon-palette',
           url: '/corsi'
@@ -140,7 +140,7 @@ const studentMenuItems = {
           action: async () => {
             if (window.confirm('Sei sicuro di voler uscire?')) {
               console.log('🔓 Student logout initiated');
-              
+
               if (window.__reactLogout) {
                 await window.__reactLogout();
                 console.log('🔓 Student logout via AuthContext completed');
@@ -162,15 +162,12 @@ const studentMenuItems = {
                   console.error('🔓 Student logout API error:', error);
                 } finally {
                   // Cleanup completo - stesso array dell'AuthContext
-                  const tokensToRemove = [
-                    'access', 'accessToken', 'refreshToken', 'refresh', 
-                    'token', 'jwt', 'authToken', 'userToken'
-                  ];
-                  tokensToRemove.forEach(tokenKey => localStorage.removeItem(tokenKey));
+                  const tokensToRemove = ['access', 'accessToken', 'refreshToken', 'refresh', 'token', 'jwt', 'authToken', 'userToken'];
+                  tokensToRemove.forEach((tokenKey) => localStorage.removeItem(tokenKey));
                   console.log('🔓 Student localStorage cleaned');
                 }
               }
-              
+
               // Redirect dopo cleanup
               window.location.href = '/auth/signin-1';
             }

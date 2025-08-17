@@ -1,6 +1,6 @@
 /**
  * 🔄 MetaMask Deposit Component
- * 
+ *
  * Handles MetaMask → Platform balance transfers
  * Uses existing BurnDepositInterface
  */

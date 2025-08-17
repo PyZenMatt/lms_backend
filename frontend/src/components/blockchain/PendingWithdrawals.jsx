@@ -17,7 +17,7 @@ const PendingWithdrawals = ({ onTransactionComplete = null }) => {
     try {
       setLoading(true);
       console.log('🔄 Loading pending withdrawals...');
-      
+
       const response = await api.get('/teocoin/withdrawals/pending/');
       console.log('📊 Pending withdrawals response:', response.data);
 
@@ -25,7 +25,11 @@ const PendingWithdrawals = ({ onTransactionComplete = null }) => {
         setPendingWithdrawals(response.data.pending_withdrawals);
         setError('');
         console.log(`✅ Loaded ${response.data.pending_withdrawals.length} pending withdrawals`);
-      } else if (response.data.success === false && Array.isArray(response.data.pending_withdrawals) && response.data.pending_withdrawals.length === 0) {
+      } else if (
+        response.data.success === false &&
+        Array.isArray(response.data.pending_withdrawals) &&
+        response.data.pending_withdrawals.length === 0
+      ) {
         setPendingWithdrawals([]);
         setError('');
         console.log('ℹ️ No pending withdrawals found');
@@ -38,7 +42,7 @@ const PendingWithdrawals = ({ onTransactionComplete = null }) => {
       console.error('❌ Error loading pending withdrawals:', err);
       console.error('Response data:', err.response?.data);
       console.error('Response status:', err.response?.status);
-      
+
       if (err.response?.data?.error) {
         setError(err.response.data.error);
       } else {
@@ -51,18 +55,18 @@ const PendingWithdrawals = ({ onTransactionComplete = null }) => {
 
   // Process a specific withdrawal
   const processWithdrawal = async (withdrawalId) => {
-    setProcessing(prev => ({ ...prev, [withdrawalId]: true }));
+    setProcessing((prev) => ({ ...prev, [withdrawalId]: true }));
     setError('');
 
     try {
       console.log(`🎯 Processing withdrawal ${withdrawalId}...`);
-      
+
       const response = await api.post(`/teocoin/withdrawals/${withdrawalId}/process/`, {});
       console.log(`📤 Process withdrawal response:`, response.data);
 
       if (response.data.success) {
         // Success! Show transaction details
-        setResults(prev => ({
+        setResults((prev) => ({
           ...prev,
           [withdrawalId]: {
             success: true,
@@ -74,9 +78,7 @@ const PendingWithdrawals = ({ onTransactionComplete = null }) => {
         }));
 
         // Remove from pending list
-        setPendingWithdrawals(prev => 
-          prev.filter(w => w.id !== withdrawalId)
-        );
+        setPendingWithdrawals((prev) => prev.filter((w) => w.id !== withdrawalId));
 
         console.log(`✅ Withdrawal ${withdrawalId} processed successfully`);
 
@@ -84,11 +86,10 @@ const PendingWithdrawals = ({ onTransactionComplete = null }) => {
         if (onTransactionComplete) {
           onTransactionComplete(response.data);
         }
-
       } else {
         // Error during processing
         const errorMsg = response.data.error || 'Processing failed';
-        setResults(prev => ({
+        setResults((prev) => ({
           ...prev,
           [withdrawalId]: {
             success: false,
@@ -101,9 +102,9 @@ const PendingWithdrawals = ({ onTransactionComplete = null }) => {
       console.error(`❌ Error processing withdrawal ${withdrawalId}:`, err);
       console.error('Response data:', err.response?.data);
       console.error('Response status:', err.response?.status);
-      
+
       const errorMsg = err.response?.data?.error || 'Network error during processing';
-      setResults(prev => ({
+      setResults((prev) => ({
         ...prev,
         [withdrawalId]: {
           success: false,
@@ -111,7 +112,7 @@ const PendingWithdrawals = ({ onTransactionComplete = null }) => {
         }
       }));
     } finally {
-      setProcessing(prev => ({ ...prev, [withdrawalId]: false }));
+      setProcessing((prev) => ({ ...prev, [withdrawalId]: false }));
     }
   };
 
@@ -141,10 +142,7 @@ const PendingWithdrawals = ({ onTransactionComplete = null }) => {
             <i className="fas fa-exclamation-triangle me-2"></i>
             {error}
           </div>
-          <button 
-            className="btn btn-outline-primary"
-            onClick={loadPendingWithdrawals}
-          >
+          <button className="btn btn-outline-primary" onClick={loadPendingWithdrawals}>
             <i className="fas fa-redo me-2"></i>
             Retry
           </button>
@@ -172,11 +170,7 @@ const PendingWithdrawals = ({ onTransactionComplete = null }) => {
           <i className="fas fa-clock text-warning me-2"></i>
           Pending Withdrawals ({pendingWithdrawals.length})
         </h5>
-        <button 
-          className="btn btn-sm btn-outline-secondary"
-          onClick={loadPendingWithdrawals}
-          disabled={loading}
-        >
+        <button className="btn btn-sm btn-outline-secondary" onClick={loadPendingWithdrawals} disabled={loading}>
           <i className="fas fa-sync-alt me-1"></i>
           Refresh
         </button>
@@ -186,7 +180,7 @@ const PendingWithdrawals = ({ onTransactionComplete = null }) => {
           <i className="fas fa-info-circle me-2"></i>
           <strong>Ready to mint!</strong> Click "Process Withdrawal" to mint TeoCoin tokens directly to your MetaMask wallet.
         </div>
-        
+
         {pendingWithdrawals.map((withdrawal) => (
           <div key={withdrawal.id} className="border rounded p-3 mb-3">
             <div className="row align-items-center">
@@ -220,7 +214,9 @@ const PendingWithdrawals = ({ onTransactionComplete = null }) => {
                     {results[withdrawal.id].success ? (
                       <div className="text-success">
                         <i className="fas fa-check-circle mb-2" style={{ fontSize: '2rem' }}></i>
-                        <p className="mb-1"><strong>✅ Minted!</strong></p>
+                        <p className="mb-1">
+                          <strong>✅ Minted!</strong>
+                        </p>
                         <p className="mb-1">
                           <small>TX: {results[withdrawal.id].transaction_hash?.substring(0, 10)}...</small>
                         </p>
@@ -231,16 +227,15 @@ const PendingWithdrawals = ({ onTransactionComplete = null }) => {
                     ) : (
                       <div className="text-danger">
                         <i className="fas fa-times-circle mb-2" style={{ fontSize: '2rem' }}></i>
-                        <p className="mb-0"><strong>❌ Failed</strong></p>
+                        <p className="mb-0">
+                          <strong>❌ Failed</strong>
+                        </p>
                         <small>{results[withdrawal.id].error}</small>
                       </div>
                     )}
                   </div>
                 ) : (
-                  <button
-                    className="btn btn-primary"
-                    onClick={() => processWithdrawal(withdrawal.id)}
-                  >
+                  <button className="btn btn-primary" onClick={() => processWithdrawal(withdrawal.id)}>
                     <i className="fas fa-play me-2"></i>
                     Process Withdrawal
                   </button>

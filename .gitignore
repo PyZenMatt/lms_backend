@@ -1,44 +1,60 @@
-# === PYTHON & DJANGO ===
-venv/
-.env
-*.pyc
+
+# Python
 __pycache__/
-*.sqlite3
-db.sqlite3
-*.log
-*.pot
 *.py[cod]
-*$py.class
-
-# Django generated
-/media/
-staticfiles/
-**/__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.so
+*.egg-info/
+.eggs/
+.build/
+dist/
+build/
+pip-wheel-metadata/
+.coverage*
+htmlcov/
+.pytest_cache/
 .mypy_cache/
-*.db
+.tox/
+.venv/
+venv/
+env/
+ENV/
+db.sqlite3
+db.sqlite3-journal
 
-# === BLOCKCHAIN & SECURITY ===
-# Private keys and sensitive blockchain data
-**/private_keys/
-**/wallet_keys/
-**/*private_key*
-**/*_keys.py
-**/*_secrets.py
-blockchain/scripts/wallet_exports/
-blockchain/scripts/private_keys/
-# Development test scripts with sensitive data
-scripts/blockchain/show_all_private_keys.py
-scripts/blockchain/assign_wallets.py
-scripts/blockchain/wallet_backup.py
-# Test files with real blockchain data
-blockchain/tests/debug_*
-blockchain/tests/test_admin_wallet_*
-blockchain/tests/real_*
-blockchain/tests/production_*
+# Django
+staticfiles/
+media/
+*.log
 
-# === NODE / REACT ===
+# Node/Frontend
 node_modules/
-.next/
+frontend/node_modules/
+frontend/.next/
+frontend/.nuxt/
+frontend/dist/
+frontend/build/
+frontend/coverage/
+
+# Env
+.env
+.env.*
+!.env.example
+backend/.env
+backend/.env.*
+!backend/.env.example
+frontend/.env
+frontend/.env.*
+!frontend/.env.example
+
+# IDE/OS
+.vscode/
+.idea/
+*.swp
+.DS_Store
+Thumbs.db
 dist/
 build/
 coverage/

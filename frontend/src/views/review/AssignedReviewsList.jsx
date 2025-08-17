@@ -30,7 +30,9 @@ const AssignedReviewsList = () => {
   return (
     <div className="container mt-4">
       <h2>Esercizi da valutare</h2>
-      <Link to="/dashboard/student" className="btn btn-secondary mb-3">&larr; Torna alla dashboard</Link>
+      <Link to="/dashboard/student" className="btn btn-secondary mb-3">
+        &larr; Torna alla dashboard
+      </Link>
       {assigned.length === 0 ? (
         <Alert variant="info">Nessun esercizio da valutare al momento.</Alert>
       ) : (

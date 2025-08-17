@@ -10,10 +10,10 @@ const RoleGuard = ({ allowedRoles, children, redirectTo }) => {
   useEffect(() => {
     if (!loading && user) {
       const userRole = user.role?.toLowerCase();
-      
+
       if (!allowedRoles.includes(userRole)) {
         console.error(`🚫 Access denied: User role "${userRole}" not in allowed roles:`, allowedRoles);
-        
+
         // Redirect to correct dashboard based on role
         switch (userRole) {
           case 'admin':
@@ -57,7 +57,7 @@ const RoleGuard = ({ allowedRoles, children, redirectTo }) => {
   }
 
   const userRole = user.role?.toLowerCase();
-  
+
   // Check if user role is allowed
   if (!allowedRoles.includes(userRole)) {
     return (

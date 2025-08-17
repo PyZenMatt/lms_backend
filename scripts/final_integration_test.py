@@ -5,10 +5,14 @@ Test the complete integration with both payment flows.
 """
 
 from decimal import Decimal
-from services.db_teocoin_service import db_teocoin_service
+import os
+import sys
+sys.path.insert(0, os.path.abspath(os.path.dirname(__file__) + '/../backend'))
+
+from backend.services.db_teocoin_service import db_teocoin_service
 from django.contrib.auth import get_user_model
-from courses.models import Course, CourseEnrollment
-from blockchain.models import DBTeoCoinTransaction
+from backend.courses.models import Course, CourseEnrollment
+from backend.blockchain.models import DBTeoCoinTransaction
 
 User = get_user_model()
 

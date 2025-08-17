@@ -1,11 +1,11 @@
-import os
-import django
-import random
-import sys
 
-sys.path.insert(0, os.path.abspath(os.path.dirname(__file__) + '/../'))
+import os
+import sys
+import random
+sys.path.insert(0, os.path.abspath(os.path.dirname(__file__) + '/../backend'))
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'schoolplatform.settings.dev')
+import django
 django.setup()
 
 from users.models import User

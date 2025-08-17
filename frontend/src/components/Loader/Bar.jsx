@@ -5,7 +5,7 @@ import './Loader.css';
 const Bar = ({ animationDuration, progress }) => {
   return (
     <div className="loader-bar">
-      <div 
+      <div
         className="loader-bar-progress"
         style={{
           marginLeft: `${(-1 + progress) * 100}%`,

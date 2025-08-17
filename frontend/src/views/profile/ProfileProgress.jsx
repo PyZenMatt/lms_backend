@@ -153,13 +153,14 @@ const ProfileProgress = () => {
     setProgressData(mockData);
   };
 
-  const filteredCategories = progressData?.categories.filter(cat => {
-    if (selectedCategory === 'all') return true;
-    if (selectedCategory === 'completed') return cat.progress === 100;
-    if (selectedCategory === 'in-progress') return cat.progress > 0 && cat.progress < 100;
-    if (selectedCategory === 'not-started') return cat.progress === 0;
-    return true;
-  }) || [];
+  const filteredCategories =
+    progressData?.categories.filter((cat) => {
+      if (selectedCategory === 'all') return true;
+      if (selectedCategory === 'completed') return cat.progress === 100;
+      if (selectedCategory === 'in-progress') return cat.progress > 0 && cat.progress < 100;
+      if (selectedCategory === 'not-started') return cat.progress === 0;
+      return true;
+    }) || [];
 
   if (loading) {
     return (
@@ -180,10 +181,7 @@ const ProfileProgress = () => {
             <i className="feather icon-alert-circle"></i>
             <span>{error}</span>
           </div>
-          <button 
-            className="enhanced-btn enhanced-btn-primary"
-            onClick={loadProgressData}
-          >
+          <button className="enhanced-btn enhanced-btn-primary" onClick={loadProgressData}>
             <i className="feather icon-refresh-cw"></i>
             <span>Riprova</span>
           </button>
@@ -205,12 +203,9 @@ const ProfileProgress = () => {
           <div className="enhanced-profile-header">
             <div className="enhanced-progress-header">
               <h1 className="enhanced-profile-name">
-                <i className="feather icon-trending-up"></i>
-                I Tuoi Progressi
+                <i className="feather icon-trending-up"></i>I Tuoi Progressi
               </h1>
-              <p className="enhanced-progress-subtitle">
-                Traccia il tuo percorso artistico e celebra i tuoi successi
-              </p>
+              <p className="enhanced-progress-subtitle">Traccia il tuo percorso artistico e celebra i tuoi successi</p>
             </div>
           </div>
         </div>
@@ -240,7 +235,6 @@ const ProfileProgress = () => {
 
       {/* Main Content */}
       <div className="container">
-        
         {/* Overall Stats */}
         <div className="enhanced-progress-overview">
           <div className="enhanced-stat-card enhanced-stat-primary">
@@ -292,25 +286,25 @@ const ProfileProgress = () => {
               <span>Progressi per Categoria</span>
             </h3>
             <div className="enhanced-progress-filters">
-              <button 
+              <button
                 className={`enhanced-filter-btn ${selectedCategory === 'all' ? 'active' : ''}`}
                 onClick={() => setSelectedCategory('all')}
               >
                 Tutte
               </button>
-              <button 
+              <button
                 className={`enhanced-filter-btn ${selectedCategory === 'completed' ? 'active' : ''}`}
                 onClick={() => setSelectedCategory('completed')}
               >
                 Completate
               </button>
-              <button 
+              <button
                 className={`enhanced-filter-btn ${selectedCategory === 'in-progress' ? 'active' : ''}`}
                 onClick={() => setSelectedCategory('in-progress')}
               >
                 In Corso
               </button>
-              <button 
+              <button
                 className={`enhanced-filter-btn ${selectedCategory === 'not-started' ? 'active' : ''}`}
                 onClick={() => setSelectedCategory('not-started')}
               >
@@ -320,10 +314,10 @@ const ProfileProgress = () => {
           </div>
 
           <div className="enhanced-category-grid">
-            {filteredCategories.map(category => (
+            {filteredCategories.map((category) => (
               <div key={category.id} className="enhanced-category-card">
                 <div className="enhanced-category-header">
-                  <div className="enhanced-category-icon" style={{backgroundColor: category.color}}>
+                  <div className="enhanced-category-icon" style={{ backgroundColor: category.color }}>
                     <i className={`feather icon-${category.icon}`}></i>
                   </div>
                   <div className="enhanced-category-info">
@@ -332,16 +326,10 @@ const ProfileProgress = () => {
                       {category.coursesCompleted}/{category.totalCourses} corsi
                     </p>
                   </div>
-                  <div className="enhanced-category-percentage">
-                    {category.progress}%
-                  </div>
+                  <div className="enhanced-category-percentage">{category.progress}%</div>
                 </div>
                 <div className="enhanced-category-progress">
-                  <ProgressBar 
-                    now={category.progress} 
-                    className="enhanced-progress-bar"
-                    style={{'--progress-color': category.color}}
-                  />
+                  <ProgressBar now={category.progress} className="enhanced-progress-bar" style={{ '--progress-color': category.color }} />
                 </div>
               </div>
             ))}
@@ -358,12 +346,9 @@ const ProfileProgress = () => {
           </div>
 
           <div className="enhanced-achievements-grid">
-            {progressData.achievements.map(achievement => (
-              <div 
-                key={achievement.id} 
-                className={`enhanced-achievement-card ${achievement.earned ? 'earned' : 'locked'}`}
-              >
-                <div className="enhanced-achievement-icon" style={{backgroundColor: achievement.color}}>
+            {progressData.achievements.map((achievement) => (
+              <div key={achievement.id} className={`enhanced-achievement-card ${achievement.earned ? 'earned' : 'locked'}`}>
+                <div className="enhanced-achievement-icon" style={{ backgroundColor: achievement.color }}>
                   <i className={`feather icon-${achievement.icon}`}></i>
                 </div>
                 <div className="enhanced-achievement-content">
@@ -376,13 +361,8 @@ const ProfileProgress = () => {
                     </div>
                   ) : (
                     <div className="enhanced-achievement-progress">
-                      <div className="enhanced-achievement-progress-text">
-                        Progresso: {achievement.progress || 0}%
-                      </div>
-                      <ProgressBar 
-                        now={achievement.progress || 0} 
-                        className="enhanced-progress-bar-small"
-                      />
+                      <div className="enhanced-achievement-progress-text">Progresso: {achievement.progress || 0}%</div>
+                      <ProgressBar now={achievement.progress || 0} className="enhanced-progress-bar-small" />
                     </div>
                   )}
                 </div>
@@ -406,31 +386,25 @@ const ProfileProgress = () => {
           </div>
 
           <div className="enhanced-activity-list">
-            {progressData.recentActivity.map(activity => (
+            {progressData.recentActivity.map((activity) => (
               <div key={activity.id} className="enhanced-activity-item">
                 <div className={`enhanced-activity-icon ${activity.type}`}>
-                  <i className={`feather icon-${
-                    activity.type === 'course_completed' ? 'check-circle' :
-                    activity.type === 'achievement_earned' ? 'award' :
-                    'play-circle'
-                  }`}></i>
+                  <i
+                    className={`feather icon-${
+                      activity.type === 'course_completed'
+                        ? 'check-circle'
+                        : activity.type === 'achievement_earned'
+                          ? 'award'
+                          : 'play-circle'
+                    }`}
+                  ></i>
                 </div>
                 <div className="enhanced-activity-content">
                   <h5 className="enhanced-activity-title">{activity.title}</h5>
                   <div className="enhanced-activity-meta">
-                    <span className="enhanced-activity-date">
-                      {new Date(activity.date).toLocaleDateString('it-IT')}
-                    </span>
-                    {activity.score && (
-                      <span className="enhanced-activity-score">
-                        Voto: {activity.score}%
-                      </span>
-                    )}
-                    {activity.teoCoins && (
-                      <span className="enhanced-activity-coins">
-                        +{activity.teoCoins} TeoCoins
-                      </span>
-                    )}
+                    <span className="enhanced-activity-date">{new Date(activity.date).toLocaleDateString('it-IT')}</span>
+                    {activity.score && <span className="enhanced-activity-score">Voto: {activity.score}%</span>}
+                    {activity.teoCoins && <span className="enhanced-activity-coins">+{activity.teoCoins} TeoCoins</span>}
                   </div>
                 </div>
               </div>

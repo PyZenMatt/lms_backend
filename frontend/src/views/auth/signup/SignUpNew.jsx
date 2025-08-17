@@ -19,7 +19,7 @@ const SignUpNew = () => {
 
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       [name]: type === 'checkbox' ? checked : value
     }));
@@ -68,9 +68,9 @@ const SignUpNew = () => {
       };
 
       const response = await api.post('/register/', payload);
-      
+
       console.log('Registration response:', response.data);
-      
+
       // Handle successful response
       if (response.data?.success !== false) {
         if (formData.role === 'student') {
@@ -79,7 +79,9 @@ const SignUpNew = () => {
             navigate('/auth/signin-1');
           }, 2000);
         } else {
-          setSuccess('📧 Registrazione inviata! La tua richiesta di accesso come docente è in attesa di approvazione da parte dell\'amministratore. Ti contatteremo via email quando sarà approvata. Grazie per la pazienza!');
+          setSuccess(
+            "📧 Registrazione inviata! La tua richiesta di accesso come docente è in attesa di approvazione da parte dell'amministratore. Ti contatteremo via email quando sarà approvata. Grazie per la pazienza!"
+          );
         }
       } else {
         // Handle API error response
@@ -125,14 +127,14 @@ const SignUpNew = () => {
                   <i className="feather icon-user-plus auth-icon" />
                 </div>
                 <h3 className="mb-4">Registrazione</h3>
-                
+
                 {error && (
                   <Alert variant="danger" className="text-start">
                     <i className="feather icon-alert-circle me-2"></i>
                     {error}
                   </Alert>
                 )}
-                
+
                 {success && (
                   <Alert variant="success" className="text-start">
                     <i className="feather icon-check-circle me-2"></i>
@@ -257,11 +259,7 @@ const SignUpNew = () => {
                   </div>
 
                   {/* Submit Button */}
-                  <Button 
-                    type="submit" 
-                    className="btn btn-primary mb-4 w-100"
-                    disabled={loading}
-                  >
+                  <Button type="submit" className="btn btn-primary mb-4 w-100" disabled={loading}>
                     {loading ? (
                       <>
                         <Spinner animation="border" size="sm" className="me-2" />

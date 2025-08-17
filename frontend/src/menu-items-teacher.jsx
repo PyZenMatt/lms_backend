@@ -69,10 +69,9 @@ const teacherMenuItems = {
             type: 'label-primary'
           },
           action: () => {
-            const createButton = document.querySelector('button:contains("+ Crea nuovo corso")') ||
-                               [...document.querySelectorAll('button')].find(btn => 
-                                 btn.textContent.includes('Crea nuovo corso')
-                               );
+            const createButton =
+              document.querySelector('button:contains("+ Crea nuovo corso")') ||
+              [...document.querySelectorAll('button')].find((btn) => btn.textContent.includes('Crea nuovo corso'));
             if (createButton) {
               createButton.click();
             } else {
@@ -82,7 +81,7 @@ const teacherMenuItems = {
         },
         {
           id: 'browse-courses',
-          title: 'Esplora Corsi d\'Arte',
+          title: "Esplora Corsi d'Arte",
           type: 'item',
           icon: 'feather icon-palette',
           url: '/corsi'
@@ -206,15 +205,12 @@ const teacherMenuItems = {
                   console.error('🔓 Teacher logout API error:', error);
                 } finally {
                   // Cleanup completo - stesso array dell'AuthContext
-                  const tokensToRemove = [
-                    'access', 'accessToken', 'refreshToken', 'refresh', 
-                    'token', 'jwt', 'authToken', 'userToken'
-                  ];
-                  tokensToRemove.forEach(tokenKey => localStorage.removeItem(tokenKey));
+                  const tokensToRemove = ['access', 'accessToken', 'refreshToken', 'refresh', 'token', 'jwt', 'authToken', 'userToken'];
+                  tokensToRemove.forEach((tokenKey) => localStorage.removeItem(tokenKey));
                   console.log('🔓 Teacher localStorage cleaned');
                 }
               }
-              
+
               // Redirect dopo cleanup
               window.location.href = '/auth/signin-1';
             }

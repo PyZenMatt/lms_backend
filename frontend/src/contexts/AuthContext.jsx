@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { fetchUserProfile } from '../services/api/dashboard';
 import { login as apiLogin, logout as apiLogout } from '../services/api/auth';
@@ -71,7 +70,7 @@ export const AuthProvider = ({ children }) => {
   const logout = async () => {
     console.log('🔓 Starting complete logout process...');
     setLoading(true);
-    
+
     try {
       const refreshToken = localStorage.getItem('refreshToken') || localStorage.getItem('refresh');
       await apiLogout(refreshToken);
@@ -79,11 +78,11 @@ export const AuthProvider = ({ children }) => {
     } catch (error) {
       console.error('🔓 API logout error:', error);
     }
-    
+
     // Cleanup completo del localStorage - elimina TUTTI i possibili token
     const tokensToRemove = [
-      'access',           // Il token che hai trovato nel localStorage
-      'accessToken', 
+      'access', // Il token che hai trovato nel localStorage
+      'accessToken',
       'refreshToken',
       'refresh',
       'token',
@@ -91,19 +90,19 @@ export const AuthProvider = ({ children }) => {
       'authToken',
       'userToken'
     ];
-    
-    tokensToRemove.forEach(tokenKey => {
+
+    tokensToRemove.forEach((tokenKey) => {
       if (localStorage.getItem(tokenKey)) {
         console.log(`🔓 Removing ${tokenKey} from localStorage`);
         localStorage.removeItem(tokenKey);
       }
     });
-    
+
     // Reset stato React
     setUser(null);
     setIsAuthenticated(false);
     setLoading(false);
-    
+
     console.log('🔓 Complete logout finished - localStorage cleaned');
     // Non facciamo redirect qui - lasciamo che lo gestisca il chiamante
   };
@@ -114,9 +113,7 @@ export const AuthProvider = ({ children }) => {
       window.__reactLogout = logout;
     }
     // Persist login su mount
-    const token = localStorage.getItem('accessToken') || 
-                  localStorage.getItem('token') || 
-                  localStorage.getItem('access');
+    const token = localStorage.getItem('accessToken') || localStorage.getItem('token') || localStorage.getItem('access');
     if (token) {
       setIsAuthenticated(true);
       refreshUser();

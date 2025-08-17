@@ -1,0 +1,4 @@
+*       @your-org/maintainers
+/backend/    @your-org/backend
+/frontend/   @your-org/frontend
+/infra/      @your-org/devops

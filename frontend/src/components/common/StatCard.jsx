@@ -4,7 +4,7 @@ import './StatCard.scss';
 
 /**
  * StatCard - Componente riutilizzabile per visualizzare statistiche con progress bar
- * 
+ *
  * @param {string} title - Titolo della statistica
  * @param {string|number} value - Valore principale da mostrare
  * @param {string} icon - Nome dell'icona Feather (senza prefisso feather)
@@ -13,15 +13,7 @@ import './StatCard.scss';
  * @param {string} iconColor - Classe CSS per il colore dell'icona (default: text-c-green)
  * @param {object} style - Stili CSS aggiuntivi per la card
  */
-const StatCard = ({ 
-  title, 
-  value, 
-  icon, 
-  percentage, 
-  progressColor = 'progress-c-theme',
-  iconColor = 'text-c-green',
-  style = {}
-}) => {
+const StatCard = ({ title, value, icon, percentage, progressColor = 'progress-c-theme', iconColor = 'text-c-green', style = {} }) => {
   return (
     <Card style={style}>
       <Card.Body>

@@ -6,7 +6,7 @@ import { lazy } from 'react';
  * @returns {React.LazyExoticComponent}
  */
 export const lazyImport = (importFunc) => {
-  return lazy(() => 
+  return lazy(() =>
     importFunc().catch((error) => {
       console.error('Error loading module:', error);
       // Fallback component in case of import failure
@@ -17,10 +17,7 @@ export const lazyImport = (importFunc) => {
             <p>Impossibile caricare il componente richiesto.</p>
             <small>Dettagli: {error.message}</small>
             <div className="mt-3">
-              <button 
-                className="btn btn-primary" 
-                onClick={() => window.location.reload()}
-              >
+              <button className="btn btn-primary" onClick={() => window.location.reload()}>
                 Riprova
               </button>
             </div>

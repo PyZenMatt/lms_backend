@@ -11,7 +11,7 @@ const AdminCourseDetail = () => {
     const fetchCourse = async () => {
       const token = localStorage.getItem('token') || localStorage.getItem('access');
       const res = await fetch(`/api/v1/courses/${courseId}/`, {
-        headers: token ? { 'Authorization': `Bearer ${token}` } : {}
+        headers: token ? { Authorization: `Bearer ${token}` } : {}
       });
       const data = await res.json();
       setCourse(data);
@@ -19,7 +19,7 @@ const AdminCourseDetail = () => {
     const fetchLessons = async () => {
       const token = localStorage.getItem('token') || localStorage.getItem('access');
       const res = await fetch(`/api/v1/courses/${courseId}/lessons/`, {
-        headers: token ? { 'Authorization': `Bearer ${token}` } : {}
+        headers: token ? { Authorization: `Bearer ${token}` } : {}
       });
       const data = await res.json();
       setLessons(Array.isArray(data) ? data : []);
@@ -36,13 +36,16 @@ const AdminCourseDetail = () => {
     <div className="container mt-4">
       <h2>{course.title}</h2>
       <p>{course.description}</p>
-      <p><strong>Docente:</strong> {course.teacher?.username || '-'}</p>
+      <p>
+        <strong>Docente:</strong> {course.teacher?.username || '-'}
+      </p>
       <h4>Lezioni</h4>
       <ul>
-        {lessons.map(lesson => (
+        {lessons.map((lesson) => (
           <li key={lesson.id}>
             <Link to={`/admin/lezioni/${lesson.id}`}>
-              {lesson.order ? `${lesson.order}. ` : ''}{lesson.title}
+              {lesson.order ? `${lesson.order}. ` : ''}
+              {lesson.title}
             </Link>
             {lesson.duration ? ` (${lesson.duration} min)` : ''}
           </li>

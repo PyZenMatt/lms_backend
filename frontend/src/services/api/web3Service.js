@@ -14,7 +14,7 @@ const POLYGON_AMOY_RPC_URL = 'https://rpc-amoy.polygon.technology/';
 // Simplified ABI - only the functions we need
 const TEOCOIN_ABI = [
   'function name() view returns (string)',
-  'function symbol() view returns (string)', 
+  'function symbol() view returns (string)',
   'function decimals() view returns (uint8)',
   'function balanceOf(address) view returns (uint256)',
   'function totalSupply() view returns (uint256)',
@@ -36,7 +36,7 @@ class Web3Service {
     this.isWalletLocked = false; // Flag to prevent automatic account changes
     this.lockedWalletAddress = null; // The originally connected wallet address
     this._hasStableConnectionSetup = false; // Internal flag to prevent multiple setups
-    
+
     // Restore locked state from localStorage if it exists
     this.restoreLockedState();
   }
@@ -48,20 +48,16 @@ class Web3Service {
     try {
       const isLocked = localStorage.getItem('isWalletLocked') === 'true';
       const lockedAddress = localStorage.getItem('lockedWalletAddress');
-      
+
       if (isLocked && lockedAddress) {
         this.isWalletLocked = true;
         this.lockedWalletAddress = lockedAddress;
         this.userAddress = lockedAddress;
-        
+
         // Setup read-only provider immediately
         this.provider = new ethers.JsonRpcProvider(POLYGON_AMOY_RPC_URL);
-        this.contract = new ethers.Contract(
-          TEOCOIN_CONTRACT_ADDRESS,
-          TEOCOIN_ABI,
-          this.provider
-        );
-        
+        this.contract = new ethers.Contract(TEOCOIN_CONTRACT_ADDRESS, TEOCOIN_ABI, this.provider);
+
         console.log('🔒 Stato wallet bloccato ripristinato:', lockedAddress);
       }
     } catch (error) {
@@ -87,7 +83,7 @@ class Web3Service {
     try {
       // Connect to Metamask ONLY to get the initial address
       await window.ethereum.request({ method: 'eth_requestAccounts' });
-      
+
       // Setup temporary provider just to get the address
       const tempProvider = new ethers.BrowserProvider(window.ethereum);
       const tempSigner = await tempProvider.getSigner();
@@ -105,13 +101,9 @@ class Web3Service {
 
       // Use a static read-only provider for all future operations
       this.provider = new ethers.JsonRpcProvider(POLYGON_AMOY_RPC_URL);
-      
+
       // Create read-only contract instance (no signer needed for balance queries)
-      this.contract = new ethers.Contract(
-        TEOCOIN_CONTRACT_ADDRESS,
-        TEOCOIN_ABI,
-        this.provider
-      );
+      this.contract = new ethers.Contract(TEOCOIN_CONTRACT_ADDRESS, TEOCOIN_ABI, this.provider);
 
       // Setup event listeners to maintain stable connection
       this.setupStableConnection();
@@ -119,7 +111,6 @@ class Web3Service {
       console.log('🔒 Wallet connesso e bloccato:', this.lockedWalletAddress);
       console.log('📡 Usando provider read-only per operazioni');
       return this.lockedWalletAddress;
-
     } catch (error) {
       console.error('Errore connessione wallet:', error);
       throw new Error('Errore nella connessione del wallet: ' + error.message);
@@ -133,7 +124,7 @@ class Web3Service {
     try {
       await window.ethereum.request({
         method: 'wallet_switchEthereumChain',
-        params: [{ chainId: POLYGON_AMOY_CHAIN_ID }],
+        params: [{ chainId: POLYGON_AMOY_CHAIN_ID }]
       });
     } catch (switchError) {
       // Chain not added to Metamask
@@ -141,20 +132,22 @@ class Web3Service {
         try {
           await window.ethereum.request({
             method: 'wallet_addEthereumChain',
-            params: [{
-              chainId: POLYGON_AMOY_CHAIN_ID,
-              chainName: 'Polygon Amoy Testnet',
-              nativeCurrency: {
-                name: 'MATIC',
-                symbol: 'MATIC',
-                decimals: 18,
-              },
-              rpcUrls: [POLYGON_AMOY_RPC_URL],
-              blockExplorerUrls: ['https://amoy.polygonscan.com/'],
-            }],
+            params: [
+              {
+                chainId: POLYGON_AMOY_CHAIN_ID,
+                chainName: 'Polygon Amoy Testnet',
+                nativeCurrency: {
+                  name: 'MATIC',
+                  symbol: 'MATIC',
+                  decimals: 18
+                },
+                rpcUrls: [POLYGON_AMOY_RPC_URL],
+                blockExplorerUrls: ['https://amoy.polygonscan.com/']
+              }
+            ]
           });
         } catch (addError) {
-          throw new Error('Errore nell\'aggiunta della rete Polygon Amoy');
+          throw new Error("Errore nell'aggiunta della rete Polygon Amoy");
         }
       } else {
         throw new Error('Errore nel cambio di rete');
@@ -171,7 +164,7 @@ class Web3Service {
       console.log('🔒 getCurrentAddress: Returning locked address:', this.lockedWalletAddress);
       return this.lockedWalletAddress;
     }
-    
+
     // If not locked, try to connect or return current address
     if (!this.provider) {
       await this.connectWallet();
@@ -193,10 +186,10 @@ class Web3Service {
     if (!this.isMetamaskInstalled()) {
       return [];
     }
-    
+
     try {
-      const accounts = await window.ethereum.request({ 
-        method: 'eth_accounts' 
+      const accounts = await window.ethereum.request({
+        method: 'eth_accounts'
       });
       return accounts;
     } catch (error) {
@@ -220,13 +213,12 @@ class Web3Service {
       const provider = new ethers.JsonRpcProvider(POLYGON_AMOY_RPC_URL);
       const contract = new ethers.Contract(TEOCOIN_CONTRACT_ADDRESS, TEOCOIN_ABI, provider);
       const balance = await contract.balanceOf(targetAddress);
-      
+
       if (this.isWalletLocked && !address) {
         console.log('🔒 Balance ottenuto per wallet bloccato:', targetAddress, 'Balance:', ethers.formatEther(balance));
       }
-      
+
       return ethers.formatEther(balance);
-      
     } catch (error) {
       console.error('Errore nel recupero balance per indirizzo', targetAddress, ':', error);
       throw new Error('Errore nel recupero del saldo');
@@ -241,11 +233,11 @@ class Web3Service {
       // Use a read-only provider for token info
       const provider = new ethers.JsonRpcProvider(POLYGON_AMOY_RPC_URL);
       const contract = new ethers.Contract(TEOCOIN_CONTRACT_ADDRESS, TEOCOIN_ABI, provider);
-      
+
       try {
         const [name, symbol, decimals, totalSupply] = await Promise.all([
           contract.name(),
-          contract.symbol(), 
+          contract.symbol(),
           contract.decimals(),
           contract.totalSupply()
         ]);
@@ -267,7 +259,7 @@ class Web3Service {
       const [name, symbol, decimals, totalSupply] = await Promise.all([
         this.contract.name(),
         this.contract.symbol(),
-        this.contract.decimals(), 
+        this.contract.decimals(),
         this.contract.totalSupply()
       ]);
 
@@ -333,7 +325,7 @@ class Web3Service {
       console.log('🔒 checkConnection: Wallet is locked, returning locked address:', this.lockedWalletAddress);
       return this.lockedWalletAddress;
     }
-    
+
     // Check for saved wallet address first (only if not locked)
     if (!this.isWalletLocked) {
       const savedAddress = localStorage.getItem('connectedWalletAddress');
@@ -341,11 +333,11 @@ class Web3Service {
         this.userAddress = savedAddress;
       }
     }
-    
+
     if (this.userAddress) {
       return this.userAddress;
     }
-    
+
     // Check MetaMask connection if available (only if wallet is not locked)
     if (this.isMetamaskInstalled()) {
       try {
@@ -358,7 +350,7 @@ class Web3Service {
         console.error('Error checking MetaMask connection:', error);
       }
     }
-    
+
     return null;
   }
 
@@ -387,13 +379,12 @@ class Web3Service {
     try {
       // Generate a random wallet
       const wallet = ethers.Wallet.createRandom();
-      
+
       return {
         address: wallet.address,
         privateKey: wallet.privateKey,
         mnemonic: wallet.mnemonic.phrase
       };
-      
     } catch (error) {
       console.error('Error generating wallet:', error);
       throw new Error('Errore nella generazione del wallet');
@@ -406,13 +397,12 @@ class Web3Service {
   recoverWallet(mnemonicPhrase) {
     try {
       const wallet = ethers.Wallet.fromPhrase(mnemonicPhrase.trim());
-      
+
       return {
         address: wallet.address,
         privateKey: wallet.privateKey,
         mnemonic: wallet.mnemonic.phrase
       };
-      
     } catch (error) {
       console.error('Error recovering wallet:', error);
       throw new Error('Frase di recupero non valida');
@@ -426,22 +416,17 @@ class Web3Service {
     try {
       // Create provider for Polygon Amoy
       this.provider = new ethers.JsonRpcProvider(POLYGON_AMOY_RPC_URL);
-      
+
       // Create wallet instance from private key
       const wallet = new ethers.Wallet(privateKey, this.provider);
       this.signer = wallet;
       this.userAddress = wallet.address;
 
       // Setup contract instance
-      this.contract = new ethers.Contract(
-        TEOCOIN_CONTRACT_ADDRESS,
-        TEOCOIN_ABI,
-        this.signer
-      );
+      this.contract = new ethers.Contract(TEOCOIN_CONTRACT_ADDRESS, TEOCOIN_ABI, this.signer);
 
       console.log('Generated wallet setup completed:', this.userAddress);
       return this.userAddress;
-
     } catch (error) {
       console.error('Error setting up generated wallet:', error);
       throw new Error('Errore nella configurazione del wallet generato');
@@ -463,43 +448,42 @@ class Web3Service {
     try {
       // Convert amount to wei (18 decimals for TeoCoin)
       const amountWei = ethers.parseEther(amount.toString());
-      
+
       // Validate the recipient address
       if (!ethers.isAddress(toAddress)) {
         throw new Error('Indirizzo destinatario non valido');
       }
 
       console.log(`Transferring ${amount} TEO to ${toAddress}`);
-      
+
       // Execute the transfer
       const transaction = await this.contract.transfer(toAddress, amountWei);
-      
+
       console.log('Transaction sent:', transaction.hash);
-      
+
       // Wait for confirmation
       const receipt = await transaction.wait();
-      
+
       if (receipt.status === 1) {
         console.log('Transfer completed successfully:', receipt.hash);
         return receipt.hash;
       } else {
         throw new Error('Transaction failed');
       }
-      
     } catch (error) {
       console.error('Transfer error:', error);
-      
+
       // Handle specific error types
       if (error.code === 'INSUFFICIENT_FUNDS') {
         throw new Error('Fondi insufficienti per la transazione');
       } else if (error.code === 'USER_REJECTED') {
-        throw new Error('Transazione rifiutata dall\'utente');
+        throw new Error("Transazione rifiutata dall'utente");
       } else if (error.message.includes('insufficient funds')) {
         throw new Error('TEO insufficienti o fondi per gas insufficienti');
       } else if (error.message.includes('user rejected')) {
-        throw new Error('Transazione rifiutata dall\'utente');
+        throw new Error("Transazione rifiutata dall'utente");
       }
-      
+
       throw new Error(`Errore nel trasferimento: ${error.message}`);
     }
   }
@@ -514,16 +498,15 @@ class Web3Service {
 
     try {
       console.log(`Waiting for ${confirmations} confirmation(s) for transaction: ${txHash}`);
-      
+
       const receipt = await this.provider.waitForTransaction(txHash, confirmations);
-      
+
       if (receipt && receipt.status === 1) {
         console.log('Transaction confirmed:', txHash);
         return receipt;
       } else {
         throw new Error('Transaction failed or was reverted');
       }
-      
     } catch (error) {
       console.error('Error waiting for transaction confirmation:', error);
       throw new Error(`Errore nella conferma della transazione: ${error.message}`);
@@ -559,7 +542,7 @@ class Web3Service {
   async processCoursePaymentApproveAndSplit(studentAddress, teacherAddress, coursePrice, courseId) {
     // Always use locked wallet address if available, otherwise use provided studentAddress
     const effectiveAddress = this.getLockedWalletAddress() || studentAddress;
-    
+
     if (!effectiveAddress) {
       throw new Error('Wallet non connesso');
     }
@@ -573,58 +556,52 @@ class Web3Service {
       // Step 1: Check if student has enough MATIC for gas fees (much less needed now)
       console.log('🔍 Checking MATIC balance for gas fees...');
       const maticCheck = await this.checkMaticForGas(effectiveAddress, '0.005'); // Reduced from 0.01
-      
+
       if (!maticCheck.hasEnough) {
         throw new Error(
           `MATIC insufficienti per gas fees. ` +
-          `Hai ${maticCheck.balance} MATIC, servono almeno ${maticCheck.required} MATIC. ` +
-          `Ottieni MATIC da: https://faucet.polygon.technology/`
+            `Hai ${maticCheck.balance} MATIC, servono almeno ${maticCheck.required} MATIC. ` +
+            `Ottieni MATIC da: https://faucet.polygon.technology/`
         );
       }
-      
+
       console.log(`✅ MATIC check passed: ${maticCheck.balance} MATIC available`);
 
       // Step 2: Check student's TEO balance
       console.log('🔍 Checking TEO balance...');
       const teoBalance = await this.getBalance(effectiveAddress);
       if (parseFloat(teoBalance) < parseFloat(coursePrice)) {
-        throw new Error(
-          `TEO insufficienti. Hai ${teoBalance} TEO, servono ${coursePrice} TEO`
-        );
+        throw new Error(`TEO insufficienti. Hai ${teoBalance} TEO, servono ${coursePrice} TEO`);
       }
       console.log(`✅ TEO check passed: ${teoBalance} TEO available`);
 
       // Step 3: Setup MetaMask connection
       console.log('🔗 Setting up MetaMask connection...');
-      
+
       if (!this.isMetamaskInstalled()) {
         throw new Error('MetaMask non è installato. Installa MetaMask per continuare.');
       }
 
       await window.ethereum.request({ method: 'eth_requestAccounts' });
-      
+
       const metamaskProvider = new ethers.BrowserProvider(window.ethereum);
       await this.switchToPolygonAmoy();
       const signer = await metamaskProvider.getSigner();
-      
+
       // Verify correct account
       const currentMetaMaskAddress = await signer.getAddress();
       if (currentMetaMaskAddress.toLowerCase() !== effectiveAddress.toLowerCase()) {
         throw new Error(
           `MetaMask è connesso all'account ${currentMetaMaskAddress} ma è richiesto l'account ${effectiveAddress}. ` +
-          `Cambia account in MetaMask e riprova.`
+            `Cambia account in MetaMask e riprova.`
         );
       }
-      
+
       console.log('✅ MetaMask connected to correct account');
       this.signer = signer;
-      
+
       // Create contract instance
-      this.contract = new ethers.Contract(
-        TEOCOIN_CONTRACT_ADDRESS,
-        TEOCOIN_ABI,
-        this.signer
-      );
+      this.contract = new ethers.Contract(TEOCOIN_CONTRACT_ADDRESS, TEOCOIN_ABI, this.signer);
 
       // Step 4: Get reward pool address from backend
       console.log('🏦 Getting reward pool address...');
@@ -632,7 +609,7 @@ class Web3Service {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token') || localStorage.getItem('access')}`
+          Authorization: `Bearer ${localStorage.getItem('token') || localStorage.getItem('access')}`
         }
       });
 
@@ -654,21 +631,17 @@ class Web3Service {
       console.log('🔍 Checking current allowance...');
       const coursePriceWei = ethers.parseEther(coursePrice.toString());
       const currentAllowance = await this.contract.allowance(effectiveAddress, rewardPoolAddress);
-      
+
       console.log(`Current allowance: ${ethers.formatEther(currentAllowance)} TEO`);
       console.log(`Required: ${coursePrice} TEO`);
 
       // Step 6: Approve tokens if needed
       if (currentAllowance < coursePriceWei) {
         console.log('💳 SINGLE SIGNATURE: Approving tokens to reward pool...');
-        
-        const approveTx = await this.contract.connect(this.signer).approve(
-          rewardPoolAddress,
-          coursePriceWei,
-          {
-            gasLimit: 60000n // Set explicit gas limit
-          }
-        );
+
+        const approveTx = await this.contract.connect(this.signer).approve(rewardPoolAddress, coursePriceWei, {
+          gasLimit: 60000n // Set explicit gas limit
+        });
 
         console.log('⏳ Waiting for approval confirmation...');
         const approveReceipt = await approveTx.wait();
@@ -683,7 +656,7 @@ class Web3Service {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token') || localStorage.getItem('access')}`
+          Authorization: `Bearer ${localStorage.getItem('token') || localStorage.getItem('access')}`
         },
         body: JSON.stringify({
           student_address: effectiveAddress,
@@ -713,13 +686,12 @@ class Web3Service {
         enrollmentId: paymentResult.enrollment_id,
         message: 'Pagamento completato con una sola firma - Backend ha gestito la distribuzione automaticamente'
       };
-
     } catch (error) {
       console.error('❌ Approve+Split course payment failed:', error);
-      
+
       // Handle specific MetaMask errors
       if (error.code === 4001) {
-        throw new Error('Transazione rifiutata dall\'utente');
+        throw new Error("Transazione rifiutata dall'utente");
       } else if (error.code === -32603) {
         throw new Error('Errore interno della rete blockchain. Verifica di essere connesso a Polygon Amoy e riprova.');
       } else if (error.message.includes('insufficient funds')) {
@@ -733,7 +705,7 @@ class Web3Service {
       } else if (error.message.includes('network')) {
         throw new Error('Errore di rete. Verifica la connessione e riprova.');
       }
-      
+
       throw error;
     }
   }
@@ -750,10 +722,9 @@ class Web3Service {
       // Use read-only provider to prevent MetaMask interference
       const provider = new ethers.JsonRpcProvider(POLYGON_AMOY_RPC_URL);
       const balance = await provider.getBalance(address);
-      
+
       console.log('⛽ MATIC balance ottenuto per indirizzo:', address, 'Balance:', ethers.formatEther(balance));
       return ethers.formatEther(balance);
-      
     } catch (error) {
       console.error('Errore nel recupero balance MATIC per indirizzo', address, ':', error);
       throw new Error('Errore nel recupero del saldo MATIC');
@@ -767,7 +738,7 @@ class Web3Service {
     try {
       const maticBalance = await this.getMaticBalance(address);
       const hasEnoughMatic = parseFloat(maticBalance) >= parseFloat(minMaticRequired);
-      
+
       return {
         balance: maticBalance,
         hasEnough: hasEnoughMatic,
@@ -790,7 +761,7 @@ class Web3Service {
   setupStableConnection() {
     if (window.ethereum && !this._hasStableConnectionSetup) {
       this._hasStableConnectionSetup = true;
-      
+
       const handleAccountsChanged = (accounts) => {
         console.log('⚠️ MetaMask account change detected:', accounts);
         console.log('🔒 Wallet remains locked to:', this.lockedWalletAddress);
@@ -813,7 +784,7 @@ class Web3Service {
       // Add event listeners
       window.ethereum.on('accountsChanged', handleAccountsChanged);
       window.ethereum.on('chainChanged', handleChainChanged);
-      
+
       // Store cleanup function
       this._removeStableConnectionListeners = () => {
         if (window.ethereum) {
@@ -833,12 +804,12 @@ class Web3Service {
     if (this._removeStableConnectionListeners) {
       this._removeStableConnectionListeners();
     }
-    
+
     // Clear localStorage
     localStorage.removeItem('connectedWalletAddress');
     localStorage.removeItem('isWalletLocked');
     localStorage.removeItem('lockedWalletAddress');
-    
+
     // Reset all connection state
     this.provider = null;
     this.signer = null;
@@ -846,7 +817,7 @@ class Web3Service {
     this.userAddress = null;
     this.isWalletLocked = false;
     this.lockedWalletAddress = null;
-    
+
     console.log('🔓 Wallet disconnected and unlocked');
   }
 
@@ -871,41 +842,36 @@ class Web3Service {
     if (!this.isWalletLocked || !this.lockedWalletAddress) {
       throw new Error('Wallet non bloccato - impossibile abilitare firma');
     }
-    
+
     if (!window.ethereum) {
       throw new Error('MetaMask non disponibile');
     }
-    
+
     try {
       // Create MetaMask provider for signing
       const metamaskProvider = new ethers.BrowserProvider(window.ethereum);
-      
+
       // Ensure we're on the correct network
       await this.switchToPolygonAmoy();
-      
+
       // Get signer
       this.signer = await metamaskProvider.getSigner();
-      
+
       // Verify the signer address matches locked address
       const signerAddress = await this.signer.getAddress();
       if (signerAddress.toLowerCase() !== this.lockedWalletAddress.toLowerCase()) {
         // This is a critical error - the user needs to switch accounts in MetaMask
         throw new Error(
           `MetaMask è connesso all'account ${signerAddress} ma il wallet bloccato è ${this.lockedWalletAddress}. ` +
-          `Per favore cambia account in MetaMask e seleziona l'account ${this.lockedWalletAddress} prima di procedere.`
+            `Per favore cambia account in MetaMask e seleziona l'account ${this.lockedWalletAddress} prima di procedere.`
         );
       }
-      
+
       // Create contract instance with signer for transactions
-      this.contract = new ethers.Contract(
-        TEOCOIN_CONTRACT_ADDRESS,
-        TEOCOIN_ABI,
-        this.signer
-      );
-      
+      this.contract = new ethers.Contract(TEOCOIN_CONTRACT_ADDRESS, TEOCOIN_ABI, this.signer);
+
       console.log('✅ Signing enabled for locked wallet:', this.lockedWalletAddress);
       return true;
-      
     } catch (error) {
       console.error('❌ Error enabling signing:', error);
       throw new Error('Impossibile abilitare firma: ' + error.message);
@@ -923,38 +889,37 @@ class Web3Service {
 
     try {
       console.log('🔧 Preparing MetaMask for account:', requiredAddress);
-      
+
       // Request account access
       await window.ethereum.request({ method: 'eth_requestAccounts' });
-      
+
       const provider = new ethers.BrowserProvider(window.ethereum);
       const signer = await provider.getSigner();
       const currentAddress = await signer.getAddress();
-      
+
       if (currentAddress.toLowerCase() !== requiredAddress.toLowerCase()) {
         // Try to trigger account selection
         await window.ethereum.request({
           method: 'wallet_requestPermissions',
           params: [{ eth_accounts: {} }]
         });
-        
+
         // Check again after permission request
         const newSigner = await provider.getSigner();
         const newAddress = await newSigner.getAddress();
-        
+
         return {
           success: newAddress.toLowerCase() === requiredAddress.toLowerCase(),
           currentAddress: newAddress,
           requiredAddress: requiredAddress
         };
       }
-      
+
       return {
         success: true,
         currentAddress: currentAddress,
         requiredAddress: requiredAddress
       };
-      
     } catch (error) {
       console.error('Error preparing MetaMask account:', error);
       return {

@@ -17,12 +17,12 @@ class StakingService {
       console.error('❌ StakingService.getStakingInfo error:', error);
       console.error('Response status:', error.response?.status);
       console.error('Response data:', error.response?.data);
-      
+
       // Handle 403 Forbidden specifically
       if (error.response?.status === 403) {
         throw new Error('Staking is only available for teachers');
       }
-      
+
       throw new Error(error.response?.data?.error || 'Failed to fetch staking info');
     }
   }
@@ -46,13 +46,10 @@ class StakingService {
         url: error.config?.url,
         method: error.config?.method
       });
-      
+
       // Extract the specific error message
-      const errorMessage = error.response?.data?.error || 
-                          error.response?.data?.message || 
-                          error.message || 
-                          'Failed to stake tokens';
-      
+      const errorMessage = error.response?.data?.error || error.response?.data?.message || error.message || 'Failed to stake tokens';
+
       throw new Error(errorMessage);
     }
   }
@@ -149,14 +146,14 @@ class StakingService {
    */
   calculateSavings(currentTier, targetTier) {
     const tierRates = [25, 22, 19, 16, 15]; // Commission rates by tier
-    
+
     if (currentTier >= targetTier || targetTier >= tierRates.length) {
       return 0;
     }
-    
+
     const currentRate = tierRates[currentTier];
     const targetRate = tierRates[targetTier];
-    
+
     return currentRate - targetRate;
   }
 
@@ -176,7 +173,7 @@ class StakingService {
   getRecommendedAmounts(currentStake) {
     const tierRequirements = [0, 100, 300, 600, 1000];
     const recommendations = [];
-    
+
     for (let i = 0; i < tierRequirements.length; i++) {
       const required = tierRequirements[i];
       if (required > currentStake) {
@@ -189,7 +186,7 @@ class StakingService {
         });
       }
     }
-    
+
     return recommendations;
   }
 }

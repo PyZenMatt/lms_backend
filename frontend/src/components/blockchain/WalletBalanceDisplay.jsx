@@ -14,7 +14,7 @@ const WalletBalanceDisplay = ({ balance = null, loading: externalLoading = false
 
   const loadBalances = async () => {
     if (!user?.wallet_address) {
-      setBalances(prev => ({
+      setBalances((prev) => ({
         ...prev,
         loading: false,
         error: 'Nessun wallet collegato al profilo'
@@ -23,7 +23,7 @@ const WalletBalanceDisplay = ({ balance = null, loading: externalLoading = false
     }
 
     try {
-      setBalances(prev => ({ ...prev, loading: true, error: null }));
+      setBalances((prev) => ({ ...prev, loading: true, error: null }));
 
       // Carica i saldi usando l'indirizzo dal profilo utente
       const [teoBalance, maticBalance] = await Promise.all([
@@ -40,10 +40,9 @@ const WalletBalanceDisplay = ({ balance = null, loading: externalLoading = false
 
       console.log('💰 Saldi caricati per wallet:', user.wallet_address);
       console.log('💰 TEO:', teoBalance, 'MATIC:', maticBalance);
-
     } catch (error) {
       console.error('Errore nel caricamento saldi:', error);
-      setBalances(prev => ({
+      setBalances((prev) => ({
         ...prev,
         loading: false,
         error: 'Errore nel caricamento dei saldi'
@@ -54,7 +53,7 @@ const WalletBalanceDisplay = ({ balance = null, loading: externalLoading = false
   useEffect(() => {
     if (balance !== null) {
       // Se è fornito un balance esterno, usalo
-      setBalances(prev => ({
+      setBalances((prev) => ({
         ...prev,
         teocoin: balance,
         loading: externalLoading
@@ -76,9 +75,7 @@ const WalletBalanceDisplay = ({ balance = null, loading: externalLoading = false
         <Card.Body className="text-center">
           <i className="feather icon-wallet text-muted mb-3" style={{ fontSize: '2rem' }}></i>
           <h6 className="text-muted">Nessun Wallet Collegato</h6>
-          <p className="text-muted small">
-            Collega un wallet dal tuo profilo per visualizzare i saldi
-          </p>
+          <p className="text-muted small">Collega un wallet dal tuo profilo per visualizzare i saldi</p>
         </Card.Body>
       </Card>
     );
@@ -100,9 +97,7 @@ const WalletBalanceDisplay = ({ balance = null, loading: externalLoading = false
 
         <div className="mb-3">
           <div className="text-muted small mb-1">Indirizzo:</div>
-          <code className="bg-light p-1 rounded small">
-            {formatAddress(user.wallet_address)}
-          </code>
+          <code className="bg-light p-1 rounded small">{formatAddress(user.wallet_address)}</code>
         </div>
 
         {balances.error ? (

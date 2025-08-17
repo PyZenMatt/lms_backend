@@ -1,13 +1,13 @@
 import React from 'react';
 import { Card } from 'react-bootstrap';
 
-const StatWidget = ({ 
-  title, 
-  value, 
-  icon, 
-  trend, 
-  changeValue, 
-  trendValue, 
+const StatWidget = ({
+  title,
+  value,
+  icon,
+  trend,
+  changeValue,
+  trendValue,
   color = 'progress-c-theme',
   subtitle,
   gradientFrom,
@@ -21,11 +21,12 @@ const StatWidget = ({
 
   // Use either changeValue or trendValue for compatibility
   const displayValue = changeValue || trendValue;
-  
+
   // Remove percentage sign if it's already included in changeValue
-  const numericValue = displayValue && typeof displayValue === 'string' && displayValue.includes('%') 
-    ? parseInt(displayValue.replace('%', ''), 10) 
-    : displayValue;
+  const numericValue =
+    displayValue && typeof displayValue === 'string' && displayValue.includes('%')
+      ? parseInt(displayValue.replace('%', ''), 10)
+      : displayValue;
 
   return (
     <Card>

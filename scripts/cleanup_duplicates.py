@@ -6,13 +6,16 @@ ATTENZIONE: Usare solo in modalità dev!
 import os
 import django
 
+
 # Set up Django environment
+sys.path.insert(0, os.path.abspath(os.path.dirname(__file__) + '/../backend'))
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'schoolplatform.settings.dev')
 django.setup()
 
 from django.db.models import Count, Min
-from rewards.models import TeacherDiscountAbsorption
-from notifications.models import Notification
+import sys
+from backend.rewards.models import TeacherDiscountAbsorption
+from backend.notifications.models import Notification
 
 def cleanup_duplicate_absorptions():
     """Rimuove gli assorbimenti duplicati mantenendo il più vecchio"""

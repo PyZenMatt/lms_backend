@@ -24,10 +24,10 @@ const Navigation = () => {
       console.log('Nessun ruolo trovato, usando menu di default');
       return navigation;
     }
-    
+
     const role = (user.role || '').toLowerCase();
     console.log('Ruolo utente:', role);
-    
+
     // Seleziona il menu in base al ruolo
     if (role === 'student' || role === 'user') {
       console.log('Usando menu studente');

@@ -28,15 +28,19 @@ const TeacherCourseDetail = () => {
         setCourse(courseData);
         setLessons(lessonsData || []);
       } catch (err) {
-        if (!isMounted) return;
-        setError('Errore nel caricamento del corso.');
+        if (isMounted) {
+          setError('Errore nel caricamento del corso.');
+        }
       } finally {
-        if (!isMounted) return;
-        setLoading(false);
+        if (isMounted) {
+          setLoading(false);
+        }
       }
     };
     loadCourseData();
-    return () => { isMounted = false; };
+    return () => {
+      isMounted = false;
+    };
   }, [courseId]);
 
   return (
@@ -78,7 +82,9 @@ const TeacherCourseDetail = () => {
                 <i className="feather icon-arrow-left me-2"></i>
                 Torna alla Dashboard
               </Button>
-              <h2 className="mb-0">{course.title}</h2>
+              <h2 className="mb-0" data-testid="page-title">
+                {course.title}
+              </h2>
               <p className="text-muted">Gestione corso - Vista Teacher</p>
             </div>
             <div>
@@ -101,12 +107,19 @@ const TeacherCourseDetail = () => {
                     <h5>Dettagli</h5>
                     <Row>
                       <Col md={6}>
-                        <p><strong>Prezzo:</strong> {course.price_eur} EUR</p>
-                        <p><strong>Categoria:</strong> {course.category || 'Non specificata'}</p>
+                        <p>
+                          <strong>Prezzo:</strong> {course.price_eur} EUR
+                        </p>
+                        <p>
+                          <strong>Categoria:</strong> {course.category || 'Non specificata'}
+                        </p>
                       </Col>
                       <Col md={6}>
-                        <p><strong>Creato il:</strong> {course.created_at ? new Date(course.created_at).toLocaleDateString('it-IT') : '-'}</p>
-                        <p><strong>Stato:</strong>
+                        <p>
+                          <strong>Creato il:</strong> {course.created_at ? new Date(course.created_at).toLocaleDateString('it-IT') : '-'}
+                        </p>
+                        <p>
+                          <strong>Stato:</strong>
                           <Badge bg={course.is_active ? 'success' : 'warning'} className="ms-2">
                             {course.is_active ? 'Attivo' : 'Inattivo'}
                           </Badge>
@@ -156,7 +169,7 @@ const TeacherCourseDetail = () => {
               <MainCard title={`Lezioni (${lessons.length})`}>
                 {lessons.length === 0 ? (
                   <div className="container mt-4 text-center">
-                    <i className="feather icon-book" style={{ fontSize: '3rem', color: '#999', marginBottom: '1rem' }}></i>
+                    <i className="feather icon-book" style={{ fontSize: '3rem', color: '#999', marginBottom: '1rem' }} />
                     <h4 className="mb-3">Nessuna lezione</h4>
                     <p className="text-muted mb-4">Questo corso non ha ancora lezioni</p>
                     <Button variant="primary" onClick={() => navigate('/dashboard/teacher')}>
@@ -187,7 +200,7 @@ const TeacherCourseDetail = () => {
                                 Visualizza
                               </Link>
                               <Button variant="outline-secondary" size="sm" onClick={() => navigate(`/teacher/lezioni/${lesson.id}/edit`)}>
-                                <i className="feather icon-edit"></i>
+                                <i className="feather icon-edit" />
                               </Button>
                             </div>
                           </div>

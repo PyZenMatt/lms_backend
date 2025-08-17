@@ -4,7 +4,6 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import Loader from './components/Loader/Loader';
 import AdminLayout from './layouts/AdminLayout';
 
-
 export const renderRoutes = (routes = []) => (
   <Suspense fallback={<Loader />}>
     <Routes>

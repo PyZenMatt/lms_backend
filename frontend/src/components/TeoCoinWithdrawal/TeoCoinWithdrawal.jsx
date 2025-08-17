@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { 
-  Dialog, 
-  DialogTitle, 
-  DialogContent, 
+import {
+  Dialog,
+  DialogTitle,
+  DialogContent,
   DialogActions,
   Button,
   TextField,
@@ -17,15 +17,7 @@ import {
   IconButton,
   Tooltip
 } from '@mui/material';
-import {
-  AccountBalanceWallet,
-  Send,
-  Refresh,
-  Close,
-  Info,
-  Warning,
-  CheckCircle
-} from '@mui/icons-material';
+import { AccountBalanceWallet, Send, Refresh, Close, Info, Warning, CheckCircle } from '@mui/icons-material';
 import { BrowserProvider, Contract, formatEther, parseEther } from 'ethers';
 import api from '../../services/core/axiosClient';
 import './TeoCoinWithdrawal.scss';
@@ -35,28 +27,28 @@ const TEOCOIN_CONTRACT = '0x20D6656A31297ab3b8A87291Ed562D4228Be9ff8';
 const POLYGON_AMOY_CHAIN_ID = '0x13882'; // 80002 in hex
 const TEOCOIN_ABI = [
   {
-    "inputs": [{"internalType": "address", "name": "account", "type": "address"}],
-    "name": "balanceOf",
-    "outputs": [{"internalType": "uint256", "name": "", "type": "uint256"}],
-    "stateMutability": "view",
-    "type": "function"
+    inputs: [{ internalType: 'address', name: 'account', type: 'address' }],
+    name: 'balanceOf',
+    outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
+    stateMutability: 'view',
+    type: 'function'
   },
   {
-    "inputs": [],
-    "name": "decimals",
-    "outputs": [{"internalType": "uint8", "name": "", "type": "uint8"}],
-    "stateMutability": "view",
-    "type": "function"
+    inputs: [],
+    name: 'decimals',
+    outputs: [{ internalType: 'uint8', name: '', type: 'uint8' }],
+    stateMutability: 'view',
+    type: 'function'
   },
   {
-    "inputs": [
-      {"internalType": "address", "name": "to", "type": "address"},
-      {"internalType": "uint256", "name": "amount", "type": "uint256"}
+    inputs: [
+      { internalType: 'address', name: 'to', type: 'address' },
+      { internalType: 'uint256', name: 'amount', type: 'uint256' }
     ],
-    "name": "mintTo",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
+    name: 'mintTo',
+    outputs: [],
+    stateMutability: 'nonpayable',
+    type: 'function'
   }
 ];
 
@@ -94,7 +86,6 @@ const TeoCoinWithdrawal = ({ open, onClose, userBalance = 0 }) => {
 
   // MetaMask connection helpers (ORDINE CORRETTO)
 
-
   // Network switching function - must be defined BEFORE connectWallet
   const switchToPolygonAmoy = useCallback(async () => {
     try {
@@ -108,17 +99,19 @@ const TeoCoinWithdrawal = ({ open, onClose, userBalance = 0 }) => {
         try {
           await window.ethereum.request({
             method: 'wallet_addEthereumChain',
-            params: [{
-              chainId: POLYGON_AMOY_CHAIN_ID,
-              chainName: 'Polygon Amoy Testnet',
-              nativeCurrency: {
-                name: 'MATIC',
-                symbol: 'MATIC',
-                decimals: 18
-              },
-              rpcUrls: ['https://rpc-amoy.polygon.technology/'],
-              blockExplorerUrls: ['https://amoy.polygonscan.com/']
-            }]
+            params: [
+              {
+                chainId: POLYGON_AMOY_CHAIN_ID,
+                chainName: 'Polygon Amoy Testnet',
+                nativeCurrency: {
+                  name: 'MATIC',
+                  symbol: 'MATIC',
+                  decimals: 18
+                },
+                rpcUrls: ['https://rpc-amoy.polygon.technology/'],
+                blockExplorerUrls: ['https://amoy.polygonscan.com/']
+              }
+            ]
           });
         } catch (addError) {
           throw new Error('Failed to add Polygon Amoy network');
@@ -129,17 +122,20 @@ const TeoCoinWithdrawal = ({ open, onClose, userBalance = 0 }) => {
     }
   }, []);
 
-  const linkWalletAddress = useCallback(async (address) => {
-    try {
-      // For now, we'll store the wallet address locally
-      // In the future, this can be sent to the backend
-      console.log('Wallet linked:', address);
-      showAlert('Wallet address linked successfully!', 'success');
-    } catch (error) {
-      console.error('Failed to link wallet:', error);
-      showAlert('Failed to link wallet address. Please try again.', 'warning');
-    }
-  }, [showAlert]);
+  const linkWalletAddress = useCallback(
+    async (address) => {
+      try {
+        // For now, we'll store the wallet address locally
+        // In the future, this can be sent to the backend
+        console.log('Wallet linked:', address);
+        showAlert('Wallet address linked successfully!', 'success');
+      } catch (error) {
+        console.error('Failed to link wallet:', error);
+        showAlert('Failed to link wallet address. Please try again.', 'warning');
+      }
+    },
+    [showAlert]
+  );
 
   // MetaMask connection functions
   const connectWallet = useCallback(async () => {
@@ -152,8 +148,8 @@ const TeoCoinWithdrawal = ({ open, onClose, userBalance = 0 }) => {
       setIsProcessing(true);
 
       // Request account access
-      const accounts = await window.ethereum.request({ 
-        method: 'eth_requestAccounts' 
+      const accounts = await window.ethereum.request({
+        method: 'eth_requestAccounts'
       });
 
       const address = accounts[0];
@@ -174,7 +170,6 @@ const TeoCoinWithdrawal = ({ open, onClose, userBalance = 0 }) => {
 
       // Link wallet address with user account
       await linkWalletAddress(address);
-
     } catch (error) {
       console.error('Wallet connection failed:', error);
       showAlert('Failed to connect wallet. Please try again.', 'error');
@@ -189,7 +184,7 @@ const TeoCoinWithdrawal = ({ open, onClose, userBalance = 0 }) => {
       // Refresh DB balance using the withdrawal API balance endpoint
       const dbResponse = await api.get('/teocoin/withdrawals/balance/');
       const dbData = dbResponse.data;
-      
+
       if (dbData.success && dbData.balance) {
         // Use the correct field names from the API response
         setDbBalance(parseFloat(dbData.balance.available || 0));
@@ -236,9 +231,9 @@ const TeoCoinWithdrawal = ({ open, onClose, userBalance = 0 }) => {
 
     try {
       setIsProcessing(true);
-      
+
       const token = localStorage.getItem('accessToken');
-      
+
       if (!token) {
         throw new Error('No authentication token found. Please log in again.');
       }
@@ -246,20 +241,20 @@ const TeoCoinWithdrawal = ({ open, onClose, userBalance = 0 }) => {
       // Use the correct field name that the API expects
       const requestData = {
         amount: parseFloat(withdrawalAmount),
-        metamask_address: walletAddress  // Changed from wallet_address to metamask_address
+        metamask_address: walletAddress // Changed from wallet_address to metamask_address
       };
 
       console.log('Sending withdrawal request:', requestData);
 
       const response = await api.post('/teocoin/withdrawals/create/', requestData);
       const data = response.data;
-      
+
       console.log('Withdrawal response:', data);
-      
+
       if (data.success) {
         showAlert(
           `Withdrawal request submitted successfully! Request ID: ${data.withdrawal_id}. 
-          Your tokens will be minted to your wallet within 1-24 hours.`, 
+          Your tokens will be minted to your wallet within 1-24 hours.`,
           'success'
         );
         setWithdrawalAmount('');
@@ -274,10 +269,9 @@ const TeoCoinWithdrawal = ({ open, onClose, userBalance = 0 }) => {
         const errorMessage = data.error || data.message || 'Withdrawal failed for unknown reason';
         throw new Error(errorMessage);
       }
-      
     } catch (error) {
       console.error('Withdrawal failed:', error);
-      
+
       // Provide specific error messages for common issues
       if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
         showAlert('Network error. Please check your internet connection and try again.', 'error');
@@ -286,7 +280,10 @@ const TeoCoinWithdrawal = ({ open, onClose, userBalance = 0 }) => {
       } else if (error.message.includes('Insufficient balance')) {
         showAlert('Insufficient balance for this withdrawal.', 'error');
       } else if (error.message.includes('too many pending withdrawals')) {
-        showAlert('You have too many pending withdrawals. Please wait for current withdrawals to complete before making new requests.', 'warning');
+        showAlert(
+          'You have too many pending withdrawals. Please wait for current withdrawals to complete before making new requests.',
+          'warning'
+        );
       } else {
         showAlert(`Withdrawal failed: ${error.message}`, 'error');
       }
@@ -299,16 +296,12 @@ const TeoCoinWithdrawal = ({ open, onClose, userBalance = 0 }) => {
   const handleProcessPendingWithdrawals = useCallback(async () => {
     try {
       setIsProcessing(true);
-      
+
       const response = await api.post('/teocoin/withdrawals/admin/process-pending/');
       const data = response.data;
-      
+
       if (data.success) {
-        showAlert(
-          `✅ ${data.message}. Processed: ${data.results.successful}, Failed: ${data.results.failed}`,
-          'success',
-          8000
-        );
+        showAlert(`✅ ${data.message}. Processed: ${data.results.successful}, Failed: ${data.results.failed}`, 'success', 8000);
         // Refresh balances and history after processing
         await refreshBalances();
         await loadWithdrawalHistory();
@@ -327,13 +320,13 @@ const TeoCoinWithdrawal = ({ open, onClose, userBalance = 0 }) => {
     try {
       const response = await api.get('/teocoin/withdrawals/history/');
       const data = response.data;
-      
+
       if (data.success) {
         const withdrawals = data.withdrawals || [];
         setWithdrawalHistory(withdrawals);
-        
+
         // Count pending withdrawals
-        const pending = withdrawals.filter(w => w.status === 'pending' || w.status === 'processing').length;
+        const pending = withdrawals.filter((w) => w.status === 'pending' || w.status === 'processing').length;
         setPendingWithdrawals(pending);
       }
     } catch (error) {
@@ -354,29 +347,32 @@ const TeoCoinWithdrawal = ({ open, onClose, userBalance = 0 }) => {
   }, [userBalance]);
 
   // Cancel withdrawal function
-  const cancelWithdrawal = useCallback(async (withdrawalId) => {
-    try {
-      setLoading(true);
-      
-      const response = await api.post(`/teocoin/withdrawals/${withdrawalId}/cancel/`);
-      const data = response.data;
-      
-      if (data.success) {
-        showAlert(`Withdrawal cancelled successfully! ${data.amount_returned} TEO returned to your balance.`, 'success');
-        await loadWithdrawalHistory();
-        if (refreshBalances) {
-          refreshBalances();
+  const cancelWithdrawal = useCallback(
+    async (withdrawalId) => {
+      try {
+        setLoading(true);
+
+        const response = await api.post(`/teocoin/withdrawals/${withdrawalId}/cancel/`);
+        const data = response.data;
+
+        if (data.success) {
+          showAlert(`Withdrawal cancelled successfully! ${data.amount_returned} TEO returned to your balance.`, 'success');
+          await loadWithdrawalHistory();
+          if (refreshBalances) {
+            refreshBalances();
+          }
+        } else {
+          showAlert(data.error || 'Failed to cancel withdrawal', 'error');
         }
-      } else {
-        showAlert(data.error || 'Failed to cancel withdrawal', 'error');
+      } catch (error) {
+        console.error('Error cancelling withdrawal:', error);
+        showAlert('Failed to cancel withdrawal. Please try again.', 'error');
+      } finally {
+        setLoading(false);
       }
-    } catch (error) {
-      console.error('Error cancelling withdrawal:', error);
-      showAlert('Failed to cancel withdrawal. Please try again.', 'error');
-    } finally {
-      setLoading(false);
-    }
-  }, [showAlert, loadWithdrawalHistory, refreshBalances]);
+    },
+    [showAlert, loadWithdrawalHistory, refreshBalances]
+  );
 
   // Event handlers
   const handleClose = () => {
@@ -407,13 +403,7 @@ const TeoCoinWithdrawal = ({ open, onClose, userBalance = 0 }) => {
   };
 
   return (
-    <Dialog 
-      open={open} 
-      onClose={handleClose} 
-      maxWidth="md" 
-      fullWidth
-      className="teocoin-withdrawal-dialog"
-    >
+    <Dialog open={open} onClose={handleClose} maxWidth="md" fullWidth className="teocoin-withdrawal-dialog">
       <DialogTitle>
         <Box display="flex" alignItems="center" justifyContent="space-between">
           <Box display="flex" alignItems="center" gap={1}>
@@ -490,14 +480,8 @@ const TeoCoinWithdrawal = ({ open, onClose, userBalance = 0 }) => {
           <Box sx={{ mb: 3 }}>
             <Box display="flex" alignItems="center" gap={1} sx={{ mb: 2 }}>
               <CheckCircle color="success" />
-              <Typography variant="body2">
-                Wallet connected: {`${walletAddress.slice(0, 6)}...${walletAddress.slice(-4)}`}
-              </Typography>
-              <Chip 
-                label="Connected" 
-                color="success" 
-                size="small" 
-              />
+              <Typography variant="body2">Wallet connected: {`${walletAddress.slice(0, 6)}...${walletAddress.slice(-4)}`}</Typography>
+              <Chip label="Connected" color="success" size="small" />
             </Box>
 
             {/* Withdrawal Form */}
@@ -505,27 +489,29 @@ const TeoCoinWithdrawal = ({ open, onClose, userBalance = 0 }) => {
               <Typography variant="h6" sx={{ mb: 2 }}>
                 Request Withdrawal
               </Typography>
-              
+
               {/* Pending Withdrawals Warning */}
               {pendingWithdrawals > 0 && (
                 <Alert severity="warning" sx={{ mb: 2 }}>
                   <Typography variant="body2">
-                    You have {pendingWithdrawals} pending withdrawal{pendingWithdrawals > 1 ? 's' : ''}. 
-                    {pendingWithdrawals >= 3 ? ' Please wait for current withdrawals to complete before making new requests.' : ' New requests may be delayed.'}
+                    You have {pendingWithdrawals} pending withdrawal{pendingWithdrawals > 1 ? 's' : ''}.
+                    {pendingWithdrawals >= 3
+                      ? ' Please wait for current withdrawals to complete before making new requests.'
+                      : ' New requests may be delayed.'}
                   </Typography>
                 </Alert>
               )}
-              
+
               <TextField
                 fullWidth
                 label="Withdrawal Amount (TEO)"
                 type="number"
                 value={withdrawalAmount}
                 onChange={(e) => setWithdrawalAmount(e.target.value)}
-                inputProps={{ 
-                  min: 0.01, 
+                inputProps={{
+                  min: 0.01,
                   max: dbBalance,
-                  step: 0.01 
+                  step: 0.01
                 }}
                 helperText={`Available: ${dbBalance.toFixed(2)} TEO`}
                 sx={{ mb: 2 }}
@@ -535,23 +521,14 @@ const TeoCoinWithdrawal = ({ open, onClose, userBalance = 0 }) => {
                 <Button
                   variant="contained"
                   onClick={handleWithdrawal}
-                  disabled={
-                    isProcessing || 
-                    !withdrawalAmount || 
-                    parseFloat(withdrawalAmount) <= 0 || 
-                    pendingWithdrawals >= 3
-                  }
+                  disabled={isProcessing || !withdrawalAmount || parseFloat(withdrawalAmount) <= 0 || pendingWithdrawals >= 3}
                   startIcon={isProcessing ? <CircularProgress size={20} /> : <Send />}
                   fullWidth
                 >
                   {isProcessing ? 'Processing...' : 'Request Withdrawal'}
                 </Button>
-                
-                <Button
-                  variant="outlined"
-                  onClick={handleAddTokenToWallet}
-                  sx={{ minWidth: 'fit-content' }}
-                >
+
+                <Button variant="outlined" onClick={handleAddTokenToWallet} sx={{ minWidth: 'fit-content' }}>
                   Add TEO to Wallet
                 </Button>
               </Box>
@@ -575,9 +552,7 @@ const TeoCoinWithdrawal = ({ open, onClose, userBalance = 0 }) => {
             {withdrawalHistory.length > 0 && (
               <Card variant="outlined" sx={{ p: 2 }}>
                 <Box display="flex" justifyContent="space-between" alignItems="center" sx={{ mb: 2 }}>
-                  <Typography variant="h6">
-                    Recent Withdrawals
-                  </Typography>
+                  <Typography variant="h6">Recent Withdrawals</Typography>
                   {pendingWithdrawals > 0 && (
                     <Button
                       size="small"
@@ -585,11 +560,11 @@ const TeoCoinWithdrawal = ({ open, onClose, userBalance = 0 }) => {
                       color="error"
                       onClick={() => {
                         const pendingIds = withdrawalHistory
-                          .filter(w => w.status === 'pending' || w.status === 'processing')
-                          .map(w => w.id);
-                        
+                          .filter((w) => w.status === 'pending' || w.status === 'processing')
+                          .map((w) => w.id);
+
                         if (window.confirm(`Cancel all ${pendingWithdrawals} pending withdrawals?`)) {
-                          pendingIds.forEach(id => cancelWithdrawal(id));
+                          pendingIds.forEach((id) => cancelWithdrawal(id));
                         }
                       }}
                       disabled={loading}
@@ -600,28 +575,23 @@ const TeoCoinWithdrawal = ({ open, onClose, userBalance = 0 }) => {
                   )}
                 </Box>
                 {withdrawalHistory.slice(0, 3).map((withdrawal, index) => (
-                  <Box 
+                  <Box
                     key={index}
-                    display="flex" 
-                    justifyContent="space-between" 
+                    display="flex"
+                    justifyContent="space-between"
                     alignItems="center"
                     sx={{ py: 1, borderBottom: index < 2 ? '1px solid #eee' : 'none' }}
                   >
                     <Box>
-                      <Typography variant="body2">
-                        {withdrawal.amount} TEO
-                      </Typography>
+                      <Typography variant="body2">{withdrawal.amount} TEO</Typography>
                       <Typography variant="caption" color="textSecondary">
                         {new Date(withdrawal.created_at).toLocaleDateString()}
                       </Typography>
                     </Box>
                     <Box display="flex" alignItems="center" gap={1}>
-                      <Chip 
+                      <Chip
                         label={withdrawal.status}
-                        color={
-                          withdrawal.status === 'completed' ? 'success' :
-                          withdrawal.status === 'pending' ? 'warning' : 'default'
-                        }
+                        color={withdrawal.status === 'completed' ? 'success' : withdrawal.status === 'pending' ? 'warning' : 'default'}
                         size="small"
                       />
                       {(withdrawal.status === 'pending' || withdrawal.status === 'processing') && (
@@ -647,16 +617,13 @@ const TeoCoinWithdrawal = ({ open, onClose, userBalance = 0 }) => {
         {/* Information */}
         <Alert severity="info" icon={<Info />}>
           <Typography variant="body2">
-            Withdrawals are processed to the Polygon Amoy testnet. 
-            Make sure your MetaMask is connected to the correct network.
+            Withdrawals are processed to the Polygon Amoy testnet. Make sure your MetaMask is connected to the correct network.
           </Typography>
         </Alert>
       </DialogContent>
 
       <DialogActions>
-        <Button onClick={handleClose}>
-          Close
-        </Button>
+        <Button onClick={handleClose}>Close</Button>
       </DialogActions>
     </Dialog>
   );

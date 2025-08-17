@@ -6,7 +6,6 @@
 import api from '../core/axiosClient';
 
 class BlockchainAPIService {
-  
   /**
    * Get wallet balance from backend
    */
@@ -136,7 +135,7 @@ class BlockchainAPIService {
       params.append('limit', limit);
       if (status) params.append('status', status);
       if (type) params.append('type', type);
-      
+
       const response = await api.get(`/rewards/admin/transactions/?${params.toString()}`);
       return response.data;
     } catch (error) {

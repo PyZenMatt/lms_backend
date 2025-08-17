@@ -1,6 +1,6 @@
 /**
  * 🔥 PHASE 4: Enhanced Notification System
- * 
+ *
  * Extends the existing notification system with:
  * - Sound notifications
  * - Vibration support
@@ -22,9 +22,9 @@ const EnhancedNotificationSystem = () => {
 
   useEffect(() => {
     // Update unread count
-    const unread = notifications.filter(n => !n.read).length;
+    const unread = notifications.filter((n) => !n.read).length;
     setUnreadCount(unread);
-    
+
     // Update document title with unread count
     if (unread > 0) {
       document.title = `(${unread}) SchoolPlatform`;
@@ -63,7 +63,7 @@ const EnhancedNotificationSystem = () => {
       const soundFile = getSoundFile(type);
       const audio = new Audio(soundFile);
       audio.volume = 0.4;
-      audio.play().catch(e => {
+      audio.play().catch((e) => {
         console.log('🔇 Sound play failed (user interaction required):', e.message);
       });
     } catch (error) {
@@ -81,7 +81,7 @@ const EnhancedNotificationSystem = () => {
       [NOTIFICATION_TYPES.WARNING]: '/sounds/warning.mp3',
       [NOTIFICATION_TYPES.INFO]: '/sounds/info.mp3'
     };
-    
+
     return soundMap[type] || '/sounds/default.mp3';
   };
 
@@ -95,7 +95,7 @@ const EnhancedNotificationSystem = () => {
       [NOTIFICATION_TYPES.WARNING]: [100, 100, 100, 100, 100],
       [NOTIFICATION_TYPES.INFO]: [200]
     };
-    
+
     return patterns[type] || [200];
   };
 
@@ -129,7 +129,7 @@ const EnhancedNotificationSystem = () => {
     notification.onclick = () => {
       window.focus();
       notification.close();
-      
+
       // Execute first action if available
       if (actions.length > 0 && actions[0].action) {
         actions[0].action();
@@ -137,9 +137,12 @@ const EnhancedNotificationSystem = () => {
     };
 
     // Auto-close after duration
-    setTimeout(() => {
-      notification.close();
-    }, type === NOTIFICATION_TYPES.ERROR ? 10000 : 5000);
+    setTimeout(
+      () => {
+        notification.close();
+      },
+      type === NOTIFICATION_TYPES.ERROR ? 10000 : 5000
+    );
   };
 
   /**
@@ -152,7 +155,7 @@ const EnhancedNotificationSystem = () => {
       [NOTIFICATION_TYPES.WARNING]: '/icons/warning.png',
       [NOTIFICATION_TYPES.INFO]: '/icons/info.png'
     };
-    
+
     return iconMap[type] || '/favicon.ico';
   };
 
@@ -171,15 +174,15 @@ const EnhancedNotificationSystem = () => {
     if ('Notification' in window) {
       const permission = await Notification.requestPermission();
       setNotificationPermission(permission);
-      
+
       if (permission === 'granted') {
         // Show a test notification
         new Notification('SchoolPlatform', {
-          body: '🔔 Notifications enabled! You\'ll now receive real-time updates.',
+          body: "🔔 Notifications enabled! You'll now receive real-time updates.",
           icon: '/favicon.ico'
         });
       }
-      
+
       return permission === 'granted';
     }
     return false;
@@ -191,7 +194,7 @@ const EnhancedNotificationSystem = () => {
   const toggleSound = () => {
     setSoundEnabled(!soundEnabled);
     localStorage.setItem('notificationSound', (!soundEnabled).toString());
-    
+
     if (!soundEnabled) {
       // Play test sound
       playNotificationSound(NOTIFICATION_TYPES.SUCCESS);
@@ -204,7 +207,7 @@ const EnhancedNotificationSystem = () => {
   const toggleVibration = () => {
     setVibrationEnabled(!vibrationEnabled);
     localStorage.setItem('notificationVibration', (!vibrationEnabled).toString());
-    
+
     if (!vibrationEnabled && 'vibrate' in navigator) {
       navigator.vibrate([200, 100, 200]);
     }
@@ -214,7 +217,7 @@ const EnhancedNotificationSystem = () => {
    * Clear all notifications
    */
   const clearAllNotifications = () => {
-    notifications.forEach(notification => {
+    notifications.forEach((notification) => {
       removeNotification(notification.id);
     });
     setUnreadCount(0);
@@ -225,7 +228,7 @@ const EnhancedNotificationSystem = () => {
    */
   const getNotificationVariant = (type, priority) => {
     if (priority === 'high') return 'danger';
-    
+
     switch (type) {
       case NOTIFICATION_TYPES.SUCCESS:
         return 'success';
@@ -266,20 +269,15 @@ const EnhancedNotificationSystem = () => {
               {unreadCount > 99 ? '99+' : unreadCount}
             </Badge>
           )}
-          
+
           {/* Browser Notification Permission */}
           {notificationPermission !== 'granted' && (
-            <Button
-              variant="outline-primary"
-              size="sm"
-              onClick={requestNotificationPermission}
-              className="permission-btn"
-            >
+            <Button variant="outline-primary" size="sm" onClick={requestNotificationPermission} className="permission-btn">
               <i className="fas fa-bell me-1"></i>
               Enable Notifications
             </Button>
           )}
-          
+
           {/* Sound Toggle */}
           <Button
             variant={soundEnabled ? 'success' : 'outline-secondary'}
@@ -289,9 +287,9 @@ const EnhancedNotificationSystem = () => {
           >
             <i className={`fas fa-volume-${soundEnabled ? 'up' : 'mute'}`}></i>
           </Button>
-          
+
           {/* Vibration Toggle */}
-          {('vibrate' in navigator) && (
+          {'vibrate' in navigator && (
             <Button
               variant={vibrationEnabled ? 'success' : 'outline-secondary'}
               size="sm"
@@ -301,15 +299,10 @@ const EnhancedNotificationSystem = () => {
               <i className="fas fa-mobile-alt"></i>
             </Button>
           )}
-          
+
           {/* Clear All */}
           {notifications.length > 0 && (
-            <Button
-              variant="outline-danger"
-              size="sm"
-              onClick={clearAllNotifications}
-              title="Clear All Notifications"
-            >
+            <Button variant="outline-danger" size="sm" onClick={clearAllNotifications} title="Clear All Notifications">
               <i className="fas fa-trash"></i>
             </Button>
           )}
@@ -317,11 +310,7 @@ const EnhancedNotificationSystem = () => {
       </div>
 
       {/* Toast Container */}
-      <ToastContainer 
-        position="top-end" 
-        className="enhanced-toast-container"
-        style={{ zIndex: 9999 }}
-      >
+      <ToastContainer position="top-end" className="enhanced-toast-container" style={{ zIndex: 9999 }}>
         {notifications.map((notification) => (
           <Toast
             key={notification.id}
@@ -332,29 +321,23 @@ const EnhancedNotificationSystem = () => {
             className={`enhanced-toast enhanced-toast-${getNotificationVariant(notification.type, notification.priority)}`}
           >
             <Toast.Header>
-              <div className="toast-icon">
-                {getPriorityIcon(notification.priority)}
-              </div>
+              <div className="toast-icon">{getPriorityIcon(notification.priority)}</div>
               <strong className="me-auto">
                 SchoolPlatform
                 {notification.priority === 'high' && (
-                  <Badge bg="danger" className="ms-2">URGENT</Badge>
+                  <Badge bg="danger" className="ms-2">
+                    URGENT
+                  </Badge>
                 )}
               </strong>
-              <small className="text-muted">
-                {new Date(notification.timestamp).toLocaleTimeString()}
-              </small>
+              <small className="text-muted">{new Date(notification.timestamp).toLocaleTimeString()}</small>
             </Toast.Header>
-            
+
             <Toast.Body>
               <div className="notification-content">
-                {typeof notification.message === 'string' ? (
-                  <span>{notification.message}</span>
-                ) : (
-                  notification.message
-                )}
+                {typeof notification.message === 'string' ? <span>{notification.message}</span> : notification.message}
               </div>
-              
+
               {/* Action Buttons */}
               {notification.actions && notification.actions.length > 0 && (
                 <div className="notification-actions mt-2">
@@ -383,12 +366,20 @@ const EnhancedNotificationSystem = () => {
 };
 
 // Enable user gesture tracking for sound
-document.addEventListener('click', () => {
-  localStorage.setItem('userGesture', 'true');
-}, { once: true });
+document.addEventListener(
+  'click',
+  () => {
+    localStorage.setItem('userGesture', 'true');
+  },
+  { once: true }
+);
 
-document.addEventListener('keydown', () => {
-  localStorage.setItem('userGesture', 'true');
-}, { once: true });
+document.addEventListener(
+  'keydown',
+  () => {
+    localStorage.setItem('userGesture', 'true');
+  },
+  { once: true }
+);
 
 export default EnhancedNotificationSystem;

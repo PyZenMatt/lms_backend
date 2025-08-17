@@ -16,7 +16,7 @@ const Breadcrumb = () => {
   // Seleziona il menu corretto basato sul ruolo dell'utente
   const selectedNavigation = useMemo(() => {
     if (!user?.role) return navigation;
-    
+
     switch (user.role) {
       case 'student':
       case 'user':

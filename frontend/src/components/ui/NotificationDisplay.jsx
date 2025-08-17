@@ -46,17 +46,11 @@ const NotificationDisplay = () => {
           onClick={() => removeNotification(notification.id)}
         >
           <div className="notification-content">
-            <span className="notification-icon">
-              {getIcon(notification.type)}
-            </span>
+            <span className="notification-icon">{getIcon(notification.type)}</span>
             <div className="notification-message">
-              {typeof notification.message === 'string' ? (
-                <span>{notification.message}</span>
-              ) : (
-                notification.message
-              )}
+              {typeof notification.message === 'string' ? <span>{notification.message}</span> : notification.message}
             </div>
-            <button 
+            <button
               className="notification-close"
               onClick={(e) => {
                 e.stopPropagation();

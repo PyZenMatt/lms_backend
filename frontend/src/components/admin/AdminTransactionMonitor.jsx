@@ -46,9 +46,9 @@ const AdminTransactionMonitor = () => {
 
   const getStatusBadge = (status) => {
     const statusMap = {
-      'completed': { variant: 'success', text: 'Completata' },
-      'pending': { variant: 'warning', text: 'In Attesa' },
-      'failed': { variant: 'danger', text: 'Fallita' }
+      completed: { variant: 'success', text: 'Completata' },
+      pending: { variant: 'warning', text: 'In Attesa' },
+      failed: { variant: 'danger', text: 'Fallita' }
     };
     const config = statusMap[status] || { variant: 'secondary', text: status };
     return <Badge bg={config.variant}>{config.text}</Badge>;
@@ -56,10 +56,10 @@ const AdminTransactionMonitor = () => {
 
   const getTypeIcon = (type) => {
     const typeMap = {
-      'course_purchase': 'icon-shopping-cart',
-      'exercise_reward': 'icon-award',
-      'review_reward': 'icon-star',
-      'achievement_reward': 'icon-trophy'
+      course_purchase: 'icon-shopping-cart',
+      exercise_reward: 'icon-award',
+      review_reward: 'icon-star',
+      achievement_reward: 'icon-trophy'
     };
     return typeMap[type] || 'icon-circle';
   };
@@ -95,7 +95,7 @@ const AdminTransactionMonitor = () => {
             </Card.Body>
           </Card>
         </Col>
-        
+
         <Col md={3}>
           <Card className="bg-warning text-white">
             <Card.Body>
@@ -111,7 +111,7 @@ const AdminTransactionMonitor = () => {
             </Card.Body>
           </Card>
         </Col>
-        
+
         <Col md={3}>
           <Card className="bg-danger text-white">
             <Card.Body>
@@ -127,7 +127,7 @@ const AdminTransactionMonitor = () => {
             </Card.Body>
           </Card>
         </Col>
-        
+
         <Col md={3}>
           <Card className="bg-info text-white">
             <Card.Body>
@@ -150,9 +150,8 @@ const AdminTransactionMonitor = () => {
         <div className="d-flex align-items-center">
           <i className="feather icon-shield me-2"></i>
           <div>
-            <strong>Nota sulla Privacy:</strong> Questi dati sono accessibili solo agli amministratori per scopi di 
-            monitoraggio sistema, supporto utenti e compliance. Le informazioni personali sono protette secondo 
-            le normative vigenti sulla privacy.
+            <strong>Nota sulla Privacy:</strong> Questi dati sono accessibili solo agli amministratori per scopi di monitoraggio sistema,
+            supporto utenti e compliance. Le informazioni personali sono protette secondo le normative vigenti sulla privacy.
           </div>
         </div>
       </Alert>
@@ -201,21 +200,17 @@ const AdminTransactionMonitor = () => {
               </tr>
             </thead>
             <tbody>
-              {transactions.map(tx => (
+              {transactions.map((tx) => (
                 <tr key={tx.id}>
                   <td className="small">
                     {new Date(tx.created_at).toLocaleDateString('it-IT')}
                     <br />
-                    <span className="text-muted">
-                      {new Date(tx.created_at).toLocaleTimeString('it-IT')}
-                    </span>
+                    <span className="text-muted">{new Date(tx.created_at).toLocaleTimeString('it-IT')}</span>
                   </td>
                   <td>
                     <div className="d-flex align-items-center">
                       <i className={`feather ${getTypeIcon(tx.transaction_type)} me-2`}></i>
-                      <span className="small">
-                        {tx.transaction_type.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}
-                      </span>
+                      <span className="small">{tx.transaction_type.replace('_', ' ').replace(/\b\w/g, (l) => l.toUpperCase())}</span>
                     </div>
                   </td>
                   <td>
@@ -227,7 +222,8 @@ const AdminTransactionMonitor = () => {
                   </td>
                   <td>
                     <strong className={tx.amount > 0 ? 'text-success' : 'text-danger'}>
-                      {tx.amount > 0 ? '+' : ''}{formatAmount(tx.amount)}
+                      {tx.amount > 0 ? '+' : ''}
+                      {formatAmount(tx.amount)}
                     </strong>
                   </td>
                   <td>{getStatusBadge(tx.status)}</td>
@@ -236,9 +232,9 @@ const AdminTransactionMonitor = () => {
                       <div>
                         <code className="small">{tx.tx_hash.substring(0, 10)}...</code>
                         <br />
-                        <a 
-                          href={`https://amoy.polygonscan.com/tx/${tx.tx_hash}`} 
-                          target="_blank" 
+                        <a
+                          href={`https://amoy.polygonscan.com/tx/${tx.tx_hash}`}
+                          target="_blank"
                           rel="noopener noreferrer"
                           className="small text-primary"
                         >
@@ -263,11 +259,7 @@ const AdminTransactionMonitor = () => {
                         <i className="feather icon-eye"></i>
                       </Button>
                       {tx.status === 'failed' && (
-                        <Button
-                          variant="outline-warning"
-                          size="sm"
-                          onClick={() => retryFailedTransaction(tx.id)}
-                        >
+                        <Button variant="outline-warning" size="sm" onClick={() => retryFailedTransaction(tx.id)}>
                           <i className="feather icon-refresh-cw"></i>
                         </Button>
                       )}

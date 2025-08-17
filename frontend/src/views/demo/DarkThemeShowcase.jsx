@@ -1,6 +1,6 @@
 /**
  * 🌙 Dark Theme Feature Showcase
- * 
+ *
  * Comprehensive demonstration of all dark theme capabilities
  */
 
@@ -13,7 +13,7 @@ const DarkThemeShowcase = () => {
   const { isDark, getThemeColors } = useTheme();
   const [showModal, setShowModal] = useState(false);
   const [activeTab, setActiveTab] = useState('components');
-  
+
   const themeColors = getThemeColors();
 
   const showcaseData = {
@@ -55,9 +55,7 @@ const DarkThemeShowcase = () => {
               <div className="d-flex align-items-center justify-content-between">
                 <div>
                   <h3 className="mb-1">🌙 Dark Theme Showcase</h3>
-                  <p className="text-muted mb-0">
-                    Complete dark theme implementation with all UI components and features
-                  </p>
+                  <p className="text-muted mb-0">Complete dark theme implementation with all UI components and features</p>
                 </div>
                 <ThemeToggle size="lg" showLabel={true} />
               </div>
@@ -73,16 +71,12 @@ const DarkThemeShowcase = () => {
                   <div className="flex-grow-1">
                     <h5 className="mb-1">Current Theme: {isDark ? 'Dark Mode' : 'Light Mode'}</h5>
                     <p className="mb-0">
-                      {isDark 
-                        ? 'You are currently viewing the dark theme with full component support.' 
-                        : 'Switch to dark mode using the toggle above to see all dark theme features.'
-                      }
+                      {isDark
+                        ? 'You are currently viewing the dark theme with full component support.'
+                        : 'Switch to dark mode using the toggle above to see all dark theme features.'}
                     </p>
                   </div>
-                  <Button 
-                    variant={isDark ? 'light' : 'dark'} 
-                    onClick={() => setShowModal(true)}
-                  >
+                  <Button variant={isDark ? 'light' : 'dark'} onClick={() => setShowModal(true)}>
                     View Features
                   </Button>
                 </div>
@@ -129,7 +123,9 @@ const DarkThemeShowcase = () => {
                               </div>
                               <ul className="small mb-0">
                                 {component.features.map((feature, idx) => (
-                                  <li key={idx} className="text-muted">{feature}</li>
+                                  <li key={idx} className="text-muted">
+                                    {feature}
+                                  </li>
                                 ))}
                               </ul>
                             </Card.Body>
@@ -167,7 +163,7 @@ const DarkThemeShowcase = () => {
                 <Row>
                   <Col lg={12}>
                     <h5 className="mb-3">🎨 Live Component Demo</h5>
-                    
+
                     {/* Sample Table */}
                     <Card className="mb-4">
                       <Card.Header>
@@ -188,16 +184,10 @@ const DarkThemeShowcase = () => {
                               <tr key={row.id}>
                                 <td>{row.course}</td>
                                 <td>
-                                  <ProgressBar 
-                                    now={row.progress} 
-                                    label={`${row.progress}%`}
-                                    style={{ height: '20px' }}
-                                  />
+                                  <ProgressBar now={row.progress} label={`${row.progress}%`} style={{ height: '20px' }} />
                                 </td>
                                 <td>
-                                  <Badge bg={row.status === 'Completed' ? 'success' : 'primary'}>
-                                    {row.status}
-                                  </Badge>
+                                  <Badge bg={row.status === 'Completed' ? 'success' : 'primary'}>{row.status}</Badge>
                                 </td>
                                 <td>{row.students}</td>
                               </tr>
@@ -238,11 +228,7 @@ const DarkThemeShowcase = () => {
                             <Col md={6}>
                               <Form.Group className="mb-3">
                                 <Form.Label>Course Name</Form.Label>
-                                <Form.Control 
-                                  type="text" 
-                                  placeholder="Enter course name"
-                                  defaultValue="React Advanced Concepts"
-                                />
+                                <Form.Control type="text" placeholder="Enter course name" defaultValue="React Advanced Concepts" />
                               </Form.Group>
                             </Col>
                             <Col md={6}>
@@ -259,8 +245,8 @@ const DarkThemeShowcase = () => {
                           </Row>
                           <Form.Group className="mb-3">
                             <Form.Label>Description</Form.Label>
-                            <Form.Control 
-                              as="textarea" 
+                            <Form.Control
+                              as="textarea"
                               rows={3}
                               placeholder="Course description..."
                               defaultValue="Advanced React concepts including hooks, context, and performance optimization."
@@ -290,8 +276,7 @@ const DarkThemeShowcase = () => {
         <Modal.Body>
           <h6>🎨 Color System</h6>
           <p className="small text-muted mb-3">
-            The dark theme uses a comprehensive CSS custom property system that dynamically 
-            updates all component colors in real-time.
+            The dark theme uses a comprehensive CSS custom property system that dynamically updates all component colors in real-time.
           </p>
 
           <h6>⚙️ Implementation Features</h6>
@@ -308,8 +293,8 @@ const DarkThemeShowcase = () => {
 
           <h6>🎯 Component Coverage</h6>
           <p className="small text-muted">
-            All Bootstrap components and custom UI elements are fully themed, including:
-            cards, modals, forms, tables, navigation, alerts, buttons, badges, and more.
+            All Bootstrap components and custom UI elements are fully themed, including: cards, modals, forms, tables, navigation, alerts,
+            buttons, badges, and more.
           </p>
         </Modal.Body>
         <Modal.Footer>

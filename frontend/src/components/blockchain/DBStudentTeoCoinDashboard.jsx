@@ -33,10 +33,10 @@ const DBStudentTeoCoinDashboard = () => {
 
   useEffect(() => {
     loadDashboardData();
-    
+
     // Set up auto-refresh
     const interval = setInterval(loadDashboardData, REFRESH_INTERVAL);
-    
+
     return () => clearInterval(interval);
   }, []);
 
@@ -53,9 +53,9 @@ const DBStudentTeoCoinDashboard = () => {
       // Load balance using student API for consistency
       const balanceResponse = await fetch(`${API_BASE_URL}/api/v1/teocoin/student/balance/`, {
         headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
       });
 
       if (!balanceResponse.ok) {
@@ -66,28 +66,29 @@ const DBStudentTeoCoinDashboard = () => {
       console.log('🔍 Student Balance API Response:', balanceData);
 
       // Extract balance data correctly from student API format
-      const balance = balanceData.success && balanceData.balance 
-        ? {
-            available_balance: parseFloat(balanceData.balance.available || 0).toFixed(2),
-            staked_balance: parseFloat(balanceData.balance.staked || 0).toFixed(2),
-            pending_withdrawal: parseFloat(balanceData.balance.pending_withdrawal || 0).toFixed(2),
-            total_balance: parseFloat(balanceData.balance.total || 0).toFixed(2)
-          }
-        : {
-            available_balance: '0.00',
-            staked_balance: '0.00', 
-            pending_withdrawal: '0.00',
-            total_balance: '0.00'
-          };
+      const balance =
+        balanceData.success && balanceData.balance
+          ? {
+              available_balance: parseFloat(balanceData.balance.available || 0).toFixed(2),
+              staked_balance: parseFloat(balanceData.balance.staked || 0).toFixed(2),
+              pending_withdrawal: parseFloat(balanceData.balance.pending_withdrawal || 0).toFixed(2),
+              total_balance: parseFloat(balanceData.balance.total || 0).toFixed(2)
+            }
+          : {
+              available_balance: '0.00',
+              staked_balance: '0.00',
+              pending_withdrawal: '0.00',
+              total_balance: '0.00'
+            };
 
       // Load recent transactions - handle errors gracefully
       let transactionsData = [];
       try {
         const transactionsResponse = await fetch(`${API_BASE_URL}/api/v1/teocoin/transactions/`, {
           headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json',
-          },
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
         });
 
         if (transactionsResponse.ok) {
@@ -102,14 +103,12 @@ const DBStudentTeoCoinDashboard = () => {
       // Load platform statistics
       const statsResponse = await fetch(`${API_BASE_URL}/api/v1/teocoin/statistics/`, {
         headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
       });
 
-      const statsData = statsResponse.ok 
-        ? await statsResponse.json() 
-        : {};
+      const statsData = statsResponse.ok ? await statsResponse.json() : {};
 
       setDashboardData({
         balance: balance,
@@ -192,13 +191,11 @@ const DBStudentTeoCoinDashboard = () => {
         <h4>
           <i className="fas fa-coins"></i>
           Dashboard TeoCoin
-          <Badge bg="success" className="ms-2">DB-Based</Badge>
+          <Badge bg="success" className="ms-2">
+            DB-Based
+          </Badge>
         </h4>
-        {lastUpdate && (
-          <small className="text-muted">
-            Ultimo aggiornamento: {formatDate(lastUpdate)}
-          </small>
-        )}
+        {lastUpdate && <small className="text-muted">Ultimo aggiornamento: {formatDate(lastUpdate)}</small>}
       </div>
 
       {error && (
@@ -217,17 +214,8 @@ const DBStudentTeoCoinDashboard = () => {
                 <i className="feather icon-activity text-primary me-2"></i>
                 Recent Transactions
               </h5>
-              <Button 
-                variant="outline-primary" 
-                size="sm"
-                onClick={loadDashboardData}
-                disabled={loading}
-              >
-                {loading ? (
-                  <Spinner animation="border" size="sm" />
-                ) : (
-                  <i className="feather icon-refresh-cw"></i>
-                )}
+              <Button variant="outline-primary" size="sm" onClick={loadDashboardData} disabled={loading}>
+                {loading ? <Spinner animation="border" size="sm" /> : <i className="feather icon-refresh-cw"></i>}
                 Refresh
               </Button>
             </Card.Header>
@@ -241,7 +229,7 @@ const DBStudentTeoCoinDashboard = () => {
               ) : (
                 <div className="transaction-list">
                   {dashboardData.recentTransactions
-                    .filter(transaction => {
+                    .filter((transaction) => {
                       // Filter out staking transactions for students
                       if (user?.role === 'student') {
                         return !['stake', 'unstake'].includes(transaction.type);
@@ -249,34 +237,34 @@ const DBStudentTeoCoinDashboard = () => {
                       return true;
                     })
                     .map((transaction, index) => (
-                    <div key={transaction.id || index} className="d-flex align-items-center justify-content-between py-3 border-bottom">
-                      <div className="d-flex align-items-center">
-                        <div className="me-3">
-                          <div className={`rounded-circle d-flex align-items-center justify-content-center text-white bg-${getTransactionColor(transaction.type)}`} 
-                               style={{ width: '40px', height: '40px' }}>
-                            <i className="feather icon-arrow-up-right"></i>
+                      <div key={transaction.id || index} className="d-flex align-items-center justify-content-between py-3 border-bottom">
+                        <div className="d-flex align-items-center">
+                          <div className="me-3">
+                            <div
+                              className={`rounded-circle d-flex align-items-center justify-content-center text-white bg-${getTransactionColor(transaction.type)}`}
+                              style={{ width: '40px', height: '40px' }}
+                            >
+                              <i className="feather icon-arrow-up-right"></i>
+                            </div>
+                          </div>
+                          <div>
+                            <h6 className="mb-1 fw-semibold">{transaction.description || 'TeoCoin Transaction'}</h6>
+                            <div className="d-flex align-items-center gap-2">
+                              <Badge bg={getTransactionColor(transaction.type)} className="small">
+                                {transaction.type}
+                              </Badge>
+                              <small className="text-muted">{formatDate(transaction.created_at)}</small>
+                            </div>
                           </div>
                         </div>
-                        <div>
-                          <h6 className="mb-1 fw-semibold">{transaction.description || 'TeoCoin Transaction'}</h6>
-                          <div className="d-flex align-items-center gap-2">
-                            <Badge bg={getTransactionColor(transaction.type)} className="small">
-                              {transaction.type}
-                            </Badge>
-                            <small className="text-muted">
-                              {formatDate(transaction.created_at)}
-                            </small>
+                        <div className="text-end">
+                          <div className={`fw-bold ${parseFloat(transaction.amount) >= 0 ? 'text-success' : 'text-danger'}`}>
+                            {parseFloat(transaction.amount) >= 0 ? '+' : ''}
+                            {parseFloat(transaction.amount).toFixed(2)} TEO
                           </div>
                         </div>
                       </div>
-                      <div className="text-end">
-                        <div className={`fw-bold ${parseFloat(transaction.amount) >= 0 ? 'text-success' : 'text-danger'}`}>
-                          {parseFloat(transaction.amount) >= 0 ? '+' : ''}
-                          {parseFloat(transaction.amount).toFixed(2)} TEO
-                        </div>
-                      </div>
-                    </div>
-                  ))}
+                    ))}
                 </div>
               )}
             </Card.Body>
@@ -289,25 +277,25 @@ const DBStudentTeoCoinDashboard = () => {
         {/* Burn & Deposit Component */}
         <Col xl={4} lg={6} md={12} className="blockchain-component-col mb-3">
           <div className="blockchain-responsive-card h-100">
-            <BurnDepositInterface 
+            <BurnDepositInterface
               onTransactionComplete={(data) => {
                 loadDashboardData();
               }}
             />
           </div>
         </Col>
-        
+
         {/* Pending Withdrawals Component */}
         <Col xl={4} lg={6} md={12} className="blockchain-component-col mb-3">
           <div className="blockchain-responsive-card h-100">
-            <PendingWithdrawals 
+            <PendingWithdrawals
               onTransactionComplete={(data) => {
                 loadDashboardData();
               }}
             />
           </div>
         </Col>
-        
+
         {/* Balance Overview Component */}
         <Col xl={4} lg={12} md={12} className="blockchain-component-col mb-3">
           <Card className="balance-overview-card blockchain-responsive-card h-100">
@@ -320,39 +308,27 @@ const DBStudentTeoCoinDashboard = () => {
             <Card.Body className="d-flex flex-column justify-content-center">
               <div className="text-center">
                 <div className="mb-3">
-                  <h4 className="balance-amount mb-1">
-                    {dashboardData.balance.total_balance} TEO
-                  </h4>
+                  <h4 className="balance-amount mb-1">{dashboardData.balance.total_balance} TEO</h4>
                   <small className="text-muted">Saldo Totale</small>
                 </div>
                 <Row className="text-center">
                   <Col>
                     <div className="mb-2">
-                      <div className="h6 text-success mb-0">
-                        {dashboardData.balance.available_balance}
-                      </div>
+                      <div className="h6 text-success mb-0">{dashboardData.balance.available_balance}</div>
                       <small className="text-muted">Disponibile</small>
                     </div>
                   </Col>
                   {parseFloat(dashboardData.balance.pending_withdrawal) > 0 && (
                     <Col>
                       <div className="mb-2">
-                        <div className="h6 text-warning mb-0">
-                          {dashboardData.balance.pending_withdrawal}
-                        </div>
+                        <div className="h6 text-warning mb-0">{dashboardData.balance.pending_withdrawal}</div>
                         <small className="text-muted">In Elaborazione</small>
                       </div>
                     </Col>
                   )}
                 </Row>
                 <div className="mt-3">
-                  <Button 
-                    variant="outline-primary" 
-                    size="sm"
-                    onClick={loadDashboardData}
-                    disabled={loading}
-                    className="w-100"
-                  >
+                  <Button variant="outline-primary" size="sm" onClick={loadDashboardData} disabled={loading} className="w-100">
                     {loading ? (
                       <>
                         <Spinner animation="border" size="sm" className="me-2" />
@@ -371,7 +347,6 @@ const DBStudentTeoCoinDashboard = () => {
           </Card>
         </Col>
       </Row>
-
     </div>
   );
 };

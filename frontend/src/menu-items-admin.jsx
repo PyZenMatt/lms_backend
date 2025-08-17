@@ -245,7 +245,7 @@ const adminMenuItems = {
           action: async () => {
             if (window.confirm('Sei sicuro di voler uscire?')) {
               console.log('🔓 Admin logout initiated');
-              
+
               if (window.__reactLogout) {
                 await window.__reactLogout();
                 console.log('🔓 Admin logout via AuthContext completed');
@@ -267,15 +267,12 @@ const adminMenuItems = {
                   console.error('🔓 Admin logout API error:', error);
                 } finally {
                   // Cleanup completo - stesso array dell'AuthContext
-                  const tokensToRemove = [
-                    'access', 'accessToken', 'refreshToken', 'refresh', 
-                    'token', 'jwt', 'authToken', 'userToken'
-                  ];
-                  tokensToRemove.forEach(tokenKey => localStorage.removeItem(tokenKey));
+                  const tokensToRemove = ['access', 'accessToken', 'refreshToken', 'refresh', 'token', 'jwt', 'authToken', 'userToken'];
+                  tokensToRemove.forEach((tokenKey) => localStorage.removeItem(tokenKey));
                   console.log('🔓 Admin localStorage cleaned');
                 }
               }
-              
+
               // Redirect dopo cleanup
               window.location.href = '/auth/signin-1';
             }

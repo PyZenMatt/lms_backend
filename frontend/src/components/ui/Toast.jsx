@@ -3,7 +3,7 @@ import { Toast, ToastContainer } from 'react-bootstrap';
 
 const CustomToast = ({ show, onClose, variant = 'success', title, message, delay = 5000 }) => {
   const getVariantClasses = (variant) => {
-    switch(variant) {
+    switch (variant) {
       case 'success':
         return { header: 'bg-success text-white', body: 'text-success' };
       case 'error':
@@ -24,16 +24,14 @@ const CustomToast = ({ show, onClose, variant = 'success', title, message, delay
       <Toast show={show} onClose={onClose} delay={delay} autohide>
         <Toast.Header className={variantClasses.header}>
           <strong className="me-auto">
-            {variant === 'success' && '✅'} 
-            {variant === 'error' && '❌'} 
-            {variant === 'warning' && '⚠️'} 
-            {variant === 'info' && 'ℹ️'} 
+            {variant === 'success' && '✅'}
+            {variant === 'error' && '❌'}
+            {variant === 'warning' && '⚠️'}
+            {variant === 'info' && 'ℹ️'}
             {title}
           </strong>
         </Toast.Header>
-        <Toast.Body className={variantClasses.body}>
-          {message}
-        </Toast.Body>
+        <Toast.Body className={variantClasses.body}>{message}</Toast.Body>
       </Toast>
     </ToastContainer>
   );

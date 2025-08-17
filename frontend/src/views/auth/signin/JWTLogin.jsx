@@ -1,4 +1,3 @@
-
 import React, { useEffect } from 'react';
 import { Row, Col, Alert, Button } from 'react-bootstrap';
 import * as Yup from 'yup';
@@ -16,7 +15,7 @@ const JWTLogin = () => {
   useEffect(() => {
     if (!loading && isAuthenticated) {
       // Recupera il ruolo utente dal profilo
-      fetchUserProfile().then(profileRes => {
+      fetchUserProfile().then((profileRes) => {
         const { role } = profileRes.data;
         if (role === 'student' || role === 'user') {
           navigate('/dashboard/student');
@@ -104,8 +103,15 @@ const JWTLogin = () => {
 
           <Row>
             <Col mt={2}>
-              <Button className="btn-block mb-4" color="primary" disabled={isSubmitting || loading} size="large" type="submit" variant="primary">
-                {(isSubmitting || loading) ? 'Accesso in corso...' : 'Accedi'}
+              <Button
+                className="btn-block mb-4"
+                color="primary"
+                disabled={isSubmitting || loading}
+                size="large"
+                type="submit"
+                variant="primary"
+              >
+                {isSubmitting || loading ? 'Accesso in corso...' : 'Accedi'}
               </Button>
             </Col>
           </Row>

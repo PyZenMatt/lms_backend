@@ -15,7 +15,7 @@ const UnifiedTeacherNotifications = () => {
   const parseDiscountNotification = (notification) => {
     try {
       const message = notification.message;
-      
+
       // Extract data from notification message using regex
       const studentMatch = message.match(/Student ([^\s]+)/);
       const discountMatch = message.match(/(\d+)% discount/);
@@ -23,7 +23,7 @@ const UnifiedTeacherNotifications = () => {
       const teoMatch = message.match(/Accept TEO: ([\d.]+) TEO/);
       const eurMatch = message.match(/Keep EUR: €([\d.]+)/);
       const hoursMatch = message.match(/within (\d+) hours/);
-      
+
       return {
         type: 'discount_decision',
         student: studentMatch ? studentMatch[1] : 'Unknown',
@@ -44,7 +44,7 @@ const UnifiedTeacherNotifications = () => {
     try {
       setLoading(true);
       setError(null);
-      
+
       // Get all unread notifications
       const response = await axiosClient.get('/notifications/', {
         params: {
@@ -52,7 +52,7 @@ const UnifiedTeacherNotifications = () => {
           limit: 50
         }
       });
-      
+
       if (response.data && Array.isArray(response.data)) {
         // Process notifications and add parsed data
         const processedNotifications = response.data.map((notification) => {
@@ -62,7 +62,7 @@ const UnifiedTeacherNotifications = () => {
             parsed: isPending ? parseDiscountNotification(notification) : { type: 'regular' }
           };
         });
-        
+
         setNotifications(processedNotifications);
       } else {
         setError('Errore nel caricamento delle notifiche');
@@ -89,7 +89,7 @@ const UnifiedTeacherNotifications = () => {
 
       // Remove from local state
       setNotifications((prev) => prev.filter((notification) => notification.id !== notificationId));
-      
+
       if (window.showToast) {
         window.showToast('✅ Notifica marcata come letta', 'success');
       }
@@ -139,9 +139,9 @@ const UnifiedTeacherNotifications = () => {
       const now = new Date();
       const expiry = new Date(expiresAt);
       const diffMs = expiry - now;
-      
+
       if (diffMs <= 0) return 'Scaduto';
-      
+
       const diffHours = diffMs / (1000 * 60 * 60);
       if (diffHours < 1) return `${Math.round(diffHours * 60)}m rimanenti`;
       return `${Math.round(diffHours)}h rimanenti`;
@@ -160,7 +160,7 @@ const UnifiedTeacherNotifications = () => {
   const renderDiscountNotification = (notification) => {
     const { parsed } = notification;
     const isProcessing = processing[notification.id];
-    
+
     return (
       <Card className="border-0 border-bottom">
         <Card.Body className="p-3">
