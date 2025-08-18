@@ -260,8 +260,8 @@ const TeacherDashboard = () => {
       <div className="container-fluid">
         <div className="row">
           <div className="col-md-12">
-            <div className="card">
-              <div className="card-body">
+            <div className="bg-bg-card text-card-foreground rounded-lg border border-border shadow-sm text-bg-card text-card-foreground rounded-lg border border-border shadow-sm-foreground border border-border rounded-lg shadow-sm">
+              <div className="p-4">
                 <div className="d-flex justify-content-center align-items-center" style={{ minHeight: '400px' }}>
                   <div className="text-center">
                     <div className="spinner-border text-primary" role="status">
@@ -341,7 +341,7 @@ const TeacherDashboard = () => {
                       Gestisci Corsi
                     </Button>
                   )}
-                  <Link to="/profilo" className="btn btn-outline-secondary rounded-pill px-4 py-2">
+                  <Link to="/profilo" className="inline-flex items-center justify-center rounded-md h-9 px-4 py-2 text-sm font-medium bg-primary text-primary-foreground inline-flex items-center justify-center rounded-md h-9 px-4 py-2 text-sm font-medium bg-primary text-primary-foreground-outline-secondary rounded-pill px-4 py-2">
                     <i className="feather icon-settings me-2"></i>
                     Profilo
                   </Link>
@@ -355,7 +355,7 @@ const TeacherDashboard = () => {
         <Row>
           {dashStatsData.map((data, index) => (
             <Col key={index} md={6} xl={4}>
-              <Card className="dashboard-stat-card border-0 shadow-sm h-100">
+              <Card className="dashboard-stat-bg-bg-card text-card-foreground rounded-lg border border-border shadow-sm text-bg-card text-card-foreground rounded-lg border border-border shadow-sm-foreground border border-border rounded-lg shadow-sm border-0 shadow-sm h-100">
                 <Card.Body style={{ background: data.bgGradient }}>
                   <div className="d-flex align-items-center justify-content-between mb-3">
                     <div className="stat-icon">
@@ -406,7 +406,7 @@ const TeacherDashboard = () => {
           <Col md={12}>
             <Card className="border-0 shadow-sm">
               <Card.Header className="bg-transparent border-0 pb-0">
-                <h5 className="card-title mb-0">I tuoi corsi</h5>
+                <h5 className="bg-bg-card text-card-foreground rounded-lg border border-border shadow-sm text-bg-card text-card-foreground rounded-lg border border-border shadow-sm-foreground border border-border rounded-lg shadow-sm-title mb-0">I tuoi corsi</h5>
               </Card.Header>
               <Card.Body>
                 <CoursesTable

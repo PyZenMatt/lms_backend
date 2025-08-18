@@ -10,7 +10,7 @@ import { Card } from '@/components/ui/legacy-shims';
  * @param {number} percentage - Percentuale per la progress bar (0-100)
  * @param {string} progressColor - Classe CSS per il colore della progress bar
  * @param {string} iconColor - Classe CSS per il colore dell'icona (default: text-c-green)
- * @param {object} style - Stili CSS aggiuntivi per la card
+ * @param {object} style - Stili CSS aggiuntivi per la bg-bg-card text-card-foreground rounded-lg border border-border shadow-sm text-bg-card text-card-foreground rounded-lg border border-border shadow-sm-foreground border border-border rounded-lg shadow-sm
  */
 const StatCard = ({ title, value, icon, percentage, progressColor = 'progress-c-theme', iconColor = 'text-c-green', style = {} }) => {
   return (

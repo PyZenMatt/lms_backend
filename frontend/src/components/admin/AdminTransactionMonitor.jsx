@@ -1,3 +1,4 @@
+// TODO: Verifica mapping sottocomponenti Modal
 import React, { useEffect, useState } from 'react';
 import { Row, Col, Card, Table, Badge, Button, Alert, Spinner, Modal } from '@/components/ui/legacy-shims';
 import api from '../../services/core/axiosClient';
@@ -38,9 +39,9 @@ const AdminTransactionMonitor = () => {
     try {
       await api.post(`/admin/transactions/${txId}/retry/`);
       fetchTransactions(); // Refresh
-      alert('Transazione ritentata con successo');
+      border rounded-md p-3 bg-muted text-muted-foreground('Transazione ritentata con successo');
     } catch (error) {
-      alert('Errore nel ritentare la transazione');
+      border rounded-md p-3 bg-muted text-muted-foreground('Errore nel ritentare la transazione');
     }
   };
 
@@ -161,7 +162,7 @@ const AdminTransactionMonitor = () => {
         <Alert variant="warning" className="mb-4">
           <div className="d-flex justify-content-between align-items-center">
             <div>
-              <i className="feather icon-alert-triangle me-2"></i>
+              <i className="feather icon-border rounded-md p-3 bg-muted text-muted-foreground-triangle me-2"></i>
               <strong>Attenzione:</strong> Ci sono {stats.failed_count} transazioni fallite che richiedono intervento.
             </div>
             <Button variant="outline-warning" size="sm" onClick={() => fetchTransactions()}>
@@ -247,7 +248,7 @@ const AdminTransactionMonitor = () => {
                     )}
                   </td>
                   <td>
-                    <div className="btn-group-vertical btn-group-sm">
+                    <div className="inline-flex items-center justify-center rounded-md h-9 px-4 py-2 text-sm font-medium bg-primary text-primary-foreground-group-vertical inline-flex items-center justify-center rounded-md h-9 px-4 py-2 text-sm font-medium bg-primary text-primary-foreground-group-sm">
                       <Button
                         variant="outline-info"
                         size="sm"
@@ -273,7 +274,7 @@ const AdminTransactionMonitor = () => {
       </Card>
 
       {/* Transaction Detail Modal */}
-      <Modal show={showModal} onHide={() => setShowModal(false)} size="lg">
+      <Dialog open={showModal}> setShowModal(false)} size="lg">
         <Modal.Header closeButton>
           <Modal.Title>Dettagli Transazione</Modal.Title>
         </Modal.Header>
@@ -320,7 +321,7 @@ const AdminTransactionMonitor = () => {
             Chiudi
           </Button>
         </Modal.Footer>
-      </Modal>
+      </Dialog>
     </div>
   );
 };

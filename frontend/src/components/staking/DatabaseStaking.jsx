@@ -1,3 +1,4 @@
+// TODO: Verifica mapping sottocomponenti Modal
 /**
  * � Database-Only Staking Component
  *
@@ -157,7 +158,7 @@ const DatabaseStaking = ({ onBalanceUpdate }) => {
   // Show loading state
   if (loading) {
     return (
-      <Card className="database-staking-card">
+      <Card className="database-staking-bg-bg-card text-card-foreground rounded-lg border border-border shadow-sm text-bg-card text-card-foreground rounded-lg border border-border shadow-sm-foreground border border-border rounded-lg shadow-sm">
         <Card.Header className="bg-gradient-primary text-white">
           <h5 className="mb-0">
             <i className="feather icon-database me-2"></i>
@@ -177,10 +178,10 @@ const DatabaseStaking = ({ onBalanceUpdate }) => {
   // Show error state
   if (error && !stakingInfo) {
     return (
-      <Card className="database-staking-card">
+      <Card className="database-staking-bg-bg-card text-card-foreground rounded-lg border border-border shadow-sm text-bg-card text-card-foreground rounded-lg border border-border shadow-sm-foreground border border-border rounded-lg shadow-sm">
         <Card.Header className="bg-gradient-danger text-white">
           <h5 className="mb-0">
-            <i className="feather icon-alert-circle me-2"></i>
+            <i className="feather icon-border rounded-md p-3 bg-muted text-muted-foreground-circle me-2"></i>
             Error Loading Data
           </h5>
         </Card.Header>
@@ -201,7 +202,7 @@ const DatabaseStaking = ({ onBalanceUpdate }) => {
   // If user is not a teacher, show access denied message
   if (!isTeacher) {
     return (
-      <Card className="database-staking-card">
+      <Card className="database-staking-bg-bg-card text-card-foreground rounded-lg border border-border shadow-sm text-bg-card text-card-foreground rounded-lg border border-border shadow-sm-foreground border border-border rounded-lg shadow-sm">
         <Card.Header className="bg-gradient-secondary text-white">
           <h5 className="mb-0">
             <i className="feather icon-lock me-2"></i>
@@ -215,7 +216,7 @@ const DatabaseStaking = ({ onBalanceUpdate }) => {
             Staking is exclusively available for teachers to earn commission benefits. As a student, you can use your TEO for course
             discounts instead.
           </p>
-          <div className="alert alert-info">
+          <div className="border rounded-md p-3 bg-muted text-muted-foreground bg-info/15 border-info text-info-foreground">
             <i className="feather icon-info me-2"></i>
             <strong>For Students:</strong> Use your TEO tokens to get discounts on course purchases!
           </div>
@@ -226,7 +227,7 @@ const DatabaseStaking = ({ onBalanceUpdate }) => {
 
   return (
     <>
-      <Card className="database-staking-card">
+      <Card className="database-staking-bg-bg-card text-card-foreground rounded-lg border border-border shadow-sm text-bg-card text-card-foreground rounded-lg border border-border shadow-sm-foreground border border-border rounded-lg shadow-sm">
         <Card.Header className="bg-gradient-primary text-white">
           <div className="d-flex justify-content-between align-items-center">
             <h5 className="mb-0">
@@ -246,7 +247,7 @@ const DatabaseStaking = ({ onBalanceUpdate }) => {
         <Card.Body>
           {error && (
             <Alert variant="danger" dismissible onClose={() => setError('')}>
-              <i className="feather icon-alert-circle me-2"></i>
+              <i className="feather icon-border rounded-md p-3 bg-muted text-muted-foreground-circle me-2"></i>
               {error}
             </Alert>
           )}
@@ -346,7 +347,7 @@ const DatabaseStaking = ({ onBalanceUpdate }) => {
           )}
 
           {/* Information Box */}
-          <div className="alert alert-info">
+          <div className="border rounded-md p-3 bg-muted text-muted-foreground bg-info/15 border-info text-info-foreground">
             <i className="feather icon-info me-2"></i>
             <strong>Database Staking:</strong> Your TEO is staked virtually within the platform. This affects your commission rates but
             doesn't involve blockchain transactions.
@@ -355,7 +356,7 @@ const DatabaseStaking = ({ onBalanceUpdate }) => {
       </Card>
 
       {/* Stake Modal */}
-      <Modal show={showStakeModal} onHide={() => setShowStakeModal(false)} centered>
+      <Dialog open={showStakeModal}> setShowStakeModal(false)} centered>
         <Modal.Header closeButton>
           <Modal.Title>
             <i className="feather icon-trending-up me-2"></i>
@@ -378,7 +379,7 @@ const DatabaseStaking = ({ onBalanceUpdate }) => {
               <Form.Text className="text-muted">Available: {formatAmount(stakingInfo?.current_balance)} TEO</Form.Text>
             </Form.Group>
 
-            <div className="alert alert-warning">
+            <div className="border rounded-md p-3 bg-muted text-muted-foreground bg-warning/15 border-warning text-warning-foreground">
               <i className="feather icon-info me-2"></i>
               Staking will improve your commission rates and tier status.
             </div>
@@ -402,10 +403,10 @@ const DatabaseStaking = ({ onBalanceUpdate }) => {
             )}
           </Button>
         </Modal.Footer>
-      </Modal>
+      </Dialog>
 
       {/* Unstake Modal */}
-      <Modal show={showUnstakeModal} onHide={() => setShowUnstakeModal(false)} centered>
+      <Dialog open={showUnstakeModal}> setShowUnstakeModal(false)} centered>
         <Modal.Header closeButton>
           <Modal.Title>
             <i className="feather icon-trending-down me-2"></i>
@@ -428,8 +429,8 @@ const DatabaseStaking = ({ onBalanceUpdate }) => {
               <Form.Text className="text-muted">Staked: {formatAmount(stakingInfo?.staked_amount)} TEO</Form.Text>
             </Form.Group>
 
-            <div className="alert alert-warning">
-              <i className="feather icon-alert-triangle me-2"></i>
+            <div className="border rounded-md p-3 bg-muted text-muted-foreground bg-warning/15 border-warning text-warning-foreground">
+              <i className="feather icon-border rounded-md p-3 bg-muted text-muted-foreground-triangle me-2"></i>
               Unstaking may reduce your tier and increase platform commission rates.
             </div>
           </Form>
@@ -452,7 +453,7 @@ const DatabaseStaking = ({ onBalanceUpdate }) => {
             )}
           </Button>
         </Modal.Footer>
-      </Modal>
+      </Dialog>
     </>
   );
 };

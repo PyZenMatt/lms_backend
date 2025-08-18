@@ -23,7 +23,7 @@ const PendingTeachersCard = () => {
       const teachersList = Array.isArray(teachersData) ? teachersData : [];
 
       console.log(`✅ Found ${teachersList.length} pending teachers`);
-      setTeachers(teachersList.slice(0, 5)); // Limit to 5 for dashboard card
+      setTeachers(teachersList.slice(0, 5)); // Limit to 5 for dashboard bg-bg-card text-card-foreground rounded-lg border border-border shadow-sm text-bg-card text-card-foreground rounded-lg border border-border shadow-sm-foreground border border-border rounded-lg shadow-sm
       setError(''); // Clear any previous errors on success
     } catch (err) {
       console.error('❌ Error loading pending teachers:', err);

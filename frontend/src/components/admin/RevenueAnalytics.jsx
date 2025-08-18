@@ -70,7 +70,7 @@ const RevenueAnalytics = () => {
   if (error) {
     return (
       <Alert variant="danger">
-        <i className="feather icon-alert-triangle me-2"></i>
+        <i className="feather icon-border rounded-md p-3 bg-muted text-muted-foreground-triangle me-2"></i>
         {error}
       </Alert>
     );
@@ -276,7 +276,7 @@ const RevenueAnalytics = () => {
                       <tr key={index}>
                         <td>
                           <div className="d-flex align-items-center">
-                            <div className="badge bg-primary me-2">{index + 1}</div>
+                            <div className="inline-flex items-center rounded-md px-2 py-0.5 text-xs font-medium bg-accent text-accent-foreground bg-primary me-2">{index + 1}</div>
                             <strong>{course.title}</strong>
                           </div>
                         </td>
@@ -286,7 +286,7 @@ const RevenueAnalytics = () => {
                           </span>
                         </td>
                         <td>
-                          <span className="badge bg-info">{course.enrollments}</span>
+                          <span className="inline-flex items-center rounded-md px-2 py-0.5 text-xs font-medium bg-accent text-accent-foreground bg-info">{course.enrollments}</span>
                         </td>
                         <td>€{course.price.toLocaleString('it-IT', { minimumFractionDigits: 2 })}</td>
                         <td>

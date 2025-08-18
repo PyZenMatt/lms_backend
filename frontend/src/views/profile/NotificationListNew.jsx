@@ -209,8 +209,8 @@ const NotificationListNew = () => {
 
   if (loading) {
     return (
-      <div className="card">
-        <div className="card-body text-center py-5">
+      <div className="bg-bg-card text-card-foreground rounded-lg border border-border shadow-sm text-bg-card text-card-foreground rounded-lg border border-border shadow-sm-foreground border border-border rounded-lg shadow-sm">
+        <div className="p-4 text-center py-5">
           <div className="spinner-border text-primary" role="status"></div>
           <p className="mt-3 text-muted">Caricamento notifiche...</p>
         </div>
@@ -229,7 +229,7 @@ const NotificationListNew = () => {
               Le tue notifiche
             </h5>
             <div className="d-flex align-items-center">
-              {unreadCount > 0 && <span className="badge bg-primary me-3">{unreadCount} non lette</span>}
+              {unreadCount > 0 && <span className="inline-flex items-center rounded-md px-2 py-0.5 text-xs font-medium bg-accent text-accent-foreground bg-primary me-3">{unreadCount} non lette</span>}
             </div>
           </div>
         </Card.Header>
@@ -271,7 +271,7 @@ const NotificationListNew = () => {
       <Card>
         <Card.Header>
           <div className="d-flex justify-content-between align-items-center">
-            <div className="btn-group">
+            <div className="inline-flex items-center justify-center rounded-md h-9 px-4 py-2 text-sm font-medium bg-primary text-primary-foreground-group">
               <Button variant={filter === 'all' ? 'primary' : 'outline-primary'} onClick={() => setFilter('all')}>
                 Tutte
               </Button>
@@ -297,8 +297,8 @@ const NotificationListNew = () => {
         </Card.Header>
         <Card.Body>
           {error && (
-            <div className="alert alert-danger" role="alert">
-              <i className="feather icon-alert-circle me-2"></i>
+            <div className="border rounded-md p-3 bg-muted text-muted-foreground bg-destructive/15 border-destructive text-destructive-foreground" role="border rounded-md p-3 bg-muted text-muted-foreground">
+              <i className="feather icon-border rounded-md p-3 bg-muted text-muted-foreground-circle me-2"></i>
               {error}
             </div>
           )}

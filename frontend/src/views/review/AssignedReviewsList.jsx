@@ -30,7 +30,7 @@ const AssignedReviewsList = () => {
   return (
     <div className="container mt-4">
       <h2>Esercizi da valutare</h2>
-      <Link to="/dashboard/student" className="btn btn-secondary mb-3">
+      <Link to="/dashboard/student" className="inline-flex items-center justify-center rounded-md h-9 px-4 py-2 text-sm font-medium bg-primary text-primary-foreground bg-secondary text-secondary-foreground mb-3">
         &larr; Torna alla dashboard
       </Link>
       {assigned.length === 0 ? (

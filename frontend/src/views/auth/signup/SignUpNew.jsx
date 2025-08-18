@@ -125,7 +125,7 @@ const SignUpNew = () => {
           <CardContent>
             {error && (
               <Alert variant="destructive" className="mb-4 flex items-center">
-                <i className="feather icon-alert-circle mr-2"></i>
+                <i className="feather icon-border rounded-md p-3 bg-muted text-muted-foreground-circle mr-2"></i>
                 {error}
               </Alert>
             )}

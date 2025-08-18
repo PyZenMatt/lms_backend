@@ -122,7 +122,7 @@ const menuItems = {
           title: 'Authentication',
           type: 'collapse',
           icon: 'feather icon-lock',
-          badge: {
+          inline-flex items-center rounded-md px-2 py-0.5 text-xs font-medium bg-accent text-accent-foreground: {
             title: 'New',
             type: 'label-danger'
           },

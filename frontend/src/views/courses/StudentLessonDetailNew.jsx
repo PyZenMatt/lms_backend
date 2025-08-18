@@ -105,7 +105,7 @@ const StudentLessonDetailNew = () => {
         <Row className="justify-content-center">
           <Col md={8}>
             <Alert variant="warning" className="text-center">
-              <i className="feather icon-alert-triangle mr-2"></i>
+              <i className="feather icon-border rounded-md p-3 bg-muted text-muted-foreground-triangle mr-2"></i>
               Lezione non trovata
             </Alert>
           </Col>
@@ -165,7 +165,7 @@ const StudentLessonDetailNew = () => {
                           ? '/dashboard/teacher'
                           : '/dashboard/student'
                   }
-                  className="btn btn-outline-primary d-flex align-items-center"
+                  className="inline-flex items-center justify-center rounded-md h-9 px-4 py-2 text-sm font-medium bg-primary text-primary-foreground inline-flex items-center justify-center rounded-md h-9 px-4 py-2 text-sm font-medium bg-primary text-primary-foreground-outline-primary d-flex align-items-center"
                 >
                   <i className="feather icon-arrow-left mr-2"></i>
                   {lesson?.course_id
@@ -259,9 +259,9 @@ const StudentLessonDetailNew = () => {
                     {exercises.map((ex) => (
                       <Card key={ex.id} className="border">
                         <Card.Body className="p-3">
-                          <h6 className="card-title mb-2">{ex.title}</h6>
-                          <p className="card-text text-muted mb-3 small">{ex.description}</p>
-                          <Link to={`/esercizi/${ex.id}`} className="btn btn-sm btn-primary w-100">
+                          <h6 className="bg-bg-card text-card-foreground rounded-lg border border-border shadow-sm text-bg-card text-card-foreground rounded-lg border border-border shadow-sm-foreground border border-border rounded-lg shadow-sm-title mb-2">{ex.title}</h6>
+                          <p className="bg-bg-card text-card-foreground rounded-lg border border-border shadow-sm text-bg-card text-card-foreground rounded-lg border border-border shadow-sm-foreground border border-border rounded-lg shadow-sm-text text-muted mb-3 small">{ex.description}</p>
+                          <Link to={`/esercizi/${ex.id}`} className="inline-flex items-center justify-center rounded-md h-9 px-4 py-2 text-sm font-medium bg-primary text-primary-foreground inline-flex items-center justify-center rounded-md h-9 px-4 py-2 text-sm font-medium bg-primary text-primary-foreground-sm bg-primary text-primary-foreground w-100">
                             <i className="feather icon-arrow-right mr-1"></i>
                             Vai all'esercizio
                           </Link>

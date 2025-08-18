@@ -173,7 +173,7 @@ const UserProfileNew = () => {
         <Row className="justify-content-center">
           <Col md={8}>
             <Alert variant="danger" className="text-center">
-              <i className="feather icon-alert-circle me-2"></i>
+              <i className="feather icon-border rounded-md p-3 bg-muted text-muted-foreground-circle me-2"></i>
               {error}
             </Alert>
           </Col>
@@ -254,7 +254,7 @@ const UserProfileNew = () => {
         <Row className="mb-4">
           <Col md={12}>
             <Alert variant="danger">
-              <i className="feather icon-alert-circle me-2"></i>
+              <i className="feather icon-border rounded-md p-3 bg-muted text-muted-foreground-circle me-2"></i>
               {error}
             </Alert>
           </Col>
@@ -425,7 +425,7 @@ const UserProfileNew = () => {
               <Row>
                 <Col md={12}>
                   <div className="d-flex justify-content-between align-items-center">
-                    <Link to={getDashboardLink()} className="btn btn-outline-secondary d-flex align-items-center">
+                    <Link to={getDashboardLink()} className="inline-flex items-center justify-center rounded-md h-9 px-4 py-2 text-sm font-medium bg-primary text-primary-foreground inline-flex items-center justify-center rounded-md h-9 px-4 py-2 text-sm font-medium bg-primary text-primary-foreground-outline-secondary d-flex align-items-center">
                       <i className="feather icon-arrow-left me-2"></i>
                       Torna alla dashboard
                     </Link>

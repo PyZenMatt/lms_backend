@@ -1,6 +1,6 @@
 import { useState } from "react"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/card"
-import { Badge } from "./ui/badge"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/bg-card text-card-foreground rounded-lg border border-border shadow-sm"
+import { Badge } from "./ui/inline-flex items-center rounded-md px-2 py-0.5 text-xs bg-accent text-accent-foreground"
 import { Button } from "./ui/button"
 import { Avatar, AvatarFallback } from "./ui/avatar"
 import { Textarea } from "./ui/textarea"

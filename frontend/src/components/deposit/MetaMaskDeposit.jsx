@@ -20,12 +20,12 @@ const MetaMaskDeposit = ({ onDepositComplete }) => {
   };
 
   return (
-    <Card className="metamask-deposit-card">
+    <Card className="metamask-deposit-bg-bg-card text-card-foreground rounded-lg border border-border shadow-sm text-bg-card text-card-foreground rounded-lg border border-border shadow-sm-foreground border border-border rounded-lg shadow-sm">
       <Card.Header className="bg-gradient-warning text-white">
         <h5 className="mb-0">
           <i className="fab fa-ethereum me-2"></i>
           Deposit TEO from MetaMask
-          <span className="badge bg-light text-dark ms-2">MetaMask → Platform</span>
+          <span className="inline-flex items-center rounded-md px-2 py-0.5 text-xs font-medium bg-accent text-accent-foreground bg-light text-dark ms-2">MetaMask → Platform</span>
         </h5>
       </Card.Header>
 

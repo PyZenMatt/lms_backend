@@ -150,7 +150,7 @@ const ProfileWalletDisplay = ({
   };
 
   return (
-    <Card className="wallet-status-card">
+    <Card className="wallet-status-bg-bg-card text-card-foreground rounded-lg border border-border shadow-sm text-bg-card text-card-foreground rounded-lg border border-border shadow-sm-foreground border border-border rounded-lg shadow-sm">
       <Card.Body>
         <Card.Title>
           <i className="feather icon-wallet me-2"></i>

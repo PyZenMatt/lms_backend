@@ -19,7 +19,7 @@ const StatCard = memo(({ stat }) => (
 
 const FeatureCard = memo(({ feature }) => (
   <Col lg={4} md={6} className="mb-4">
-    <Card className={`border-top-${feature.colorClass} border-top-3 card-hover-shadow h-100`}>
+    <Card className={`border-top-${feature.colorClass} border-top-3 bg-bg-card text-card-foreground rounded-lg border border-border shadow-sm text-bg-card text-card-foreground rounded-lg border border-border shadow-sm-foreground border border-border rounded-lg shadow-sm-hover-shadow h-100`}>
       <Card.Body className="p-4">
         <div className="d-flex align-items-center mb-3">
           <div className={`bg-${feature.colorClass} text-white rounded p-3 me-3`}>
@@ -150,9 +150,8 @@ const LandingPage = () => {
                 </h1>
 
                 <p className="lead mb-4">
-                  <strong>Rivoluzione nell'educazione artistica!</strong> La prima scuola che unisce arte tradizionale e tecnologia Web3.
-                  Crea NFT, guadagna <span className="text-primary">TeoCoins reali</span>e partecipa alla Community DAO più innovativa del
-                  settore.
+                  <strong>Rivoluzione nell'educazione artistica!</strong> La prima scuola che unisce arte tradizionale e tecnologia Web3. Crea
+                  NFT, guadagna <span className="text-primary">TeoCoins reali</span> e partecipa alla Community DAO più innovativa del settore.
                 </p>
 
                 <div className="d-flex flex-wrap gap-2 mb-4">
@@ -175,11 +174,11 @@ const LandingPage = () => {
                 </div>
 
                 <div className="d-flex flex-wrap gap-3">
-                  <Link to="/auth/signup-1" className="btn btn-primary btn-lg shadow-lg">
+                  <Link to="/auth/signup-1" className="inline-flex items-center justify-center rounded-md h-9 px-4 py-2 text-sm font-medium bg-primary text-primary-foreground shadow-lg">
                     <i className="feather icon-rocket me-2"></i>
                     Inizia l'Avventura Web3
                   </Link>
-                  <Link to="/auth/signin-1" className="btn btn-light btn-lg">
+                  <Link to="/auth/signin-1" className="inline-flex items-center justify-center rounded-md h-9 px-4 py-2 text-sm font-medium inline-flex items-center justify-center rounded-md px-4 py-2 text-sm font-medium-outline-light">
                     <i className="feather icon-log-in me-2"></i>
                     Accedi alla Piattaforma
                   </Link>
@@ -191,7 +190,7 @@ const LandingPage = () => {
               <div className="hero-cards">
                 {/* Floating Cards - Styled like cards in SchoolPlatform theme */}
                 <Card
-                  className="shadow-lg position-absolute card-nft"
+                  className="shadow-lg position-absolute bg-bg-card text-card-foreground rounded-lg border border-border shadow-sm text-bg-card text-card-foreground rounded-lg border border-border shadow-sm-foreground border border-border rounded-lg shadow-sm-nft"
                   style={{
                     top: '10%',
                     right: '15%',
@@ -219,7 +218,7 @@ const LandingPage = () => {
                 </Card>
 
                 <Card
-                  className="shadow-lg position-absolute card-course"
+                  className="shadow-lg position-absolute bg-bg-card text-card-foreground rounded-lg border border-border shadow-sm text-bg-card text-card-foreground rounded-lg border border-border shadow-sm-foreground border border-border rounded-lg shadow-sm-course"
                   style={{
                     top: '35%',
                     left: '5%',
@@ -254,7 +253,7 @@ const LandingPage = () => {
                 </Card>
 
                 <Card
-                  className="shadow-lg position-absolute card-dao"
+                  className="shadow-lg position-absolute bg-bg-card text-card-foreground rounded-lg border border-border shadow-sm text-bg-card text-card-foreground rounded-lg border border-border shadow-sm-foreground border border-border rounded-lg shadow-sm-dao"
                   style={{
                     bottom: '10%',
                     right: '10%',
@@ -409,11 +408,11 @@ const LandingPage = () => {
                 Unisciti a migliaia di artisti che stanno già guadagnando nel Web3. La tua creatività ha finalmente un valore reale.
               </p>
               <div className="d-flex flex-wrap justify-content-center gap-3">
-                <Link to="/auth/signup-1" className="btn btn-light btn-lg">
+                <Link to="/auth/signup-1" className="inline-flex items-center justify-center rounded-md h-9 px-4 py-2 text-sm font-medium bg-white text-primary">
                   <i className="feather icon-rocket me-2"></i>
                   Inizia Gratis Ora
                 </Link>
-                <Link to="/sample-page" className="btn btn-outline-light btn-lg">
+                <Link to="/sample-page" className="inline-flex items-center justify-center rounded-md h-9 px-4 py-2 text-sm font-medium inline-flex items-center justify-center rounded-md px-4 py-2 text-sm font-medium-outline-light">
                   <i className="feather icon-info me-2"></i>
                   Scopri di Più
                 </Link>
@@ -440,16 +439,16 @@ const LandingPage = () => {
               </h3>
               <p className="mb-4">La prima scuola d'arte Web3 al mondo. Dove creatività e tecnologia si incontrano.</p>
               <div className="social-links mb-4">
-                <a href="#" className="btn btn-outline-light btn-icon rounded-circle mx-1">
+                <a href="#" className="inline-flex items-center justify-center rounded-md px-4 py-2 text-sm font-medium bg-primary text-primary-foreground hover:opacity-90 rounded-circle mx-1">
                   <i className="feather icon-twitter"></i>
                 </a>
-                <a href="#" className="btn btn-outline-light btn-icon rounded-circle mx-1">
+                <a href="#" className="inline-flex items-center justify-center rounded-md px-4 py-2 text-sm font-medium bg-primary text-primary-foreground hover:opacity-90 rounded-circle mx-1">
                   <i className="feather icon-instagram"></i>
                 </a>
-                <a href="#" className="btn btn-outline-light btn-icon rounded-circle mx-1">
+                <a href="#" className="inline-flex items-center justify-center rounded-md px-4 py-2 text-sm font-medium bg-primary text-primary-foreground hover:opacity-90 rounded-circle mx-1">
                   <i className="feather icon-github"></i>
                 </a>
-                <a href="#" className="btn btn-outline-light btn-icon rounded-circle mx-1">
+                <a href="#" className="inline-flex items-center justify-center rounded-md px-4 py-2 text-sm font-medium bg-primary text-primary-foreground hover:opacity-90 rounded-circle mx-1">
                   <i className="feather icon-globe"></i>
                 </a>
               </div>

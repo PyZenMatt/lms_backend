@@ -57,7 +57,7 @@ const AdminExerciseDetail = () => {
     <div className="admin-exercise-container">
       <div className="admin-exercise-content">
         {/* Admin Badge */}
-        <div className="admin-badge">
+        <div className="admin-inline-flex items-center rounded-md px-2 py-0.5 text-xs font-medium bg-accent text-accent-foreground">
           <i className="fas fa-crown"></i>
           Visualizzazione Amministratore
         </div>
@@ -111,7 +111,7 @@ const AdminExerciseDetail = () => {
 
         {/* Navigation */}
         <div className="admin-action-buttons">
-          <Link to="/dashboard/admin" className="btn-admin-secondary">
+          <Link to="/dashboard/admin" className="inline-flex items-center justify-center rounded-md h-9 px-4 py-2 text-sm font-medium bg-primary text-primary-foreground-admin-secondary">
             <i className="fas fa-arrow-left"></i>
             Torna alla dashboard admin
           </Link>

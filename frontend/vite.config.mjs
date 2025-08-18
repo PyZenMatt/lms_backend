@@ -22,8 +22,7 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': path.resolve(__dirname, 'src'),
-      'bootstrap/dist/css/bootstrap.min.css': path.resolve(__dirname, 'src/styles/empty.css'),
-      'react-bootstrap': path.resolve(__dirname, 'src/styles/empty-module.js')
+  // Legacy bootstrap/react-bootstrap aliases rimossi dopo cutover V2
     }
   },
   css: {

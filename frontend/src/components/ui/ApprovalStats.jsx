@@ -98,8 +98,8 @@ const ApprovalStats = React.memo(() => {
       <div className="row g-3">
         {[1, 2, 3, 4].map((i) => (
           <div key={i} className="col-xl-3 col-lg-6 col-md-6 col-sm-6">
-            <div className="card">
-              <div className="card-body text-center py-4">
+            <div className="bg-bg-card text-card-foreground rounded-lg border border-border shadow-sm text-bg-card text-card-foreground rounded-lg border border-border shadow-sm-foreground border border-border rounded-lg shadow-sm">
+              <div className="p-4 text-center py-4">
                 <div className="spinner-border text-primary" role="status">
                   <span className="visually-hidden">Loading...</span>
                 </div>
@@ -113,8 +113,8 @@ const ApprovalStats = React.memo(() => {
 
   if (stats.error) {
     return (
-      <div className="alert alert-danger">
-        <i className="feather icon-alert-circle me-2"></i>
+      <div className="border rounded-md p-3 bg-muted text-muted-foreground bg-destructive/15 border-destructive text-destructive-foreground">
+        <i className="feather icon-border rounded-md p-3 bg-muted text-muted-foreground-circle me-2"></i>
         {stats.error}
       </div>
     );

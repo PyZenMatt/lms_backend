@@ -8,9 +8,9 @@ const getStatusInfo = (submission) => {
   if (submission.reviewed) {
     const score = submission.average_score ? Math.round(submission.average_score * 10) / 10 : submission.average_score;
     const scoreClass = score >= 8 ? 'success' : score >= 6 ? 'warning' : 'danger';
-    const icon = score >= 8 ? 'check-circle' : score >= 6 ? 'alert-circle' : 'x-circle';
+    const icon = score >= 8 ? 'check-circle' : score >= 6 ? 'border rounded-md p-3 bg-muted text-muted-foreground-circle' : 'x-circle';
     return {
-      badge: (
+      node: (
         <Badge bg={scoreClass}>
           <i className={`feather icon-${icon} me-1`}></i>Valutato: {score}
         </Badge>
@@ -20,7 +20,7 @@ const getStatusInfo = (submission) => {
     };
   }
   return {
-    badge: (
+    node: (
       <Badge bg="info" text="dark">
         <i className="feather icon-clock me-1"></i>In Review
       </Badge>
@@ -98,12 +98,12 @@ const StudentSubmissions = () => {
               return (
                 <Col xs={12} key={submission.id}>
                   <Card
-                    className={`submission-card h-100 ${isClickable ? 'submission-clickable' : ''}`}
+                    className={`submission-bg-card text-card-foreground rounded-lg border border-border shadow-sm h-100 ${isClickable ? 'submission-clickable' : ''}`}
                     onClick={() => handleSubmissionClick(submission)}
                     style={{
                       cursor: isClickable ? 'pointer' : 'default',
                       transition: 'all 0.2s ease',
-                      border: isClickable ? '1px solid var(--border)' : '1px solid var(--card)'
+                      border: isClickable ? '1px solid var(--border)' : '1px solid var(--bg-card text-card-foreground rounded-lg border border-border shadow-sm-border, var(--border))'
                     }}
                   >
                     <Card.Body className="p-3">
@@ -156,7 +156,7 @@ const StudentSubmissions = () => {
                         {/* Status Badge */}
                         <Col xs="auto">
                           <div className="submission-status">
-                            {statusInfo.badge}
+                            {statusInfo.node}
                             {isClickable && (
                               <div className="mt-2">
                                 <small className="text-muted">

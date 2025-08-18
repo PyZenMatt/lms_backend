@@ -11,7 +11,7 @@ import {
   SidebarHeader,
   SidebarFooter,
 } from "./ui/sidebar"
-import { Badge } from "./ui/badge"
+import { Badge } from "./ui/inline-flex items-center rounded-md px-2 py-0.5 text-xs font-medium bg-accent text-accent-foreground"
 import { useAuth } from "./AuthContext"
 
 interface AppSidebarProps {

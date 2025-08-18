@@ -1,3 +1,4 @@
+// TODO: Verifica mapping sottocomponenti Modal
 /**
  * 🌙 Dark Theme Feature Showcase
  *
@@ -201,7 +202,7 @@ const DarkThemeShowcase = () => {
                     <Row>
                       <Col md={6} className="mb-3">
                         <Alert variant="primary">
-                          <strong>Primary Alert:</strong> This is a primary alert showing theme adaptation.
+                          <strong>Primary Alert:</strong> This is a primary border rounded-md p-3 bg-muted text-muted-foreground showing theme adaptation.
                         </Alert>
                         <Alert variant="success">
                           <strong>Success Alert:</strong> Action completed successfully.
@@ -269,7 +270,7 @@ const DarkThemeShowcase = () => {
       </Row>
 
       {/* Feature Details Modal */}
-      <Modal show={showModal} onHide={() => setShowModal(false)} size="lg">
+      <Dialog open={showModal}> setShowModal(false)} size="lg">
         <Modal.Header closeButton>
           <Modal.Title>🌙 Dark Theme Technical Details</Modal.Title>
         </Modal.Header>
@@ -302,7 +303,7 @@ const DarkThemeShowcase = () => {
             Close
           </Button>
         </Modal.Footer>
-      </Modal>
+      </Dialog>
     </Container>
   );
 };

@@ -1,3 +1,4 @@
+// TODO: Verifica mapping sottocomponenti Modal
 import React, { useState, useRef, useEffect } from 'react';
 import { Modal, Button, Form, Alert, Spinner, Card, Row, Col, Badge, InputGroup } from '@/components/ui/legacy-shims';
 import { createLesson } from '../../services/api/courses';
@@ -182,7 +183,7 @@ const LessonCreateModal = ({ show, onHide, onCreated, courseId }) => {
 
   return (
     <>
-      <Modal show={show} onHide={handleClose} size="lg">
+      <Dialog open={show} onOpenChange={handleClose}>
         <Modal.Header closeButton className="border-0 pb-0">
           <Modal.Title className="d-flex align-items-center">
             <span className="me-2">📖</span>
@@ -271,7 +272,7 @@ const LessonCreateModal = ({ show, onHide, onCreated, courseId }) => {
                             <Badge
                               bg={lessonType === type.value ? type.color : 'light'}
                               text={lessonType === type.value ? 'white' : 'dark'}
-                              className="mb-2 lesson-modal-badge"
+                              className="mb-2 lesson-modal-inline-flex items-center rounded-md px-2 py-0.5 text-xs font-medium bg-accent text-accent-foreground"
                             >
                               {type.label}
                             </Badge>
@@ -345,7 +346,7 @@ const LessonCreateModal = ({ show, onHide, onCreated, courseId }) => {
                         Il tuo browser non supporta il tag video.
                       </video>
                       <div className="video-overlay">
-                        <Button variant="danger" size="sm" onClick={removeVideo} className="remove-video-btn">
+                        <Button variant="danger" size="sm" onClick={removeVideo} className="remove-video-inline-flex items-center justify-center rounded-md h-9 px-4 py-2 text-sm font-medium bg-primary text-primary-foreground">
                           <i className="bi bi-trash"></i>
                         </Button>
                       </div>
@@ -394,7 +395,7 @@ const LessonCreateModal = ({ show, onHide, onCreated, courseId }) => {
             </Button>
           </Modal.Footer>
         </Form>
-      </Modal>
+      </Dialog>
 
       <CustomToast
         show={showToast}

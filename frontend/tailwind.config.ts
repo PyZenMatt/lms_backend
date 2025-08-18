@@ -8,7 +8,7 @@ const config: Config = {
     "./src/**/*.{ts,tsx,js,jsx,html}"
   ],
   darkMode: ["class", '[data-theme="dark"]'],
-  important: true, // <— temporaneo: le utility diventano !important
+  // important flag rimosso dopo cutover V2 per ridurre specificità globale
   theme: {
     extend: {
       colors: {

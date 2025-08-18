@@ -38,13 +38,14 @@ const LessonForm: React.FC<{ onSubmit: (data: any) => void }> = ({ onSubmit }) =
   </form>
 );
 
+// Legacy Modal placeholder removed (Bootstrap class removed)
 const Modal: React.FC<{ open: boolean; onClose: () => void; children: React.ReactNode }> = ({ open, onClose, children }) =>
   open ? (
-    <div className="modal">
-      <button type="button" onClick={onClose}>
-        Chiudi
-      </button>
-      {children}
+    <div className="fixed inset-0 flex items-center justify-center bg-background/80">
+      <div className="bg-card text-card-foreground rounded-lg border border-border shadow-sm p-4">
+        <button type="button" onClick={onClose} className="text-sm mb-2">Chiudi</button>
+        {children}
+      </div>
     </div>
   ) : null;
 
@@ -74,8 +75,8 @@ export default function LessonsListPage() {
 
   return (
     <div>
-      <div className="d-flex justify-content-between align-items-center mb-3">
-        <h3 className="mb-0" data-testid="page-title">
+      <div className="flex items-center justify-between mb-4">
+        <h3 className="m-0" data-testid="page-title">
           Lezioni
         </h3>
         <button type="button" onClick={onCreate}>
@@ -93,22 +94,28 @@ export default function LessonsListPage() {
         onDelete={onDelete}
       />
 
-      <Modal open={isOpen} onClose={() => setIsOpen(false)}>
-        <h5 className="mb-3">Nuova lezione</h5>
-        <LessonForm
-          onSubmit={async (data) => {
-            setServerError(null);
-            try {
-              await actions.create(data);
-              setIsOpen(false);
-              // opzionale: query.refetch();
-            } catch (e) {
-              setServerError(getUserSafeMessage(e));
-            }
-          }}
-        />
-        {serverError && <p className="text-danger mt-2">{serverError}</p>}
-      </Modal>
+      {isOpen && (
+        <div className="fixed inset-0 bg-background/80 backdrop-blur-sm flex items-center justify-center">
+          <div className="bg-card text-card-foreground rounded-lg border border-border shadow-sm p-6 w-full max-w-md">
+            <div className="flex items-center justify-between mb-4">
+              <h5 className="text-lg font-semibold">Nuova lezione</h5>
+              <button type="button" onClick={() => setIsOpen(false)} className="text-muted-foreground hover:text-foreground">✕</button>
+            </div>
+            <LessonForm
+              onSubmit={async (data) => {
+                setServerError(null);
+                try {
+                  await actions.create(data);
+                  setIsOpen(false);
+                } catch (e) {
+                  setServerError(getUserSafeMessage(e));
+                }
+              }}
+            />
+            {serverError && <p className="text-destructive mt-2 text-sm">{serverError}</p>}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

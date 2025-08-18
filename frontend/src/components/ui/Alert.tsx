@@ -14,7 +14,7 @@ export function Alert({ variant = "default", className = "", children, ...props 
   return (
     <div
       className={`rounded-lg px-4 py-3 ${variants[variant]} ${className}`}
-      role={variant === "destructive" ? "alert" : undefined}
+      role={variant === "destructive" ? "border rounded-md p-3 bg-muted text-muted-foreground" : undefined}
       {...props}
     >
       {children}

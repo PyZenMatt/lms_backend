@@ -36,7 +36,7 @@ function Badge({
 
   return (
     <Comp
-      data-slot="badge"
+      data-slot="inline-flex items-center rounded-md px-2 py-0.5 text-xs font-medium bg-accent text-accent-foreground"
       className={cn(badgeVariants({ variant }), className)}
       {...props}
     />

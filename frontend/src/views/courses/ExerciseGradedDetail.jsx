@@ -56,7 +56,7 @@ const ExerciseGradedDetail = () => {
     return (
       <div className="container mt-4">
         <Alert variant="danger">{error}</Alert>
-        <Link to="/dashboard-studente" className="btn btn-secondary">
+        <Link to="/dashboard-studente" className="inline-flex items-center justify-center rounded-md h-9 px-4 py-2 text-sm font-medium bg-primary text-primary-foreground bg-secondary text-secondary-foreground">
           Torna alla Dashboard
         </Link>
       </div>
@@ -66,7 +66,7 @@ const ExerciseGradedDetail = () => {
     return (
       <div className="container mt-4">
         <Alert variant="warning">Submission non trovata.</Alert>
-        <Link to="/dashboard-studente" className="btn btn-secondary">
+        <Link to="/dashboard-studente" className="inline-flex items-center justify-center rounded-md h-9 px-4 py-2 text-sm font-medium bg-primary text-primary-foreground bg-secondary text-secondary-foreground">
           Torna alla Dashboard
         </Link>
       </div>
@@ -134,7 +134,7 @@ const ExerciseGradedDetail = () => {
                   <Row>
                     {submission.reviews.map((review, index) => (
                       <Col md={6} key={index} className="mb-3">
-                        <Card className="review-card h-100">
+                        <Card className="review-bg-bg-card text-card-foreground rounded-lg border border-border shadow-sm text-bg-card text-card-foreground rounded-lg border border-border shadow-sm-foreground border border-border rounded-lg shadow-sm h-100">
                           <Card.Body>
                             <div className="d-flex justify-content-between align-items-center mb-2">
                               <strong>Valutatore #{index + 1}</strong>
@@ -229,12 +229,12 @@ const ExerciseGradedDetail = () => {
               <Card.Body>
                 <div className="d-grid gap-2">
                   {submission.exercise?.id && (
-                    <Link to={`/esercizi/${submission.exercise.id}`} className="btn btn-outline-primary">
+                    <Link to={`/esercizi/${submission.exercise.id}`} className="inline-flex items-center justify-center rounded-md h-9 px-4 py-2 text-sm font-medium bg-primary text-primary-foreground inline-flex items-center justify-center rounded-md h-9 px-4 py-2 text-sm font-medium bg-primary text-primary-foreground-outline-primary">
                       <i className="fas fa-eye me-2"></i>
                       Vedi Esercizio
                     </Link>
                   )}
-                  <Link to="/dashboard-studente" className="btn btn-secondary">
+                  <Link to="/dashboard-studente" className="inline-flex items-center justify-center rounded-md h-9 px-4 py-2 text-sm font-medium bg-primary text-primary-foreground bg-secondary text-secondary-foreground">
                     <i className="fas fa-arrow-left me-2"></i>
                     Torna alla Dashboard
                   </Link>

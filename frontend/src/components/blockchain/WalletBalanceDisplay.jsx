@@ -71,7 +71,7 @@ const WalletBalanceDisplay = ({ balance = null, loading: externalLoading = false
 
   if (!user?.wallet_address) {
     return (
-      <Card className="wallet-balance-card">
+      <Card className="wallet-balance-bg-bg-card text-card-foreground rounded-lg border border-border shadow-sm text-bg-card text-card-foreground rounded-lg border border-border shadow-sm-foreground border border-border rounded-lg shadow-sm">
         <Card.Body className="text-center">
           <i className="feather icon-wallet text-muted mb-3" style={{ fontSize: '2rem' }}></i>
           <h6 className="text-muted">Nessun Wallet Collegato</h6>
@@ -82,7 +82,7 @@ const WalletBalanceDisplay = ({ balance = null, loading: externalLoading = false
   }
 
   return (
-    <Card className="wallet-balance-card">
+    <Card className="wallet-balance-bg-bg-card text-card-foreground rounded-lg border border-border shadow-sm text-bg-card text-card-foreground rounded-lg border border-border shadow-sm-foreground border border-border rounded-lg shadow-sm">
       <Card.Body>
         <div className="d-flex justify-content-between align-items-center mb-3">
           <h6 className="mb-0">

@@ -185,7 +185,7 @@ const TeacherCourseDetail = () => {
                           <div className="d-flex align-items-center justify-content-between">
                             <div className="d-flex align-items-center">
                               <div className="lesson-number me-3">
-                                <span className="badge bg-success rounded-circle">{index + 1}</span>
+                                <span className="inline-flex items-center rounded-md px-2 py-0.5 text-xs font-medium bg-accent text-accent-foreground bg-success rounded-circle">{index + 1}</span>
                               </div>
                               <div>
                                 <h6 className="mb-1">{lesson.title}</h6>
@@ -195,7 +195,7 @@ const TeacherCourseDetail = () => {
                               </div>
                             </div>
                             <div className="lesson-actions">
-                              <Link to={`/lezioni-docente/${lesson.id}`} className="btn btn-outline-primary btn-sm me-2">
+                              <Link to={`/lezioni-docente/${lesson.id}`} className="inline-flex items-center justify-center rounded-md h-9 px-4 py-2 text-sm font-medium bg-primary text-primary-foreground inline-flex items-center justify-center rounded-md h-9 px-4 py-2 text-sm font-medium bg-primary text-primary-foreground-outline-primary inline-flex items-center justify-center rounded-md h-9 px-4 py-2 text-sm font-medium bg-primary text-primary-foreground-sm me-2">
                                 <i className="feather icon-eye me-1"></i>
                                 Visualizza
                               </Link>

@@ -64,7 +64,7 @@ const DBAdminTeoCoinDashboard = ({ onWithdrawalClick }) => {
 
   if (loading) {
     return (
-      <Card className="admin-teocoin-dashboard-card">
+      <Card className="admin-teocoin-dashboard-bg-bg-card text-card-foreground rounded-lg border border-border shadow-sm text-bg-card text-card-foreground rounded-lg border border-border shadow-sm-foreground border border-border rounded-lg shadow-sm">
         <Card.Body className="text-center">
           <Spinner animation="border" variant="primary" />
           <p className="mt-2">Caricamento dashboard amministratore...</p>
@@ -81,7 +81,7 @@ const DBAdminTeoCoinDashboard = ({ onWithdrawalClick }) => {
           {error}
         </Alert>
       )}
-      <button className="btn btn-primary mb-3" onClick={loadDashboardData} disabled={loading}>
+      <button className="inline-flex items-center justify-center rounded-md h-9 px-4 py-2 text-sm font-medium bg-primary text-primary-foreground bg-primary text-primary-foreground mb-3" onClick={loadDashboardData} disabled={loading}>
         {loading ? 'Aggiornamento...' : 'Aggiorna'}
       </button>
       <PendingWithdrawals />

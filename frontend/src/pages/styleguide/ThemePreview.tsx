@@ -20,8 +20,8 @@ export default function ThemePreview() {
       <section className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
         <Swatch name="background" className="bg-background" />
         <Swatch name="foreground" className="bg-foreground" />
-        <Swatch name="card" className="bg-card" />
-        <Swatch name="card-foreground" className="bg-card-foreground" />
+        <Swatch name="bg-bg-card text-card-foreground rounded-lg border border-border shadow-sm text-bg-card text-card-foreground rounded-lg border border-border shadow-sm-foreground border border-border rounded-lg shadow-sm" className="bg-bg-bg-card text-card-foreground rounded-lg border border-border shadow-sm text-bg-card text-card-foreground rounded-lg border border-border shadow-sm-foreground border border-border rounded-lg shadow-sm" />
+        <Swatch name="bg-bg-card text-card-foreground rounded-lg border border-border shadow-sm text-bg-card text-card-foreground rounded-lg border border-border shadow-sm-foreground border border-border rounded-lg shadow-sm-foreground" className="bg-bg-bg-card text-card-foreground rounded-lg border border-border shadow-sm text-bg-card text-card-foreground rounded-lg border border-border shadow-sm-foreground border border-border rounded-lg shadow-sm-foreground" />
         <Swatch name="popover" className="bg-popover" />
         <Swatch name="popover-foreground" className="bg-popover-foreground" />
         <Swatch name="primary" className="bg-primary" />
@@ -40,10 +40,10 @@ export default function ThemePreview() {
       </section>
 
       <section className="grid gap-4">
-        <div className="rounded-lg bg-card text-card-foreground shadow p-4">
+        <div className="rounded-lg bg-bg-bg-card text-card-foreground rounded-lg border border-border shadow-sm text-bg-card text-card-foreground rounded-lg border border-border shadow-sm-foreground border border-border rounded-lg shadow-sm text-bg-bg-card text-card-foreground rounded-lg border border-border shadow-sm text-bg-card text-card-foreground rounded-lg border border-border shadow-sm-foreground border border-border rounded-lg shadow-sm-foreground shadow p-4">
           <h2 className="font-semibold mb-2">Card example</h2>
           <p className="text-sm">
-            Questo blocco usa <code>bg-card</code>/<code>text-card-foreground</code> e
+            Questo blocco usa <code>bg-bg-bg-card text-card-foreground rounded-lg border border-border shadow-sm text-bg-card text-card-foreground rounded-lg border border-border shadow-sm-foreground border border-border rounded-lg shadow-sm</code>/<code>text-bg-bg-card text-card-foreground rounded-lg border border-border shadow-sm text-bg-card text-card-foreground rounded-lg border border-border shadow-sm-foreground border border-border rounded-lg shadow-sm-foreground</code> e
             ombre da token.
           </p>
           <button className="mt-3 inline-flex items-center rounded-md px-3 py-2 bg-primary text-primary-foreground shadow hover:opacity-90">
@@ -76,7 +76,7 @@ function ThemeToggle() {
 
   return (
     <button
-      className="rounded-md border border-border bg-card text-card-foreground px-3 py-1"
+      className="rounded-md border border-border bg-bg-bg-card text-card-foreground rounded-lg border border-border shadow-sm text-bg-card text-card-foreground rounded-lg border border-border shadow-sm-foreground border border-border rounded-lg shadow-sm text-bg-bg-card text-card-foreground rounded-lg border border-border shadow-sm text-bg-card text-card-foreground rounded-lg border border-border shadow-sm-foreground border border-border rounded-lg shadow-sm-foreground px-3 py-1"
       onClick={() => setTheme(theme === "light" ? "dark" : "light")}
     >
       {theme === "light" ? "Switch to Dark" : "Switch to Light"}

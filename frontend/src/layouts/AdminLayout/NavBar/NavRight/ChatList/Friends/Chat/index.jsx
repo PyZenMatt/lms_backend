@@ -50,11 +50,11 @@ const Chat = ({ user, chatOpen, listOpen, closed }) => {
         </div>
         <div className="h-list-footer">
           <InputGroup>
-            <Button variant="success" className="btn-attach">
+            <Button variant="success" className="inline-flex items-center justify-center rounded-md h-9 px-4 py-2 text-sm font-medium bg-primary text-primary-foreground-attach">
               <i className="feather icon-paperclip" />
             </Button>
             <FormControl type="text" name="h-chat-text" className="h-send-chat" placeholder="Write hear . . " />
-            <Button type="submit" className="input-group-append btn-send">
+            <Button type="submit" className="input-group-append inline-flex items-center justify-center rounded-md h-9 px-4 py-2 text-sm font-medium bg-primary text-primary-foreground-send">
               <i className="feather icon-message-circle" />
             </Button>
           </InputGroup>

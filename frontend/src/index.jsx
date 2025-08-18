@@ -6,9 +6,13 @@ import { AuthProvider } from './contexts/AuthContext';
 import { Web3Provider } from './contexts/Web3Context';
 import { NotificationProvider } from './contexts/NotificationContext';
 
+// Ensure theme attribute is present before any component logic (SSR-friendly if added server side)
+document.documentElement.setAttribute('data-theme', 'v2');
+
+// Base token layer (old tokens) then override with V2 semantic layer
 import './styles/tokens.css';
+import './styles/figma-raw/v2.css'; // Theme V2 override
 // import './index.scss'; // legacy bootstrap/scss bundle removed during UI V2 cutover
-import './styles/figma-raw/v2.css'; // Theme V2 override (now global)
 import App from './App';
 import reportWebVitals from './reportWebVitals';
 

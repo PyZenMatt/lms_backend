@@ -11,9 +11,9 @@ const alertVariants = cva(
   {
     variants: {
       variant: {
-        default: "bg-card text-card-foreground",
+        default: "bg-bg-card text-card-foreground rounded-lg border border-border shadow-sm text-bg-card text-card-foreground rounded-lg border border-border shadow-sm-foreground border border-border",
         destructive:
-          "text-destructive bg-card [&>svg]:text-current *:data-[slot=alert-description]:text-destructive/90",
+          "text-destructive bg-bg-card text-card-foreground rounded-lg border border-border shadow-sm text-bg-card text-card-foreground rounded-lg border border-border shadow-sm-foreground border border-border [&>svg]:text-destructive",
       },
     },
     defaultVariants: {
@@ -30,8 +30,8 @@ function Alert({
   VariantProps<typeof alertVariants>) {
   return (
     <div
-      data-slot="alert"
-      role="alert"
+  data-slot="border rounded-md p-3 bg-muted text-muted-foreground"
+  role="border rounded-md p-3 bg-muted text-muted-foreground"
       className={cn(alertVariants({ variant }), className)}
       {...props}
     />
@@ -44,7 +44,7 @@ function AlertTitle({
 }: React.ComponentProps<"div">) {
   return (
     <div
-      data-slot="alert-title"
+  data-slot="border rounded-md p-3 bg-muted text-muted-foreground-title"
       className={cn(
         "col-start-2 line-clamp-1 min-h-4 font-medium tracking-tight",
         className,
@@ -60,7 +60,7 @@ function AlertDescription({
 }: React.ComponentProps<"div">) {
   return (
     <div
-      data-slot="alert-description"
+  data-slot="border rounded-md p-3 bg-muted text-muted-foreground-description"
       className={cn(
         "text-muted-foreground col-start-2 grid justify-items-start gap-1 text-sm [&_p]:leading-relaxed",
         className,

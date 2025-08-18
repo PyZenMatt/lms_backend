@@ -177,11 +177,11 @@ const ProfileProgress = () => {
     return (
       <div className="enhanced-profile-container">
         <div className="enhanced-error-container">
-          <div className="enhanced-alert enhanced-alert-danger">
-            <i className="feather icon-alert-circle"></i>
+          <div className="enhanced-border rounded-md p-3 bg-muted text-muted-foreground enhanced-bg-destructive/15 border-destructive text-destructive-foreground">
+            <i className="feather icon-border rounded-md p-3 bg-muted text-muted-foreground-circle"></i>
             <span>{error}</span>
           </div>
-          <button className="enhanced-btn enhanced-btn-primary" onClick={loadProgressData}>
+          <button className="enhanced-inline-flex items-center justify-center rounded-md h-9 px-4 py-2 text-sm font-medium bg-primary text-primary-foreground enhanced-bg-primary text-primary-foreground" onClick={loadProgressData}>
             <i className="feather icon-refresh-cw"></i>
             <span>Riprova</span>
           </button>
@@ -237,7 +237,7 @@ const ProfileProgress = () => {
       <div className="container">
         {/* Overall Stats */}
         <div className="enhanced-progress-overview">
-          <div className="enhanced-stat-card enhanced-stat-primary">
+          <div className="enhanced-stat-bg-bg-card text-card-foreground rounded-lg border border-border shadow-sm text-bg-card text-card-foreground rounded-lg border border-border shadow-sm-foreground border border-border rounded-lg shadow-sm enhanced-stat-primary">
             <div className="enhanced-stat-icon">
               <i className="feather icon-book-open"></i>
             </div>
@@ -247,7 +247,7 @@ const ProfileProgress = () => {
             </div>
           </div>
 
-          <div className="enhanced-stat-card enhanced-stat-success">
+          <div className="enhanced-stat-bg-bg-card text-card-foreground rounded-lg border border-border shadow-sm text-bg-card text-card-foreground rounded-lg border border-border shadow-sm-foreground border border-border rounded-lg shadow-sm enhanced-stat-success">
             <div className="enhanced-stat-icon">
               <i className="feather icon-dollar-sign"></i>
             </div>
@@ -257,7 +257,7 @@ const ProfileProgress = () => {
             </div>
           </div>
 
-          <div className="enhanced-stat-card enhanced-stat-info">
+          <div className="enhanced-stat-bg-bg-card text-card-foreground rounded-lg border border-border shadow-sm text-bg-card text-card-foreground rounded-lg border border-border shadow-sm-foreground border border-border rounded-lg shadow-sm enhanced-stat-info">
             <div className="enhanced-stat-icon">
               <i className="feather icon-clock"></i>
             </div>
@@ -267,7 +267,7 @@ const ProfileProgress = () => {
             </div>
           </div>
 
-          <div className="enhanced-stat-card enhanced-stat-warning">
+          <div className="enhanced-stat-bg-bg-card text-card-foreground rounded-lg border border-border shadow-sm text-bg-card text-card-foreground rounded-lg border border-border shadow-sm-foreground border border-border rounded-lg shadow-sm enhanced-stat-warning">
             <div className="enhanced-stat-icon">
               <i className="feather icon-target"></i>
             </div>
@@ -287,25 +287,25 @@ const ProfileProgress = () => {
             </h3>
             <div className="enhanced-progress-filters">
               <button
-                className={`enhanced-filter-btn ${selectedCategory === 'all' ? 'active' : ''}`}
+                className={`enhanced-filter-inline-flex items-center justify-center rounded-md h-9 px-4 py-2 text-sm font-medium bg-primary text-primary-foreground ${selectedCategory === 'all' ? 'active' : ''}`}
                 onClick={() => setSelectedCategory('all')}
               >
                 Tutte
               </button>
               <button
-                className={`enhanced-filter-btn ${selectedCategory === 'completed' ? 'active' : ''}`}
+                className={`enhanced-filter-inline-flex items-center justify-center rounded-md h-9 px-4 py-2 text-sm font-medium bg-primary text-primary-foreground ${selectedCategory === 'completed' ? 'active' : ''}`}
                 onClick={() => setSelectedCategory('completed')}
               >
                 Completate
               </button>
               <button
-                className={`enhanced-filter-btn ${selectedCategory === 'in-progress' ? 'active' : ''}`}
+                className={`enhanced-filter-inline-flex items-center justify-center rounded-md h-9 px-4 py-2 text-sm font-medium bg-primary text-primary-foreground ${selectedCategory === 'in-progress' ? 'active' : ''}`}
                 onClick={() => setSelectedCategory('in-progress')}
               >
                 In Corso
               </button>
               <button
-                className={`enhanced-filter-btn ${selectedCategory === 'not-started' ? 'active' : ''}`}
+                className={`enhanced-filter-inline-flex items-center justify-center rounded-md h-9 px-4 py-2 text-sm font-medium bg-primary text-primary-foreground ${selectedCategory === 'not-started' ? 'active' : ''}`}
                 onClick={() => setSelectedCategory('not-started')}
               >
                 Da Iniziare
@@ -315,7 +315,7 @@ const ProfileProgress = () => {
 
           <div className="enhanced-category-grid">
             {filteredCategories.map((category) => (
-              <div key={category.id} className="enhanced-category-card">
+              <div key={category.id} className="enhanced-category-bg-bg-card text-card-foreground rounded-lg border border-border shadow-sm text-bg-card text-card-foreground rounded-lg border border-border shadow-sm-foreground border border-border rounded-lg shadow-sm">
                 <div className="enhanced-category-header">
                   <div className="enhanced-category-icon" style={{ backgroundColor: category.color }}>
                     <i className={`feather icon-${category.icon}`}></i>
@@ -347,7 +347,7 @@ const ProfileProgress = () => {
 
           <div className="enhanced-achievements-grid">
             {progressData.achievements.map((achievement) => (
-              <div key={achievement.id} className={`enhanced-achievement-card ${achievement.earned ? 'earned' : 'locked'}`}>
+              <div key={achievement.id} className={`enhanced-achievement-bg-bg-card text-card-foreground rounded-lg border border-border shadow-sm text-bg-card text-card-foreground rounded-lg border border-border shadow-sm-foreground border border-border rounded-lg shadow-sm ${achievement.earned ? 'earned' : 'locked'}`}>
                 <div className="enhanced-achievement-icon" style={{ backgroundColor: achievement.color }}>
                   <i className={`feather icon-${achievement.icon}`}></i>
                 </div>
@@ -367,7 +367,7 @@ const ProfileProgress = () => {
                   )}
                 </div>
                 {achievement.earned && (
-                  <div className="enhanced-achievement-badge">
+                  <div className="enhanced-achievement-inline-flex items-center rounded-md px-2 py-0.5 text-xs font-medium bg-accent text-accent-foreground">
                     <i className="feather icon-star"></i>
                   </div>
                 )}

@@ -42,7 +42,7 @@ const NavSearch = (props) => {
             onKeyDown={searchOnHandler}
             role="button"
             tabIndex="0"
-            className="input-group-append search-btn btn btn-primary"
+            className="input-group-append search-inline-flex items-center justify-center rounded-md h-9 px-4 py-2 text-sm font-medium bg-primary text-primary-foreground inline-flex items-center justify-center rounded-md h-9 px-4 py-2 text-sm font-medium bg-primary text-primary-foreground bg-primary text-primary-foreground"
             onClick={searchOnHandler}
             style={{ borderRadius: '50%', marginLeft: 5 }}
           >

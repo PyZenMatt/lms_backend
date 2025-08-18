@@ -157,7 +157,7 @@ const CoursesTable = ({
   return (
     <div className="courses-grid-modern">
       {showCreateCourse && (
-        <Card className="create-course-card mb-4 border-0 shadow-sm">
+        <Card className="create-course-bg-bg-card text-card-foreground rounded-lg border border-border shadow-sm text-bg-card text-card-foreground rounded-lg border border-border shadow-sm-foreground border border-border rounded-lg shadow-sm mb-4 border-0 shadow-sm">
           <Card.Body
             className="text-center py-5"
             style={{
@@ -203,7 +203,7 @@ const CoursesTable = ({
 
           return (
             <Col lg={6} xl={4} key={course.id} className="mb-4">
-              <Card className="course-card h-100 border-0 shadow-sm">
+              <Card className="course-bg-bg-card text-card-foreground rounded-lg border border-border shadow-sm text-bg-card text-card-foreground rounded-lg border border-border shadow-sm-foreground border border-border rounded-lg shadow-sm h-100 border-0 shadow-sm">
                 {/* Course Image/Header */}
                 <div className="course-image-container position-relative">
                   {course.image ? (
@@ -221,7 +221,7 @@ const CoursesTable = ({
 
                   <div className="position-absolute top-0 start-0 m-3">
                     <Badge
-                      className="category-badge px-3 py-2"
+                      className="category-inline-flex items-center rounded-md px-2 py-0.5 text-xs font-medium bg-accent text-accent-foreground px-3 py-2"
                       style={{
                         background: `${getCategoryColor(course.category)}dd`,
                         color: 'white',
@@ -234,7 +234,7 @@ const CoursesTable = ({
 
                   <div className="position-absolute top-0 end-0 m-3">
                     <Button
-                      className="expand-btn"
+                      className="expand-inline-flex items-center justify-center rounded-md h-9 px-4 py-2 text-sm font-medium bg-primary text-primary-foreground"
                       size="sm"
                       onClick={() => onExpandCourse && onExpandCourse(isExpanded ? null : course.id)}
                     >
@@ -248,12 +248,12 @@ const CoursesTable = ({
                     <div className="flex-grow-1">
                       <h6 className="course-title mb-2">{course.title}</h6>
                       <div className="d-flex align-items-center gap-2 mb-2">
-                        <Badge variant={getBadgeVariant(course.status)} className="course-type-badge" style={{ borderRadius: '10px' }}>
+                        <Badge variant={getBadgeVariant(course.status)} className="course-type-inline-flex items-center rounded-md px-2 py-0.5 text-xs font-medium bg-accent text-accent-foreground" style={{ borderRadius: '10px' }}>
                           {course.status || 'Draft'}
                         </Badge>
                         <button
                           type="button"
-                          className="btn p-0 text-muted lessons-badge border-0 bg-transparent"
+                          className="inline-flex items-center justify-center rounded-md h-9 px-4 py-2 text-sm font-medium bg-primary text-primary-foreground p-0 text-muted lessons-inline-flex items-center rounded-md px-2 py-0.5 text-xs font-medium bg-accent text-accent-foreground border-0 bg-transparent"
                           onClick={() => handleViewLessons(course.id)}
                           style={{
                             cursor: 'pointer',
@@ -262,7 +262,7 @@ const CoursesTable = ({
                             fontSize: '0.875rem'
                           }}
                           onMouseEnter={(e) => {
-                            e.target.style.backgroundColor = 'var(--card)';
+                            e.target.style.backgroundColor = 'var(--bg-bg-card text-card-foreground rounded-lg border border-border shadow-sm text-bg-card text-card-foreground rounded-lg border border-border shadow-sm-foreground border border-border rounded-lg shadow-sm)';
                             e.target.style.color = 'var(--primary)';
                           }}
                           onMouseLeave={(e) => {
@@ -323,14 +323,14 @@ const CoursesTable = ({
                           style={{
                             cursor: 'pointer',
                             transition: 'all 0.2s ease',
-                            backgroundColor: 'var(--card)'
+                            backgroundColor: 'var(--bg-bg-card text-card-foreground rounded-lg border border-border shadow-sm text-bg-card text-card-foreground rounded-lg border border-border shadow-sm-foreground border border-border rounded-lg shadow-sm)'
                           }}
                           onMouseEnter={(e) => {
                             e.target.style.backgroundColor = 'color-mix(in srgb, var(--primary) 8%, white)';
                             e.target.style.transform = 'scale(1.02)';
                           }}
                           onMouseLeave={(e) => {
-                            e.target.style.backgroundColor = 'var(--card)';
+                            e.target.style.backgroundColor = 'var(--bg-bg-card text-card-foreground rounded-lg border border-border shadow-sm text-bg-card text-card-foreground rounded-lg border border-border shadow-sm-foreground border border-border rounded-lg shadow-sm)';
                             e.target.style.transform = 'scale(1)';
                           }}
                           title={`Clicca per vedere le ${course.lessons?.length || 0} lezioni`}
@@ -397,11 +397,11 @@ const CoursesTable = ({
                       {course.lessons && course.lessons.length > 0 ? (
                         <div className="lessons-grid">
                           {course.lessons.map((lesson, lessonIndex) => (
-                            <Card key={lesson.id} className="lesson-card mb-3 border-0 shadow-sm">
+                            <Card key={lesson.id} className="lesson-bg-bg-card text-card-foreground rounded-lg border border-border shadow-sm text-bg-card text-card-foreground rounded-lg border border-border shadow-sm-foreground border border-border rounded-lg shadow-sm mb-3 border-0 shadow-sm">
                               <Card.Body className="p-3">
                                 <button
                                   type="button"
-                                  className="lesson-header cursor-pointer btn-reset"
+                                  className="lesson-header cursor-pointer inline-flex items-center justify-center rounded-md h-9 px-4 py-2 text-sm font-medium bg-primary text-primary-foreground-reset"
                                   onClick={() => handleToggleLesson(lesson.id)}
                                   style={{ background: 'none', border: 'none', padding: 0, width: '100%', textAlign: 'left' }}
                                 >

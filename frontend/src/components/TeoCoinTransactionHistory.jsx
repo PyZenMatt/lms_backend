@@ -76,15 +76,14 @@ const TeoCoinTransactionHistory = ({ limit = 5 }) => {
 
   const getTransactionBadge = (type) => {
     const badges = {
-      reward: { variant: 'success', text: 'Reward' },
-      discount: { variant: 'primary', text: 'Discount' },
-      withdrawal: { variant: 'warning', text: 'Withdrawal' },
-      deposit: { variant: 'info', text: 'Deposit' },
-      default: { variant: 'secondary', text: type || 'Transaction' }
+      reward: { class: 'bg-success text-success-foreground', text: 'Reward' },
+      discount: { class: 'bg-primary text-primary-foreground', text: 'Discount' },
+      withdrawal: { class: 'bg-warning text-warning-foreground', text: 'Withdrawal' },
+      deposit: { class: 'bg-info text-info-foreground', text: 'Deposit' },
+      default: { class: 'bg-muted text-muted-foreground', text: type || 'Transaction' }
     };
-
-    const badge = badges[type] || badges.default;
-    return <Badge bg={badge.variant}>{badge.text}</Badge>;
+  const badgeData = badges[type] || badges.default;
+  return <span className={`inline-flex items-center rounded-md px-2 py-0.5 text-xs font-medium ${badgeData.class}`}>{badgeData.text}</span>;
   };
 
   return (
@@ -98,7 +97,7 @@ const TeoCoinTransactionHistory = ({ limit = 5 }) => {
       <Card.Body>
         {error && (
           <Alert variant="danger" className="mb-3">
-            <i className="feather icon-alert-circle me-2"></i>
+            <i className="feather icon-border rounded-md p-3 bg-muted text-muted-foreground-circle me-2"></i>
             {error}
           </Alert>
         )}

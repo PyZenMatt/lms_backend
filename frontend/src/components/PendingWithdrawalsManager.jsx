@@ -1,3 +1,4 @@
+// TODO: Verifica mapping sottocomponenti Modal
 import React, { useState, useEffect } from 'react';
 import { Card, Table, Button, Badge, Alert, Modal, Spinner } from '@/components/ui/legacy-shims';
 
@@ -119,14 +120,14 @@ const PendingWithdrawalsManager = ({ onWithdrawalCancelled }) => {
         <Card.Body>
           {error && (
             <Alert variant="danger" className="mb-3">
-              <i className="feather icon-alert-circle me-2"></i>
+              <i className="feather icon-border rounded-md p-3 bg-muted text-muted-foreground-circle me-2"></i>
               {error}
             </Alert>
           )}
 
           {pendingWithdrawals.length >= 3 && (
             <Alert variant="warning" className="mb-3">
-              <i className="feather icon-alert-triangle me-2"></i>
+              <i className="feather icon-border rounded-md p-3 bg-muted text-muted-foreground-triangle me-2"></i>
               <strong>Withdrawal limit reached!</strong> Cancel some pending withdrawals to create new ones.
             </Alert>
           )}
@@ -180,7 +181,7 @@ const PendingWithdrawalsManager = ({ onWithdrawalCancelled }) => {
       </Card>
 
       {/* Cancel Confirmation Modal */}
-      <Modal show={showCancelModal} onHide={() => setShowCancelModal(false)}>
+      <Dialog open={showCancelModal}> setShowCancelModal(false)}>
         <Modal.Header closeButton>
           <Modal.Title>Cancel Withdrawal</Modal.Title>
         </Modal.Header>
@@ -224,7 +225,7 @@ const PendingWithdrawalsManager = ({ onWithdrawalCancelled }) => {
             Cancel Withdrawal
           </Button>
         </Modal.Footer>
-      </Modal>
+      </Dialog>
     </>
   );
 };

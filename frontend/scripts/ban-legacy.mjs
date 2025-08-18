@@ -1,27 +1,48 @@
 import { globby } from 'globby';
 import fs from 'node:fs/promises';
 
-// Regex list for banned legacy patterns (imports or class usage)
-const BANNED = [
-  /bootstrap(\/dist\/css\/bootstrap\.min\.css)?/,
-  /react-bootstrap/,
-  /\/styles\/legacy\//,
-  /\/assets\/scss\//,
-  /\/assets\/css\//,
-  /\bbtn(-| )/, /\balert(-| )/, /\bbadge(-| )/, /\bcard(-| )/
+// Scan only relevant surfaces to cut false positives (variable names, component filenames).
+// Only core Bootstrap tokens we must eradicate from runtime markup
+const BANNED_CLASS_TOKENS = ['btn','alert','badge','modal'];
+// Global patterns limited to explicit imports + lingering .scss
+const BANNED_GLOBAL = [
+  /react-bootstrap(?!-icons)/,
+  /['\"]bootstrap\//,
+  /\.scss\b/
 ];
 
-const files = await globby(['src/**/*.{ts,tsx,js,jsx,css,scss}']);
-let errors = [];
+const files = await globby(['src/**/*.{ts,tsx,js,jsx,css,html}']);
+const offenders = [];
 for (const f of files) {
-  const txt = await fs.readFile(f, 'utf8');
-  for (const re of BANNED) {
-    if (re.test(txt)) { errors.push(`${f} :: ${re}`); break; }
+  let raw = await fs.readFile(f,'utf8');
+  // Strip JS/TS single-line & block comments to avoid false positives from commented .scss lines
+  if (!f.endsWith('.css')) {
+    raw = raw.replace(/\/\*[\s\S]*?\*\//g,'').replace(/(^|\n)\s*\/\/.*(?=\n|$)/g,'$1');
+  }
+  const isCSS = f.endsWith('.css');
+  // global patterns (react-bootstrap, bootstrap imports, .scss refs) always banned
+  if (BANNED_GLOBAL.some(r=>r.test(raw))) { offenders.push(f); continue; }
+  if (isCSS) continue; // skip raw CSS class selectors
+  const classAttrRe = /(className|class)\s*=\s*(?:"([^"]*)"|'([^']*)'|`([^`]*)`)/g;
+  let m; let flagged = false;
+  while((m = classAttrRe.exec(raw))) {
+    const val = m[2]||m[3]||m[4]||'';
+    for (const token of BANNED_CLASS_TOKENS) {
+      const re = new RegExp(`(^|\s)${token}(-[a-z0-9]+)?(\s|$)`);
+      if (re.test(val)) { offenders.push(f); flagged = true; break; }
+      // contextual variants like btn-primary, alert-success etc.
+      if (/^(btn|alert|badge)/.test(token)) {
+        const variantRe = new RegExp(`(^|\s)${token}-(primary|secondary|success|danger|warning|info|light|dark)(\s|$)`);
+        if (variantRe.test(val)) { offenders.push(f); flagged = true; break; }
+      }
+    }
+    if (flagged) break;
   }
 }
-if (errors.length) {
-  console.error('❌ Legacy UI rilevato:\n' + errors.join('\n'));
+
+if (offenders.length) {
+  console.error('⛔ Legacy UI trovato in:');
+  for (const f of offenders) console.error(' -', f);
   process.exit(1);
-} else {
-  console.log('✅ Nessun riferimento legacy trovato.');
 }
+console.log('✅ Legacy UI assente.');

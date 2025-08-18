@@ -1,3 +1,4 @@
+// TODO: Verifica mapping sottocomponenti Modal
 import React, { useState, useEffect } from 'react';
 import { Modal, Form, Button, Alert, Spinner, Row, Col } from '@/components/ui/legacy-shims';
 import PropTypes from 'prop-types';
@@ -144,7 +145,7 @@ const CourseEditModal = ({ show, onHide, courseId, onCourseUpdated }) => {
   ];
 
   return (
-    <Modal show={show} onHide={onHide} size="lg">
+    <Dialog open={show} onOpenChange={onHide}>
       <Modal.Header closeButton>
         <Modal.Title>
           <i className="feather icon-edit me-2"></i>
@@ -162,7 +163,7 @@ const CourseEditModal = ({ show, onHide, courseId, onCourseUpdated }) => {
           <Form onSubmit={handleSubmit}>
             {error && (
               <Alert variant="danger" className="mb-3">
-                <i className="feather icon-alert-circle me-2"></i>
+                <i className="feather icon-border rounded-md p-3 bg-muted text-muted-foreground-circle me-2"></i>
                 {error}
               </Alert>
             )}
@@ -307,7 +308,7 @@ const CourseEditModal = ({ show, onHide, courseId, onCourseUpdated }) => {
           )}
         </Button>
       </Modal.Footer>
-    </Modal>
+    </Dialog>
   );
 };
 

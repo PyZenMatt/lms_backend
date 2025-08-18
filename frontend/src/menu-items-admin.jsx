@@ -28,7 +28,7 @@ const adminMenuItems = {
           title: 'Docenti in Attesa',
           type: 'item',
           icon: 'feather icon-user-check',
-          badge: {
+          inline-flex items-center rounded-md px-2 py-0.5 text-xs font-medium bg-accent text-accent-foreground: {
             title: 'PENDING',
             type: 'label-warning'
           },
@@ -39,7 +39,7 @@ const adminMenuItems = {
           title: 'Corsi in Attesa',
           type: 'item',
           icon: 'feather icon-book',
-          badge: {
+          inline-flex items-center rounded-md px-2 py-0.5 text-xs font-medium bg-accent text-accent-foreground: {
             title: 'REVIEW',
             type: 'label-info'
           },
@@ -144,7 +144,7 @@ const adminMenuItems = {
           title: 'Gestione TeoCoin',
           type: 'item',
           icon: 'feather icon-dollar-sign',
-          badge: {
+          inline-flex items-center rounded-md px-2 py-0.5 text-xs font-medium bg-accent text-accent-foreground: {
             title: 'CRYPTO',
             type: 'label-success'
           },

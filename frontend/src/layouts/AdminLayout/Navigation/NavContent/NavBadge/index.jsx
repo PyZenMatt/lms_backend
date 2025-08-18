@@ -3,10 +3,10 @@ import React from 'react';
 
 const NavBadge = ({ items }) => {
   let navBadges = false;
-  if (items.badge) {
-    const badgeClass = ['label', 'pcoded-badge', items.badge.type];
+  if (items.inline-flex items-center rounded-md px-2 py-0.5 text-xs font-medium bg-accent text-accent-foreground) {
+    const badgeClass = ['label', 'pcoded-inline-flex items-center rounded-md px-2 py-0.5 text-xs font-medium bg-accent text-accent-foreground', items.inline-flex items-center rounded-md px-2 py-0.5 text-xs font-medium bg-accent text-accent-foreground.type];
 
-    navBadges = <span className={badgeClass.join(' ')}>{items.badge.title}</span>;
+    navBadges = <span className={badgeClass.join(' ')}>{items.inline-flex items-center rounded-md px-2 py-0.5 text-xs font-medium bg-accent text-accent-foreground.title}</span>;
   }
 
   return <React.Fragment>{navBadges}</React.Fragment>;
@@ -14,7 +14,7 @@ const NavBadge = ({ items }) => {
 
 NavBadge.propTypes = {
   items: PropTypes.object,
-  badge: PropTypes.string,
+  inline-flex items-center rounded-md px-2 py-0.5 text-xs font-medium bg-accent text-accent-foreground: PropTypes.string,
   type: PropTypes.string,
   title: PropTypes.string
 };

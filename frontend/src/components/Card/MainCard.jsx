@@ -1,5 +1,6 @@
 import PropTypes from 'prop-types';
 import React, { useState } from 'react';
+// TODO: Replace legacy-shims usage with native UI primitives (Dropdown, Card, Collapse) once equivalents exist.
 import { Dropdown, Card, Collapse } from '@/components/ui/legacy-shims';
 import { Link } from 'react-router-dom';
 
@@ -27,17 +28,17 @@ const MainCard = (props) => {
   };
 
   let fullScreenStyle, loader, cardHeaderRight, cardHeader;
-  let card = '';
+  let cardMarkup = '';
   let mainCardClass = [];
 
   if (isOption) {
     cardHeaderRight = (
-      <div className={'card-header-right ' + optionClass}>
-        <Dropdown align="end" className="btn-group card-option">
-          <Dropdown.Toggle id="dropdown-basic" className="btn-icon">
+      <div className={'px-4 py-2 border-b border-border-right ' + optionClass}>
+        <Dropdown align="end" className="inline-flex items-center justify-center rounded-md h-9 px-4 py-2 text-sm font-medium bg-primary text-primary-foreground-group bg-bg-card text-card-foreground rounded-lg border border-border shadow-sm text-bg-card text-card-foreground rounded-lg border border-border shadow-sm-foreground border border-border rounded-lg shadow-sm-option">
+          <Dropdown.Toggle id="dropdown-basic" className="inline-flex items-center justify-center rounded-md h-9 px-4 py-2 text-sm font-medium bg-primary text-primary-foreground-icon">
             <i className="feather icon-more-horizontal" />
           </Dropdown.Toggle>
-          <Dropdown.Menu as="ul" className="list-unstyled card-option">
+          <Dropdown.Menu as="ul" className="list-unstyled bg-bg-card text-card-foreground rounded-lg border border-border shadow-sm text-bg-card text-card-foreground rounded-lg border border-border shadow-sm-foreground border border-border rounded-lg shadow-sm-option">
             <Dropdown.Item as="li" className="dropdown-item" onClick={() => setFullCard(!fullCard)}>
               <i className={fullCard ? 'feather icon-minimize' : 'feather icon-maximize'} />
               <Link to="#"> {fullCard ? 'Restore' : 'Maximize'} </Link>
@@ -68,14 +69,14 @@ const MainCard = (props) => {
   );
 
   if (fullCard) {
-    mainCardClass = [...mainCardClass, 'full-card'];
+  mainCardClass = [...mainCardClass, 'full-bg-card text-card-foreground rounded-lg border border-border shadow-sm shadow-lg'];
     fullScreenStyle = { position: 'fixed', top: 0, left: 0, right: 0, width: windowSize.width, height: windowSize.height };
   }
 
   if (loadCard) {
-    mainCardClass = [...mainCardClass, 'card-load'];
+  mainCardClass = [...mainCardClass, 'bg-card text-card-foreground rounded-lg border border-border shadow-sm-loading'];
     loader = (
-      <div className="card-loader">
+  <div className="bg-card text-card-foreground rounded-lg border border-border shadow-sm-loader">
         <i className="pct-loader1 anim-rotate" />
       </div>
     );
@@ -89,7 +90,7 @@ const MainCard = (props) => {
     mainCardClass = [...mainCardClass, cardClass];
   }
 
-  card = (
+  cardMarkup = (
     <Card className={mainCardClass.join(' ')} style={fullScreenStyle}>
       {cardHeader}
       <Collapse in={!collapseCard}>
@@ -101,7 +102,7 @@ const MainCard = (props) => {
     </Card>
   );
 
-  return <React.Fragment>{card}</React.Fragment>;
+  return <>{cardMarkup}</>;
 };
 
 MainCard.propTypes = {

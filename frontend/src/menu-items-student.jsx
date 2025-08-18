@@ -34,7 +34,7 @@ const studentMenuItems = {
           id: 'transactions',
           title: 'Transazioni',
           type: 'item',
-          icon: 'feather icon-credit-card',
+          icon: 'feather icon-credit-bg-bg-card text-card-foreground rounded-lg border border-border shadow-sm text-bg-card text-card-foreground rounded-lg border border-border shadow-sm-foreground border border-border rounded-lg shadow-sm',
           action: dashboardScrollActions.student.transactions
         },
         {
@@ -71,13 +71,13 @@ const studentMenuItems = {
           title: 'Wallet Web3',
           type: 'item',
           icon: 'feather icon-shield',
-          badge: {
+          inline-flex items-center rounded-md px-2 py-0.5 text-xs font-medium bg-accent text-accent-foreground: {
             title: 'NEW',
             type: 'label-success'
           },
           action: () => {
             // Apri modale wallet o naviga a pagina wallet
-            alert('Funzionalità Wallet Web3 in arrivo!');
+            border rounded-md p-3 bg-muted text-muted-foreground('Funzionalità Wallet Web3 in arrivo!');
           }
         }
       ]
@@ -115,7 +115,7 @@ const studentMenuItems = {
           type: 'item',
           icon: 'feather icon-moon',
           url: '/profile/settings/theme',
-          badge: {
+          inline-flex items-center rounded-md px-2 py-0.5 text-xs font-medium bg-accent text-accent-foreground: {
             title: 'New',
             type: 'label-info'
           }
@@ -125,7 +125,7 @@ const studentMenuItems = {
           title: 'Progressi & Achievement',
           type: 'item',
           icon: 'feather icon-award',
-          badge: {
+          inline-flex items-center rounded-md px-2 py-0.5 text-xs font-medium bg-accent text-accent-foreground: {
             title: 'Web3',
             type: 'label-warning'
           },

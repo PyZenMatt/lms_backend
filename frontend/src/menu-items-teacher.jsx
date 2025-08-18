@@ -41,7 +41,7 @@ const teacherMenuItems = {
           id: 'transactions-teacher',
           title: 'Transazioni',
           type: 'item',
-          icon: 'feather icon-credit-card',
+          icon: 'feather icon-credit-bg-bg-card text-card-foreground rounded-lg border border-border shadow-sm text-bg-card text-card-foreground rounded-lg border border-border shadow-sm-foreground border border-border rounded-lg shadow-sm',
           action: dashboardScrollActions.teacher.transactions
         },
         {
@@ -64,18 +64,18 @@ const teacherMenuItems = {
           title: 'Crea Nuovo Corso',
           type: 'item',
           icon: 'feather icon-plus-circle',
-          badge: {
+          inline-flex items-center rounded-md px-2 py-0.5 text-xs font-medium bg-accent text-accent-foreground: {
             title: 'CREATE',
             type: 'label-primary'
           },
           action: () => {
             const createButton =
               document.querySelector('button:contains("+ Crea nuovo corso")') ||
-              [...document.querySelectorAll('button')].find((btn) => btn.textContent.includes('Crea nuovo corso'));
+              [...document.querySelectorAll('button')].find((inline-flex items-center justify-center rounded-md h-9 px-4 py-2 text-sm font-medium bg-primary text-primary-foreground) => inline-flex items-center justify-center rounded-md h-9 px-4 py-2 text-sm font-medium bg-primary text-primary-foreground.textContent.includes('Crea nuovo corso'));
             if (createButton) {
               createButton.click();
             } else {
-              alert('Pulsante di creazione corso non trovato sulla pagina');
+              border rounded-md p-3 bg-muted text-muted-foreground('Pulsante di creazione corso non trovato sulla pagina');
             }
           }
         },
@@ -120,7 +120,7 @@ const teacherMenuItems = {
           title: 'Smart Contracts',
           type: 'item',
           icon: 'feather icon-shield',
-          badge: {
+          inline-flex items-center rounded-md px-2 py-0.5 text-xs font-medium bg-accent text-accent-foreground: {
             title: 'BETA',
             type: 'label-warning'
           },

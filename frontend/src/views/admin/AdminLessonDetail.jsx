@@ -51,7 +51,7 @@ const AdminLessonDetail = () => {
       )}
       <div className="mt-3">{lesson.content}</div>
       <div className="mt-3">{lesson.materials}</div>
-      <Link to="/dashboard/admin" className="btn btn-secondary mt-3">
+      <Link to="/dashboard/admin" className="inline-flex items-center justify-center rounded-md h-9 px-4 py-2 text-sm font-medium bg-primary text-primary-foreground bg-secondary text-secondary-foreground mt-3">
         Torna alla dashboard admin
       </Link>
       <div className="mt-4">

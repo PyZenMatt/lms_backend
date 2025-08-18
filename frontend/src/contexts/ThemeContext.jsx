@@ -89,7 +89,7 @@ export const ThemeProvider = ({ children }) => {
       // Set CSS custom properties for dark theme
       root.style.setProperty('--bs-body-bg', '#1a1d21');
       root.style.setProperty('--bs-body-color', '#adb7be');
-      root.style.setProperty('--bs-card-bg', '#2d3748');
+  root.style.setProperty('--bs-bg-card text-card-foreground rounded-lg border border-border shadow-sm-bg', '#2d3748');
       root.style.setProperty('--bs-navbar-bg', '#1a202c');
       root.style.setProperty('--bs-sidebar-bg', '#2d3748');
       root.style.setProperty('--bs-primary', 'var(--primary)');
@@ -113,7 +113,7 @@ export const ThemeProvider = ({ children }) => {
       // Reset CSS custom properties to default light theme
       root.style.setProperty('--bs-body-bg', 'var(--background)');
       root.style.setProperty('--bs-body-color', '#888');
-      root.style.setProperty('--bs-card-bg', 'var(--background)');
+  root.style.setProperty('--bs-bg-card text-card-foreground rounded-lg border border-border shadow-sm-bg', 'var(--background)');
       root.style.setProperty('--bs-navbar-bg', 'var(--background)');
       root.style.setProperty('--bs-sidebar-bg', 'var(--background)');
       root.style.setProperty('--bs-primary', 'var(--primary)');

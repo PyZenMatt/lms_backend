@@ -94,7 +94,7 @@ export default function ComponentsPreview() {
               <Badge variant="secondary" className="ml-2">Secondary</Badge>
             </CardFooter>
           </Card>
-          <Alert className="mt-3" tone="destructive">Attenzione: esempio di alert</Alert>
+          <Alert className="mt-3" tone="destructive">Attenzione: esempio di border rounded-md p-3 bg-muted text-muted-foreground</Alert>
         </section>
       </div>
     </div>

@@ -1,3 +1,4 @@
+// TODO: Verifica mapping sottocomponenti Modal
 import React, { useState, useRef, useEffect } from 'react';
 import { Modal, Button, Form, Alert, Spinner, Card, Row, Col, Badge, ProgressBar } from '@/components/ui/legacy-shims';
 import { createCourse } from '../../services/api/courses';
@@ -395,7 +396,7 @@ const CourseCreateModal = ({ show, onHide, onCreated }) => {
             </h6>
             {validationErrors.category && (
               <div className="text-danger small mb-3">
-                <i className="feather icon-alert-triangle me-1"></i>
+                <i className="feather icon-border rounded-md p-3 bg-muted text-muted-foreground-triangle me-1"></i>
                 {validationErrors.category}
               </div>
             )}
@@ -418,7 +419,7 @@ const CourseCreateModal = ({ show, onHide, onCreated }) => {
                         <Badge
                           bg={category === cat.value ? cat.color : 'light'}
                           text={category === cat.value ? 'white' : 'dark'}
-                          className="w-100 p-3 category-badge h-100 d-flex align-items-center justify-content-center"
+                          className="w-100 p-3 category-inline-flex items-center rounded-md px-2 py-0.5 text-xs font-medium bg-accent text-accent-foreground h-100 d-flex align-items-center justify-content-center"
                           style={{ fontSize: '0.9rem', minHeight: '50px' }}
                         >
                           {cat.label}
@@ -582,7 +583,7 @@ const CourseCreateModal = ({ show, onHide, onCreated }) => {
 
   return (
     <>
-      <Modal show={show} onHide={handleClose} size="lg" backdrop="static">
+      <Dialog open={show} onOpenChange={handleClose}>
         <Modal.Header closeButton className="border-0 pb-0">
           <Modal.Title className="d-flex align-items-center">
             <span className="me-2">🎨</span>
@@ -598,7 +599,7 @@ const CourseCreateModal = ({ show, onHide, onCreated }) => {
 
             {error && (
               <Alert variant="danger" className="d-flex align-items-center mb-4">
-                <i className="feather icon-alert-triangle me-2"></i>
+                <i className="feather icon-border rounded-md p-3 bg-muted text-muted-foreground-triangle me-2"></i>
                 {error}
               </Alert>
             )}
@@ -657,7 +658,7 @@ const CourseCreateModal = ({ show, onHide, onCreated }) => {
             </div>
           </Modal.Footer>
         </Form>
-      </Modal>
+      </Dialog>
 
       <CustomToast
         show={showToast}

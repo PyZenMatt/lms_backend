@@ -173,7 +173,7 @@ const DBStudentTeoCoinDashboard = () => {
 
   if (loading && !dashboardData.balance.total_balance) {
     return (
-      <Card className="teocoin-dashboard-card">
+      <Card className="teocoin-dashboard-bg-bg-card text-card-foreground rounded-lg border border-border shadow-sm text-bg-card text-card-foreground rounded-lg border border-border shadow-sm-foreground border border-border rounded-lg shadow-sm">
         <Card.Body className="text-center">
           <Spinner animation="border" variant="primary" />
           <p className="mt-2">Caricamento dashboard TeoCoin...</p>
@@ -274,7 +274,7 @@ const DBStudentTeoCoinDashboard = () => {
       <Row className="blockchain-components-row mb-3">
         {/* Burn & Deposit Component */}
         <Col xl={4} lg={6} md={12} className="blockchain-component-col mb-3">
-          <div className="blockchain-responsive-card h-100">
+          <div className="blockchain-responsive-bg-bg-card text-card-foreground rounded-lg border border-border shadow-sm text-bg-card text-card-foreground rounded-lg border border-border shadow-sm-foreground border border-border rounded-lg shadow-sm h-100">
             <BurnDepositInterface
               onTransactionComplete={(data) => {
                 loadDashboardData();
@@ -285,7 +285,7 @@ const DBStudentTeoCoinDashboard = () => {
 
         {/* Pending Withdrawals Component */}
         <Col xl={4} lg={6} md={12} className="blockchain-component-col mb-3">
-          <div className="blockchain-responsive-card h-100">
+          <div className="blockchain-responsive-bg-bg-card text-card-foreground rounded-lg border border-border shadow-sm text-bg-card text-card-foreground rounded-lg border border-border shadow-sm-foreground border border-border rounded-lg shadow-sm h-100">
             <PendingWithdrawals
               onTransactionComplete={(data) => {
                 loadDashboardData();
@@ -296,7 +296,7 @@ const DBStudentTeoCoinDashboard = () => {
 
         {/* Balance Overview Component */}
         <Col xl={4} lg={12} md={12} className="blockchain-component-col mb-3">
-          <Card className="balance-overview-card blockchain-responsive-card h-100">
+          <Card className="balance-overview-bg-bg-card text-card-foreground rounded-lg border border-border shadow-sm text-bg-card text-card-foreground rounded-lg border border-border shadow-sm-foreground border border-border rounded-lg shadow-sm blockchain-responsive-bg-bg-card text-card-foreground rounded-lg border border-border shadow-sm text-bg-card text-card-foreground rounded-lg border border-border shadow-sm-foreground border border-border rounded-lg shadow-sm h-100">
             <Card.Header>
               <h6 className="mb-0">
                 <i className="feather icon-pie-chart text-info me-2"></i>

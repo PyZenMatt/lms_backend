@@ -14,7 +14,7 @@ const PendingCoursesCard = () => {
     setError('');
     try {
       const res = await fetchPendingCourses();
-      setCourses(res.data.slice(0, 5)); // Limit to 5 for dashboard card
+      setCourses(res.data.slice(0, 5)); // Limit to 5 for dashboard bg-bg-card text-card-foreground rounded-lg border border-border shadow-sm text-bg-card text-card-foreground rounded-lg border border-border shadow-sm-foreground border border-border rounded-lg shadow-sm
     } catch (err) {
       setError('Errore nel caricamento dei corsi in attesa');
     } finally {

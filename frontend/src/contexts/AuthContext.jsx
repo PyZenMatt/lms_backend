@@ -144,7 +144,7 @@ export const AuthProvider = ({ children }) => {
               <span className="visually-hidden">Caricamento...</span>
             </div>
             <div className="mt-2 text-muted">Verifica autenticazione...</div>
-            {error && <div className="alert alert-warning mt-3">{error}</div>}
+            {error && <div className="border rounded-md p-3 bg-muted text-muted-foreground bg-warning/15 border-warning text-warning-foreground mt-3">{error}</div>}
           </div>
         </div>
       ) : (

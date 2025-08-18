@@ -1,3 +1,4 @@
+// TODO: Verifica mapping sottocomponenti Modal
 /**
  * TeoCoin Burn Deposit Component
  * Allows users to burn TEO tokens from MetaMask and credit platform balance
@@ -293,7 +294,7 @@ const BurnDepositInterface = ({ onTransactionComplete }) => {
               <p className="text-muted mb-3">Connect your MetaMask wallet to deposit TEO tokens</p>
 
               {/* Debug Info */}
-              <div className="alert alert-info small text-start mb-3">
+              <div className="border rounded-md p-3 bg-muted text-muted-foreground bg-info/15 border-info text-info-foreground small text-start mb-3">
                 <div>
                   <strong>Debug Info:</strong>
                 </div>
@@ -318,7 +319,7 @@ const BurnDepositInterface = ({ onTransactionComplete }) => {
           ) : (
             <div>
               {/* Debug Info for Connected State */}
-              <div className="alert alert-info small mb-3">
+              <div className="border rounded-md p-3 bg-muted text-muted-foreground bg-info/15 border-info text-info-foreground small mb-3">
                 <div>
                   <strong>Debug Info:</strong>
                 </div>
@@ -363,7 +364,7 @@ const BurnDepositInterface = ({ onTransactionComplete }) => {
                     setShowModal(true);
                   }}
                   disabled={parseFloat(metamaskBalance) <= 0}
-                  className="btn-success"
+                  className="bg-success text-success-foreground"
                   style={{
                     backgroundColor: 'var(--success)',
                     borderColor: 'var(--success)',
@@ -383,7 +384,7 @@ const BurnDepositInterface = ({ onTransactionComplete }) => {
                     loadMetaMaskBalance(account);
                   }}
                   disabled={processing}
-                  className="btn-outline-primary"
+                  className="inline-flex items-center justify-center rounded-md h-9 px-4 py-2 text-sm font-medium bg-primary text-primary-foreground-outline-primary"
                   style={{
                     borderColor: 'var(--primary)',
                     color: 'var(--primary)',
@@ -411,7 +412,7 @@ const BurnDepositInterface = ({ onTransactionComplete }) => {
       </Card>
 
       {/* Burn Deposit Modal */}
-      <Modal show={showModal} onHide={() => setShowModal(false)} centered>
+      <Dialog open={showModal}> setShowModal(false)} centered>
         <Modal.Header closeButton>
           <Modal.Title>
             <i className="fas fa-fire text-danger me-2"></i>
@@ -419,7 +420,7 @@ const BurnDepositInterface = ({ onTransactionComplete }) => {
           </Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <div className="alert alert-warning">
+          <div className="border rounded-md p-3 bg-muted text-muted-foreground bg-warning/15 border-warning text-warning-foreground">
             <i className="fas fa-exclamation-triangle me-2"></i>
             <strong>Warning:</strong> Burning tokens is permanent! TEO will be removed from your MetaMask and added to your platform
             balance.
@@ -472,7 +473,7 @@ const BurnDepositInterface = ({ onTransactionComplete }) => {
             )}
           </Button>
         </Modal.Footer>
-      </Modal>
+      </Dialog>
     </>
   );
 };

@@ -48,7 +48,7 @@ const RoleGuard = ({ allowedRoles, children, redirectTo }) => {
   if (!user) {
     return (
       <div className="d-flex justify-content-center align-items-center" style={{ minHeight: '60vh' }}>
-        <div className="alert alert-warning">
+        <div className="border rounded-md p-3 bg-muted text-muted-foreground bg-warning/15 border-warning text-warning-foreground">
           <h5>Accesso negato</h5>
           <p>Devi effettuare il login per accedere a questa pagina.</p>
         </div>
@@ -62,7 +62,7 @@ const RoleGuard = ({ allowedRoles, children, redirectTo }) => {
   if (!allowedRoles.includes(userRole)) {
     return (
       <div className="d-flex justify-content-center align-items-center" style={{ minHeight: '60vh' }}>
-        <div className="alert alert-danger">
+        <div className="border rounded-md p-3 bg-muted text-muted-foreground bg-destructive/15 border-destructive text-destructive-foreground">
           <h5>Accesso non autorizzato</h5>
           <p>Non hai i permessi per accedere a questa sezione.</p>
           <p>

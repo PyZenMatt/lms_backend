@@ -20,7 +20,8 @@ import {
 import { AccountBalanceWallet, Send, Refresh, Close, Info, Warning, CheckCircle } from '@mui/icons-material';
 import { BrowserProvider, Contract, formatEther, parseEther } from 'ethers';
 import api from '../../services/core/axiosClient';
-import './TeoCoinWithdrawal.scss';
+// Legacy SCSS removed during V2 cutover (styles migrated to tokens/utilities)
+// import './TeoCoinWithdrawal.scss';
 
 // TeoCoin contract configuration
 const TEOCOIN_CONTRACT = '0x20D6656A31297ab3b8A87291Ed562D4228Be9ff8';
@@ -59,7 +60,7 @@ const TeoCoinWithdrawal = ({ open, onClose, userBalance = 0 }) => {
   const [withdrawalAmount, setWithdrawalAmount] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [alert, setAlert] = useState(null);
+  const [alertState, setAlert] = useState(null); // { message, severity }
   const [dbBalance, setDbBalance] = useState(userBalance);
   const [metamaskBalance, setMetamaskBalance] = useState(0);
   const [withdrawalHistory, setWithdrawalHistory] = useState([]);
@@ -69,8 +70,8 @@ const TeoCoinWithdrawal = ({ open, onClose, userBalance = 0 }) => {
 
   // Utility functions
   const showAlert = useCallback((message, severity = 'info', duration = 5000) => {
-    setAlert({ message, severity });
-    setTimeout(() => setAlert(null), duration);
+  setAlert({ message, severity });
+  setTimeout(() => setAlert(null), duration);
   }, []);
 
   const getCsrfToken = useCallback(() => {
@@ -376,7 +377,7 @@ const TeoCoinWithdrawal = ({ open, onClose, userBalance = 0 }) => {
 
   // Event handlers
   const handleClose = () => {
-    setAlert(null);
+  setAlert(null);
     onClose();
   };
 
@@ -417,9 +418,9 @@ const TeoCoinWithdrawal = ({ open, onClose, userBalance = 0 }) => {
       </DialogTitle>
 
       <DialogContent dividers>
-        {alert && (
-          <Alert severity={alert.severity} sx={{ mb: 2 }}>
-            {alert.message}
+        {alertState && (
+          <Alert severity={alertState.severity} sx={{ mb: 2 }}>
+            {alertState.message}
           </Alert>
         )}
 

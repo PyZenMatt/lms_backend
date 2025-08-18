@@ -163,7 +163,7 @@ const StudentExerciseDetailNew = () => {
         <Row className="justify-content-center">
           <Col md={8}>
             <Alert variant="danger" className="text-center">
-              <i className="feather icon-alert-triangle mr-2"></i>
+              <i className="feather icon-border rounded-md p-3 bg-muted text-muted-foreground-triangle mr-2"></i>
               {error}
             </Alert>
           </Col>
@@ -178,7 +178,7 @@ const StudentExerciseDetailNew = () => {
         <Row className="justify-content-center">
           <Col md={8}>
             <Alert variant="warning" className="text-center">
-              <i className="feather icon-alert-triangle mr-2"></i>
+              <i className="feather icon-border rounded-md p-3 bg-muted text-muted-foreground-triangle mr-2"></i>
               Esercizio non trovato
             </Alert>
           </Col>
@@ -218,7 +218,7 @@ const StudentExerciseDetailNew = () => {
                         ? '/dashboard/teacher'
                         : '/dashboard/student'
                 }
-                className="btn btn-outline-primary d-flex align-items-center"
+                className="inline-flex items-center justify-center rounded-md h-9 px-4 py-2 text-sm font-medium bg-primary text-primary-foreground inline-flex items-center justify-center rounded-md h-9 px-4 py-2 text-sm font-medium bg-primary text-primary-foreground-outline-primary d-flex align-items-center"
               >
                 <i className="feather icon-arrow-left mr-2"></i>
                 {exercise.lesson

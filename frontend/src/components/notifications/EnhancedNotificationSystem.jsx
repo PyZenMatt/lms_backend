@@ -114,7 +114,6 @@ const EnhancedNotificationSystem = () => {
     const options = {
       body: message,
       icon: getNotificationIcon(type),
-      badge: '/badge-96x96.png',
       tag: 'schoolplatform-notification',
       requireInteraction: type === NOTIFICATION_TYPES.ERROR,
       silent: false,
@@ -264,14 +263,14 @@ const EnhancedNotificationSystem = () => {
         <div className="d-flex align-items-center gap-3">
           {/* Unread Badge */}
           {unreadCount > 0 && (
-            <Badge bg="danger" className="notification-badge">
+            <span className="inline-flex items-center rounded-md px-2 py-0.5 text-xs font-medium bg-destructive text-destructive-foreground">
               {unreadCount > 99 ? '99+' : unreadCount}
-            </Badge>
+            </span>
           )}
 
           {/* Browser Notification Permission */}
           {notificationPermission !== 'granted' && (
-            <Button variant="outline-primary" size="sm" onClick={requestNotificationPermission} className="permission-btn">
+            <Button variant="outline-primary" size="sm" onClick={requestNotificationPermission} className="permission-inline-flex items-center justify-center rounded-md h-9 px-4 py-2 text-sm font-medium bg-primary text-primary-foreground">
               <i className="fas fa-bell me-1"></i>
               Enable Notifications
             </Button>

@@ -10,13 +10,17 @@
     "typecheck:e2e": "tsc -p tsconfig.e2e.json --noEmit",
     "e2e:ci": "npm run typecheck:e2e && playwright test --reporter=html",
     "e2e:report": "playwright show-report",
-  "tokens:check": "grep -rE 'rgba\\([^)]+,\\s*0\\.[1-9]\\)' src | grep -v 'tokens.css' && echo '❌ RGBA non mappato trovato!' && exit 1 || echo '✅ RGBA OK'",
+    "tokens:check": "node scripts/tokens-check.mjs",
     "tokens:replace": "node scripts/tokenize-css.js",
     "openapi:gen": "openapi-typescript openapi/openapi.json -o src/lib/api/schema.ts",
     "tokens:apply": "node scripts/tokenize-css.mjs --root src --mapping scripts/color-mapping.js --ext css,scss,js,jsx,ts,tsx --write --report .tokenize-report.json",
     "imports:strip-versions": "node scripts/strip-import-versions.mjs",
-  "ban:legacy": "node scripts/ban-legacy.mjs",
-  "migrate:rb": "node scripts/migrate-react-bootstrap-imports.mjs"
+    "ban:legacy": "node scripts/ban-legacy.mjs",
+    "migrate:rb": "node scripts/migrate-react-bootstrap-imports.mjs",
+    "purge:css": "node scripts/purge-css.mjs",
+    "codemod:rb": "node scripts/codemod-react-bootstrap.mjs",
+    "migrate:classes": "node scripts/migrate-bootstrap-classes.mjs",
+    "cutover:v2": "npm run purge:css && npm run codemod:rb && npm run migrate:classes && npm run ban:legacy && npm run tokens:check"
   },
   "lint-staged": {
     "**/*.{js,jsx,ts,tsx}": [
@@ -74,7 +78,6 @@
     "@stripe/stripe-js": "^7.8.0",
     "@tanem/react-nprogress": "^5.0.55",
     "axios": "^1.11.0",
-    "bootstrap": "^5.3.7",
     "class-variance-authority": "^0.7.1",
     "cmdk": "^1.1.1",
     "date-fns": "^4.1.0",
@@ -85,7 +88,6 @@
     "lucide-react": "^0.539.0",
     "prop-types": "^15.8.1",
     "react": "^19.1.1",
-    "react-bootstrap": "^2.10.10",
     "react-bootstrap-icons": "^1.11.6",
     "react-day-picker": "^9.9.0",
     "react-dom": "^19.1.1",

@@ -252,7 +252,7 @@ const TeoCoinBalanceWidget = ({ variant = 'default', onWithdrawalClick }) => {
         <Card.Body>
           {error && (
             <Alert variant="danger" dismissible onClose={() => setError('')}>
-              <i className="feather icon-alert-circle me-2"></i>
+              <i className="feather icon-border rounded-md p-3 bg-muted text-muted-foreground-circle me-2"></i>
               {error}
             </Alert>
           )}
@@ -409,7 +409,7 @@ const TeoCoinBalanceWidget = ({ variant = 'default', onWithdrawalClick }) => {
           </div>
 
           {/* Information Text */}
-          <div className="alert alert-info">
+          <div className="border rounded-md p-3 bg-muted text-muted-foreground bg-info/15 border-info text-info-foreground">
             <i className="feather icon-info me-2"></i>
             <small>
               {isTeacher

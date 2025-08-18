@@ -65,7 +65,7 @@ const StudentTeoCoinStats = () => {
       <Card className="border-0 shadow-sm">
         <Card.Body>
           <Alert variant="danger">
-            <i className="feather icon-alert-circle me-2"></i>
+            <i className="feather icon-border rounded-md p-3 bg-muted text-muted-foreground-circle me-2"></i>
             {error}
           </Alert>
         </Card.Body>

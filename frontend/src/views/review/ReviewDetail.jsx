@@ -82,7 +82,7 @@ const ReviewDetail = () => {
 
   return (
     <div className="container mt-4">
-      <Link to="/review/assigned" className="btn btn-secondary mb-3">
+      <Link to="/review/assigned" className="inline-flex items-center justify-center rounded-md h-9 px-4 py-2 text-sm font-medium bg-primary text-primary-foreground bg-secondary text-secondary-foreground mb-3">
         &larr; Torna alla lista
       </Link>
       <Card>

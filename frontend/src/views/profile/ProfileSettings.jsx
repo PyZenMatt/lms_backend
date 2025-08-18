@@ -382,14 +382,14 @@ const ProfileSettings = () => {
                   <Button
                     type="button"
                     variant="outline-secondary"
-                    className="enhanced-btn enhanced-btn-secondary"
+                    className="enhanced-inline-flex items-center justify-center rounded-md h-9 px-4 py-2 text-sm font-medium bg-primary text-primary-foreground enhanced-bg-secondary text-secondary-foreground"
                     onClick={resetToDefaults}
                   >
                     <i className="feather icon-refresh-cw"></i>
                     <span>Ripristina Default</span>
                   </Button>
 
-                  <Button type="submit" className="enhanced-btn enhanced-btn-primary" disabled={loading}>
+                  <Button type="submit" className="enhanced-inline-flex items-center justify-center rounded-md h-9 px-4 py-2 text-sm font-medium bg-primary text-primary-foreground enhanced-bg-primary text-primary-foreground" disabled={loading}>
                     {loading ? (
                       <>
                         <div className="enhanced-loading-spinner-small"></div>
@@ -407,15 +407,15 @@ const ProfileSettings = () => {
 
               {/* Alerts */}
               {success && (
-                <div className="enhanced-alert enhanced-alert-success">
+                <div className="enhanced-border rounded-md p-3 bg-muted text-muted-foreground enhanced-bg-success/15 border-success text-success-foreground">
                   <i className="feather icon-check-circle"></i>
                   <span>{success}</span>
                 </div>
               )}
 
               {error && (
-                <div className="enhanced-alert enhanced-alert-danger">
-                  <i className="feather icon-alert-circle"></i>
+                <div className="enhanced-border rounded-md p-3 bg-muted text-muted-foreground enhanced-bg-destructive/15 border-destructive text-destructive-foreground">
+                  <i className="feather icon-border rounded-md p-3 bg-muted text-muted-foreground-circle"></i>
                   <span>{error}</span>
                 </div>
               )}

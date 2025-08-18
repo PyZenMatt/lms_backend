@@ -1,8 +1,8 @@
 import React from 'react';
 import { Button as NewButton } from './components/ui/button';
-import { Card as NewCard, CardHeader, CardContent, CardFooter } from './components/ui/card';
-import { Alert as NewAlert } from './components/ui/alert';
-import { Badge as NewBadge } from './components/ui/badge';
+import { Card as NewCard, CardHeader, CardContent, CardFooter } from './components/ui/bg-card text-card-foreground rounded-lg border border-border shadow-sm';
+import { Alert as NewAlert } from './components/ui/border rounded-md p-3 bg-muted text-muted-foreground';
+import { Badge as NewBadge } from './components/ui/inline-flex items-center rounded-md px-2 py-0.5 text-xs bg-accent text-accent-foreground';
 import { Tabs as NewTabs } from './components/ui/tabs';
 import { Table as NewTable, TableBody, TableHeader, TableRow, TableHead, TableCell } from './components/ui/table';
 

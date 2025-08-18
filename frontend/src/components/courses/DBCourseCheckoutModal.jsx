@@ -1,3 +1,4 @@
+// TODO: Verifica mapping sottocomponenti Modal
 import React, { useState, useEffect } from 'react';
 import { Modal, Button, Alert, Spinner, Nav, Tab, Card, Badge } from '@/components/ui/legacy-shims';
 import { useAuth } from '../../contexts/AuthContext';
@@ -103,7 +104,7 @@ const DBCourseCheckoutModal = ({ course, show, handleClose, onPurchaseComplete }
   // Handle Stripe card payment with course enrollment
   const handleStripeCardPayment = async () => {
     // This function will be handled by the StripeCardForm component
-    console.log('� Stripe payment initiated from card form');
+    console.log('💳 Stripe payment initiated from form');
   };
 
   // Handle Stripe payment success
@@ -169,7 +170,7 @@ const DBCourseCheckoutModal = ({ course, show, handleClose, onPurchaseComplete }
       setDiscountApplied(true);
       setActiveTab('fiat');
 
-      console.log('💳 Switched to card payment with TeoCoin discount info:', discountInfo);
+  console.log('💳 Switched to card payment with TeoCoin discount info:', discountInfo);
     } catch (error) {
       console.error('❌ DB TeoCoin discount preparation error:', error);
       setError('Errore durante la preparazione dello sconto TeoCoin');
@@ -258,12 +259,12 @@ const DBCourseCheckoutModal = ({ course, show, handleClose, onPurchaseComplete }
         )}
 
         <div
-          className="payment-option-card mb-4 p-3"
+          className="payment-option mb-4 p-3 border rounded-lg shadow-sm"
           style={{ border: '2px solid var(--primary)', borderRadius: '8px', backgroundColor: 'color-mix(in srgb, var(--primary) 4%, white)' }}
         >
           <div className="d-flex justify-content-between align-items-center mb-2">
             <h5 className="mb-0 text-primary">💳 Pagamento con Carta</h5>
-            <span className="badge badge-primary">Consigliato</span>
+            <span className="inline-flex items-center rounded-md px-2 py-0.5 text-xs font-medium bg-accent text-accent-foreground inline-flex items-center rounded-md px-2 py-0.5 text-xs font-medium bg-accent text-accent-foreground-primary">Consigliato</span>
           </div>
           <div className="row">
             <div className="col-6">
@@ -425,7 +426,7 @@ const DBCourseCheckoutModal = ({ course, show, handleClose, onPurchaseComplete }
   };
 
   return (
-    <Modal show={show} onHide={handleClose} size="lg" centered>
+    <Dialog open={show} onOpenChange={handleClose}>
       <Modal.Header closeButton>
         <Modal.Title>💳 Acquista Corso: {course?.title}</Modal.Title>
       </Modal.Header>
@@ -460,7 +461,7 @@ const DBCourseCheckoutModal = ({ course, show, handleClose, onPurchaseComplete }
           </Button>
         </Modal.Footer>
       )}
-    </Modal>
+    </Dialog>
   );
 };
 
@@ -557,9 +558,7 @@ const StripeCardForm = ({ course, finalPrice, fiatPrice, paymentResult, onPaymen
 
         // Confirm payment with Stripe
         const result = await stripe.confirmCardPayment(client_secret, {
-          payment_method: {
-            card: cardElement
-          }
+          payment_method: { card: cardElement }
         });
 
         console.log('💳 Stripe confirmation result:', result);
@@ -617,9 +616,9 @@ const StripeCardForm = ({ course, finalPrice, fiatPrice, paymentResult, onPaymen
   };
 
   return (
-    <form onSubmit={handleSubmit} className="stripe-card-form">
+  <form onSubmit={handleSubmit} className="stripe-bg-card text-card-foreground rounded-lg border border-border shadow-sm-form">
       <div
-        className="card-element-container mb-3"
+        className="bg-card text-card-foreground rounded-lg border border-border shadow-sm-element-container mb-3"
         style={{
           border: '2px solid var(--primary)',
           borderRadius: '8px',
@@ -635,7 +634,7 @@ const StripeCardForm = ({ course, finalPrice, fiatPrice, paymentResult, onPaymen
                 fontSize: '16px',
                 color: 'var(--muted-foreground)',
                 '::placeholder': {
-                  color: 'color-mix(in srgb, var(--muted-foreground) 60%, var(--card))'
+                  color: 'color-mix(in srgb, var(--muted-foreground) 60%, var(--background))'
                 },
                 fontFamily: 'Arial, sans-serif',
                 fontSmoothing: 'antialiased',

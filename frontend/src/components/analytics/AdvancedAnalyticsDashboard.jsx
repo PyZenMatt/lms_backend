@@ -394,7 +394,7 @@ const AdvancedAnalyticsDashboard = () => {
       <Row className="mb-4">
         {kpiCards.map((kpi, index) => (
           <Col lg={3} md={6} key={index} className="mb-3">
-            <Card className={`kpi-card kpi-${kpi.color}`}>
+            <Card className={`kpi-bg-bg-card text-card-foreground rounded-lg border border-border shadow-sm text-bg-card text-card-foreground rounded-lg border border-border shadow-sm-foreground border border-border rounded-lg shadow-sm kpi-${kpi.color}`}>
               <Card.Body>
                 <div className="d-flex justify-content-between align-items-start">
                   <div>
@@ -416,7 +416,7 @@ const AdvancedAnalyticsDashboard = () => {
       {/* Charts Row 1 */}
       <Row className="mb-4">
         <Col lg={8}>
-          <Card className="chart-card">
+          <Card className="chart-bg-bg-card text-card-foreground rounded-lg border border-border shadow-sm text-bg-card text-card-foreground rounded-lg border border-border shadow-sm-foreground border border-border rounded-lg shadow-sm">
             <Card.Header>
               <h5 className="mb-0">
                 <i className="fas fa-chart-area me-2"></i>
@@ -432,7 +432,7 @@ const AdvancedAnalyticsDashboard = () => {
         </Col>
 
         <Col lg={4}>
-          <Card className="chart-card">
+          <Card className="chart-bg-bg-card text-card-foreground rounded-lg border border-border shadow-sm text-bg-card text-card-foreground rounded-lg border border-border shadow-sm-foreground border border-border rounded-lg shadow-sm">
             <Card.Header>
               <h5 className="mb-0">
                 <i className="fas fa-chart-pie me-2"></i>
@@ -451,7 +451,7 @@ const AdvancedAnalyticsDashboard = () => {
       {/* Charts Row 2 */}
       <Row className="mb-4">
         <Col lg={6}>
-          <Card className="chart-card">
+          <Card className="chart-bg-bg-card text-card-foreground rounded-lg border border-border shadow-sm text-bg-card text-card-foreground rounded-lg border border-border shadow-sm-foreground border border-border rounded-lg shadow-sm">
             <Card.Header>
               <h5 className="mb-0">
                 <i className="fas fa-radar-chart me-2"></i>
@@ -467,7 +467,7 @@ const AdvancedAnalyticsDashboard = () => {
         </Col>
 
         <Col lg={6}>
-          <Card className="chart-card">
+          <Card className="chart-bg-bg-card text-card-foreground rounded-lg border border-border shadow-sm text-bg-card text-card-foreground rounded-lg border border-border shadow-sm-foreground border border-border rounded-lg shadow-sm">
             <Card.Header>
               <h5 className="mb-0">
                 <i className="fas fa-activity me-2"></i>
@@ -487,7 +487,7 @@ const AdvancedAnalyticsDashboard = () => {
       {customMetrics.length > 0 && (
         <Row>
           <Col lg={12}>
-            <Card className="chart-card">
+            <Card className="chart-bg-bg-card text-card-foreground rounded-lg border border-border shadow-sm text-bg-card text-card-foreground rounded-lg border border-border shadow-sm-foreground border border-border rounded-lg shadow-sm">
               <Card.Header>
                 <h5 className="mb-0">
                   <i className="fas fa-cogs me-2"></i>

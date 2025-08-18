@@ -1,3 +1,4 @@
+// TODO: Verifica mapping sottocomponenti Modal
 import React, { useState, useEffect, useRef } from 'react';
 import { Modal, Button, Form, Alert, Spinner, Card, Row, Col, Badge, InputGroup } from '@/components/ui/legacy-shims';
 import { createExercise } from '../../services/api/courses';
@@ -205,7 +206,7 @@ const ExerciseCreateModal = ({ show, onHide, onCreated, lessonId, courseId }) =>
 
   return (
     <>
-      <Modal show={show} onHide={handleClose} size="xl" className="exercise-create-modal">
+      <Dialog open={show} onOpenChange={handleClose}>
         <Modal.Header closeButton className="border-0 pb-0">
           <Modal.Title className="d-flex align-items-center">
             <span className="me-2">🎯</span>
@@ -386,7 +387,7 @@ const ExerciseCreateModal = ({ show, onHide, onCreated, lessonId, courseId }) =>
                         <Badge
                           bg={difficulty === level.value ? level.color : 'light'}
                           text={difficulty === level.value ? 'white' : 'dark'}
-                          className="w-100 p-2 difficulty-badge"
+                          className="w-100 p-2 difficulty-inline-flex items-center rounded-md px-2 py-0.5 text-xs font-medium bg-accent text-accent-foreground"
                         >
                           {level.label}
                         </Badge>
@@ -431,7 +432,7 @@ const ExerciseCreateModal = ({ show, onHide, onCreated, lessonId, courseId }) =>
                       <div className="reference-preview">
                         <img src={imagePreview} alt="Reference" className="reference-image" />
                         <div className="image-overlay">
-                          <Button variant="danger" size="sm" onClick={removeImage} className="remove-image-btn">
+                          <Button variant="danger" size="sm" onClick={removeImage} className="remove-image-inline-flex items-center justify-center rounded-md h-9 px-4 py-2 text-sm font-medium bg-primary text-primary-foreground">
                             <i className="bi bi-trash"></i>
                           </Button>
                         </div>
@@ -482,7 +483,7 @@ const ExerciseCreateModal = ({ show, onHide, onCreated, lessonId, courseId }) =>
             </Button>
           </Modal.Footer>
         </Form>
-      </Modal>
+      </Dialog>
 
       <CustomToast
         show={showToast}

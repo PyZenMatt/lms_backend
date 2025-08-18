@@ -123,8 +123,8 @@ const PendingWithdrawals = ({ onTransactionComplete = null }) => {
 
   if (loading) {
     return (
-      <div className="card">
-        <div className="card-body text-center">
+      <div className="bg-bg-card text-card-foreground rounded-lg border border-border shadow-sm text-bg-card text-card-foreground rounded-lg border border-border shadow-sm-foreground border border-border rounded-lg shadow-sm">
+        <div className="p-4 text-center">
           <div className="spinner-border text-primary" role="status">
             <span className="visually-hidden">Loading...</span>
           </div>
@@ -136,13 +136,13 @@ const PendingWithdrawals = ({ onTransactionComplete = null }) => {
 
   if (error) {
     return (
-      <div className="card">
-        <div className="card-body">
-          <div className="alert alert-danger">
+      <div className="bg-bg-card text-card-foreground rounded-lg border border-border shadow-sm text-bg-card text-card-foreground rounded-lg border border-border shadow-sm-foreground border border-border rounded-lg shadow-sm">
+        <div className="p-4">
+          <div className="border rounded-md p-3 bg-muted text-muted-foreground bg-destructive/15 border-destructive text-destructive-foreground">
             <i className="fas fa-exclamation-triangle me-2"></i>
             {error}
           </div>
-          <button className="btn btn-outline-primary" onClick={loadPendingWithdrawals}>
+          <button className="inline-flex items-center justify-center rounded-md h-9 px-4 py-2 text-sm font-medium bg-primary text-primary-foreground inline-flex items-center justify-center rounded-md h-9 px-4 py-2 text-sm font-medium bg-primary text-primary-foreground-outline-primary" onClick={loadPendingWithdrawals}>
             <i className="fas fa-redo me-2"></i>
             Retry
           </button>
@@ -153,8 +153,8 @@ const PendingWithdrawals = ({ onTransactionComplete = null }) => {
 
   if (pendingWithdrawals.length === 0) {
     return (
-      <div className="card">
-        <div className="card-body text-center">
+      <div className="bg-bg-card text-card-foreground rounded-lg border border-border shadow-sm text-bg-card text-card-foreground rounded-lg border border-border shadow-sm-foreground border border-border rounded-lg shadow-sm">
+        <div className="p-4 text-center">
           <i className="fas fa-check-circle text-success mb-3" style={{ fontSize: '3rem' }}></i>
           <h5>No Pending Withdrawals</h5>
           <p className="text-muted">All your withdrawals have been processed!</p>
@@ -164,19 +164,19 @@ const PendingWithdrawals = ({ onTransactionComplete = null }) => {
   }
 
   return (
-    <div className="card">
-      <div className="card-header d-flex justify-content-between align-items-center">
+    <div className="bg-bg-card text-card-foreground rounded-lg border border-border shadow-sm text-bg-card text-card-foreground rounded-lg border border-border shadow-sm-foreground border border-border rounded-lg shadow-sm">
+      <div className="px-4 py-2 border-b border-border d-flex justify-content-between align-items-center">
         <h5 className="mb-0">
           <i className="fas fa-clock text-warning me-2"></i>
           Pending Withdrawals ({pendingWithdrawals.length})
         </h5>
-        <button className="btn btn-sm btn-outline-secondary" onClick={loadPendingWithdrawals} disabled={loading}>
+        <button className="inline-flex items-center justify-center rounded-md h-9 px-4 py-2 text-sm font-medium bg-primary text-primary-foreground inline-flex items-center justify-center rounded-md h-9 px-4 py-2 text-sm font-medium bg-primary text-primary-foreground-sm inline-flex items-center justify-center rounded-md h-9 px-4 py-2 text-sm font-medium bg-primary text-primary-foreground-outline-secondary" onClick={loadPendingWithdrawals} disabled={loading}>
           <i className="fas fa-sync-alt me-1"></i>
           Refresh
         </button>
       </div>
-      <div className="card-body">
-        <div className="alert alert-info">
+      <div className="p-4">
+        <div className="border rounded-md p-3 bg-muted text-muted-foreground bg-info/15 border-info text-info-foreground">
           <i className="fas fa-info-circle me-2"></i>
           <strong>Ready to mint!</strong> Click "Process Withdrawal" to mint TeoCoin tokens directly to your MetaMask wallet.
         </div>
@@ -186,7 +186,7 @@ const PendingWithdrawals = ({ onTransactionComplete = null }) => {
             <div className="row align-items-center">
               <div className="col-md-8">
                 <div className="d-flex align-items-center mb-2">
-                  <span className="badge bg-warning text-dark me-2">PENDING</span>
+                  <span className="inline-flex items-center rounded-md px-2 py-0.5 text-xs font-medium bg-accent text-accent-foreground bg-warning text-dark me-2">PENDING</span>
                   <strong>{withdrawal.amount} TEO</strong>
                 </div>
                 <p className="text-muted mb-1">
@@ -235,7 +235,7 @@ const PendingWithdrawals = ({ onTransactionComplete = null }) => {
                     )}
                   </div>
                 ) : (
-                  <button className="btn btn-primary" onClick={() => processWithdrawal(withdrawal.id)}>
+                  <button className="inline-flex items-center justify-center rounded-md h-9 px-4 py-2 text-sm font-medium bg-primary text-primary-foreground bg-primary text-primary-foreground" onClick={() => processWithdrawal(withdrawal.id)}>
                     <i className="fas fa-play me-2"></i>
                     Process Withdrawal
                   </button>
