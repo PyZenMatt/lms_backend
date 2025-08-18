@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Row, Col, Card, Table, Badge, Button, Alert, Spinner, Modal } from 'react-bootstrap';
+import { Row, Col, Card, Table, Badge, Button, Alert, Spinner, Modal } from '@/components/ui/legacy-shims';
 import api from '../../services/core/axiosClient';
 
 const AdminTransactionMonitor = () => {

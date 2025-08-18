@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Card, Badge, Button, Row, Col, Collapse, ProgressBar, InputGroup } from 'react-bootstrap';
+import { Card, Badge, Button, Row, Col, Collapse, ProgressBar, InputGroup } from '@/components/ui/legacy-shims';
 import { Link, useNavigate } from 'react-router-dom';
 
 const CoursesTable = ({

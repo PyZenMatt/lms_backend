@@ -1,6 +1,6 @@
 import PropTypes from 'prop-types';
 import React from 'react';
-import { FormControl } from 'react-bootstrap';
+import { FormControl } from '@/components/ui/legacy-shims';
 import { Link } from 'react-router-dom';
 import PerfectScrollbar from 'react-perfect-scrollbar';
 

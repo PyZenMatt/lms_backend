@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Row, Col, Card, Button, Alert } from 'react-bootstrap';
+import { Row, Col, Card, Button, Alert } from '@/components/ui/legacy-shims';
 import { Link, useNavigate } from 'react-router-dom';
 import RoleGuard from '../../components/guards/RoleGuard';
 

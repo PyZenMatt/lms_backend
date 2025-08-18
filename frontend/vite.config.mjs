@@ -1,6 +1,7 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import jsconfigPaths from 'vite-jsconfig-paths';
+import path from 'node:path';
 
 export default defineConfig({
   server: {
@@ -19,7 +20,11 @@ export default defineConfig({
     'process.env': {}
   },
   resolve: {
-    alias: []
+    alias: {
+      '@': path.resolve(__dirname, 'src'),
+      'bootstrap/dist/css/bootstrap.min.css': path.resolve(__dirname, 'src/styles/empty.css'),
+      'react-bootstrap': path.resolve(__dirname, 'src/styles/empty-module.js')
+    }
   },
   css: {
     preprocessorOptions: {
@@ -82,11 +87,8 @@ export default defineConfig({
       output: {
         // Manual chunk splitting for better caching
         manualChunks: {
-          // Vendor chunks
           'react-vendor': ['react', 'react-dom'],
-          'bootstrap-vendor': ['react-bootstrap', 'bootstrap'],
           'router-vendor': ['react-router-dom']
-          // Removed hardcoded component chunks to avoid conflicts with lazy loading
         },
         // Optimize chunk file names
         chunkFileNames: (chunkInfo) => {
@@ -96,7 +98,7 @@ export default defineConfig({
         entryFileNames: 'assets/js/[name]-[hash].js',
         assetFileNames: (assetInfo) => {
           const info = assetInfo.name.split('.');
-          const ext = info[info.length - 1];
+            const ext = info[info.length - 1];
           if (/\.(png|jpe?g|svg|gif|tiff|bmp|ico)$/i.test(assetInfo.name)) {
             return `assets/images/[name]-[hash].${ext}`;
           }
@@ -124,9 +126,7 @@ export default defineConfig({
     include: [
       'react',
       'react-dom',
-      'react-router-dom',
-      'react-bootstrap',
-      'bootstrap'
+      'react-router-dom'
     ],
     // Exclude problematic dependencies
     exclude: ['@vite/client', '@vite/env']

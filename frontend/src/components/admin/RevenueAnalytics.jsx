@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Row, Col, Card, Spinner, Alert, ProgressBar } from 'react-bootstrap';
+import { Row, Col, Card, Spinner, Alert, ProgressBar } from '@/components/ui/legacy-shims';
 import { Line } from 'react-chartjs-2';
 import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend } from 'chart.js';
 import { getAnalyticsData, getRevenueChartData } from '../../services/api/analytics';

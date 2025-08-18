@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Row, Col, Form, Spinner } from 'react-bootstrap';
+import { Row, Col, Form, Spinner } from '@/components/ui/legacy-shims';
 import { Card, CardHeader, CardContent, Button } from '../../../components/ui';
 import { Alert } from '../../../components/ui/Alert';
 import { NavLink, useNavigate } from 'react-router-dom';

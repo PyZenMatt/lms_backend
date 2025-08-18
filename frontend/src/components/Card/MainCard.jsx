@@ -1,6 +1,6 @@
 import PropTypes from 'prop-types';
 import React, { useState } from 'react';
-import { Dropdown, Card, Collapse } from 'react-bootstrap';
+import { Dropdown, Card, Collapse } from '@/components/ui/legacy-shims';
 import { Link } from 'react-router-dom';
 
 import useWindowSize from '../../hooks/useWindowSize';

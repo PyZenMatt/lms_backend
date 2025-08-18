@@ -7,7 +7,8 @@ import { Web3Provider } from './contexts/Web3Context';
 import { NotificationProvider } from './contexts/NotificationContext';
 
 import './styles/tokens.css';
-import './index.scss';
+// import './index.scss'; // legacy bootstrap/scss bundle removed during UI V2 cutover
+import './styles/figma-raw/v2.css'; // Theme V2 override (now global)
 import App from './App';
 import reportWebVitals from './reportWebVitals';
 

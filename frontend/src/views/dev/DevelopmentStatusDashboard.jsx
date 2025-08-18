@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Helmet } from 'react-helmet';
-import { Container, Row, Col, Card, Alert, Badge, Button, Accordion, ProgressBar } from 'react-bootstrap';
+import { Container, Row, Col, Card, Alert, Badge, Button, Accordion, ProgressBar } from '@/components/ui/legacy-shims';
 import { useTheme } from '../../contexts/ThemeContext';
 import ThemeToggle from '../../components/ui/ThemeToggle';
 

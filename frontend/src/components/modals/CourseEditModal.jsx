@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Modal, Form, Button, Alert, Spinner, Row, Col } from 'react-bootstrap';
+import { Modal, Form, Button, Alert, Spinner, Row, Col } from '@/components/ui/legacy-shims';
 import PropTypes from 'prop-types';
 import { fetchCourseDetail, updateCourse } from '../../services/api/courses';
 

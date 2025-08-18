@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Container, Row, Col, Card, Tab, Tabs, Button, Badge, Alert, Spinner } from 'react-bootstrap';
+import { Container, Row, Col, Card, Tab, Tabs, Button, Badge, Alert, Spinner } from '@/components/ui/legacy-shims';
 import axiosClient from '../../services/core/axiosClient';
 
 const TeacherAbsorptionDashboard = () => {

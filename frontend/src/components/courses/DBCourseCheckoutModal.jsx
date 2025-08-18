@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Modal, Button, Alert, Spinner, Nav, Tab, Card, Badge } from 'react-bootstrap';
+import { Modal, Button, Alert, Spinner, Nav, Tab, Card, Badge } from '@/components/ui/legacy-shims';
 import { useAuth } from '../../contexts/AuthContext';
 import { getTeoCoinBalance } from '../../services/api/teocoin';
 import api from '../../services/core/axiosClient';

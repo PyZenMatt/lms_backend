@@ -6,6 +6,7 @@ import { Elements } from '@stripe/react-stripe-js';
 import routes, { renderRoutes } from './routes';
 import NotificationDisplay from './components/ui/NotificationDisplay';
 import { ThemeProvider } from './contexts/ThemeContext';
+import { AppShell } from './components/layout/AppShell';
 
 // Import development error handling
 import './utils/errorHandling';
@@ -22,10 +23,12 @@ const App = () => {
   return (
     <ThemeProvider>
       <BrowserRouter>
-        <Elements stripe={stripePromise}>
-          {renderRoutes(routes)}
-          <NotificationDisplay />
-        </Elements>
+        <AppShell>
+          <Elements stripe={stripePromise}>
+            {renderRoutes(routes)}
+            <NotificationDisplay />
+          </Elements>
+        </AppShell>
       </BrowserRouter>
     </ThemeProvider>
   );

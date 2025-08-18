@@ -1,6 +1,6 @@
 import PropTypes from 'prop-types';
 import React from 'react';
-import { ListGroup } from 'react-bootstrap';
+import { ListGroup } from '@/components/ui/legacy-shims';
 import PerfectScrollbar from 'react-perfect-scrollbar';
 
 import NavGroup from './NavGroup';

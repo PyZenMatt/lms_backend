@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Card, Button, Row, Col, Spinner, Alert, Badge, Form, InputGroup } from 'react-bootstrap';
+import { Card, Button, Row, Col, Spinner, Alert, Badge, Form, InputGroup } from '@/components/ui/legacy-shims';
 import { fetchCourses } from '../../services/api/courses';
 import CourseCheckoutModal from '../../components/courses/DBCourseCheckoutModal';
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Card } from 'react-bootstrap';
+import { Card } from '@/components/ui/legacy-shims';
 import { NavLink } from 'react-router-dom';
 
 import Breadcrumb from '../../../layouts/AdminLayout/Breadcrumb';

@@ -5,7 +5,7 @@
  */
 
 import React, { useState } from 'react';
-import { Container, Row, Col, Card, Button, Alert, Modal, Form, Table, Badge, ProgressBar } from 'react-bootstrap';
+import { Container, Row, Col, Card, Button, Alert, Modal, Form, Table, Badge, ProgressBar } from '@/components/ui/legacy-shims';
 import { useTheme } from '../../contexts/ThemeContext';
 import ThemeToggle from '../../components/ui/ThemeToggle';
 

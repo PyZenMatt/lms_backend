@@ -1,6 +1,6 @@
 import PropTypes from 'prop-types';
 import React, { useContext } from 'react';
-import { ListGroup } from 'react-bootstrap';
+import { ListGroup } from '@/components/ui/legacy-shims';
 import { NavLink } from 'react-router-dom';
 
 import NavIcon from '../NavIcon';

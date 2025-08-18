@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { Container, Row, Col, Card, Button, Alert, Spinner, Badge, Form } from 'react-bootstrap';
+import { Container, Row, Col, Card, Button, Alert, Spinner, Badge, Form } from '@/components/ui/legacy-shims';
 import { fetchUserRole } from '../../services/api/auth';
 import MainCard from '../../components/Card/MainCard';
 

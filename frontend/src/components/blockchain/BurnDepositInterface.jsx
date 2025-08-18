@@ -4,7 +4,7 @@
  */
 import React, { useState, useEffect, useCallback } from 'react';
 import PropTypes from 'prop-types';
-import { Card, Spinner, Button, Modal, Form, Alert } from 'react-bootstrap';
+import { Card, Spinner, Button, Modal, Form, Alert } from '@/components/ui/legacy-shims';
 import { ethers } from 'ethers';
 import api from '../../services/core/axiosClient';
 

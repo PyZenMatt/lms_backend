@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { Row, Col } from 'react-bootstrap';
+import { Row, Col } from '@/components/ui/legacy-shims';
 import { Button } from '../../../components/ui/Button';
 import { Alert } from '../../../components/ui/Alert';
 import * as Yup from 'yup';

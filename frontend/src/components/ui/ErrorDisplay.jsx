@@ -1,5 +1,5 @@
 import React from 'react';
-import { Alert } from 'react-bootstrap';
+import { Alert } from '@/components/ui/legacy-shims';
 
 const ErrorDisplay = ({ errors, className = '' }) => {
   if (!errors || Object.keys(errors).length === 0) {

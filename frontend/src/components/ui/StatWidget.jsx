@@ -1,5 +1,5 @@
 import React from 'react';
-import { Card } from 'react-bootstrap';
+import { Card } from '@/components/ui/legacy-shims';
 
 const StatWidget = ({
   title,

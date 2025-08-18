@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ProgressBar } from 'react-bootstrap';
+import { ProgressBar } from '@/components/ui/legacy-shims';
 import { Link } from 'react-router-dom';
 import { fetchUserProgress, transformProgressData } from '../../services/api/profile';
 

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Modal, Button, Form, Alert, Spinner, Card, Row, Col, Badge, InputGroup } from 'react-bootstrap';
+import { Modal, Button, Form, Alert, Spinner, Card, Row, Col, Badge, InputGroup } from '@/components/ui/legacy-shims';
 import { createExercise } from '../../services/api/courses';
 import CustomToast from '../ui/Toast';
 

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Card, Spinner, Alert, Badge, Row, Col } from 'react-bootstrap';
+import { Card, Spinner, Alert, Badge, Row, Col } from '@/components/ui/legacy-shims';
 import { useNavigate } from 'react-router-dom';
 import { fetchStudentSubmissions } from '../../services/api/dashboard';
 

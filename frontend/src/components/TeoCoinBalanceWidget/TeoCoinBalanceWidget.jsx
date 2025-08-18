@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Card, Button, Alert, Spinner, Badge } from 'react-bootstrap';
+import { Card, Button, Alert, Spinner, Badge } from '@/components/ui/legacy-shims';
 import stakingService from '../../services/stakingService';
 import { useAuth } from '../../contexts/AuthContext';
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;

@@ -6,7 +6,7 @@
  */
 
 import React, { useState } from 'react';
-import { Card, Alert } from 'react-bootstrap';
+import { Card, Alert } from '@/components/ui/legacy-shims';
 import BurnDepositInterface from '../blockchain/BurnDepositInterface';
 
 const MetaMaskDeposit = ({ onDepositComplete }) => {

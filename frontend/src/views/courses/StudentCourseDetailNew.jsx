@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { Row, Col, Spinner } from 'react-bootstrap';
+import { Row, Col, Spinner } from '@/components/ui/legacy-shims';
 import { Card, CardHeader, CardContent } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
 import { Alert } from '../../components/ui/Alert';

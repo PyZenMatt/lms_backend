@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Card, Table, Button, Spinner, Alert, Badge } from 'react-bootstrap';
+import { Card, Table, Button, Spinner, Alert, Badge } from '@/components/ui/legacy-shims';
 import { fetchPendingTeachers, approveTeacher, rejectTeacher } from '../../services/api/admin';
 
 const PendingTeachersCard = () => {

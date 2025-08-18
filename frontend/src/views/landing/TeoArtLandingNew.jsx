@@ -1,5 +1,5 @@
 import React, { memo } from 'react';
-import { Container, Row, Col, Card, Badge } from 'react-bootstrap';
+import { Container, Row, Col, Card, Badge } from '@/components/ui/legacy-shims';
 import { Link } from 'react-router-dom';
 
 // Memoized components for better performance

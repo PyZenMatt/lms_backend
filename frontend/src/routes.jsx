@@ -187,6 +187,12 @@ const routes = [
         path: '/admin/corsi/:courseId',
         element: lazy(() => import('./views/admin/AdminCourseDetail.jsx'))
       },
+      // Styleguide route (Theme V2 demo)
+      {
+        exact: 'true',
+        path: '/styleguide',
+        element: lazy(() => import('./pages/styleguide/ComponentsPreview.tsx'))
+      },
       // Default redirect
       {
         path: '*',

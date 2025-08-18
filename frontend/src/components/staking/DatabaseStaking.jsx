@@ -6,7 +6,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { Card, Button, Modal, Form, Alert, ProgressBar, Badge, Row, Col } from 'react-bootstrap';
+import { Card, Button, Modal, Form, Alert, ProgressBar, Badge, Row, Col } from '@/components/ui/legacy-shims';
 import stakingService from '../../services/stakingService';
 import { useAuth } from '../../contexts/AuthContext';
 

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Form, Button } from 'react-bootstrap';
+import { Form, Button } from '@/components/ui/legacy-shims';
 import { Link } from 'react-router-dom';
 import { fetchUserSettings, updateUserSettings, transformSettingsData, transformSettingsForBackend } from '../../services/api/profile';
 

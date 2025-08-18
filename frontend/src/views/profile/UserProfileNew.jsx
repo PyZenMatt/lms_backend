@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Card, Spinner, Alert, Form, Button, Row, Col, Container, Badge } from 'react-bootstrap';
+import { Card, Spinner, Alert, Form, Button, Row, Col, Container, Badge } from '@/components/ui/legacy-shims';
 import { Link } from 'react-router-dom';
 import { fetchUserProfile, updateUserProfile } from '../../services/api/dashboard';
 import { fetchUserRole } from '../../services/api/auth';

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Toast, ToastContainer } from 'react-bootstrap';
+import { Toast, ToastContainer } from '@/components/ui/legacy-shims';
 import { blockchainAPI } from '../../services/api/blockchainAPI';
 import { useAuth } from '../../contexts/AuthContext';
 

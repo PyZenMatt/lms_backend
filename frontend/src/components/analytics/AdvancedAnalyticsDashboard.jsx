@@ -9,7 +9,7 @@
  */
 
 import React, { useState, useEffect, useRef } from 'react';
-import { Card, Row, Col, Badge, Button, Dropdown, Form, Alert } from 'react-bootstrap';
+import { Card, Row, Col, Badge, Button, Dropdown, Form, Alert } from '@/components/ui/legacy-shims';
 import {
   Chart as ChartJS,
   CategoryScale,

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Card, Row, Col, Spinner, Alert } from 'react-bootstrap';
+import { Card, Row, Col, Spinner, Alert } from '@/components/ui/legacy-shims';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 

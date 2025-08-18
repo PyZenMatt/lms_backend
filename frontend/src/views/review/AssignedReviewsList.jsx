@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Table, Alert, Spinner, Button } from 'react-bootstrap';
+import { Table, Alert, Spinner, Button } from '@/components/ui/legacy-shims';
 import api from '../../services/core/axiosClient';
 
 const AssignedReviewsList = () => {

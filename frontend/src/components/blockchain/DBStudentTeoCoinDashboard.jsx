@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Card, Badge, Spinner, Alert, Button, Row, Col } from 'react-bootstrap';
+import { Card, Badge, Spinner, Alert, Button, Row, Col } from '@/components/ui/legacy-shims';
 import { useAuth } from '../../contexts/AuthContext';
 import PendingWithdrawals from './PendingWithdrawals';
 import BurnDepositInterface from './BurnDepositInterface';

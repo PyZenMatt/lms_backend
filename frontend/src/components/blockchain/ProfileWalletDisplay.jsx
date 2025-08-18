@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Card, Button, Alert, Badge } from 'react-bootstrap';
+import { Card, Button, Alert, Badge } from '@/components/ui/legacy-shims';
 import { web3Service } from '../../services/api/web3Service';
 import { useAuth } from '../../contexts/AuthContext';
 import { connectWallet, disconnectWallet } from '../../services/api/dashboard';
