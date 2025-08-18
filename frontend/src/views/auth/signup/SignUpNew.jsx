@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
 import { Row, Col, Form, Spinner } from 'react-bootstrap';
-import { Card, CardHeader, CardContent } from '../../components/ui';
-import { Button } from '../../components/ui/Button';
-import { Alert } from '../../components/ui/Alert';
+import { Card, CardHeader, CardContent, Button } from '../../../components/ui';
+import { Alert } from '../../../components/ui/Alert';
 import { NavLink, useNavigate } from 'react-router-dom';
 import api from '../../../services/core/axiosClient';
 

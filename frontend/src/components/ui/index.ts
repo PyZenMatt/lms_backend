@@ -1,6 +1,6 @@
 export * from './components/Card';
 // Centralized exports for UI components
-export * from './components/Button';
+export * from './Button';
 export * from './components/Input';
 export * from './components/Card';
 export * from './components/Alert';

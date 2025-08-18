@@ -25,7 +25,7 @@ import {
   AlertTriangle
 } from "lucide-react"
 import { useAuth } from "./AuthContext"
-import { toast } from "sonner@2.0.3"
+import { toast } from "sonner"
 
 export function Settings() {
   const { user } = useAuth()
@@ -135,7 +135,7 @@ export function Settings() {
                     </div>
                     <Switch
                       checked={settings.compactMode}
-                      onCheckedChange={(checked) => handleSettingChange('compactMode', checked)}
+                      onCheckedChange={(checked: boolean) => handleSettingChange('compactMode', checked)}
                     />
                   </div>
                   <div className="flex items-center justify-between">
@@ -145,7 +145,7 @@ export function Settings() {
                     </div>
                     <Switch
                       checked={settings.autoplayVideos}
-                      onCheckedChange={(checked) => handleSettingChange('autoplayVideos', checked)}
+                      onCheckedChange={(checked: boolean) => handleSettingChange('autoplayVideos', checked)}
                     />
                   </div>
                   <div className="flex items-center justify-between">
@@ -161,7 +161,7 @@ export function Settings() {
                       )}
                       <Switch
                         checked={settings.soundEffects}
-                        onCheckedChange={(checked) => handleSettingChange('soundEffects', checked)}
+                        onCheckedChange={(checked: boolean) => handleSettingChange('soundEffects', checked)}
                       />
                     </div>
                   </div>
@@ -175,7 +175,7 @@ export function Settings() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="language" className="text-sm">Language</Label>
-                    <Select value={settings.language} onValueChange={(value) => handleSettingChange('language', value)}>
+                    <Select value={settings.language} onValueChange={(value: string) => handleSettingChange('language', value)}>
                       <SelectTrigger>
                         <SelectValue />
                       </SelectTrigger>
@@ -190,7 +190,7 @@ export function Settings() {
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="timezone" className="text-sm">Timezone</Label>
-                    <Select value={settings.timezone} onValueChange={(value) => handleSettingChange('timezone', value)}>
+                    <Select value={settings.timezone} onValueChange={(value: string) => handleSettingChange('timezone', value)}>
                       <SelectTrigger>
                         <SelectValue />
                       </SelectTrigger>
@@ -231,7 +231,7 @@ export function Settings() {
                     <Mail className="size-4 text-muted-foreground" />
                     <Switch
                       checked={settings.emailNotifications}
-                      onCheckedChange={(checked) => handleSettingChange('emailNotifications', checked)}
+                      onCheckedChange={(checked: boolean) => handleSettingChange('emailNotifications', checked)}
                     />
                   </div>
                 </div>
@@ -247,7 +247,7 @@ export function Settings() {
                     <Smartphone className="size-4 text-muted-foreground" />
                     <Switch
                       checked={settings.pushNotifications}
-                      onCheckedChange={(checked) => handleSettingChange('pushNotifications', checked)}
+                      onCheckedChange={(checked: boolean) => handleSettingChange('pushNotifications', checked)}
                     />
                   </div>
                 </div>
@@ -265,7 +265,7 @@ export function Settings() {
                     </div>
                     <Switch
                       checked={settings.peerReviewNotifications}
-                      onCheckedChange={(checked) => handleSettingChange('peerReviewNotifications', checked)}
+                      onCheckedChange={(checked: boolean) => handleSettingChange('peerReviewNotifications', checked)}
                     />
                   </div>
                   <div className="flex items-center justify-between">
@@ -275,7 +275,7 @@ export function Settings() {
                     </div>
                     <Switch
                       checked={settings.achievementNotifications}
-                      onCheckedChange={(checked) => handleSettingChange('achievementNotifications', checked)}
+                      onCheckedChange={(checked: boolean) => handleSettingChange('achievementNotifications', checked)}
                     />
                   </div>
                   <div className="flex items-center justify-between">
@@ -285,7 +285,7 @@ export function Settings() {
                     </div>
                     <Switch
                       checked={settings.courseNotifications}
-                      onCheckedChange={(checked) => handleSettingChange('courseNotifications', checked)}
+                      onCheckedChange={(checked: boolean) => handleSettingChange('courseNotifications', checked)}
                     />
                   </div>
                   <div className="flex items-center justify-between">
@@ -295,7 +295,7 @@ export function Settings() {
                     </div>
                     <Switch
                       checked={settings.communityNotifications}
-                      onCheckedChange={(checked) => handleSettingChange('communityNotifications', checked)}
+                      onCheckedChange={(checked: boolean) => handleSettingChange('communityNotifications', checked)}
                     />
                   </div>
                 </div>
@@ -317,7 +317,7 @@ export function Settings() {
               <div className="space-y-4">
                 <div className="space-y-2">
                   <Label>Profile Visibility</Label>
-                  <Select value={settings.profileVisibility} onValueChange={(value) => handleSettingChange('profileVisibility', value)}>
+                  <Select value={settings.profileVisibility} onValueChange={(value: string) => handleSettingChange('profileVisibility', value)}>
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
@@ -344,7 +344,7 @@ export function Settings() {
                       </div>
                       <Switch
                         checked={settings.showEmail}
-                        onCheckedChange={(checked) => handleSettingChange('showEmail', checked)}
+                        onCheckedChange={(checked: boolean) => handleSettingChange('showEmail', checked)}
                       />
                     </div>
                     <div className="flex items-center justify-between">
@@ -354,7 +354,7 @@ export function Settings() {
                       </div>
                       <Switch
                         checked={settings.showProgress}
-                        onCheckedChange={(checked) => handleSettingChange('showProgress', checked)}
+                        onCheckedChange={(checked: boolean) => handleSettingChange('showProgress', checked)}
                       />
                     </div>
                     <div className="flex items-center justify-between">
@@ -364,7 +364,7 @@ export function Settings() {
                       </div>
                       <Switch
                         checked={settings.allowMessages}
-                        onCheckedChange={(checked) => handleSettingChange('allowMessages', checked)}
+                        onCheckedChange={(checked: boolean) => handleSettingChange('allowMessages', checked)}
                       />
                     </div>
                   </div>

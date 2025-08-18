@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { Row, Col } from 'react-bootstrap';
-import { Button } from '../../components/ui/Button';
-import { Alert } from '../../components/ui/Alert';
+import { Button } from '../../../components/ui/Button';
+import { Alert } from '../../../components/ui/Alert';
 import * as Yup from 'yup';
 import { Formik } from 'formik';
 import { login } from '../../../services/api/auth';

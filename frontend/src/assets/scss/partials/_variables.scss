@@ -9,14 +9,14 @@ $Menu-collapsed-width: 80px;
 
 // color list for build layouts
 // temp variables
-$theme-color: linear-gradient(-135deg, color-mix(in srgb, var(--success) 75%, cyan) 0%, #1dc4e9 100%);
+$theme-color: #2563eb;
 $theme-color2: linear-gradient(-135deg, #899fd4 0%, #a389d4 100%);
-$primary-color: var(--primary);
+$primary-color: #2563eb;
 $warning-color: #f4c22b;
 $danger-color: #f44236;
-$success-color: color-mix(in srgb, var(--success) 75%, cyan);
+$success-color: #22c55e;
 $purple-color: #a389d4;
-$info-color: var(--info);
+$info-color: #0ea5e9;
 $secondary-color: #748892;
 $default-color: #d6d6d6;
 $light-color: #f2f2f2;
