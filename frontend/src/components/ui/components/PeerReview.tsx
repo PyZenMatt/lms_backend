@@ -1,5 +1,5 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/bg-card text-card-foreground rounded-lg border border-border shadow-sm"
-import { Badge } from "./ui/inline-flex items-center rounded-md px-2 py-0.5 text-xs bg-accent text-accent-foreground"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/card"
+import { Badge } from "./ui/badge"
 import { Button } from "./ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs"
@@ -53,7 +53,7 @@ export function PeerReview() {
             <CardHeader className="pb-3">
               <div className="flex items-center gap-3">
                 <div className="size-10 bg-green-500 rounded-full flex items-center justify-center">
-                  <Award className="size-5 text-white" />
+                  <Award className="size-5 text-hsl(var(--background))" />
                 </div>
                 <div className="flex-1">
                   <CardTitle className="text-base">Ready to Review</CardTitle>

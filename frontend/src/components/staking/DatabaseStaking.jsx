@@ -7,7 +7,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { Card, Button, Modal, Form, Alert, ProgressBar, Badge, Row, Col } from '@/components/ui/legacy-shims';
+import { Card, Button, Modal, Form, Alert, ProgressBar, Badge, Row, Col } from '@/components/ui';
 import stakingService from '../../services/stakingService';
 import { useAuth } from '../../contexts/AuthContext';
 
@@ -159,7 +159,7 @@ const DatabaseStaking = ({ onBalanceUpdate }) => {
   if (loading) {
     return (
       <Card className="database-staking-bg-bg-card text-card-foreground rounded-lg border border-border shadow-sm text-bg-card text-card-foreground rounded-lg border border-border shadow-sm-foreground border border-border rounded-lg shadow-sm">
-        <Card.Header className="bg-gradient-primary text-white">
+        <Card.Header className="bg-gradient-primary text-hsl(var(--background))">
           <h5 className="mb-0">
             <i className="feather icon-database me-2"></i>
             Database Staking
@@ -179,7 +179,7 @@ const DatabaseStaking = ({ onBalanceUpdate }) => {
   if (error && !stakingInfo) {
     return (
       <Card className="database-staking-bg-bg-card text-card-foreground rounded-lg border border-border shadow-sm text-bg-card text-card-foreground rounded-lg border border-border shadow-sm-foreground border border-border rounded-lg shadow-sm">
-        <Card.Header className="bg-gradient-danger text-white">
+        <Card.Header className="bg-gradient-danger text-hsl(var(--background))">
           <h5 className="mb-0">
             <i className="feather icon-border rounded-md p-3 bg-muted text-muted-foreground-circle me-2"></i>
             Error Loading Data
@@ -203,7 +203,7 @@ const DatabaseStaking = ({ onBalanceUpdate }) => {
   if (!isTeacher) {
     return (
       <Card className="database-staking-bg-bg-card text-card-foreground rounded-lg border border-border shadow-sm text-bg-card text-card-foreground rounded-lg border border-border shadow-sm-foreground border border-border rounded-lg shadow-sm">
-        <Card.Header className="bg-gradient-secondary text-white">
+        <Card.Header className="bg-gradient-secondary text-hsl(var(--background))">
           <h5 className="mb-0">
             <i className="feather icon-lock me-2"></i>
             Staking Not Available
@@ -228,7 +228,7 @@ const DatabaseStaking = ({ onBalanceUpdate }) => {
   return (
     <>
       <Card className="database-staking-bg-bg-card text-card-foreground rounded-lg border border-border shadow-sm text-bg-card text-card-foreground rounded-lg border border-border shadow-sm-foreground border border-border rounded-lg shadow-sm">
-        <Card.Header className="bg-gradient-primary text-white">
+        <Card.Header className="bg-gradient-primary text-hsl(var(--background))">
           <div className="d-flex justify-content-between align-items-center">
             <h5 className="mb-0">
               <i className="feather icon-database me-2"></i>
@@ -279,7 +279,7 @@ const DatabaseStaking = ({ onBalanceUpdate }) => {
             className="tier-display text-center p-3 rounded mb-4"
             style={{
               background: `linear-gradient(135deg, var(--bs-${tierInfo.color}) 0%, var(--bs-${tierInfo.color}) 100%)`,
-              color: tierInfo.color === 'warning' || tierInfo.color === 'light' ? 'var(--bs-dark)' : 'white'
+              color: tierInfo.color === 'warning' || tierInfo.color === 'light' ? 'var(--bs-dark)' : 'hsl(var(--background))'
             }}
           >
             <h3 className="mb-2">
@@ -355,8 +355,8 @@ const DatabaseStaking = ({ onBalanceUpdate }) => {
         </Card.Body>
       </Card>
 
-      {/* Stake Modal */}
-      <Dialog open={showStakeModal}> setShowStakeModal(false)} centered>
+  {/* Stake Modal */}
+  <Modal show={showStakeModal} onHide={() => setShowStakeModal(false)} centered>
         <Modal.Header closeButton>
           <Modal.Title>
             <i className="feather icon-trending-up me-2"></i>
@@ -385,7 +385,7 @@ const DatabaseStaking = ({ onBalanceUpdate }) => {
             </div>
           </Form>
         </Modal.Body>
-        <Modal.Footer>
+  <Modal.Footer>
           <Button variant="outline-secondary" onClick={() => setShowStakeModal(false)}>
             Cancel
           </Button>
@@ -403,10 +403,10 @@ const DatabaseStaking = ({ onBalanceUpdate }) => {
             )}
           </Button>
         </Modal.Footer>
-      </Dialog>
+      </Modal>
 
-      {/* Unstake Modal */}
-      <Dialog open={showUnstakeModal}> setShowUnstakeModal(false)} centered>
+  {/* Unstake Modal */}
+  <Modal show={showUnstakeModal} onHide={() => setShowUnstakeModal(false)} centered>
         <Modal.Header closeButton>
           <Modal.Title>
             <i className="feather icon-trending-down me-2"></i>
@@ -435,7 +435,7 @@ const DatabaseStaking = ({ onBalanceUpdate }) => {
             </div>
           </Form>
         </Modal.Body>
-        <Modal.Footer>
+  <Modal.Footer>
           <Button variant="outline-secondary" onClick={() => setShowUnstakeModal(false)}>
             Cancel
           </Button>
@@ -453,7 +453,7 @@ const DatabaseStaking = ({ onBalanceUpdate }) => {
             )}
           </Button>
         </Modal.Footer>
-      </Dialog>
+      </Modal>
     </>
   );
 };

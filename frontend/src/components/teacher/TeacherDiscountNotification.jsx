@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Badge, Dropdown, Card, Button, Spinner } from '@/components/ui/legacy-shims';
+import { Badge, Dropdown, Card, Button, Spinner } from '@/components/ui';
 import { BellFill, CurrencyExchange, Clock, CheckCircle, XCircle } from 'react-bootstrap-icons';
 import axiosClient from '../../services/core/axiosClient';
 import { formatDistanceToNow } from 'date-fns';

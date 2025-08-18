@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { Container, Row, Col, Card, Button, Alert, Spinner, Badge } from '@/components/ui/legacy-shims';
+import { Container, Row, Col, Card, Button, Alert, Spinner, Badge } from '@/components/ui';
 import { fetchUserRole } from '../../services/api/auth';
 import api from '../../services/core/axiosClient';
 import MainCard from '../../components/Card/MainCard';

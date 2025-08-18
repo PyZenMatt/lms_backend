@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Card, Row, Col, Spinner, Alert } from '@/components/ui/legacy-shims';
+import { Card, Row, Col, Spinner, Alert } from '@/components/ui';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
@@ -75,7 +75,7 @@ const StudentTeoCoinStats = () => {
 
   return (
     <Card className="border-0 shadow-sm">
-      <Card.Header className="bg-gradient-primary text-white border-0">
+      <Card.Header className="bg-gradient-primary text-hsl(var(--background)) border-0">
         <Card.Title as="h5" className="mb-0 d-flex align-items-center">
           <i className="feather icon-trending-up me-2"></i>
           Your TeoCoin Journey
@@ -87,7 +87,7 @@ const StudentTeoCoinStats = () => {
             <div
               className="text-center p-3 rounded"
               style={{
-                background: 'linear-gradient(135deg, rgba(40, 167, 69, 0.1) 0%, hsl(var(--success) / 0.05) 100%)'
+                background: 'linear-gradient(135deg, hsl(var(--success) / 0.10) 0%, hsl(var(--success) / 0.05) 100%)'
               }}
             >
               <i className="feather icon-award text-success" style={{ fontSize: '2rem' }}></i>
@@ -99,7 +99,7 @@ const StudentTeoCoinStats = () => {
             <div
               className="text-center p-3 rounded"
               style={{
-                background: 'linear-gradient(135deg, rgba(23, 162, 184, 0.1) 0%, hsl(var(--info) / 0.05) 100%)'
+                background: 'linear-gradient(135deg, hsl(var(--info) / 0.10) 0%, hsl(var(--info) / 0.05) 100%)'
               }}
             >
               <i className="feather icon-percent text-info" style={{ fontSize: '2rem' }}></i>
@@ -123,7 +123,7 @@ const StudentTeoCoinStats = () => {
             <div
               className="text-center p-3 rounded"
               style={{
-                background: 'linear-gradient(135deg, rgba(108, 117, 125, 0.1) 0%, rgba(108, 117, 125, 0.05) 100%)'
+                background: 'linear-gradient(135deg, hsl(var(--muted-foreground) / 0.10) 0%, hsl(var(--muted-foreground) / 0.05) 100%)'
               }}
             >
               <i className="feather icon-activity text-secondary" style={{ fontSize: '2rem' }}></i>
@@ -138,7 +138,7 @@ const StudentTeoCoinStats = () => {
           <div
             className="p-3 rounded"
             style={{
-              background: 'linear-gradient(135deg, rgba(220, 53, 69, 0.1) 0%, hsl(var(--danger) / 0.05) 100%)'
+              background: 'linear-gradient(135deg, hsl(var(--danger) / 0.10) 0%, hsl(var(--danger) / 0.05) 100%)'
             }}
           >
             <h5 className="text-danger mb-2">

@@ -6,7 +6,7 @@
  */
 
 import React, { useState } from 'react';
-import { Container, Row, Col, Card, Button, Alert, Modal, Form, Table, Badge, ProgressBar } from '@/components/ui/legacy-shims';
+import { Container, Row, Col, Card, Button, Alert, Modal, Form, Table, Badge, ProgressBar } from '@/components/ui';
 import { useTheme } from '../../contexts/ThemeContext';
 import ThemeToggle from '../../components/ui/ThemeToggle';
 
@@ -93,7 +93,7 @@ const DarkThemeShowcase = () => {
                       onClick={() => setActiveTab(tab)}
                       style={{
                         background: activeTab === tab ? themeColors.primary : 'transparent',
-                        color: activeTab === tab ? 'white' : themeColors.text,
+                        color: activeTab === tab ? 'hsl(var(--background))' : themeColors.text,
                         border: 'none',
                         padding: '0.5rem 1rem',
                         margin: '0 0.25rem',
@@ -270,7 +270,7 @@ const DarkThemeShowcase = () => {
       </Row>
 
       {/* Feature Details Modal */}
-      <Dialog open={showModal}> setShowModal(false)} size="lg">
+  <Modal show={showModal} onHide={() => setShowModal(false)}>
         <Modal.Header closeButton>
           <Modal.Title>🌙 Dark Theme Technical Details</Modal.Title>
         </Modal.Header>
@@ -303,7 +303,7 @@ const DarkThemeShowcase = () => {
             Close
           </Button>
         </Modal.Footer>
-      </Dialog>
+  </Modal>
     </Container>
   );
 };

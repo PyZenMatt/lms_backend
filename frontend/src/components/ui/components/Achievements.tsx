@@ -1,5 +1,5 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/bg-card text-card-foreground rounded-lg border border-border shadow-sm"
-import { Badge } from "./ui/inline-flex items-center rounded-md px-2 py-0.5 text-xs bg-accent text-accent-foreground"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/card"
+import { Badge } from "./ui/badge"
 import { Progress } from "./ui/progress"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs"
 import { Trophy, Star, Users, Heart, BookOpen, Sparkles, Award, Target } from "lucide-react"
@@ -18,7 +18,7 @@ export function Achievements() {
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
               <div className="size-12 bg-purple-500 rounded-full flex items-center justify-center">
-                <Sparkles className="size-6 text-white" />
+                <Sparkles className="size-6 text-hsl(var(--background))" />
               </div>
               <div>
                 <p className="text-2xl font-medium">247</p>
@@ -68,7 +68,7 @@ export function Achievements() {
               <CardHeader className="pb-3">
                 <div className="flex items-center gap-3">
                   <div className="size-12 bg-amber-500 rounded-full flex items-center justify-center">
-                    <Star className="size-6 text-white" />
+                    <Star className="size-6 text-hsl(var(--background))" />
                   </div>
                   <div>
                     <CardTitle className="text-base">First Masterpiece</CardTitle>
@@ -88,7 +88,7 @@ export function Achievements() {
               <CardHeader className="pb-3">
                 <div className="flex items-center gap-3">
                   <div className="size-12 bg-green-500 rounded-full flex items-center justify-center">
-                    <Heart className="size-6 text-white" />
+                    <Heart className="size-6 text-hsl(var(--background))" />
                   </div>
                   <div>
                     <CardTitle className="text-base">Community Helper</CardTitle>
@@ -108,7 +108,7 @@ export function Achievements() {
               <CardHeader className="pb-3">
                 <div className="flex items-center gap-3">
                   <div className="size-12 bg-blue-500 rounded-full flex items-center justify-center">
-                    <BookOpen className="size-6 text-white" />
+                    <BookOpen className="size-6 text-hsl(var(--background))" />
                   </div>
                   <div>
                     <CardTitle className="text-base">Learning Streak</CardTitle>
@@ -128,7 +128,7 @@ export function Achievements() {
               <CardHeader className="pb-3">
                 <div className="flex items-center gap-3">
                   <div className="size-12 bg-purple-500 rounded-full flex items-center justify-center">
-                    <Users className="size-6 text-white" />
+                    <Users className="size-6 text-hsl(var(--background))" />
                   </div>
                   <div>
                     <CardTitle className="text-base">Collaborator</CardTitle>

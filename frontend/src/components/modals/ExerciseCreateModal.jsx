@@ -1,6 +1,6 @@
 // TODO: Verifica mapping sottocomponenti Modal
 import React, { useState, useEffect, useRef } from 'react';
-import { Modal, Button, Form, Alert, Spinner, Card, Row, Col, Badge, InputGroup } from '@/components/ui/legacy-shims';
+import { Modal, Button, Form, Alert, Spinner, Card, Row, Col, Badge, InputGroup } from '@/components/ui';
 import { createExercise } from '../../services/api/courses';
 import CustomToast from '../ui/Toast';
 
@@ -353,7 +353,7 @@ const ExerciseCreateModal = ({ show, onHide, onCreated, lessonId, courseId }) =>
                             <div className="d-flex align-items-center">
                               <Badge
                                 bg={exerciseType === type.value ? type.color : 'light'}
-                                text={exerciseType === type.value ? 'white' : 'dark'}
+                                text={exerciseType === type.value ? 'hsl(var(--background))' : 'dark'}
                                 className="me-2"
                               >
                                 {type.label}
@@ -386,7 +386,7 @@ const ExerciseCreateModal = ({ show, onHide, onCreated, lessonId, courseId }) =>
                       >
                         <Badge
                           bg={difficulty === level.value ? level.color : 'light'}
-                          text={difficulty === level.value ? 'white' : 'dark'}
+                          text={difficulty === level.value ? 'hsl(var(--background))' : 'dark'}
                           className="w-100 p-2 difficulty-inline-flex items-center rounded-md px-2 py-0.5 text-xs font-medium bg-accent text-accent-foreground"
                         >
                           {level.label}

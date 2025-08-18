@@ -54,7 +54,7 @@
       
       &.locked-tier {
         opacity: 0.6;
-        filter: grayscale(0.3);
+        filter: hsl(var(--muted-foreground))scale(0.3);
       }
     }
   }
@@ -245,7 +245,7 @@
     }
     
     .loading-overlay {
-      background: rgba(0, 0, 0, 0.8);
+      background: hsl(var(--foreground) / 0.80);
     }
   }
 }

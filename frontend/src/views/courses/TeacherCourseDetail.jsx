@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { Row, Col, Card, Button, Spinner, Alert, Badge } from '@/components/ui/legacy-shims';
+import { Row, Col, Card, Button, Spinner, Alert, Badge } from '@/components/ui';
 import { fetchCourseDetail, fetchLessonsForCourse } from '../../services/api/courses';
 import MainCard from '../../components/Card/MainCard';
 import { Helmet } from 'react-helmet';

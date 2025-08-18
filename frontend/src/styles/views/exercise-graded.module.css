@@ -16,7 +16,7 @@
 }
 
 .graded-header {
-  background: white;
+  background: hsl(var(--background));
   padding: 2rem;
   border-radius: 12px;
   margin-bottom: 2rem;
@@ -29,7 +29,7 @@
 }
 
 .graded-title {
-  color: #2c3e50;
+  color: hsl(var(--foreground));
   margin: 0;
   font-size: 1.8rem;
   font-weight: 600;
@@ -98,7 +98,7 @@
 
 .card-header {
   background: linear-gradient(135deg, var(--primary) 0%, var(--primary) 100%);
-  color: white;
+  color: hsl(var(--background));
   border-radius: 12px 12px 0 0 !important;
   font-weight: 600;
 }
@@ -106,7 +106,7 @@
 .card-header h5,
 .card-header h6 {
   margin: 0;
-  color: white;
+  color: hsl(var(--background));
 }
 
 @media (max-width: 768px) {

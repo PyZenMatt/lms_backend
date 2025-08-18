@@ -426,8 +426,8 @@ section {
 /* High contrast mode support */
 @media (prefers-contrast: high) {
   .glass-card {
-    background: rgba(0, 0, 0, 0.9);
-    border: 2px solid white;
+    background: hsl(var(--foreground) / 0.9);
+    border: 2px solid hsl(var(--background));
   }
 
   .btn-primary-glow {
@@ -471,13 +471,13 @@ section {
   .hero-section-dark,
   .features-section-dark,
   .stats-section-dark {
-    background: white !important;
-    color: black !important;
+    background: hsl(var(--background)) !important;
+    color: hsl(var(--foreground)) !important;
   }
 
   .glass-card {
-    background: white !important;
-    border: 1px solid black !important;
+    background: hsl(var(--background)) !important;
+    border: 1px solid hsl(var(--foreground)) !important;
   }
 }
 

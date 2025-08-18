@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ListGroup, Dropdown } from '@/components/ui/legacy-shims';
+import { ListGroup, Dropdown } from '@/components/ui';
 import { Link } from 'react-router-dom';
 
 import ChatList from './ChatList';

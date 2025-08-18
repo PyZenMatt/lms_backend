@@ -15,12 +15,15 @@
     "openapi:gen": "openapi-typescript openapi/openapi.json -o src/lib/api/schema.ts",
     "tokens:apply": "node scripts/tokenize-css.mjs --root src --mapping scripts/color-mapping.js --ext css,scss,js,jsx,ts,tsx --write --report .tokenize-report.json",
     "imports:strip-versions": "node scripts/strip-import-versions.mjs",
+  "imports:normalize": "node scripts/normalize-imports.mjs",
+  "imports:dedupe-ui": "node scripts/dedupe-ui-imports.mjs",
     "ban:legacy": "node scripts/ban-legacy.mjs",
     "migrate:rb": "node scripts/migrate-react-bootstrap-imports.mjs",
     "purge:css": "node scripts/purge-css.mjs",
     "codemod:rb": "node scripts/codemod-react-bootstrap.mjs",
     "migrate:classes": "node scripts/migrate-bootstrap-classes.mjs",
-    "cutover:v2": "npm run purge:css && npm run codemod:rb && npm run migrate:classes && npm run ban:legacy && npm run tokens:check"
+  "cutover:v2": "npm run purge:css && npm run codemod:rb && npm run migrate:classes && npm run ban:legacy && npm run tokens:check",
+  "cutover:imports": "npm run imports:normalize && npm run imports:dedupe-ui && npm run ban:legacy && npm run typecheck"
   },
   "lint-staged": {
     "**/*.{js,jsx,ts,tsx}": [

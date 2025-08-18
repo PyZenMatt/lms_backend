@@ -15,7 +15,7 @@ import { CommunityGallery } from "../../components/ui/components/CommunityGaller
 import { useState } from "react"
 import { Button } from "../../components/ui/components/ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "../../components/ui/components/ui/avatar"
-import { Badge } from "../../components/ui/components/ui/inline-flex items-center rounded-md px-2 py-0.5 text-xs font-medium bg-accent text-accent-foreground"
+import { Badge } from "../../components/ui/components/ui/badge"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "../../components/ui/components/ui/dropdown-menu"
 import { LogOut, User, Wallet as WalletIcon, Settings as SettingsIcon } from "lucide-react"
 import { Toaster } from "../../components/ui/components/ui/sonner"

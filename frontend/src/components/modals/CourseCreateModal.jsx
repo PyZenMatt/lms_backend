@@ -1,6 +1,6 @@
 // TODO: Verifica mapping sottocomponenti Modal
 import React, { useState, useRef, useEffect } from 'react';
-import { Modal, Button, Form, Alert, Spinner, Card, Row, Col, Badge, ProgressBar } from '@/components/ui/legacy-shims';
+import { Modal, Button, Form, Alert, Spinner, Card, Row, Col, Badge, ProgressBar } from '@/components/ui';
 import { createCourse } from '../../services/api/courses';
 import CustomToast from '../ui/Toast';
 
@@ -287,7 +287,7 @@ const CourseCreateModal = ({ show, onHide, onCreated }) => {
           >
             <div
               className={`step-circle d-flex align-items-center justify-content-center mx-auto mb-2 ${
-                currentStep >= step ? 'bg-primary text-white' : 'bg-light text-muted'
+                currentStep >= step ? 'bg-primary text-hsl(var(--background))' : 'bg-light text-muted'
               }`}
               style={{ width: '40px', height: '40px', borderRadius: '50%' }}
             >
@@ -418,7 +418,7 @@ const CourseCreateModal = ({ show, onHide, onCreated }) => {
                       >
                         <Badge
                           bg={category === cat.value ? cat.color : 'light'}
-                          text={category === cat.value ? 'white' : 'dark'}
+                          text={category === cat.value ? 'hsl(var(--background))' : 'dark'}
                           className="w-100 p-3 category-inline-flex items-center rounded-md px-2 py-0.5 text-xs font-medium bg-accent text-accent-foreground h-100 d-flex align-items-center justify-content-center"
                           style={{ fontSize: '0.9rem', minHeight: '50px' }}
                         >
@@ -447,7 +447,7 @@ const CourseCreateModal = ({ show, onHide, onCreated }) => {
                     <Card.Body className="text-center p-3">
                       <Badge
                         bg={level === levelOption.value ? levelOption.color : 'light'}
-                        text={level === levelOption.value ? 'white' : 'dark'}
+                        text={level === levelOption.value ? 'hsl(var(--background))' : 'dark'}
                         className="mb-2"
                       >
                         {levelOption.label}

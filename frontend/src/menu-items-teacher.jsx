@@ -64,19 +64,15 @@ const teacherMenuItems = {
           title: 'Crea Nuovo Corso',
           type: 'item',
           icon: 'feather icon-plus-circle',
-          inline-flex items-center rounded-md px-2 py-0.5 text-xs font-medium bg-accent text-accent-foreground: {
+          badge: {
             title: 'CREATE',
             type: 'label-primary'
           },
           action: () => {
-            const createButton =
-              document.querySelector('button:contains("+ Crea nuovo corso")') ||
-              [...document.querySelectorAll('button')].find((inline-flex items-center justify-center rounded-md h-9 px-4 py-2 text-sm font-medium bg-primary text-primary-foreground) => inline-flex items-center justify-center rounded-md h-9 px-4 py-2 text-sm font-medium bg-primary text-primary-foreground.textContent.includes('Crea nuovo corso'));
-            if (createButton) {
-              createButton.click();
-            } else {
-              border rounded-md p-3 bg-muted text-muted-foreground('Pulsante di creazione corso non trovato sulla pagina');
-            }
+            const buttons = [...document.querySelectorAll('button')];
+            const createButton = buttons.find((b) => b.textContent?.toLowerCase().includes('crea nuovo corso'));
+            if (createButton) createButton.click();
+            else alert('Pulsante di creazione corso non trovato sulla pagina');
           }
         },
         {
@@ -120,7 +116,7 @@ const teacherMenuItems = {
           title: 'Smart Contracts',
           type: 'item',
           icon: 'feather icon-shield',
-          inline-flex items-center rounded-md px-2 py-0.5 text-xs font-medium bg-accent text-accent-foreground: {
+          badge: {
             title: 'BETA',
             type: 'label-warning'
           },

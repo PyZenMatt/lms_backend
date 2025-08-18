@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Card, Spinner, Alert, Form, Button, Row, Col, Container, Badge } from '@/components/ui/legacy-shims';
+import { Card, Spinner, Alert, Form, Button, Row, Col, Container, Badge } from '@/components/ui';
 import { Link } from 'react-router-dom';
 import { fetchUserProfile, updateUserProfile } from '../../services/api/dashboard';
 import { fetchUserRole } from '../../services/api/auth';
@@ -203,7 +203,7 @@ const UserProfileNew = () => {
                       className="rounded-circle profile-avatar-image"
                     />
                   ) : (
-                    <div className="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center profile-avatar-placeholder">
+                    <div className="rounded-circle bg-primary text-hsl(var(--background)) d-flex align-items-center justify-content-center profile-avatar-placeholder">
                       {getUserInitials()}
                     </div>
                   )}

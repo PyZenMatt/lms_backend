@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Helmet } from 'react-helmet';
-import { Row, Col } from '@/components/ui/legacy-shims';
+import { Row, Col } from '@/components/ui';
 import RoleGuard from '../../components/guards/RoleGuard';
 import PendingTeachersCard from '../../components/cards/PendingTeachersCard';
 import PendingCoursesCard from '../../components/cards/PendingCoursesCard';

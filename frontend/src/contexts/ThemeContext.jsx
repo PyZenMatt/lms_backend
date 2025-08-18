@@ -87,24 +87,24 @@ export const ThemeProvider = ({ children }) => {
       body.classList.remove('light-mode');
 
       // Set CSS custom properties for dark theme
-      root.style.setProperty('--bs-body-bg', '#1a1d21');
-      root.style.setProperty('--bs-body-color', '#adb7be');
-  root.style.setProperty('--bs-bg-card text-card-foreground rounded-lg border border-border shadow-sm-bg', '#2d3748');
-      root.style.setProperty('--bs-navbar-bg', '#1a202c');
-      root.style.setProperty('--bs-sidebar-bg', '#2d3748');
+      root.style.setProperty('--bs-body-bg', 'hsl(var(--foreground))');
+      root.style.setProperty('--bs-body-color', 'hsl(var(--muted-foreground))');
+  root.style.setProperty('--bs-bg-card text-card-foreground rounded-lg border border-border shadow-sm-bg', 'hsl(var(--muted-foreground))');
+      root.style.setProperty('--bs-navbar-bg', 'hsl(var(--foreground))');
+      root.style.setProperty('--bs-sidebar-bg', 'hsl(var(--muted-foreground))');
       root.style.setProperty('--bs-primary', 'var(--primary)');
-      root.style.setProperty('--bs-secondary', '#4a5568');
-      root.style.setProperty('--bs-success', '#38a169');
-      root.style.setProperty('--bs-warning', '#ed8936');
+      root.style.setProperty('--bs-secondary', 'hsl(var(--muted-foreground))');
+      root.style.setProperty('--bs-success', 'hsl(var(--success))');
+      root.style.setProperty('--bs-warning', 'hsl(var(--warning-600))');
       root.style.setProperty('--bs-danger', 'var(--destructive)');
-      root.style.setProperty('--bs-info', '#3182ce');
-      root.style.setProperty('--bs-light', '#4a5568');
+      root.style.setProperty('--bs-info', 'hsl(var(--info))');
+      root.style.setProperty('--bs-light', 'hsl(var(--muted-foreground))');
       root.style.setProperty('--bs-dark', 'var(--border)');
       root.style.setProperty('--bs-border-color', 'hsl(var(--background) / 0.125)');
-      root.style.setProperty('--bs-text-muted', '#a0aec0');
+      root.style.setProperty('--bs-text-muted', 'hsl(var(--muted-foreground))');
 
       // Update meta theme-color for mobile browsers
-      updateMetaThemeColor('#1a1d21');
+      updateMetaThemeColor('hsl(var(--foreground))');
     } else {
       // Add light mode classes
       body.classList.add('light-mode');
@@ -112,20 +112,20 @@ export const ThemeProvider = ({ children }) => {
 
       // Reset CSS custom properties to default light theme
       root.style.setProperty('--bs-body-bg', 'var(--background)');
-      root.style.setProperty('--bs-body-color', '#888');
+      root.style.setProperty('--bs-body-color', 'hsl(var(--muted-foreground))');
   root.style.setProperty('--bs-bg-card text-card-foreground rounded-lg border border-border shadow-sm-bg', 'var(--background)');
       root.style.setProperty('--bs-navbar-bg', 'var(--background)');
       root.style.setProperty('--bs-sidebar-bg', 'var(--background)');
       root.style.setProperty('--bs-primary', 'var(--primary)');
-      root.style.setProperty('--bs-secondary', '#748892');
+      root.style.setProperty('--bs-secondary', 'hsl(var(--muted-foreground))');
       root.style.setProperty('--bs-success', 'color-mix(in srgb, var(--success) 75%, cyan)');
-      root.style.setProperty('--bs-warning', '#f4c22b');
-      root.style.setProperty('--bs-danger', '#f44236');
+      root.style.setProperty('--bs-warning', 'hsl(var(--warning))');
+      root.style.setProperty('--bs-danger', 'hsl(var(--destructive))');
       root.style.setProperty('--bs-info', 'var(--info)');
-      root.style.setProperty('--bs-light', '#f2f2f2');
-      root.style.setProperty('--bs-dark', '#37474f');
-      root.style.setProperty('--bs-border-color', '#eaeaea');
-      root.style.setProperty('--bs-text-muted', '#888');
+      root.style.setProperty('--bs-light', 'hsl(var(--muted))');
+      root.style.setProperty('--bs-dark', 'hsl(var(--foreground))');
+      root.style.setProperty('--bs-border-color', 'hsl(var(--muted))');
+      root.style.setProperty('--bs-text-muted', 'hsl(var(--muted-foreground))');
 
       // Update meta theme-color for mobile browsers
       updateMetaThemeColor('var(--background)');
@@ -189,34 +189,34 @@ export const ThemeProvider = ({ children }) => {
     if (isDark) {
       return {
         primary: 'var(--primary)',
-        secondary: '#4a5568',
-        success: '#38a169',
-        warning: '#ed8936',
+        secondary: 'hsl(var(--muted-foreground))',
+        success: 'hsl(var(--success))',
+        warning: 'hsl(var(--warning-600))',
         danger: 'var(--destructive)',
-        info: '#3182ce',
-        light: '#4a5568',
+        info: 'hsl(var(--info))',
+        light: 'hsl(var(--muted-foreground))',
         dark: 'var(--border)',
-        background: '#1a1d21',
-        surface: '#2d3748',
-        text: '#adb7be',
-        textMuted: '#a0aec0',
+        background: 'hsl(var(--foreground))',
+        surface: 'hsl(var(--muted-foreground))',
+        text: 'hsl(var(--muted-foreground))',
+        textMuted: 'hsl(var(--muted-foreground))',
         border: 'hsl(var(--background) / 0.125)'
       };
     } else {
       return {
         primary: 'var(--primary)',
-        secondary: '#748892',
+        secondary: 'hsl(var(--muted-foreground))',
         success: 'color-mix(in srgb, var(--success) 75%, cyan)',
-        warning: '#f4c22b',
-        danger: '#f44236',
+        warning: 'hsl(var(--warning))',
+        danger: 'hsl(var(--destructive))',
         info: 'var(--info)',
-        light: '#f2f2f2',
-        dark: '#37474f',
+        light: 'hsl(var(--muted))',
+        dark: 'hsl(var(--foreground))',
         background: 'var(--background)',
         surface: 'var(--background)',
-        text: '#888',
-        textMuted: '#888',
-        border: '#eaeaea'
+        text: 'hsl(var(--muted-foreground))',
+        textMuted: 'hsl(var(--muted-foreground))',
+        border: 'hsl(var(--muted))'
       };
     }
   };

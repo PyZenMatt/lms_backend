@@ -18,7 +18,7 @@
 .form-select:focus {
   background-color: var(--bg-primary);
   border-color: var(--primary-color);
-  box-shadow: 0 0 0 3px rgba(0, 255, 136, 0.1);
+  box-shadow: 0 0 0 3px hsl(var(--success) / 0.10);
   outline: none;
   transform: translateY(-1px);
 }
@@ -31,13 +31,13 @@
 .form-control.is-invalid,
 .form-select.is-invalid {
   border-color: var(--error-color);
-  box-shadow: 0 0 0 3px rgba(244, 63, 94, 0.1);
+  box-shadow: 0 0 0 3px hsl(var(--danger) / 0.10);
 }
 
 .form-control.is-valid,
 .form-select.is-valid {
   border-color: var(--success-color);
-  box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.1);
+  box-shadow: 0 0 0 3px hsl(var(--success) / 0.10);
 }
 
 /* Form Labels */
@@ -104,7 +104,7 @@ label {
 }
 
 .form-check-input:focus {
-  box-shadow: 0 0 0 3px rgba(0, 255, 136, 0.1);
+  box-shadow: 0 0 0 3px hsl(var(--success) / 0.10);
   border-color: var(--primary-color);
 }
 
@@ -236,7 +236,7 @@ label {
 
 /* Auth-specific form styles */
 .auth-wrapper .form-control {
-  background-color: rgba(255, 255, 255, 0.95);
+  background-color: hsl(var(--background) / 0.95);
   border: 2px solid var(--shadow-sm);
   border-radius: var(--radius-lg);
   padding: var(--space-4);
@@ -246,8 +246,8 @@ label {
 
 .auth-wrapper .form-control:focus {
   border-color: var(--primary-color);
-  background-color: white;
-  box-shadow: 0 0 0 3px rgba(0, 255, 136, 0.1);
+  background-color: hsl(var(--background));
+  box-shadow: 0 0 0 3px hsl(var(--success) / 0.10);
 }
 
 .auth-wrapper .btn {
@@ -278,7 +278,7 @@ label {
 
 .modal .form-control:focus {
   border-color: var(--primary-color);
-  box-shadow: 0 0 0 3px rgba(0, 255, 136, 0.1);
+  box-shadow: 0 0 0 3px hsl(var(--success) / 0.10);
 }
 
 .modal .form-label {
@@ -314,7 +314,7 @@ label {
 .video-upload-area.drag-over {
   border-color: var(--primary-color);
   background-color: var(--primary-light);
-  box-shadow: 0 0 20px rgba(0, 255, 136, 0.2);
+  box-shadow: 0 0 20px hsl(var(--success) / 0.20);
 }
 
 .upload-content h5 {
@@ -361,7 +361,7 @@ label {
 
 .profile-form .form-control:focus {
   border-color: var(--primary-color);
-  box-shadow: 0 0 0 3px rgba(0, 255, 136, 0.1);
+  box-shadow: 0 0 0 3px hsl(var(--success) / 0.10);
   transform: translateY(-1px);
 }
 
@@ -405,7 +405,7 @@ label {
   border-radius: 50%;
   object-fit: cover;
   border: 3px solid var(--primary-color);
-  box-shadow: 0 4px 15px rgba(0, 255, 136, 0.3);
+  box-shadow: 0 4px 15px hsl(var(--success) / 0.30);
 }
 
 /* Enhanced button in forms */

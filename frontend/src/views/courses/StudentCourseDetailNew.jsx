@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { Row, Col, Spinner } from '@/components/ui/legacy-shims';
+import { Row, Col, Spinner } from '@/components/ui';
 import { Card, CardHeader, CardContent } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
 import { Alert } from '../../components/ui/Alert';
@@ -129,7 +129,7 @@ const StudentCourseDetailNew = () => {
               <Card.Body className="text-center">
                 <div className="d-flex justify-content-center align-items-center mb-3">
                   <div
-                    className="rounded-circle bg-primary text-white d-flex justify-content-center align-items-center"
+                    className="rounded-circle bg-primary text-hsl(var(--background)) d-flex justify-content-center align-items-center"
                     style={{ width: '60px', height: '60px' }}
                   >
                     <i className="feather icon-clock" style={{ fontSize: '1.5rem' }}></i>
@@ -146,7 +146,7 @@ const StudentCourseDetailNew = () => {
               <Card.Body className="text-center">
                 <div className="d-flex justify-content-center align-items-center mb-3">
                   <div
-                    className="rounded-circle bg-primary text-white d-flex justify-content-center align-items-center"
+                    className="rounded-circle bg-primary text-hsl(var(--background)) d-flex justify-content-center align-items-center"
                     style={{ width: '60px', height: '60px' }}
                   >
                     <i className="feather icon-award" style={{ fontSize: '1.5rem' }}></i>
@@ -163,7 +163,7 @@ const StudentCourseDetailNew = () => {
               <Card.Body className="text-center">
                 <div className="d-flex justify-content-center align-items-center mb-3">
                   <div
-                    className="rounded-circle bg-primary text-white d-flex justify-content-center align-items-center"
+                    className="rounded-circle bg-primary text-hsl(var(--background)) d-flex justify-content-center align-items-center"
                     style={{ width: '60px', height: '60px' }}
                   >
                     <i className="feather icon-users" style={{ fontSize: '1.5rem' }}></i>

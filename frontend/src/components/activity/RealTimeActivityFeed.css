@@ -13,12 +13,12 @@
   background: linear-gradient(135deg, var(--primary) 0%, var(--primary) 100%);
   border: none;
   border-radius: 20px;
-  box-shadow: 0 20px 40px rgba(102, 126, 234, 0.15);
+  box-shadow: 0 20px 40px hsl(var(--indigo-500) / 0.15);
   overflow: hidden;
 }
 
 .activity-feed-header {
-  background: rgba(255, 255, 255, 0.95);
+  background: hsl(var(--background) / 0.95);
   backdrop-filter: blur(10px);
   border-bottom: 1px solid color-mix(in srgb, var(--background) 20%, transparent);
   padding: 1.5rem;
@@ -45,14 +45,14 @@
   display: flex;
   gap: 0.5rem;
   padding: 1rem;
-  background: rgba(255, 255, 255, 0.95);
+  background: hsl(var(--background) / 0.95);
   border-bottom: 1px solid color-mix(in srgb, var(--background) 20%, transparent);
   overflow-x: auto;
 }
 
 .filter-btn {
   border-radius: 20px;
-  white-space: nowrap;
+  hsl(var(--background))-space: nowrap;
   transition: all 0.3s ease;
   border: 2px solid transparent;
 }
@@ -65,7 +65,7 @@
 .activity-feed-container {
   flex: 1;
   overflow-y: auto;
-  background: rgba(255, 255, 255, 0.95);
+  background: hsl(var(--background) / 0.95);
 }
 
 .activity-list {
@@ -83,13 +83,13 @@
 }
 
 .activity-item:hover {
-  background: rgba(102, 126, 234, 0.05);
+  background: hsl(var(--indigo-500) / 0.05);
   transform: translateX(5px);
 }
 
 .activity-item.new-activity {
-  background: linear-gradient(90deg, rgba(76, 175, 80, 0.1) 0%, transparent 100%);
-  border-left: 4px solid #4caf50;
+  background: linear-gradient(90deg, hsl(var(--success) / 0.10) 0%, transparent 100%);
+  border-left: 4px solid hsl(var(--success));
   animation: newActivitySlide 0.5s ease-out;
 }
 
@@ -119,7 +119,7 @@
   background: linear-gradient(135deg, var(--primary) 0%, var(--primary) 100%);
   border-radius: 50%;
   font-size: 1.2rem;
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+  box-shadow: 0 4px 12px hsl(var(--indigo-500) / 0.30);
 }
 
 .online-indicator {
@@ -128,8 +128,8 @@
   right: -2px;
   width: 12px;
   height: 12px;
-  background: #4caf50;
-  border: 2px solid white;
+  background: hsl(var(--success));
+  border: 2px solid hsl(var(--background));
   border-radius: 50%;
   animation: onlineIndicator 2s ease-in-out infinite;
 }
@@ -152,7 +152,7 @@
 
 .activity-message {
   font-weight: 500;
-  color: #2d3748;
+  color: hsl(var(--muted-foreground));
   margin-bottom: 0.5rem;
   line-height: 1.4;
 }
@@ -173,9 +173,9 @@
 
 .activity-points {
   font-size: 0.8rem;
-  color: #4caf50;
+  color: hsl(var(--success));
   font-weight: 600;
-  background: rgba(76, 175, 80, 0.1);
+  background: hsl(var(--success) / 0.10);
   padding: 0.2rem 0.5rem;
   border-radius: 12px;
 }
@@ -198,7 +198,7 @@
 
 .activity-preview {
   padding: 1rem;
-  background: rgba(102, 126, 234, 0.1);
+  background: hsl(var(--indigo-500) / 0.10);
   border-radius: 12px;
   border-left: 4px solid var(--primary);
   font-style: italic;
@@ -293,13 +293,13 @@
 
 /* Dark Mode Support */
 .dark-mode .activity-feed-card {
-  background: linear-gradient(135deg, #2d3748 0%, #4a5568 100%);
+  background: linear-gradient(135deg, hsl(var(--muted-foreground)) 0%, hsl(var(--muted-foreground)) 100%);
 }
 
 .dark-mode .activity-feed-header,
 .dark-mode .activity-filters,
 .dark-mode .activity-feed-container {
-  background: rgba(45, 55, 72, 0.95);
+  background: hsl(var(--foreground) / 0.95);
 }
 
 .dark-mode .activity-item {
@@ -307,7 +307,7 @@
 }
 
 .dark-mode .activity-item:hover {
-  background: rgba(102, 126, 234, 0.1);
+  background: hsl(var(--indigo-500) / 0.10);
 }
 
 .dark-mode .activity-message {
@@ -315,11 +315,11 @@
 }
 
 .dark-mode .activity-description {
-  color: #a0aec0;
+  color: hsl(var(--muted-foreground));
 }
 
 .dark-mode .activity-preview {
-  background: rgba(102, 126, 234, 0.2);
+  background: hsl(var(--indigo-500) / 0.20);
   color: var(--border);
 }
 
@@ -338,7 +338,7 @@
 }
 
 .activity-feed-container::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(135deg, #5a67d8 0%, #6b46c1 100%);
+  background: linear-gradient(135deg, hsl(var(--indigo-500)), hsl(var(--purple)));
 }
 
 /* Loading states */

@@ -13,7 +13,7 @@
 }
 
 .gas-free-discount-interface .card-header {
-  background: linear-gradient(135deg, var(--primary) 0%, color-mix(in srgb, var(--primary) 80%, black) 100%);
+  background: linear-gradient(135deg, var(--primary) 0%, color-mix(in srgb, var(--primary) 80%, hsl(var(--foreground))) 100%);
   border: none;
   padding: 1rem 1.5rem;
 }
@@ -67,7 +67,7 @@
 
 .gas-free-discount-interface .input-group-text {
   background: var(--primary);
-  color: white;
+  color: hsl(var(--background));
   border: none;
   font-weight: 600;
   padding: 0.75rem 1rem;
@@ -81,28 +81,28 @@
 }
 
 .gas-free-discount-interface .alert-info {
-  background: linear-gradient(135deg, color-mix(in srgb, var(--info) 12%, white) 0%, color-mix(in srgb, var(--info) 20%, white) 100%);
+  background: linear-gradient(135deg, color-mix(in srgb, var(--info) 12%, hsl(var(--background))) 0%, color-mix(in srgb, var(--info) 20%, hsl(var(--background))) 100%);
   color: var(--info-foreground);
 }
 
 .gas-free-discount-interface .alert-warning {
-  background: linear-gradient(135deg, color-mix(in srgb, var(--warning) 16%, white) 0%, color-mix(in srgb, var(--warning) 24%, white) 100%);
+  background: linear-gradient(135deg, color-mix(in srgb, var(--warning) 16%, hsl(var(--background))) 0%, color-mix(in srgb, var(--warning) 24%, hsl(var(--background))) 100%);
   color: var(--warning-foreground);
 }
 
 .gas-free-discount-interface .alert-success {
-  background: linear-gradient(135deg, color-mix(in srgb, var(--success) 16%, white) 0%, color-mix(in srgb, var(--success) 24%, white) 100%);
+  background: linear-gradient(135deg, color-mix(in srgb, var(--success) 16%, hsl(var(--background))) 0%, color-mix(in srgb, var(--success) 24%, hsl(var(--background))) 100%);
   color: var(--success-foreground);
 }
 
 .gas-free-discount-interface .alert-danger {
-  background: linear-gradient(135deg, color-mix(in srgb, var(--destructive) 12%, white) 0%, #f5c6cb 100%);
+  background: linear-gradient(135deg, color-mix(in srgb, var(--destructive) 12%, hsl(var(--background))) 0%, hsl(var(--danger) / 0.30) 100%);
   color: var(--destructive-foreground);
 }
 
 /* Gas-Free Button */
 .gas-free-discount-interface .gas-free-btn {
-  background: linear-gradient(135deg, var(--success) 0%, color-mix(in srgb, var(--success) 90%, white) 100%);
+  background: linear-gradient(135deg, var(--success) 0%, color-mix(in srgb, var(--success) 90%, hsl(var(--background))) 100%);
   border: none;
   border-radius: 8px;
   padding: 0.875rem 2rem;
@@ -116,7 +116,7 @@
 }
 
 .gas-free-discount-interface .gas-free-btn:hover {
-  background: linear-gradient(135deg, hsl(var(--success-600)) 0%, #1ea086 100%);
+  background: linear-gradient(135deg, hsl(var(--success-600)) 0%, hsl(var(--brand-teal)) 100%);
   transform: translateY(-1px);
   box-shadow: 0 4px 12px color-mix(in srgb, var(--success) 30%, transparent);
 }
@@ -186,7 +186,7 @@
 }
 
 .gas-free-discount-interface a:hover {
-  color: color-mix(in srgb, var(--primary) 80%, black);
+  color: color-mix(in srgb, var(--primary) 80%, hsl(var(--foreground)));
   text-decoration: underline !important;
 }
 
@@ -228,8 +228,8 @@
 
 /* Gas-Free Badge Animation */
 @keyframes gasFreeGlow {
-  0%, 100% { box-shadow: 0 0 5px rgba(40, 167, 69, 0.5); }
-  50% { box-shadow: 0 0 15px rgba(40, 167, 69, 0.8); }
+  0%, 100% { box-shadow: 0 0 5px hsl(var(--success) / 0.50); }
+  50% { box-shadow: 0 0 15px hsl(var(--success) / 0.80); }
 }
 
 .gas-free-discount-interface .badge.bg-success {

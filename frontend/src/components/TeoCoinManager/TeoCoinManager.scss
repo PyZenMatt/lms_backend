@@ -11,7 +11,7 @@
 
   .MuiDialogTitle-root {
     background: linear-gradient(135deg, var(--primary) 0%, var(--primary) 100%);
-    color: white;
+    color: hsl(var(--background));
     padding: 20px 24px;
     
     .MuiTypography-h6 {
@@ -23,7 +23,7 @@
       color: hsl(var(--background) / 0.80);
       
       &:hover {
-        color: white;
+        color: hsl(var(--background));
         background-color: color-mix(in srgb, var(--background) 10%, transparent);
       }
     }
@@ -31,7 +31,7 @@
 
   .MuiDialogContent-root {
     padding: 24px;
-    background-color: #fafafa;
+    background-color: hsl(var(--muted));
   }
 
   // Balance cards styling
@@ -73,7 +73,7 @@
   .operation-card {
     border-radius: 12px;
     padding: 24px;
-    background: white;
+    background: hsl(var(--background));
     
     .MuiTextField-root {
       .MuiOutlinedInput-root {
@@ -94,10 +94,10 @@
       font-size: 1rem;
       
       &.MuiButton-contained {
-        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        box-shadow: 0 4px 12px hsl(var(--indigo-500) / 0.30);
         
         &:hover {
-          box-shadow: 0 6px 16px rgba(102, 126, 234, 0.4);
+          box-shadow: 0 6px 16px hsl(var(--indigo-500) / 0.40);
           transform: translateY(-1px);
         }
         
@@ -108,23 +108,23 @@
       }
 
       &.MuiButton-containedWarning {
-        background: linear-gradient(135deg, #ff9a56 0%, #ff6b4a 100%);
-        box-shadow: 0 4px 12px rgba(255, 154, 86, 0.3);
+        background: linear-gradient(135deg, hsl(var(--warning)) 0%, hsl(var(--destructive)) 100%);
+        box-shadow: 0 4px 12px hsl(var(--warning) / 0.30);
         
         &:hover {
-          background: linear-gradient(135deg, #ff8a46 0%, #ff5b3a 100%);
-          box-shadow: 0 6px 16px rgba(255, 154, 86, 0.4);
+          background: linear-gradient(135deg, hsl(var(--warning)) 0%, hsl(var(--destructive)) 100%);
+          box-shadow: 0 6px 16px hsl(var(--warning) / 0.40);
         }
       }
 
       &.MuiButton-containedSecondary {
-        background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
-        color: #5a67d8;
-        box-shadow: 0 4px 12px rgba(168, 237, 234, 0.3);
+        background: linear-gradient(135deg, hsl(var(--brand-teal) / 0.40) 0%, hsl(var(--pink) / 0.40) 100%);
+        color: hsl(var(--indigo-500));
+        box-shadow: 0 4px 12px hsl(var(--brand-teal) / 0.30);
         
         &:hover {
-          background: linear-gradient(135deg, #98e3e0 0%, #eec6d9 100%);
-          box-shadow: 0 6px 16px rgba(168, 237, 234, 0.4);
+          background: linear-gradient(135deg, hsl(var(--brand-teal) / 0.35) 0%, hsl(var(--pink) / 0.35) 100%);
+          box-shadow: 0 6px 16px hsl(var(--brand-teal) / 0.40);
         }
       }
     }
@@ -146,8 +146,8 @@
     border-radius: 8px;
     
     &.MuiAlert-standardInfo {
-      background-color: rgba(102, 126, 234, 0.1);
-      border: 1px solid rgba(102, 126, 234, 0.2);
+      background-color: hsl(var(--indigo-500) / 0.10);
+      border: 1px solid hsl(var(--indigo-500) / 0.20);
       
       .MuiAlert-icon {
         color: var(--primary);
@@ -158,8 +158,8 @@
   // Chip styling
   .MuiChip-root {
     &.MuiChip-colorSuccess {
-      background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
-      color: white;
+      background: linear-gradient(135deg, hsl(var(--success)) 0%, hsl(var(--success)) 100%);
+      color: hsl(var(--background));
       font-weight: 500;
     }
   }

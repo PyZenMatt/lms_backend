@@ -1,6 +1,6 @@
 import PropTypes from 'prop-types';
 import React from 'react';
-import { Card } from '@/components/ui/legacy-shims';
+import { Card } from '@/components/ui';
 import { Link } from 'react-router-dom';
 const Messages = ({ message, photo, name }) => {
   let image = '';

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Card } from '@/components/ui/legacy-shims';
+import { Card } from '@/components/ui';
 
 /**
  * StatCard - Componente riutilizzabile per visualizzare statistiche con progress bar

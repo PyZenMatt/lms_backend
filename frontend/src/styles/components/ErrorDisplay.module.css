@@ -4,7 +4,7 @@
   border: none;
   border-left: 4px solid var(--destructive);
   border-radius: 8px;
-  background: linear-gradient(135deg, var(--background)5f5 0%, #ffe6e6 100%);
+  background: linear-gradient(135deg, var(--background)5f5 0%, hsl(var(--destructive) / 0.15) 100%);
   box-shadow: 0 4px 12px hsl(var(--danger) / 0.15);
   animation: errorSlideIn 0.3s ease-out;
 }
@@ -45,7 +45,7 @@
 }
 
 .errorDisplay ul li strong {
-  color: #a71e2a;
+  color: hsl(var(--danger) / 0.85);
 }
 
 /* Shake animation for critical errors */

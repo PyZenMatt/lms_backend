@@ -1,5 +1,5 @@
 import React, { memo } from 'react';
-import { Container, Row, Col, Card, Badge } from '@/components/ui/legacy-shims';
+import { Container, Row, Col, Card, Badge } from '@/components/ui';
 import { Link } from 'react-router-dom';
 
 // Memoized components for better performance
@@ -8,7 +8,7 @@ const StatCard = memo(({ stat }) => (
     <Card className="border-0 shadow-sm h-100">
       <Card.Body className="text-center p-4">
         <div className="avatar-circle bg-primary mb-3 mx-auto">
-          <i className={`feather ${stat.icon} text-white`}></i>
+          <i className={`feather ${stat.icon} text-hsl(var(--background))`}></i>
         </div>
         <h3 className="counter-value">{stat.value}</h3>
         <p className="mb-0 text-muted">{stat.label}</p>
@@ -22,7 +22,7 @@ const FeatureCard = memo(({ feature }) => (
     <Card className={`border-top-${feature.colorClass} border-top-3 bg-bg-card text-card-foreground rounded-lg border border-border shadow-sm text-bg-card text-card-foreground rounded-lg border border-border shadow-sm-foreground border border-border rounded-lg shadow-sm-hover-shadow h-100`}>
       <Card.Body className="p-4">
         <div className="d-flex align-items-center mb-3">
-          <div className={`bg-${feature.colorClass} text-white rounded p-3 me-3`}>
+          <div className={`bg-${feature.colorClass} text-hsl(var(--background)) rounded p-3 me-3`}>
             <i className={`feather ${feature.icon}`}></i>
           </div>
           <h5 className="mb-0">{feature.title}</h5>
@@ -38,7 +38,7 @@ const TestimonialCard = memo(({ testimonial }) => (
     <Card className="border-0 shadow-sm h-100">
       <Card.Body className="p-4">
         <div className="d-flex align-items-center mb-3">
-          <div className="avatar-initial bg-primary text-white rounded-circle me-3">{testimonial.name.charAt(0)}</div>
+          <div className="avatar-initial bg-primary text-hsl(var(--background)) rounded-circle me-3">{testimonial.name.charAt(0)}</div>
           <div>
             <h6 className="mb-0">{testimonial.name}</h6>
             <small className="text-muted">{testimonial.role}</small>
@@ -235,7 +235,7 @@ const LandingPage = () => {
                         style={{
                           width: '30px',
                           height: '30px',
-                          border: '3px solid #00acc1',
+                          border: '3px solid hsl(var(--info))',
                           borderTopColor: 'transparent',
                           transform: 'rotate(45deg)'
                         }}
@@ -363,7 +363,7 @@ const LandingPage = () => {
                 <Card.Body className="p-4 text-center">
                   <div className="step-circle mb-3 mx-auto">1</div>
                   <div className="avatar-circle bg-primary mb-3 mx-auto">
-                    <i className="feather icon-user-plus text-white"></i>
+                    <i className="feather icon-user-plus text-hsl(var(--background))"></i>
                   </div>
                   <h5>Registrati e Connetti Wallet</h5>
                   <p className="text-muted mb-0">Crea il tuo account e connetti il tuo wallet Web3 per iniziare</p>
@@ -375,7 +375,7 @@ const LandingPage = () => {
                 <Card.Body className="p-4 text-center">
                   <div className="step-circle mb-3 mx-auto">2</div>
                   <div className="avatar-circle bg-primary mb-3 mx-auto">
-                    <i className="feather icon-book-open text-white"></i>
+                    <i className="feather icon-book-open text-hsl(var(--background))"></i>
                   </div>
                   <h5>Scegli i Tuoi Corsi</h5>
                   <p className="text-muted mb-0">Esplora i corsi NFT e Web3, acquista con TeoCoins o ETH</p>
@@ -387,7 +387,7 @@ const LandingPage = () => {
                 <Card.Body className="p-4 text-center">
                   <div className="step-circle mb-3 mx-auto">3</div>
                   <div className="avatar-circle bg-primary mb-3 mx-auto">
-                    <i className="feather icon-dollar-sign text-white"></i>
+                    <i className="feather icon-dollar-sign text-hsl(var(--background))"></i>
                   </div>
                   <h5>Crea, Valuta e Guadagna</h5>
                   <p className="text-muted mb-0">Completa progetti, partecipa a peer review e guadagna TeoCoins reali</p>
@@ -399,7 +399,7 @@ const LandingPage = () => {
       </section>
 
       {/* CTA Section */}
-      <section className="cta-section py-5 bg-primary text-white">
+      <section className="cta-section py-5 bg-primary text-hsl(var(--background))">
         <Container>
           <Row className="justify-content-center">
             <Col lg={8} className="text-center">
@@ -408,7 +408,7 @@ const LandingPage = () => {
                 Unisciti a migliaia di artisti che stanno già guadagnando nel Web3. La tua creatività ha finalmente un valore reale.
               </p>
               <div className="d-flex flex-wrap justify-content-center gap-3">
-                <Link to="/auth/signup-1" className="inline-flex items-center justify-center rounded-md h-9 px-4 py-2 text-sm font-medium bg-white text-primary">
+                <Link to="/auth/signup-1" className="inline-flex items-center justify-center rounded-md h-9 px-4 py-2 text-sm font-medium bg-hsl(var(--background)) text-primary">
                   <i className="feather icon-rocket me-2"></i>
                   Inizia Gratis Ora
                 </Link>
@@ -429,7 +429,7 @@ const LandingPage = () => {
       </section>
 
       {/* Footer */}
-      <footer className="footer py-5 bg-dark text-white">
+      <footer className="footer py-5 bg-dark text-hsl(var(--background))">
         <Container>
           <Row className="text-center">
             <Col>

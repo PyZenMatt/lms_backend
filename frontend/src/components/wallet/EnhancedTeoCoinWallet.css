@@ -11,13 +11,13 @@
 
 .enhanced-teocoin-wallet .card-header {
   background: linear-gradient(135deg, var(--primary) 0%, var(--primary) 100%);
-  color: white;
+  color: hsl(var(--background));
   border-radius: 8px 8px 0 0;
   border-bottom: none;
 }
 
 .enhanced-teocoin-wallet .card-header h5 {
-  color: white;
+  color: hsl(var(--background));
   font-weight: 600;
 }
 
@@ -80,8 +80,8 @@
 
 .enhanced-teocoin-wallet .nav-pills .nav-link.active {
   background: linear-gradient(135deg, var(--primary) 0%, var(--primary) 100%);
-  color: white;
-  box-shadow: 0 3px 8px rgba(102, 126, 234, 0.3);
+  color: hsl(var(--background));
+  box-shadow: 0 3px 8px hsl(var(--indigo-500) / 0.30);
 }
 
 /* Staking Tiers */
@@ -92,7 +92,7 @@
 
 .tier-card:hover {
   border-color: var(--primary) !important;
-  box-shadow: 0 3px 12px rgba(102, 126, 234, 0.15);
+  box-shadow: 0 3px 12px hsl(var(--indigo-500) / 0.15);
 }
 
 .tier-card h6 {
@@ -148,12 +148,12 @@
 /* Modal Styles */
 .modal-header {
   background: linear-gradient(135deg, var(--primary) 0%, var(--primary) 100%);
-  color: white;
+  color: hsl(var(--background));
   border-bottom: none;
 }
 
 .modal-header .modal-title {
-  color: white;
+  color: hsl(var(--background));
   font-weight: 600;
 }
 
@@ -180,7 +180,7 @@
 
 .enhanced-teocoin-wallet .form-control:focus {
   border-color: var(--primary);
-  box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+  box-shadow: 0 0 0 0.2rem hsl(var(--indigo-500) / 0.25);
 }
 
 .enhanced-teocoin-wallet .form-select {
@@ -203,12 +203,12 @@
 }
 
 .enhanced-teocoin-wallet .alert-success {
-  background-color: color-mix(in srgb, var(--info) 12%, white);
+  background-color: color-mix(in srgb, var(--info) 12%, hsl(var(--background)));
   color: var(--info-foreground);
 }
 
 .enhanced-teocoin-wallet .alert-danger {
-  background-color: color-mix(in srgb, var(--destructive) 12%, white);
+  background-color: color-mix(in srgb, var(--destructive) 12%, hsl(var(--background)));
   color: var(--destructive-foreground);
 }
 

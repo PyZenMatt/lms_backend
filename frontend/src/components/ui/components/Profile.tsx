@@ -1,7 +1,7 @@
 import { useState } from "react"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/bg-card text-card-foreground rounded-lg border border-border shadow-sm"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/card"
 import { Button } from "./ui/button"
-import { Badge } from "./ui/inline-flex items-center rounded-md px-2 py-0.5 text-xs bg-accent text-accent-foreground"
+import { Badge } from "./ui/badge"
 import { Input } from "./ui/input"
 import { Textarea } from "./ui/textarea"
 import { Label } from "./ui/label"
@@ -352,15 +352,15 @@ export function Profile() {
                 {achievements.map((achievement, index) => (
                   <div 
                     key={index} 
-                    className={`p-4 border rounded-lg ${achievement.earned ? 'bg-green-50 border-green-200' : 'bg-gray-50 border-gray-200 opacity-60'}`}
+                    className={`p-4 border rounded-lg ${achievement.earned ? 'bg-green-50 border-green-200' : 'bg-hsl(var(--muted-foreground))-50 border-hsl(var(--muted-foreground))-200 opacity-60'}`}
                   >
                     <div className="flex items-center gap-3">
                       <div className="text-2xl">{achievement.icon}</div>
                       <div>
-                        <h4 className={`font-medium ${achievement.earned ? 'text-green-800' : 'text-gray-600'}`}>
+                        <h4 className={`font-medium ${achievement.earned ? 'text-green-800' : 'text-hsl(var(--muted-foreground))-600'}`}>
                           {achievement.name}
                         </h4>
-                        <p className={`text-sm ${achievement.earned ? 'text-green-600' : 'text-gray-500'}`}>
+                        <p className={`text-sm ${achievement.earned ? 'text-green-600' : 'text-hsl(var(--muted-foreground))-500'}`}>
                           {achievement.description}
                         </p>
                       </div>

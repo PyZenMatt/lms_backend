@@ -1,5 +1,5 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/bg-card text-card-foreground rounded-lg border border-border shadow-sm"
-import { Badge } from "./ui/inline-flex items-center rounded-md px-2 py-0.5 text-xs bg-accent text-accent-foreground"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/card"
+import { Badge } from "./ui/badge"
 import { Button } from "./ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs"
@@ -98,7 +98,7 @@ export function Community() {
             </CardHeader>
             <CardContent className="space-y-3">
               <p>New tutorial: "Understanding Light and Shadow in Digital Art" 💡 This covers the fundamentals that will elevate your work instantly!</p>
-              <div className="bg-white p-4 rounded-lg border">
+              <div className="bg-hsl(var(--background)) p-4 rounded-lg border">
                 <h4>Light & Shadow Masterclass</h4>
                 <p className="text-sm text-muted-foreground mt-1">45 min video tutorial + practice exercises</p>
                 <Button className="mt-3" size="sm">
@@ -116,7 +116,7 @@ export function Community() {
             <CardHeader className="pb-3">
               <div className="flex items-center gap-3">
                 <div className="size-10 bg-gradient-to-br from-blue-500 to-purple-500 rounded-full flex items-center justify-center">
-                  <Users className="size-5 text-white" />
+                  <Users className="size-5 text-hsl(var(--background))" />
                 </div>
                 <div className="flex-1">
                   <p className="font-medium">Community Project</p>
@@ -134,13 +134,13 @@ export function Community() {
               <div className="flex items-center justify-between">
                 <div className="flex -space-x-2">
                   {[...Array(6)].map((_, i) => (
-                    <Avatar key={i} className="size-6 border-2 border-white">
+                    <Avatar key={i} className="size-6 border-2 border-hsl(var(--background))">
                       <AvatarFallback className="text-xs">
                         {String.fromCharCode(65 + i)}
                       </AvatarFallback>
                     </Avatar>
                   ))}
-                  <div className="size-6 bg-muted rounded-full border-2 border-white flex items-center justify-center">
+                  <div className="size-6 bg-muted rounded-full border-2 border-hsl(var(--background)) flex items-center justify-center">
                     <span className="text-xs">+6</span>
                   </div>
                 </div>

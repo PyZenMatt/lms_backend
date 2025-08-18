@@ -33,7 +33,7 @@
     box-shadow: 0 2px 8px var(--shadow-sm);
     border-radius: 10px;
     background: $theme-color2;
-    color: white;
+    color: hsl(var(--background));
     transition: transform 0.2s ease, box-shadow 0.2s ease;
     
     &:hover {
@@ -44,7 +44,7 @@
     .card-header {
       background: color-mix(in srgb, var(--background) 10%, transparent);
       border: none;
-      color: white;
+      color: hsl(var(--background));
       padding: 1rem 1.5rem;
       
       h5 {
@@ -98,7 +98,7 @@
       padding: 1rem;
       
       h6 {
-        color: white;
+        color: hsl(var(--background));
         font-weight: 600;
         margin-bottom: 1rem;
         
@@ -135,12 +135,12 @@
         color: hsl(var(--warning));
     border-color: hsl(var(--background) / 0.3);
     &.btn-danger {
-      background: rgba(220, 53, 69, 0.2);
-      border-color: rgba(220, 53, 69, 0.4);
+      background: hsl(var(--danger) / 0.20);
+      border-color: hsl(var(--danger) / 0.40);
       
       &:hover {
-        background: rgba(220, 53, 69, 0.3);
-        border-color: rgba(220, 53, 69, 0.6);
+        background: hsl(var(--danger) / 0.30);
+        border-color: hsl(var(--danger) / 0.60);
       }
     }
     
@@ -154,7 +154,7 @@
   .form-select {
     background: color-mix(in srgb, var(--background) 10%, transparent);
     border: 1px solid color-mix(in srgb, var(--background) 30%, transparent);
-    color: white;
+    color: hsl(var(--background));
     border-radius: 6px;
     
     &::placeholder {
@@ -164,7 +164,7 @@
     &:focus {
       background: color-mix(in srgb, var(--background) 15%, transparent);
       border-color: hsl(var(--background) / 0.50);
-      color: white;
+      color: hsl(var(--background));
       box-shadow: 0 0 0 0.2rem hsl(var(--background) / 0.25);
     }
   }
@@ -179,18 +179,18 @@
     border-radius: 8px;
     
     &.alert-success {
-      background: linear-gradient(135deg, var(--success) 0%, color-mix(in srgb, var(--success) 90%, white) 100%);
-      color: white;
+      background: linear-gradient(135deg, var(--success) 0%, color-mix(in srgb, var(--success) 90%, hsl(var(--background))) 100%);
+      color: hsl(var(--background));
     }
     
     &.alert-danger {
       background: linear-gradient(135deg, var(--destructive) 0%, var(--destructive) 100%);
-      color: white;
+      color: hsl(var(--background));
     }
     
     &.alert-warning {
-      background: linear-gradient(135deg, var(--warning) 0%, color-mix(in srgb, var(--warning) 80%, orange) 100%);
-      color: #212529;
+      background: linear-gradient(135deg, var(--warning) 0%, color-mix(in srgb, var(--warning) 80%, hsl(var(--warning))) 100%);
+      color: hsl(var(--foreground));
     }
   }
   
@@ -211,7 +211,7 @@
         
         .transaction-type {
           font-weight: 600;
-          color: white;
+          color: hsl(var(--background));
         }
         
         .transaction-user {
@@ -236,7 +236,7 @@
   // Spinner
   .spinner-border {
     border-color: color-mix(in srgb, var(--background) 30%, transparent);
-    border-right-color: white;
+    border-right-color: hsl(var(--background));
   }
   
   // Responsive design

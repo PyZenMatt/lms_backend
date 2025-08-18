@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Card, Spinner, Alert, Button, Table, Badge } from '@/components/ui/legacy-shims';
+import { Card, Spinner, Alert, Button, Table, Badge } from '@/components/ui';
 import { useNavigate } from 'react-router-dom';
 import { fetchAssignedReviews } from '../../services/api/reviews';
 

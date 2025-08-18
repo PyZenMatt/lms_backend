@@ -1,6 +1,6 @@
 // TODO: Verifica mapping sottocomponenti Modal
 import React, { useState, useEffect } from 'react';
-import { Card, Table, Button, Badge, Alert, Modal, Spinner } from '@/components/ui/legacy-shims';
+import { Card, Table, Button, Badge, Alert, Modal, Spinner } from '@/components/ui';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
@@ -180,8 +180,8 @@ const PendingWithdrawalsManager = ({ onWithdrawalCancelled }) => {
         </Card.Body>
       </Card>
 
-      {/* Cancel Confirmation Modal */}
-      <Dialog open={showCancelModal}> setShowCancelModal(false)}>
+  {/* Cancel Confirmation Modal */}
+  <Modal show={showCancelModal} onHide={() => setShowCancelModal(false)} centered>
         <Modal.Header closeButton>
           <Modal.Title>Cancel Withdrawal</Modal.Title>
         </Modal.Header>
@@ -225,7 +225,7 @@ const PendingWithdrawalsManager = ({ onWithdrawalCancelled }) => {
             Cancel Withdrawal
           </Button>
         </Modal.Footer>
-      </Dialog>
+      </Modal>
     </>
   );
 };

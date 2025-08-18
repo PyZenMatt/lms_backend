@@ -5,7 +5,7 @@
  */
 import React, { useState, useEffect, useCallback } from 'react';
 import PropTypes from 'prop-types';
-import { Card, Spinner, Button, Modal, Form, Alert } from '@/components/ui/legacy-shims';
+import { Card, Spinner, Button, Modal, Form, Alert } from '@/components/ui';
 import { ethers } from 'ethers';
 import api from '../../services/core/axiosClient';
 
@@ -281,7 +281,7 @@ const BurnDepositInterface = ({ onTransactionComplete }) => {
   return (
     <>
       <Card className="border-0 shadow-sm">
-        <Card.Header className="bg-gradient-primary text-white">
+        <Card.Header className="bg-gradient-primary text-hsl(var(--background))">
           <h5 className="mb-0">
             <i className="fas fa-fire me-2"></i>
             Deposit TEO from MetaMask
@@ -308,7 +308,7 @@ const BurnDepositInterface = ({ onTransactionComplete }) => {
                 style={{
                   backgroundColor: 'var(--primary)',
                   borderColor: 'var(--primary)',
-                  color: 'white',
+                  color: 'hsl(var(--background))',
                   fontWeight: 'bold'
                 }}
               >
@@ -368,7 +368,7 @@ const BurnDepositInterface = ({ onTransactionComplete }) => {
                   style={{
                     backgroundColor: 'var(--success)',
                     borderColor: 'var(--success)',
-                    color: 'white',
+                    color: 'hsl(var(--background))',
                     fontWeight: 'bold'
                   }}
                 >
@@ -411,8 +411,8 @@ const BurnDepositInterface = ({ onTransactionComplete }) => {
         </Card.Body>
       </Card>
 
-      {/* Burn Deposit Modal */}
-      <Dialog open={showModal}> setShowModal(false)} centered>
+  {/* Burn Deposit Modal */}
+  <Modal show={showModal} onHide={() => setShowModal(false)} centered>
         <Modal.Header closeButton>
           <Modal.Title>
             <i className="fas fa-fire text-danger me-2"></i>
@@ -455,7 +455,7 @@ const BurnDepositInterface = ({ onTransactionComplete }) => {
             </div>
           </Form>
         </Modal.Body>
-        <Modal.Footer>
+  <Modal.Footer>
           <Button variant="secondary" onClick={() => setShowModal(false)} disabled={processing}>
             Cancel
           </Button>
@@ -473,7 +473,7 @@ const BurnDepositInterface = ({ onTransactionComplete }) => {
             )}
           </Button>
         </Modal.Footer>
-      </Dialog>
+      </Modal>
     </>
   );
 };

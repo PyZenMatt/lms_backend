@@ -5,29 +5,29 @@
 :root {
   --skillshare-primary: var(--success);
   --skillshare-primary-dark: var(--success);
-  --skillshare-secondary: #002333;
-  --skillshare-accent: #ff6b35;
-  --skillshare-gray-50: #f8fafc;
-  --skillshare-gray-100: #f1f5f9;
-  --skillshare-gray-200: var(--border);
-  --skillshare-gray-300: #cbd5e1;
-  --skillshare-gray-400: #94a3b8;
-  --skillshare-gray-500: #64748b;
-  --skillshare-gray-600: #475569;
-  --skillshare-gray-700: #334155;
-  --skillshare-gray-800: #1e293b;
-  --skillshare-gray-900: #0f172a;
-  --skillshare-white: var(--background);
-  --skillshare-error: #ef4444;
+  --skillshare-secondary: hsl(var(--foreground));
+  --skillshare-accent: hsl(var(--warning));
+  --skillshare-hsl(var(--muted-foreground))-50: hsl(var(--background));
+  --skillshare-hsl(var(--muted-foreground))-100: hsl(var(--background));
+  --skillshare-hsl(var(--muted-foreground))-200: var(--border);
+  --skillshare-hsl(var(--muted-foreground))-300: hsl(var(--muted));
+  --skillshare-hsl(var(--muted-foreground))-400: hsl(var(--muted-foreground));
+  --skillshare-hsl(var(--muted-foreground))-500: hsl(var(--muted-foreground));
+  --skillshare-hsl(var(--muted-foreground))-600: hsl(var(--muted-foreground));
+  --skillshare-hsl(var(--muted-foreground))-700: hsl(var(--muted-foreground));
+  --skillshare-hsl(var(--muted-foreground))-800: hsl(var(--foreground));
+  --skillshare-hsl(var(--muted-foreground))-900: hsl(var(--foreground));
+  --skillshare-hsl(var(--background)): var(--background);
+  --skillshare-error: hsl(var(--destructive));
   --skillshare-border-radius: 8px;
-  --skillshare-shadow: 0 4px 6px -1px var(--shadow-sm), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --skillshare-shadow: 0 4px 6px -1px var(--shadow-sm), 0 2px 4px -1px hsl(var(--foreground) / 0.06);
   --skillshare-shadow-lg: 0 10px 15px -3px var(--shadow-sm), 0 4px 6px -2px var(--shadow-xs);
 }
 
 /* Profile Wrapper */
 .skillshare-profile-wrapper {
   min-height: 100vh;
-  background: linear-gradient(135deg, var(--skillshare-gray-50) 0%, var(--skillshare-gray-100) 100%);
+  background: linear-gradient(135deg, var(--skillshare-hsl(var(--muted-foreground))-50) 0%, var(--skillshare-hsl(var(--muted-foreground))-100) 100%);
   padding: 20px 0;
   position: relative;
   overflow: hidden;
@@ -47,7 +47,7 @@
 .skillshare-bg-circle {
   position: absolute;
   border-radius: 50%;
-  background: linear-gradient(45deg, rgba(0, 173, 91, 0.1), rgba(255, 107, 53, 0.1));
+  background: linear-gradient(45deg, hsl(var(--success) / 0.10), hsl(var(--warning) / 0.10));
   animation: float 6s ease-in-out infinite;
 }
 
@@ -105,7 +105,7 @@
 .skillshare-loading-spinner {
   width: 60px;
   height: 60px;
-  border: 4px solid var(--skillshare-gray-200);
+  border: 4px solid var(--skillshare-hsl(var(--muted-foreground))-200);
   border-top: 4px solid var(--skillshare-primary);
   border-radius: 50%;
   animation: spin 1s linear infinite;
@@ -113,7 +113,7 @@
 }
 
 .skillshare-loading-text {
-  color: var(--skillshare-gray-600);
+  color: var(--skillshare-hsl(var(--muted-foreground))-600);
   font-size: 1.1rem;
   font-weight: 500;
 }
@@ -129,8 +129,8 @@
 }
 
 .skillshare-auth-card {
-  background: var(--skillshare-white);
-  border: 1px solid var(--skillshare-gray-200);
+  background: var(--skillshare-hsl(var(--background)));
+  border: 1px solid var(--skillshare-hsl(var(--muted-foreground))-200);
   border-radius: var(--skillshare-border-radius);
   box-shadow: var(--skillshare-shadow-lg);
   overflow: hidden;
@@ -140,7 +140,7 @@
   padding: 2.5rem;
   text-align: center;
   background: linear-gradient(135deg, var(--skillshare-primary) 0%, var(--skillshare-primary-dark) 100%);
-  color: white;
+  color: hsl(var(--background));
 }
 
 /* Avatar Section - Fixed sizing issues */
@@ -180,7 +180,7 @@
   justify-content: center;
   font-size: 3rem;
   font-weight: 700;
-  color: white;
+  color: hsl(var(--background));
   backdrop-filter: blur(10px);
   transition: all 0.3s ease;
 }
@@ -192,7 +192,7 @@
 
 /* Profile Info */
 .skillshare-profile-info {
-  color: white;
+  color: hsl(var(--background));
 }
 
 .skillshare-profile-name {
@@ -232,8 +232,8 @@
 }
 
 .skillshare-stat-card {
-  background: var(--skillshare-white);
-  border: 1px solid var(--skillshare-gray-200);
+  background: var(--skillshare-hsl(var(--background)));
+  border: 1px solid var(--skillshare-hsl(var(--muted-foreground))-200);
   border-radius: var(--skillshare-border-radius);
   padding: 1rem 1.5rem;
   display: flex;
@@ -263,14 +263,14 @@
 }
 
 .skillshare-stat-special::before {
-  background: linear-gradient(90deg, var(--skillshare-accent), #ff8c5a);
+  background: linear-gradient(90deg, var(--skillshare-accent), hsl(var(--warning)));
 }
 
 .skillshare-stat-icon {
   width: 40px;
   height: 40px;
   background: linear-gradient(135deg, var(--skillshare-primary), var(--skillshare-primary-dark));
-  color: white;
+  color: hsl(var(--background));
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -281,12 +281,12 @@
 }
 
 .skillshare-stat-special .skillshare-stat-icon {
-  background: linear-gradient(135deg, var(--skillshare-accent), #ff8c5a);
+  background: linear-gradient(135deg, var(--skillshare-accent), hsl(var(--warning)));
 }
 
 .skillshare-stat-card:hover .skillshare-stat-icon {
   transform: scale(1.1);
-  box-shadow: 0 6px 20px rgba(0, 173, 91, 0.3);
+  box-shadow: 0 6px 20px hsl(var(--success) / 0.30);
 }
 
 .skillshare-stat-content {
@@ -297,13 +297,13 @@
 .skillshare-stat-value {
   font-size: 1.5rem;
   font-weight: 700;
-  color: var(--skillshare-gray-900);
+  color: var(--skillshare-hsl(var(--muted-foreground))-900);
   margin-bottom: 0.25rem;
   line-height: 1;
 }
 
 .skillshare-stat-label {
-  color: var(--skillshare-gray-600);
+  color: var(--skillshare-hsl(var(--muted-foreground))-600);
   font-size: 0.75rem;
   font-weight: 500;
   text-transform: uppercase;
@@ -329,7 +329,7 @@
 .skillshare-auth-title {
   font-size: 1.875rem;
   font-weight: 700;
-  color: var(--skillshare-gray-900);
+  color: var(--skillshare-hsl(var(--muted-foreground))-900);
   margin: 0 0 0.5rem 0;
   line-height: 1.2;
   display: flex;
@@ -339,7 +339,7 @@
 }
 
 .skillshare-auth-subtitle {
-  color: var(--skillshare-gray-600);
+  color: var(--skillshare-hsl(var(--muted-foreground))-600);
   font-size: 1rem;
   margin: 0;
   line-height: 1.5;
@@ -347,8 +347,8 @@
 
 /* Read-only Section */
 .skillshare-readonly-section {
-  background: var(--skillshare-gray-50);
-  border: 1px solid var(--skillshare-gray-200);
+  background: var(--skillshare-hsl(var(--muted-foreground))-50);
+  border: 1px solid var(--skillshare-hsl(var(--muted-foreground))-200);
   border-radius: var(--skillshare-border-radius);
   padding: 1.5rem;
   margin-bottom: 2rem;
@@ -359,7 +359,7 @@
   justify-content: space-between;
   align-items: center;
   padding: 0.75rem 0;
-  border-bottom: 1px solid var(--skillshare-gray-200);
+  border-bottom: 1px solid var(--skillshare-hsl(var(--muted-foreground))-200);
 }
 
 .skillshare-info-item:last-child {
@@ -368,11 +368,11 @@
 
 .skillshare-info-label {
   font-weight: 600;
-  color: var(--skillshare-gray-700);
+  color: var(--skillshare-hsl(var(--muted-foreground))-700);
 }
 
 .skillshare-info-value {
-  color: var(--skillshare-gray-900);
+  color: var(--skillshare-hsl(var(--muted-foreground))-900);
   font-weight: 500;
 }
 
@@ -389,7 +389,7 @@
   display: block;
   font-size: 0.875rem;
   font-weight: 500;
-  color: var(--skillshare-gray-700);
+  color: var(--skillshare-hsl(var(--muted-foreground))-700);
   margin-bottom: 0.5rem;
 }
 
@@ -397,9 +397,9 @@
   width: 100%;
   padding: 0.75rem 1rem;
   font-size: 1rem;
-  border: 1px solid var(--skillshare-gray-300);
+  border: 1px solid var(--skillshare-hsl(var(--muted-foreground))-300);
   border-radius: var(--skillshare-border-radius);
-  background-color: var(--skillshare-white);
+  background-color: var(--skillshare-hsl(var(--background)));
   transition: all 0.2s ease-in-out;
   font-family: inherit;
 }
@@ -407,12 +407,12 @@
 .skillshare-input:focus {
   outline: none;
   border-color: var(--skillshare-primary);
-  box-shadow: 0 0 0 3px rgba(0, 173, 91, 0.1);
-  background-color: var(--skillshare-white);
+  box-shadow: 0 0 0 3px hsl(var(--success) / 0.10);
+  background-color: var(--skillshare-hsl(var(--background)));
 }
 
 .skillshare-input::placeholder {
-  color: var(--skillshare-gray-400);
+  color: var(--skillshare-hsl(var(--muted-foreground))-400);
 }
 
 /* Textarea Styling */
@@ -438,17 +438,17 @@
   align-items: center;
   gap: 0.5rem;
   padding: 0.75rem 1.5rem;
-  background: var(--skillshare-gray-100);
-  border: 2px dashed var(--skillshare-gray-300);
+  background: var(--skillshare-hsl(var(--muted-foreground))-100);
+  border: 2px dashed var(--skillshare-hsl(var(--muted-foreground))-300);
   border-radius: var(--skillshare-border-radius);
-  color: var(--skillshare-gray-700);
+  color: var(--skillshare-hsl(var(--muted-foreground))-700);
   font-weight: 500;
   cursor: pointer;
   transition: all 0.2s ease;
 }
 
 .skillshare-file-label:hover {
-  background: var(--skillshare-gray-50);
+  background: var(--skillshare-hsl(var(--muted-foreground))-50);
   border-color: var(--skillshare-primary);
   color: var(--skillshare-primary);
 }
@@ -473,7 +473,7 @@
   width: 100%;
   padding: 0.875rem 1.5rem;
   background: linear-gradient(135deg, var(--skillshare-primary) 0%, var(--skillshare-primary-dark) 100%);
-  color: var(--skillshare-white);
+  color: var(--skillshare-hsl(var(--background)));
   border: none;
   border-radius: var(--skillshare-border-radius);
   font-size: 1rem;
@@ -489,7 +489,7 @@
 
 .skillshare-auth-button:hover:not(:disabled) {
   transform: translateY(-1px);
-  box-shadow: 0 6px 20px rgba(0, 173, 91, 0.3);
+  box-shadow: 0 6px 20px hsl(var(--success) / 0.30);
 }
 
 .skillshare-auth-button:disabled {
@@ -508,10 +508,10 @@
   align-items: center;
   gap: 0.5rem;
   padding: 1rem;
-  background: rgba(34, 197, 94, 0.1);
-  border: 1px solid rgba(34, 197, 94, 0.3);
+  background: hsl(var(--success) / 0.10);
+  border: 1px solid hsl(var(--success) / 0.30);
   border-radius: var(--skillshare-border-radius);
-  color: #059669;
+  color: hsl(var(--success-600));
   font-weight: 500;
   margin-top: 1rem;
 }
@@ -522,8 +522,8 @@
   align-items: center;
   gap: 0.5rem;
   padding: 1rem;
-  background: rgba(239, 68, 68, 0.1);
-  border: 1px solid rgba(239, 68, 68, 0.3);
+  background: hsl(var(--danger) / 0.10);
+  border: 1px solid hsl(var(--danger) / 0.30);
   border-radius: var(--skillshare-border-radius);
   color: var(--skillshare-error);
   font-weight: 500;
@@ -644,7 +644,7 @@
   }
   
   .skillshare-profile-wrapper {
-    background: white;
+    background: hsl(var(--background));
     box-shadow: none;
   }
   

@@ -30,7 +30,7 @@
   right: -10%;
   width: 300px;
   height: 300px;
-  background: linear-gradient(45deg, rgba(17, 153, 142, 0.2), rgba(56, 239, 125, 0.2));
+  background: linear-gradient(45deg, hsl(var(--brand-teal) / 0.20), hsl(var(--success) / 0.20));
   border-radius: 50%;
   animation: float 15s ease-in-out infinite reverse;
   pointer-events: none;
@@ -84,7 +84,7 @@
 .exercise-title {
   font-size: 2.5rem;
   font-weight: 700;
-  color: white;
+  color: hsl(var(--background));
   text-shadow: 0 2px 10px var(--shadow-xl);
   margin-bottom: 15px;
   position: relative;
@@ -95,10 +95,10 @@
 }
 
 .exercise-icon {
-  background: linear-gradient(45deg, #11998e, #38ef7d);
+  background: linear-gradient(45deg, hsl(var(--brand-teal)), hsl(var(--success)));
   padding: 15px;
   border-radius: 15px;
-  box-shadow: 0 8px 25px rgba(17, 153, 142, 0.3);
+  box-shadow: 0 8px 25px hsl(var(--brand-teal) / 0.30);
 }
 
 .exercise-description {
@@ -130,7 +130,7 @@
 .status-title {
   font-size: 1.5rem;
   font-weight: 700;
-  color: white;
+  color: hsl(var(--background));
   text-shadow: 0 2px 10px var(--shadow-xl);
 }
 
@@ -144,17 +144,17 @@
 
 .status-badge.in_review {
   background: linear-gradient(45deg, var(--primary), var(--primary));
-  color: white;
+  color: hsl(var(--background));
 }
 
 .status-badge.approved {
-  background: linear-gradient(45deg, #11998e, #38ef7d);
-  color: white;
+  background: linear-gradient(45deg, hsl(var(--brand-teal)), hsl(var(--success)));
+  color: hsl(var(--background));
 }
 
 .status-badge.rejected {
-  background: linear-gradient(45deg, #ff5252, #ff1744);
-  color: white;
+  background: linear-gradient(45deg, hsl(var(--destructive)), hsl(var(--destructive)));
+  color: hsl(var(--background));
 }
 
 .submission-content {
@@ -168,7 +168,7 @@
 .submission-text {
   color: hsl(var(--background) / 0.90);
   line-height: 1.6;
-  white-space: pre-wrap;
+  hsl(var(--background))-space: pre-wrap;
   font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
 }
 
@@ -186,7 +186,7 @@
 .form-title {
   font-size: 1.5rem;
   font-weight: 700;
-  color: white;
+  color: hsl(var(--background));
   text-shadow: 0 2px 10px var(--shadow-xl);
   margin-bottom: 20px;
   display: flex;
@@ -199,7 +199,7 @@
 }
 
 .form-label {
-  color: white;
+  color: hsl(var(--background));
   font-weight: 600;
   margin-bottom: 10px;
   display: block;
@@ -214,7 +214,7 @@
   border: 1px solid color-mix(in srgb, var(--background) 30%, transparent);
   border-radius: 15px;
   padding: 20px;
-  color: white;
+  color: hsl(var(--background));
   font-size: 1rem;
   line-height: 1.6;
   resize: vertical;
@@ -224,8 +224,8 @@
 
 .form-textarea:focus {
   outline: none;
-  border-color: rgba(56, 239, 125, 0.6);
-  box-shadow: 0 0 20px rgba(56, 239, 125, 0.3);
+  border-color: hsl(var(--success) / 0.60);
+  box-shadow: 0 0 20px hsl(var(--success) / 0.30);
   background: color-mix(in srgb, var(--background) 15%, transparent);
 }
 
@@ -242,16 +242,16 @@
 }
 
 .btn-primary {
-  background: linear-gradient(45deg, #11998e, #38ef7d);
+  background: linear-gradient(45deg, hsl(var(--brand-teal)), hsl(var(--success)));
   border: none;
-  color: white;
+  color: hsl(var(--background));
   padding: 15px 30px;
   border-radius: 25px;
   font-weight: 600;
   font-size: 1rem;
   cursor: pointer;
   transition: all 0.3s ease;
-  box-shadow: 0 8px 25px rgba(17, 153, 142, 0.3);
+  box-shadow: 0 8px 25px hsl(var(--brand-teal) / 0.30);
   display: flex;
   align-items: center;
   gap: 10px;
@@ -260,8 +260,8 @@
 
 .btn-primary:hover {
   transform: translateY(-3px);
-  box-shadow: 0 12px 35px rgba(17, 153, 142, 0.4);
-  color: white;
+  box-shadow: 0 12px 35px hsl(var(--brand-teal) / 0.40);
+  color: hsl(var(--background));
   text-decoration: none;
 }
 
@@ -275,7 +275,7 @@
   background: color-mix(in srgb, var(--background) 10%, transparent);
   backdrop-filter: blur(10px);
   border: 1px solid color-mix(in srgb, var(--background) 30%, transparent);
-  color: white;
+  color: hsl(var(--background));
   padding: 15px 30px;
   border-radius: 25px;
   font-weight: 600;
@@ -291,14 +291,14 @@
 .btn-secondary:hover {
   background: color-mix(in srgb, var(--background) 20%, transparent);
   transform: translateY(-2px);
-  color: white;
+  color: hsl(var(--background));
   text-decoration: none;
 }
 
 /* Error Message */
 .error-message {
-  background: linear-gradient(45deg, #ff5252, #ff1744);
-  color: white;
+  background: linear-gradient(45deg, hsl(var(--destructive)), hsl(var(--destructive)));
+  color: hsl(var(--background));
   padding: 20px;
   border-radius: 15px;
   margin-bottom: 20px;
@@ -306,7 +306,7 @@
   align-items: center;
   gap: 10px;
   font-weight: 600;
-  box-shadow: 0 8px 25px rgba(255, 82, 82, 0.3);
+  box-shadow: 0 8px 25px hsl(var(--destructive) / 0.30);
 }
 
 /* Loading State */
@@ -322,7 +322,7 @@
   width: 50px;
   height: 50px;
   border: 4px solid color-mix(in srgb, var(--background) 30%, transparent);
-  border-top: 4px solid white;
+  border-top: 4px solid hsl(var(--background));
   border-radius: 50%;
   animation: spin 1s linear infinite;
 }
@@ -334,7 +334,7 @@
 
 .no-exercise {
   text-align: center;
-  color: white;
+  color: hsl(var(--background));
   font-size: 1.5rem;
   margin-top: 100px;
 }
@@ -353,7 +353,7 @@
 .tips-title {
   font-size: 1.3rem;
   font-weight: 700;
-  color: white;
+  color: hsl(var(--background));
   margin-bottom: 15px;
   display: flex;
   align-items: center;

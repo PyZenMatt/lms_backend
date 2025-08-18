@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Table, Button, Spinner, Alert } from '@/components/ui/legacy-shims';
+import { Table, Button, Spinner, Alert } from '@/components/ui';
 import { fetchPendingCourses, approveCourse, rejectCourse } from '../../services/api/admin';
 import { Link } from 'react-router-dom';
 

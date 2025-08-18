@@ -159,7 +159,7 @@
 }
 
 .blockchain-component-col .card-header {
-  background: rgba(255, 255, 255, 0.95);
+  background: hsl(var(--background) / 0.95);
   backdrop-filter: blur(10px);
   border-bottom: 1px solid var(--shadow-xs);
   border-radius: 15px 15px 0 0 !important;

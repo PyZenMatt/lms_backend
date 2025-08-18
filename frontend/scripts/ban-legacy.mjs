@@ -7,8 +7,12 @@ const BANNED_CLASS_TOKENS = ['btn','alert','badge','modal'];
 // Global patterns limited to explicit imports + lingering .scss
 const BANNED_GLOBAL = [
   /react-bootstrap(?!-icons)/,
-  /['\"]bootstrap\//,
-  /\.scss\b/
+  /['"]bootstrap\//,
+  /legacy-shims/,
+  /\.scss\b/,
+  /from\s+['"][^'"@]+@\d+(?:\.\d+){0,2}['"\n]/, // versioned import suffix
+  /@\/styles\/figma-raw\/[A-Za-z].*\.(t|j)sx?/,      // figma-raw component sourcing
+  /@\/components\/legacy-shims/                      // explicit legacy shim path
 ];
 
 const files = await globby(['src/**/*.{ts,tsx,js,jsx,css,html}']);

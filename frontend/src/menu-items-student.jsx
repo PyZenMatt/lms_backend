@@ -71,13 +71,13 @@ const studentMenuItems = {
           title: 'Wallet Web3',
           type: 'item',
           icon: 'feather icon-shield',
-          inline-flex items-center rounded-md px-2 py-0.5 text-xs font-medium bg-accent text-accent-foreground: {
+          badge: {
             title: 'NEW',
             type: 'label-success'
           },
           action: () => {
             // Apri modale wallet o naviga a pagina wallet
-            border rounded-md p-3 bg-muted text-muted-foreground('Funzionalità Wallet Web3 in arrivo!');
+            alert('Funzionalità Wallet Web3 in arrivo!');
           }
         }
       ]
@@ -115,7 +115,7 @@ const studentMenuItems = {
           type: 'item',
           icon: 'feather icon-moon',
           url: '/profile/settings/theme',
-          inline-flex items-center rounded-md px-2 py-0.5 text-xs font-medium bg-accent text-accent-foreground: {
+          badge: {
             title: 'New',
             type: 'label-info'
           }
@@ -125,7 +125,7 @@ const studentMenuItems = {
           title: 'Progressi & Achievement',
           type: 'item',
           icon: 'feather icon-award',
-          inline-flex items-center rounded-md px-2 py-0.5 text-xs font-medium bg-accent text-accent-foreground: {
+          badge: {
             title: 'Web3',
             type: 'label-warning'
           },

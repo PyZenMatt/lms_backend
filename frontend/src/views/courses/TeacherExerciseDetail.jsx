@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { Container, Row, Col, Card, Button, Alert, Spinner, Badge } from '@/components/ui/legacy-shims';
+import { Container, Row, Col, Card, Button, Alert, Spinner, Badge } from '@/components/ui';
 import { fetchExerciseDetail } from '../../services/api/courses';
 import MainCard from '../../components/Card/MainCard';
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;

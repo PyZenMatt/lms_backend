@@ -1,6 +1,6 @@
 // TODO: Verifica mapping sottocomponenti Modal
 import React, { useState, useEffect } from 'react';
-import { Modal, Button, Alert, Spinner, Nav, Tab, Card, Badge } from '@/components/ui/legacy-shims';
+import { Modal, Button, Alert, Spinner, Nav, Tab, Card, Badge } from '@/components/ui';
 import { useAuth } from '../../contexts/AuthContext';
 import { getTeoCoinBalance } from '../../services/api/teocoin';
 import api from '../../services/core/axiosClient';
@@ -260,7 +260,7 @@ const DBCourseCheckoutModal = ({ course, show, handleClose, onPurchaseComplete }
 
         <div
           className="payment-option mb-4 p-3 border rounded-lg shadow-sm"
-          style={{ border: '2px solid var(--primary)', borderRadius: '8px', backgroundColor: 'color-mix(in srgb, var(--primary) 4%, white)' }}
+          style={{ border: '2px solid var(--primary)', borderRadius: '8px', backgroundColor: 'color-mix(in srgb, var(--primary) 4%, hsl(var(--background)))' }}
         >
           <div className="d-flex justify-content-between align-items-center mb-2">
             <h5 className="mb-0 text-primary">💳 Pagamento con Carta</h5>

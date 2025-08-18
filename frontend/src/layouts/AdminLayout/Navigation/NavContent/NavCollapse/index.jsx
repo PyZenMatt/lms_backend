@@ -1,6 +1,6 @@
 import PropTypes from 'prop-types';
 import React, { useContext, useEffect } from 'react';
-import { ListGroup } from '@/components/ui/legacy-shims';
+import { ListGroup } from '@/components/ui';
 import { Link, useLocation } from 'react-router-dom';
 
 import NavItem from '../NavItem';

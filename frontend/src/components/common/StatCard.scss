@@ -40,15 +40,15 @@
 
 // Progress bar theme colors
 .progress-c-theme {
-  background: linear-gradient(45deg, var(--primary), #73b4ff);
+  background: linear-gradient(45deg, var(--primary), hsl(var(--info)));
 }
 
 .progress-c-theme2 {
-  background: linear-gradient(45deg, color-mix(in srgb, var(--success) 75%, cyan), #59e0c5);
+  background: linear-gradient(45deg, color-mix(in srgb, var(--success) 75%, cyan), hsl(var(--brand-teal)));
 }
 
 .progress-c-theme3 {
-  background: linear-gradient(45deg, var(--warning), #ffcb80);
+  background: linear-gradient(45deg, var(--warning), hsl(var(--warning)));
 }
 
 // Icon colors
@@ -60,10 +60,10 @@
   color: var(--primary) !important;
 }
 
-.text-c-orange {
+.text-c-hsl(var(--warning)) {
   color: var(--warning) !important;
 }
 
 .text-c-red {
-  color: #FF5370 !important;
+  color: hsl(var(--destructive)) !important;
 }

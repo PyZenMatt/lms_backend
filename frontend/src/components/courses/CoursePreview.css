@@ -24,7 +24,7 @@
 }
 
 .course-stats-card {
-  background: rgba(255, 255, 255, 0.95);
+  background: hsl(var(--background) / 0.95);
   backdrop-filter: blur(10px);
   border-radius: 20px !important;
   transform: translateY(-20px);
@@ -69,7 +69,7 @@
 }
 
 .custom-tabs {
-  background: white;
+  background: hsl(var(--background));
   border-radius: 20px 20px 0 0;
   overflow: hidden;
 }
@@ -151,7 +151,7 @@
 .lessons-accordion .accordion-item {
   border: none;
   border-bottom: 1px solid var(--border);
-  background: white;
+  background: hsl(var(--background));
 }
 
 .lessons-accordion .accordion-item:first-child {
@@ -170,7 +170,7 @@
 }
 
 .lessons-accordion .accordion-button {
-  background: white;
+  background: hsl(var(--background));
   border: none;
   padding: 1.5rem;
   color: var(--muted-foreground);
@@ -206,7 +206,7 @@
 }
 
 .lesson-content {
-  background: white;
+  background: hsl(var(--background));
   border-radius: 10px;
   padding: 1.5rem;
   box-shadow: 0 2px 10px var(--shadow-xs);
@@ -221,7 +221,7 @@
 }
 
 .exercise-item {
-  background: white;
+  background: hsl(var(--background));
   border: 1px solid var(--border) !important;
   border-radius: 8px;
   transition: all 0.3s ease;
@@ -324,7 +324,7 @@
 }
 
 .progress-bar {
-  background: linear-gradient(135deg, var(--success) 0%, color-mix(in srgb, var(--success) 90%, white) 100%);
+  background: linear-gradient(135deg, var(--success) 0%, color-mix(in srgb, var(--success) 90%, hsl(var(--background))) 100%);
   border-radius: 10px;
   transition: width 0.6s ease;
 }

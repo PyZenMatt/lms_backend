@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Card, Badge, Spinner, Alert, Button, Row, Col } from '@/components/ui/legacy-shims';
+import { Card, Badge, Spinner, Alert, Button, Row, Col } from '@/components/ui';
 import { useAuth } from '../../contexts/AuthContext';
 import PendingWithdrawals from './PendingWithdrawals';
 import BurnDepositInterface from './BurnDepositInterface';
@@ -239,7 +239,7 @@ const DBStudentTeoCoinDashboard = () => {
                         <div className="d-flex align-items-center">
                           <div className="me-3">
                             <div
-                              className={`rounded-circle d-flex align-items-center justify-content-center text-white bg-${getTransactionColor(transaction.type)}`}
+                              className={`rounded-circle d-flex align-items-center justify-content-center text-hsl(var(--background)) bg-${getTransactionColor(transaction.type)}`}
                               style={{ width: '40px', height: '40px' }}
                             >
                               <i className="feather icon-arrow-up-right"></i>

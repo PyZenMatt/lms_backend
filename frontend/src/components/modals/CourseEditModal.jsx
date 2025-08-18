@@ -1,6 +1,6 @@
 // TODO: Verifica mapping sottocomponenti Modal
 import React, { useState, useEffect } from 'react';
-import { Modal, Form, Button, Alert, Spinner, Row, Col } from '@/components/ui/legacy-shims';
+import { Modal, Form, Button, Alert, Spinner, Row, Col } from '@/components/ui';
 import PropTypes from 'prop-types';
 import { fetchCourseDetail, updateCourse } from '../../services/api/courses';
 

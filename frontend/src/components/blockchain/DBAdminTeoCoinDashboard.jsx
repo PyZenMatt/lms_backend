@@ -1,6 +1,6 @@
 import TeoCoinBalanceWidget from '../../components/TeoCoinBalanceWidget';
 import React, { useState, useEffect } from 'react';
-import { Card, Badge, Spinner, Alert, Table } from '@/components/ui/legacy-shims';
+import { Card, Badge, Spinner, Alert, Table } from '@/components/ui';
 import PendingWithdrawals from './PendingWithdrawals';
 import BurnDepositInterface from './BurnDepositInterface';
 import { useAuth } from '../../contexts/AuthContext';

@@ -9,7 +9,7 @@
  */
 
 import React, { useState } from 'react';
-import { Container, Row, Col, Card, Button, Form, Badge, Alert } from '@/components/ui/legacy-shims';
+import { Container, Row, Col, Card, Button, Form, Badge, Alert } from '@/components/ui';
 import { useTheme } from '../../contexts/ThemeContext';
 import ThemeToggle from '../../components/ui/ThemeToggle';
 

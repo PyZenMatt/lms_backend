@@ -9,7 +9,7 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import { Toast, ToastContainer, Badge, Button } from '@/components/ui/legacy-shims';
+import { Toast, ToastContainer, Badge, Button } from '@/components/ui';
 import { useNotification, NOTIFICATION_TYPES } from '../../contexts/NotificationContext';
 
 const EnhancedNotificationSystem = () => {

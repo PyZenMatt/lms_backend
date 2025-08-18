@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { Container, Row, Col, Card, Button, Alert, Spinner, Badge, Form } from '@/components/ui/legacy-shims';
+import { Container, Row, Col, Card, Button, Alert, Spinner, Badge, Form } from '@/components/ui';
 import { fetchUserRole } from '../../services/api/auth';
 import MainCard from '../../components/Card/MainCard';
 
@@ -328,7 +328,7 @@ const StudentExerciseDetailNew = () => {
         <Col lg={4}>
           {/* Tips Card */}
           <Card className="border-primary">
-            <Card.Header className="bg-primary text-white">
+            <Card.Header className="bg-primary text-hsl(var(--background))">
               <h6 className="mb-0">
                 <i className="feather icon-lightbulb mr-2"></i>
                 Consigli per una buona soluzione

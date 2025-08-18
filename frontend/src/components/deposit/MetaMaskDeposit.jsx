@@ -6,7 +6,7 @@
  */
 
 import React, { useState } from 'react';
-import { Card, Alert } from '@/components/ui/legacy-shims';
+import { Card, Alert } from '@/components/ui';
 import BurnDepositInterface from '../blockchain/BurnDepositInterface';
 
 const MetaMaskDeposit = ({ onDepositComplete }) => {
@@ -21,7 +21,7 @@ const MetaMaskDeposit = ({ onDepositComplete }) => {
 
   return (
     <Card className="metamask-deposit-bg-bg-card text-card-foreground rounded-lg border border-border shadow-sm text-bg-card text-card-foreground rounded-lg border border-border shadow-sm-foreground border border-border rounded-lg shadow-sm">
-      <Card.Header className="bg-gradient-warning text-white">
+      <Card.Header className="bg-gradient-warning text-hsl(var(--background))">
         <h5 className="mb-0">
           <i className="fab fa-ethereum me-2"></i>
           Deposit TEO from MetaMask

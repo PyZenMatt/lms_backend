@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Card, Table, Button, Spinner, Alert, Badge } from '@/components/ui/legacy-shims';
+import { Card, Table, Button, Spinner, Alert, Badge } from '@/components/ui';
 import { fetchPendingTeachers, approveTeacher, rejectTeacher } from '../../services/api/admin';
 
 const PendingTeachersCard = () => {
@@ -126,7 +126,7 @@ const PendingTeachersCard = () => {
                     <div className="d-flex align-items-center">
                       <div className="me-3">
                         <div
-                          className="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center"
+                          className="rounded-circle bg-primary text-hsl(var(--background)) d-flex align-items-center justify-content-center"
                           style={{ width: '40px', height: '40px' }}
                         >
                           {teacher.first_name?.[0]?.toUpperCase() || 'T'}

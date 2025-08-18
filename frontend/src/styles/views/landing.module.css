@@ -27,7 +27,7 @@
   align-items: center;
   position: relative;
   overflow: hidden;
-  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+  background: linear-gradient(135deg, hsl(var(--foreground)) 0%, hsl(var(--foreground)) 100%);
 }
 
 .hero-background {
@@ -46,9 +46,9 @@
   right: 0;
   bottom: 0;
   background: linear-gradient(135deg, 
-    rgba(15, 23, 42, 0.95) 0%, 
-    rgba(30, 41, 59, 0.9) 50%, 
-    rgba(15, 23, 42, 0.95) 100%);
+    hsl(var(--foreground) / 0.95) 0%, 
+    hsl(var(--foreground) / 0.90) 50%, 
+    hsl(var(--foreground) / 0.95) 100%);
 }
 
 .floating-elements {
@@ -123,7 +123,7 @@
 }
 
 .hero-content {
-  color: white;
+  color: hsl(var(--background));
 }
 
 .hero-badge {
@@ -140,7 +140,7 @@
 
 .hero-badge .badge-crypto {
   background: linear-gradient(135deg, var(--warning), var(--warning));
-  color: white;
+  color: hsl(var(--background));
   padding: 4px 8px;
   border-radius: 50%;
   font-weight: 800;
@@ -181,21 +181,21 @@
   align-items: center;
   gap: 0.5rem;
   background: var(--success);
-  color: white;
+  color: hsl(var(--background));
   padding: 18px 32px;
   border-radius: 50px;
   text-decoration: none;
   font-weight: 600;
   font-size: 1.1rem;
   transition: all 0.3s ease;
-  box-shadow: 0 8px 25px rgba(0, 173, 91, 0.3);
+  box-shadow: 0 8px 25px hsl(var(--success) / 0.30);
 }
 
 .btn-primary-large:hover {
   background: var(--success);
   transform: translateY(-2px);
-  box-shadow: 0 12px 35px rgba(0, 173, 91, 0.4);
-  color: white;
+  box-shadow: 0 12px 35px hsl(var(--success) / 0.40);
+  color: hsl(var(--background));
   text-decoration: none;
 }
 
@@ -204,7 +204,7 @@
   align-items: center;
   gap: 0.5rem;
   background: transparent;
-  color: white;
+  color: hsl(var(--background));
   padding: 18px 32px;
   border: 2px solid color-mix(in srgb, var(--background) 30%, transparent);
   border-radius: 50px;
@@ -218,7 +218,7 @@
 .btn-secondary-large:hover {
   background: color-mix(in srgb, var(--background) 10%, transparent);
   border-color: hsl(var(--background) / 0.50);
-  color: white;
+  color: hsl(var(--background));
   text-decoration: none;
 }
 
@@ -267,7 +267,7 @@
 
 .course-card {
   position: absolute;
-  background: white;
+  background: hsl(var(--background));
   border-radius: 16px;
   padding: 20px;
   box-shadow: 0 10px 40px var(--shadow-md);
@@ -339,7 +339,7 @@
 /* Categories Section */
 .categories-section {
   padding: 100px 0;
-  background: #f8fafc;
+  background: hsl(var(--background));
 }
 
 .section-header {
@@ -367,7 +367,7 @@
 
 .category-card {
   position: relative;
-  background: white;
+  background: hsl(var(--background));
   border-radius: 16px;
   padding: 2rem;
   cursor: pointer;
@@ -415,7 +415,7 @@
 /* Features Section */
 .features-section {
   padding: 100px 0;
-  background: white;
+  background: hsl(var(--background));
 }
 
 .features-grid {
@@ -456,8 +456,8 @@
 /* Web3 Section */
 .web3-section {
   padding: 100px 0;
-  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-  color: white;
+  background: linear-gradient(135deg, hsl(var(--foreground)) 0%, hsl(var(--foreground)) 100%);
+  color: hsl(var(--background));
   position: relative;
   overflow: hidden;
 }
@@ -470,9 +470,9 @@
   right: 0;
   bottom: 0;
   background: 
-    radial-gradient(circle at 20% 20%, rgba(255, 215, 0, 0.1) 0%, transparent 50%),
-    radial-gradient(circle at 80% 80%, rgba(0, 255, 255, 0.1) 0%, transparent 50%),
-    radial-gradient(circle at 40% 60%, rgba(255, 107, 53, 0.1) 0%, transparent 50%);
+    radial-gradient(circle at 20% 20%, hsl(var(--warning) / 0.10) 0%, transparent 50%),
+    radial-gradient(circle at 80% 80%, hsl(var(--info) / 0.10) 0%, transparent 50%),
+    radial-gradient(circle at 40% 60%, hsl(var(--warning) / 0.10) 0%, transparent 50%);
   pointer-events: none;
 }
 
@@ -482,7 +482,7 @@
 }
 
 .web3-section .section-header h2 {
-  color: white;
+  color: hsl(var(--background));
   text-align: center;
   margin-bottom: 1rem;
 }
@@ -519,14 +519,14 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: linear-gradient(45deg, transparent, rgba(255, 215, 0, 0.1), transparent);
+  background: linear-gradient(45deg, transparent, hsl(var(--warning) / 0.10), transparent);
   opacity: 0;
   transition: opacity 0.3s ease;
 }
 
 .web3-card:hover {
   transform: translateY(-8px);
-  border-color: rgba(255, 215, 0, 0.5);
+  border-color: hsl(var(--accent-gold) / 0.50);
   box-shadow: 0 20px 40px var(--shadow-xl);
 }
 
@@ -544,7 +544,7 @@
   font-size: 1.5rem;
   font-weight: 700;
   margin-bottom: 1rem;
-  color: white;
+  color: hsl(var(--background));
 }
 
 .web3-card p {
@@ -554,7 +554,7 @@
 }
 
 .web3-highlight {
-  background: linear-gradient(45deg, var(--warning), #ffed4e);
+  background: linear-gradient(45deg, var(--warning), hsl(var(--accent-gold) / 0.90));
   color: var(--foreground);
   padding: 8px 16px;
   border-radius: 20px;
@@ -572,7 +572,7 @@
 
 .web3-process h3 {
   text-align: center;
-  color: white;
+  color: hsl(var(--background));
   margin-bottom: 2.5rem;
   font-size: 2rem;
 }
@@ -594,7 +594,7 @@
   justify-content: center;
   width: 50px;
   height: 50px;
-  background: linear-gradient(45deg, var(--warning), #ffed4e);
+  background: linear-gradient(45deg, var(--warning), hsl(var(--accent-gold) / 0.90));
   color: var(--foreground);
   border-radius: 50%;
   font-weight: 700;
@@ -611,8 +611,8 @@
 .cta-section {
   padding: 100px 0;
   position: relative;
-  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
-  color: white;
+  background: linear-gradient(135deg, hsl(var(--foreground)) 0%, hsl(var(--foreground)) 100%);
+  color: hsl(var(--background));
 }
 
 .cta-background {
@@ -665,7 +665,7 @@
 /* Footer */
 .landing-footer {
   background: var(--foreground);
-  color: white;
+  color: hsl(var(--background));
   padding: 60px 0 20px;
 }
 
@@ -698,7 +698,7 @@
   font-size: 1.1rem;
   font-weight: 600;
   margin-bottom: 1rem;
-  color: white;
+  color: hsl(var(--background));
 }
 
 .link-group a {
@@ -742,9 +742,9 @@
 
 /* TeoCoins Banner */
 .teocoin-banner {
-  background: linear-gradient(135deg, #1e3a8a 0%, #3730a3 100%);
+  background: linear-gradient(135deg, hsl(var(--info-700)) 0%, hsl(var(--indigo-700)) 100%);
   padding: 2rem 0;
-  color: white;
+  color: hsl(var(--background));
   border-top: 3px solid var(--warning);
   border-bottom: 3px solid var(--warning);
 }
@@ -765,7 +765,7 @@
 .crypto-icon {
   font-size: 3rem;
   background: linear-gradient(135deg, var(--warning), var(--warning));
-  color: white;
+  color: hsl(var(--background));
   width: 80px;
   height: 80px;
   border-radius: 50%;
@@ -822,26 +822,26 @@
 
 .btn-teocoin {
   background: linear-gradient(135deg, var(--warning), var(--warning));
-  color: white;
+  color: hsl(var(--background));
   padding: 15px 30px;
   border-radius: 50px;
   text-decoration: none;
   font-weight: 700;
   transition: all 0.3s ease;
-  box-shadow: 0 8px 25px rgba(245, 158, 11, 0.3);
+  box-shadow: 0 8px 25px hsl(var(--warning) / 0.30);
 }
 
 .btn-teocoin:hover {
   transform: translateY(-2px);
-  box-shadow: 0 12px 35px rgba(245, 158, 11, 0.4);
-  color: white;
+  box-shadow: 0 12px 35px hsl(var(--warning) / 0.40);
+  color: hsl(var(--background));
   text-decoration: none;
 }
 
 /* Student Earnings Testimonials */
 .earnings-testimonials {
   padding: 5rem 0;
-  background: linear-gradient(135deg, #f8fafc 0%, var(--border) 100%);
+  background: linear-gradient(135deg, hsl(var(--background)) 0%, var(--border) 100%);
 }
 
 .testimonials-grid {
@@ -852,7 +852,7 @@
 }
 
 .testimonial-card {
-  background: white;
+  background: hsl(var(--background));
   border-radius: 20px;
   padding: 2rem;
   box-shadow: 0 10px 30px var(--shadow-sm);
@@ -885,7 +885,7 @@
 }
 
 .course-name {
-  color: #6b7280;
+  color: hsl(var(--muted-foreground));
   text-align: center;
   margin-bottom: 1rem;
 }
@@ -903,7 +903,7 @@
 
 .testimonial-text {
   font-style: italic;
-  color: #4b5563;
+  color: hsl(var(--muted-foreground));
   text-align: center;
   line-height: 1.6;
 }
@@ -911,22 +911,22 @@
 .testimonials-cta {
   text-align: center;
   padding: 2rem;
-  background: white;
+  background: hsl(var(--background));
   border-radius: 20px;
-  box-shadow: 0 10px 30px rgba(245, 158, 11, 0.1);
+  box-shadow: 0 10px 30px hsl(var(--warning) / 0.10);
   border: 2px solid var(--warning);
 }
 
 .testimonials-cta p {
   font-size: 1.2rem;
   margin-bottom: 1.5rem;
-  color: #374151;
+  color: hsl(var(--muted-foreground));
 }
 
 /* Enhanced CTA Section */
 .cta-crypto-badge {
   background: linear-gradient(135deg, var(--warning), var(--warning));
-  color: white;
+  color: hsl(var(--background));
   padding: 12px 24px;
   border-radius: 50px;
   font-weight: 800;
@@ -960,15 +960,15 @@
 
 .earning-text {
   font-weight: 600;
-  color: white;
+  color: hsl(var(--background));
 }
 
 .cta-guarantee {
-  background: rgba(34, 197, 94, 0.1);
-  color: #16a34a;
+  background: hsl(var(--success) / 0.10);
+  color: hsl(var(--success-600));
   padding: 12px 20px;
   border-radius: 10px;
-  border: 1px solid #16a34a;
+  border: 1px solid hsl(var(--success-600));
   margin-top: 1rem;
   font-weight: 600;
 }

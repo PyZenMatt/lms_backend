@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Card, Alert, Spinner, Badge } from '@/components/ui/legacy-shims';
+import { Card, Alert, Spinner, Badge } from '@/components/ui';
 import { web3Service } from '../../services/api/web3Service';
 import { useAuth } from '../../contexts/AuthContext';
 

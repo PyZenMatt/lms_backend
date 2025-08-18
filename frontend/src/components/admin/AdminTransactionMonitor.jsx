@@ -1,6 +1,6 @@
 // TODO: Verifica mapping sottocomponenti Modal
 import React, { useEffect, useState } from 'react';
-import { Row, Col, Card, Table, Badge, Button, Alert, Spinner, Modal } from '@/components/ui/legacy-shims';
+import { Row, Col, Card, Table, Badge, Button, Alert, Spinner, Modal } from '@/components/ui';
 import api from '../../services/core/axiosClient';
 
 const AdminTransactionMonitor = () => {
@@ -37,11 +37,12 @@ const AdminTransactionMonitor = () => {
 
   const retryFailedTransaction = async (txId) => {
     try {
-      await api.post(`/admin/transactions/${txId}/retry/`);
-      fetchTransactions(); // Refresh
-      border rounded-md p-3 bg-muted text-muted-foreground('Transazione ritentata con successo');
+  await api.post(`/admin/transactions/${txId}/retry/`);
+  fetchTransactions(); // Refresh
+  // TODO: replace with toast
+  console.log('Transazione ritentata con successo');
     } catch (error) {
-      border rounded-md p-3 bg-muted text-muted-foreground('Errore nel ritentare la transazione');
+  console.error('Errore nel ritentare la transazione');
     }
   };
 
@@ -82,7 +83,7 @@ const AdminTransactionMonitor = () => {
       {/* Stats Cards */}
       <Row className="mb-4">
         <Col md={3}>
-          <Card className="bg-success text-white">
+          <Card className="bg-success text-background">
             <Card.Body>
               <div className="d-flex justify-content-between">
                 <div>
@@ -98,7 +99,7 @@ const AdminTransactionMonitor = () => {
         </Col>
 
         <Col md={3}>
-          <Card className="bg-warning text-white">
+          <Card className="bg-warning text-background">
             <Card.Body>
               <div className="d-flex justify-content-between">
                 <div>
@@ -114,7 +115,7 @@ const AdminTransactionMonitor = () => {
         </Col>
 
         <Col md={3}>
-          <Card className="bg-danger text-white">
+          <Card className="bg-danger text-background">
             <Card.Body>
               <div className="d-flex justify-content-between">
                 <div>
@@ -130,7 +131,7 @@ const AdminTransactionMonitor = () => {
         </Col>
 
         <Col md={3}>
-          <Card className="bg-info text-white">
+          <Card className="bg-info text-background">
             <Card.Body>
               <div className="d-flex justify-content-between">
                 <div>
@@ -274,7 +275,7 @@ const AdminTransactionMonitor = () => {
       </Card>
 
       {/* Transaction Detail Modal */}
-      <Dialog open={showModal}> setShowModal(false)} size="lg">
+  <Modal show={showModal} onHide={() => setShowModal(false)}>
         <Modal.Header closeButton>
           <Modal.Title>Dettagli Transazione</Modal.Title>
         </Modal.Header>
@@ -321,7 +322,7 @@ const AdminTransactionMonitor = () => {
             Chiudi
           </Button>
         </Modal.Footer>
-      </Dialog>
+  </Modal>
     </div>
   );
 };

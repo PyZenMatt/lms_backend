@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Row, Col, Card, Spinner, Alert, ProgressBar } from '@/components/ui/legacy-shims';
+import { Row, Col, Card, Spinner, Alert, ProgressBar } from '@/components/ui';
 import { Line } from 'react-chartjs-2';
 import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend } from 'chart.js';
 import { getAnalyticsData, getRevenueChartData } from '../../services/api/analytics';
@@ -33,8 +33,8 @@ const RevenueAnalytics = () => {
           {
             label: 'Revenue Daily (€)',
             data: chart.map((item) => item.revenue),
-            borderColor: 'rgb(75, 192, 192)',
-            backgroundColor: 'rgba(75, 192, 192, 0.1)',
+            borderColor: 'hsl(var(--brand-teal))',
+            backgroundColor: 'hsl(var(--brand-teal) / 0.10)',
             tension: 0.1,
             fill: true
           }
@@ -110,38 +110,38 @@ const RevenueAnalytics = () => {
       {/* Overview Cards */}
       <Row className="g-3 mb-4">
         <Col lg={3} md={6}>
-          <Card className="h-100 bg-primary text-white">
+          <Card className="h-100 bg-primary text-hsl(var(--background))">
             <Card.Body>
               <div className="d-flex align-items-center">
                 <div className="flex-grow-1">
-                  <h6 className="mb-1 text-white-50">Total Revenue</h6>
-                  <h4 className="mb-0 text-white">€{overview.total_revenue_eur.toLocaleString('it-IT', { minimumFractionDigits: 2 })}</h4>
+                  <h6 className="mb-1 text-hsl(var(--background))-50">Total Revenue</h6>
+                  <h4 className="mb-0 text-hsl(var(--background))">€{overview.total_revenue_eur.toLocaleString('it-IT', { minimumFractionDigits: 2 })}</h4>
                 </div>
                 <div className="flex-shrink-0">
                   <i className="feather icon-euro" style={{ fontSize: '2.5rem', opacity: 0.3 }}></i>
                 </div>
               </div>
               <div className="mt-3">
-                <small className="text-white-50">{overview.total_enrollments} total enrollments</small>
+                <small className="text-hsl(var(--background))-50">{overview.total_enrollments} total enrollments</small>
               </div>
             </Card.Body>
           </Card>
         </Col>
 
         <Col lg={3} md={6}>
-          <Card className="h-100 bg-success text-white">
+          <Card className="h-100 bg-success text-hsl(var(--background))">
             <Card.Body>
               <div className="d-flex align-items-center">
                 <div className="flex-grow-1">
-                  <h6 className="mb-1 text-white-50">Average Order Value</h6>
-                  <h4 className="mb-0 text-white">€{overview.average_order_value.toLocaleString('it-IT', { minimumFractionDigits: 2 })}</h4>
+                  <h6 className="mb-1 text-hsl(var(--background))-50">Average Order Value</h6>
+                  <h4 className="mb-0 text-hsl(var(--background))">€{overview.average_order_value.toLocaleString('it-IT', { minimumFractionDigits: 2 })}</h4>
                 </div>
                 <div className="flex-shrink-0">
                   <i className="feather icon-trending-up" style={{ fontSize: '2.5rem', opacity: 0.3 }}></i>
                 </div>
               </div>
               <div className="mt-3">
-                <small className="text-white-50">{overview.conversion_rate}% conversion rate</small>
+                <small className="text-hsl(var(--background))-50">{overview.conversion_rate}% conversion rate</small>
               </div>
             </Card.Body>
           </Card>
@@ -167,19 +167,19 @@ const RevenueAnalytics = () => {
         </Col>
 
         <Col lg={3} md={6}>
-          <Card className="h-100 bg-info text-white">
+          <Card className="h-100 bg-info text-hsl(var(--background))">
             <Card.Body>
               <div className="d-flex align-items-center">
                 <div className="flex-grow-1">
-                  <h6 className="mb-1 text-white-50">Last 7 Days</h6>
-                  <h4 className="mb-0 text-white">€{recent_activity.revenue_7d.toLocaleString('it-IT', { minimumFractionDigits: 2 })}</h4>
+                  <h6 className="mb-1 text-hsl(var(--background))-50">Last 7 Days</h6>
+                  <h4 className="mb-0 text-hsl(var(--background))">€{recent_activity.revenue_7d.toLocaleString('it-IT', { minimumFractionDigits: 2 })}</h4>
                 </div>
                 <div className="flex-shrink-0">
                   <i className="feather icon-calendar" style={{ fontSize: '2.5rem', opacity: 0.3 }}></i>
                 </div>
               </div>
               <div className="mt-3">
-                <small className="text-white-50">{recent_activity.enrollments_7d} new enrollments</small>
+                <small className="text-hsl(var(--background))-50">{recent_activity.enrollments_7d} new enrollments</small>
               </div>
             </Card.Body>
           </Card>

@@ -1,14 +1,14 @@
 // TeoCoin Withdrawal Component Styles
 .teocoin-withdrawal-dialog {
   .MuiDialog-paper {
-    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    background: linear-gradient(135deg, hsl(var(--muted)) 0%, hsl(var(--muted)) 100%);
     border-radius: 16px;
     box-shadow: 0 10px 30px var(--shadow-sm);
   }
 
   .MuiDialogTitle-root {
     background: linear-gradient(135deg, var(--primary) 0%, var(--primary) 100%);
-    color: white;
+    color: hsl(var(--background));
     margin: 0;
     padding: 20px 24px;
     border-radius: 16px 16px 0 0;
@@ -18,7 +18,7 @@
     }
 
     .MuiIconButton-root {
-      color: white;
+      color: hsl(var(--background));
       
       &:hover {
         background-color: color-mix(in srgb, var(--background) 10%, transparent);
@@ -34,7 +34,7 @@
       box-shadow: 0 2px 8px var(--shadow-xs);
       
       &.MuiCard-outlined {
-        border: 1px solid rgba(102, 126, 234, 0.1);
+        border: 1px solid hsl(var(--indigo-500) / 0.10);
       }
 
       .MuiCardContent-root {
@@ -66,11 +66,11 @@
       padding: 12px 24px;
       font-weight: 600;
       text-transform: none;
-      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+      box-shadow: 0 4px 12px hsl(var(--indigo-500) / 0.30);
       
       &:hover {
-        background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%);
-        box-shadow: 0 6px 16px rgba(102, 126, 234, 0.4);
+        background: linear-gradient(135deg, hsl(var(--indigo-500)) 0%, hsl(var(--purple)) 100%);
+        box-shadow: 0 6px 16px hsl(var(--indigo-500) / 0.40);
         transform: translateY(-2px);
       }
       
@@ -89,8 +89,8 @@
       text-transform: none;
       
       &:hover {
-        background-color: rgba(102, 126, 234, 0.05);
-        border-color: #5a6fd8;
+        background-color: hsl(var(--indigo-500) / 0.05);
+        border-color: hsl(var(--indigo-500));
       }
     }
 
@@ -98,12 +98,12 @@
       font-weight: 500;
       
       &.MuiChip-colorSuccess {
-        background-color: color-mix(in srgb, var(--success) 16%, white);
+        background-color: color-mix(in srgb, var(--success) 16%, hsl(var(--background)));
         color: var(--success-foreground);
       }
       
       &.MuiChip-colorWarning {
-        background-color: color-mix(in srgb, var(--warning) 16%, white);
+        background-color: color-mix(in srgb, var(--warning) 16%, hsl(var(--background)));
         color: var(--warning-foreground);
       }
     }
@@ -112,8 +112,8 @@
       border-radius: 8px;
       
       &.MuiAlert-standardInfo {
-        background-color: rgba(102, 126, 234, 0.1);
-        color: #4a5568;
+        background-color: hsl(var(--indigo-500) / 0.10);
+        color: hsl(var(--muted-foreground));
         
         .MuiAlert-icon {
           color: var(--primary);
@@ -121,17 +121,17 @@
       }
       
       &.MuiAlert-standardSuccess {
-        background-color: rgba(72, 187, 120, 0.1);
+        background-color: hsl(var(--success) / 0.10);
         color: var(--success-foreground);
       }
       
       &.MuiAlert-standardError {
-        background-color: rgba(245, 101, 101, 0.1);
+        background-color: hsl(var(--destructive) / 0.10);
         color: var(--destructive-foreground);
       }
       
       &.MuiAlert-standardWarning {
-        background-color: rgba(237, 137, 54, 0.1);
+        background-color: hsl(var(--warning) / 0.10);
         color: var(--warning-foreground);
       }
     }
@@ -146,7 +146,7 @@
       text-transform: none;
       
       &:hover {
-        background-color: rgba(102, 126, 234, 0.05);
+        background-color: hsl(var(--indigo-500) / 0.05);
       }
     }
   }
@@ -167,7 +167,7 @@
 // Loading state styles
 .teocoin-withdrawal-dialog {
   .MuiCircularProgress-root {
-    color: white;
+    color: hsl(var(--background));
   }
   
   .loading-overlay {

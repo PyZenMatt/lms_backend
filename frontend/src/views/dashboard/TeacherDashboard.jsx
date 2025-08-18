@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Row, Col, Card, Button, Alert } from '@/components/ui/legacy-shims';
+import { Row, Col, Card, Button, Alert } from '@/components/ui';
 import { Link, useNavigate } from 'react-router-dom';
 import RoleGuard from '../../components/guards/RoleGuard';
 
@@ -231,7 +231,7 @@ const TeacherDashboard = () => {
       progressColor: 'progress-c-theme',
       iconColor: 'text-primary',
       description: 'Corsi pubblicati e disponibili',
-      bgGradient: 'linear-gradient(135deg, rgba(4, 169, 245, 0.1) 0%, hsl(var(--brand-primary) / 0.05) 100%)'
+      bgGradient: 'linear-gradient(135deg, hsl(var(--brand-primary) / 0.10) 0%, hsl(var(--brand-primary) / 0.05) 100%)'
     },
     {
       title: 'Guadagni Mensili',
@@ -241,7 +241,7 @@ const TeacherDashboard = () => {
       progressColor: 'progress-c-theme2',
       iconColor: 'text-success',
       description: 'Ricavi del mese corrente',
-      bgGradient: 'linear-gradient(135deg, rgba(29, 233, 182, 0.1) 0%, rgba(29, 233, 182, 0.05) 100%)'
+      bgGradient: 'linear-gradient(135deg, hsl(var(--brand-teal) / 0.10) 0%, hsl(var(--brand-teal) / 0.05) 100%)'
     },
     {
       title: 'Fatturato Totale',
@@ -251,7 +251,7 @@ const TeacherDashboard = () => {
       progressColor: 'progress-c-theme3',
       iconColor: 'text-warning',
       description: 'Guadagni totali dalla piattaforma',
-      bgGradient: 'linear-gradient(135deg, rgba(244, 194, 43, 0.1) 0%, rgba(244, 194, 43, 0.05) 100%)'
+      bgGradient: 'linear-gradient(135deg, hsl(var(--warning) / 0.10) 0%, hsl(var(--warning) / 0.05) 100%)'
     }
   ];
 
@@ -309,13 +309,13 @@ const TeacherDashboard = () => {
               <Card.Body
                 className="text-center py-5"
                 style={{
-                  background: 'linear-gradient(135deg, rgba(4, 169, 245, 0.1) 0%, rgba(29, 233, 182, 0.1) 100%)'
+                  background: 'linear-gradient(135deg, hsl(var(--brand-primary) / 0.10) 0%, hsl(var(--brand-teal) / 0.10) 100%)'
                 }}
               >
                 <div className="d-flex align-items-center justify-content-center mb-3">
                   <div className="avatar-lg me-3">
                     <div
-                      className="d-flex align-items-center justify-content-center bg-primary rounded-circle text-white"
+                      className="d-flex align-items-center justify-content-center bg-primary rounded-circle text-hsl(var(--background))"
                       style={{ width: '70px', height: '70px' }}
                     >
                       <i className="feather icon-award" style={{ fontSize: '2rem' }} />

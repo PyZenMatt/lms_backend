@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Card, Button, Row, Col, Spinner, Alert, Badge, Form, InputGroup } from '@/components/ui/legacy-shims';
+import { Card, Button, Row, Col, Spinner, Alert, Badge, Form, InputGroup } from '@/components/ui';
 import { fetchCourses } from '../../services/api/courses';
 import CourseCheckoutModal from '../../components/courses/DBCourseCheckoutModal';
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
@@ -132,7 +132,7 @@ const AllCourses = () => {
       {/* Header Section */}
       <div className="row mb-4">
         <div className="col-12">
-          <h1 className="h2 mb-3" style={{ color: '#6c63ff' }}>
+          <h1 className="h2 mb-3" style={{ color: 'hsl(var(--primary))' }}>
             <i className="feather icon-palette me-2"></i>
             Esplora i Corsi d'Arte
           </h1>
@@ -225,7 +225,7 @@ const AllCourses = () => {
 
                   {/* Category Badge */}
                   {course.category_display && (
-                    <Badge bg="primary" className="position-absolute top-0 start-0 m-2" style={{ backgroundColor: '#6c63ff' }}>
+                    <Badge bg="primary" className="position-absolute top-0 start-0 m-2" style={{ backgroundColor: 'hsl(var(--primary))' }}>
                       {course.category_display}
                     </Badge>
                   )}
@@ -240,7 +240,7 @@ const AllCourses = () => {
 
                 <Card.Body className="d-flex flex-column">
                   {/* Course Title */}
-                  <Card.Title className="h5 mb-2" style={{ color: '#2d3436' }}>
+                  <Card.Title className="h5 mb-2" style={{ color: 'hsl(var(--foreground))' }}>
                     {course.title || 'Senza titolo'}
                   </Card.Title>
 
@@ -299,8 +299,8 @@ const AllCourses = () => {
                       disabled={course.is_enrolled || purchasing === course.id}
                       onClick={() => handlePurchase(course)}
                       style={{
-                        backgroundColor: course.is_enrolled ? '#00b894' : '#6c63ff',
-                        borderColor: course.is_enrolled ? '#00b894' : '#6c63ff'
+                        backgroundColor: course.is_enrolled ? 'hsl(var(--brand-teal))' : 'hsl(var(--primary))',
+                        borderColor: course.is_enrolled ? 'hsl(var(--brand-teal))' : 'hsl(var(--primary))'
                       }}
                     >
                       {purchasing === course.id ? (
@@ -344,7 +344,7 @@ const AllCourses = () => {
                           {courseLessons[course.id].map((lesson, index) => (
                             <li key={lesson.id} className="mb-1">
                               <small className="text-muted">
-                                <i className="feather icon-play-circle me-2" style={{ color: '#6c63ff' }}></i>
+                                <i className="feather icon-play-circle me-2" style={{ color: 'hsl(var(--primary))' }}></i>
                                 {lesson.order ? `${lesson.order}. ` : `${index + 1}. `}
                                 {lesson.title}
                                 {lesson.duration ? ` (${lesson.duration} min)` : ''}

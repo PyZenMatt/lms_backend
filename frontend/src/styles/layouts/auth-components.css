@@ -6,29 +6,29 @@
 :root {
   --skillshare-primary: var(--success);
   --skillshare-primary-dark: var(--success);
-  --skillshare-secondary: #002333;
-  --skillshare-accent: #ff6b35;
-  --skillshare-gray-50: #f8fafc;
-  --skillshare-gray-100: #f1f5f9;
-  --skillshare-gray-200: var(--border);
-  --skillshare-gray-300: #cbd5e1;
-  --skillshare-gray-400: #94a3b8;
-  --skillshare-gray-500: #64748b;
-  --skillshare-gray-600: #475569;
-  --skillshare-gray-700: #334155;
-  --skillshare-gray-800: #1e293b;
-  --skillshare-gray-900: #0f172a;
-  --skillshare-white: var(--background);
-  --skillshare-error: #ef4444;
+  --skillshare-secondary: hsl(var(--foreground));
+  --skillshare-accent: hsl(var(--warning));
+  --skillshare-hsl(var(--muted-foreground))-50: hsl(var(--background));
+  --skillshare-hsl(var(--muted-foreground))-100: hsl(var(--background));
+  --skillshare-hsl(var(--muted-foreground))-200: var(--border);
+  --skillshare-hsl(var(--muted-foreground))-300: hsl(var(--muted));
+  --skillshare-hsl(var(--muted-foreground))-400: hsl(var(--muted-foreground));
+  --skillshare-hsl(var(--muted-foreground))-500: hsl(var(--muted-foreground));
+  --skillshare-hsl(var(--muted-foreground))-600: hsl(var(--muted-foreground));
+  --skillshare-hsl(var(--muted-foreground))-700: hsl(var(--muted-foreground));
+  --skillshare-hsl(var(--muted-foreground))-800: hsl(var(--foreground));
+  --skillshare-hsl(var(--muted-foreground))-900: hsl(var(--foreground));
+  --skillshare-hsl(var(--background)): var(--background);
+  --skillshare-error: hsl(var(--destructive));
   --skillshare-border-radius: 8px;
-  --skillshare-shadow: 0 4px 6px -1px var(--shadow-sm), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --skillshare-shadow: 0 4px 6px -1px var(--shadow-sm), 0 2px 4px -1px hsl(var(--foreground) / 0.06);
   --skillshare-shadow-lg: 0 10px 15px -3px var(--shadow-sm), 0 4px 6px -2px var(--shadow-xs);
 }
 
 /* Main Auth Wrapper */
 .skillshare-auth-wrapper {
   min-height: 100vh;
-  background: linear-gradient(135deg, var(--skillshare-gray-50) 0%, var(--skillshare-gray-100) 100%);
+  background: linear-gradient(135deg, var(--skillshare-hsl(var(--muted-foreground))-50) 0%, var(--skillshare-hsl(var(--muted-foreground))-100) 100%);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -65,8 +65,8 @@
 
 /* Auth Card */
 .skillshare-auth-card {
-  background: var(--skillshare-white);
-  border: 1px solid var(--skillshare-gray-200);
+  background: var(--skillshare-hsl(var(--background)));
+  border: 1px solid var(--skillshare-hsl(var(--muted-foreground))-200);
   border-radius: var(--skillshare-border-radius);
   box-shadow: var(--skillshare-shadow-lg);
   overflow: hidden;
@@ -84,36 +84,36 @@
 .skillshare-auth-title {
   font-size: 1.875rem;
   font-weight: 700;
-  color: var(--skillshare-gray-900);
+  color: var(--skillshare-hsl(var(--muted-foreground))-900);
   margin: 0 0 0.5rem 0;
   line-height: 1.2;
   text-align: center;
 }
 
 .skillshare-auth-subtitle {
-  color: var(--skillshare-gray-600);
+  color: var(--skillshare-hsl(var(--muted-foreground))-600);
   font-size: 1rem;
   margin: 0 0 2rem 0;
   text-align: center;
   line-height: 1.5;
 }
 
-/* Signin Header Title - Black text in white container */
+/* Signin Header Title - Black text in hsl(var(--background)) container */
 .signin-header-title {
   text-align: center;
   margin-bottom: 1rem;
   padding-bottom: 1rem;
-  border-bottom: 2px solid var(--skillshare-gray-100);
+  border-bottom: 2px solid var(--skillshare-hsl(var(--muted-foreground))-100);
 }
 
 .signin-title-text {
   font-size: 1.5rem;
   font-weight: 800;
-  color: var(--skillshare-gray-900);
+  color: var(--skillshare-hsl(var(--muted-foreground))-900);
   margin: 0;
   text-transform: uppercase;
   letter-spacing: 0.1em;
-  background: linear-gradient(135deg, var(--skillshare-gray-900), var(--skillshare-gray-700));
+  background: linear-gradient(135deg, var(--skillshare-hsl(var(--muted-foreground))-900), var(--skillshare-hsl(var(--muted-foreground))-700));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -121,7 +121,7 @@
 
 /* Enhanced Readability for Auth Subtitles */
 .skillshare-auth-subtitle-dark {
-  color: var(--skillshare-gray-800) !important;
+  color: var(--skillshare-hsl(var(--muted-foreground))-800) !important;
   font-weight: 600;
   font-size: 1.1rem;
   text-shadow: 0 1px 2px var(--shadow-sm);
@@ -129,14 +129,14 @@
 
 /* Better contrast for auth titles */
 .skillshare-auth-title {
-  color: var(--skillshare-gray-900) !important;
+  color: var(--skillshare-hsl(var(--muted-foreground))-900) !important;
   text-shadow: 0 1px 2px var(--shadow-sm);
 }
 
 /* Enhanced Auth Card for better readability */
 .skillshare-auth-card {
-  box-shadow: 0 20px 25px -5px var(--shadow-sm), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-  border: 2px solid var(--skillshare-gray-100);
+  box-shadow: 0 20px 25px -5px var(--shadow-sm), 0 10px 10px -5px hsl(var(--foreground) / 0.04);
+  border: 2px solid var(--skillshare-hsl(var(--muted-foreground))-100);
 }
 
 /* Form Styles */
@@ -152,7 +152,7 @@
   display: block;
   font-size: 0.875rem;
   font-weight: 500;
-  color: var(--skillshare-gray-700);
+  color: var(--skillshare-hsl(var(--muted-foreground))-700);
   margin-bottom: 0.5rem;
 }
 
@@ -160,17 +160,17 @@
   width: 100%;
   padding: 0.75rem 1rem;
   font-size: 1rem;
-  border: 2px solid var(--skillshare-gray-300);
+  border: 2px solid var(--skillshare-hsl(var(--muted-foreground))-300);
   border-radius: var(--skillshare-border-radius);
-  background-color: var(--skillshare-white);
-  color: var(--skillshare-gray-900);
+  background-color: var(--skillshare-hsl(var(--background)));
+  color: var(--skillshare-hsl(var(--muted-foreground))-900);
   transition: all 0.2s ease-in-out;
   outline: none;
 }
 
 .skillshare-input:focus {
   border-color: var(--skillshare-primary);
-  box-shadow: 0 0 0 3px rgba(0, 173, 91, 0.1);
+  box-shadow: 0 0 0 3px hsl(var(--success) / 0.10);
 }
 
 .skillshare-input.skillshare-input-error {
@@ -178,11 +178,11 @@
 }
 
 .skillshare-input.skillshare-input-error:focus {
-  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+  box-shadow: 0 0 0 3px hsl(var(--danger) / 0.10);
 }
 
 .skillshare-input::placeholder {
-  color: var(--skillshare-gray-400);
+  color: var(--skillshare-hsl(var(--muted-foreground))-400);
 }
 
 .skillshare-input-error-text {
@@ -193,7 +193,7 @@
 
 /* Improved Form Labels */
 .form-label {
-  color: var(--skillshare-gray-800) !important;
+  color: var(--skillshare-hsl(var(--muted-foreground))-800) !important;
   font-weight: 700;
   font-size: 0.95rem;
   text-shadow: 0 1px 1px var(--shadow-xs);
@@ -205,7 +205,7 @@
   padding: 0.875rem 1.5rem;
   font-size: 1rem;
   font-weight: 600;
-  color: var(--skillshare-white);
+  color: var(--skillshare-hsl(var(--background)));
   background-color: var(--skillshare-primary);
   border: none;
   border-radius: var(--skillshare-border-radius);
@@ -221,7 +221,7 @@
 }
 
 .skillshare-auth-button:disabled {
-  background-color: var(--skillshare-gray-400);
+  background-color: var(--skillshare-hsl(var(--muted-foreground))-400);
   cursor: not-allowed;
   transform: none;
   box-shadow: none;
@@ -246,8 +246,8 @@
 
 /* Error Message */
 .skillshare-auth-error {
-  background-color: #fef2f2;
-  border: 1px solid #fecaca;
+  background-color: hsl(var(--danger) / 0.15);
+  border: 1px solid hsl(var(--danger) / 0.30);
   color: var(--skillshare-error);
   padding: 0.75rem;
   border-radius: var(--skillshare-border-radius);
@@ -276,7 +276,7 @@
 
 /* Enhanced Auth Footer Links */
 .auth-footer p {
-  color: var(--skillshare-white) !important;
+  color: var(--skillshare-hsl(var(--background))) !important;
   font-weight: 600;
   text-shadow: 0 2px 4px var(--shadow-xl);
   font-size: 1.05rem;
@@ -303,7 +303,7 @@
 }
 
 .skillshare-auth-footer p {
-  color: var(--skillshare-gray-700) !important;
+  color: var(--skillshare-hsl(var(--muted-foreground))-700) !important;
   font-weight: 600;
   font-size: 1.05rem;
   text-shadow: 0 1px 2px hsl(var(--background) / 0.80);
@@ -335,7 +335,7 @@
 .skillshare-bg-circle {
   position: absolute;
   border-radius: 50%;
-  background: linear-gradient(45deg, rgba(0, 173, 91, 0.1), rgba(255, 107, 53, 0.1));
+  background: linear-gradient(45deg, hsl(var(--success) / 0.10), hsl(var(--warning) / 0.10));
   animation: float 6s ease-in-out infinite;
 }
 
@@ -404,34 +404,34 @@
 /* Dark mode support */
 @media (prefers-color-scheme: dark) {
   .skillshare-auth-wrapper {
-    background: linear-gradient(135deg, var(--skillshare-gray-900) 0%, var(--skillshare-gray-800) 100%);
+    background: linear-gradient(135deg, var(--skillshare-hsl(var(--muted-foreground))-900) 0%, var(--skillshare-hsl(var(--muted-foreground))-800) 100%);
   }
   
   .skillshare-auth-card {
-    background: var(--skillshare-gray-800);
-    border-color: var(--skillshare-gray-700);
+    background: var(--skillshare-hsl(var(--muted-foreground))-800);
+    border-color: var(--skillshare-hsl(var(--muted-foreground))-700);
   }
   
   .skillshare-auth-title {
-    color: var(--skillshare-white);
+    color: var(--skillshare-hsl(var(--background)));
   }
   
   .skillshare-auth-subtitle {
-    color: var(--skillshare-gray-300);
+    color: var(--skillshare-hsl(var(--muted-foreground))-300);
   }
   
   .skillshare-input-label {
-    color: var(--skillshare-gray-300);
+    color: var(--skillshare-hsl(var(--muted-foreground))-300);
   }
   
   .skillshare-input {
-    background-color: var(--skillshare-gray-700);
-    border-color: var(--skillshare-gray-600);
-    color: var(--skillshare-white);
+    background-color: var(--skillshare-hsl(var(--muted-foreground))-700);
+    border-color: var(--skillshare-hsl(var(--muted-foreground))-600);
+    color: var(--skillshare-hsl(var(--background)));
   }
   
   .skillshare-auth-footer p {
-    color: var(--skillshare-gray-400);
+    color: var(--skillshare-hsl(var(--muted-foreground))-400);
   }
 }
 
@@ -571,7 +571,7 @@
 }
 
 .auth-wrapper .alert-primary {
-  background: linear-gradient(135deg, var(--primary-light), rgba(4, 169, 245, 0.1));
+  background: linear-gradient(135deg, var(--primary-light), hsl(var(--brand-primary) / 0.10));
   color: var(--primary-dark);
   border-left: 4px solid var(--primary);
 }
@@ -591,7 +591,7 @@
 
 .auth-wrapper .btn-primary {
   background: linear-gradient(135deg, var(--gradient-primary-start), var(--gradient-primary-end));
-  color: white;
+  color: hsl(var(--background));
   box-shadow: var(--shadow-lg);
 }
 
@@ -711,7 +711,7 @@
 /* Demo Credentials Styling */
 .auth-wrapper .badge {
   background: var(--primary);
-  color: white;
+  color: hsl(var(--background));
   border-radius: var(--border-radius-md);
   padding: var(--space-2) var(--space-3);
   font-weight: var(--font-weight-medium);
@@ -767,8 +767,8 @@
 }
 
 .form-select option {
-  background-color: var(--skillshare-white);
-  color: var(--skillshare-gray-700);
+  background-color: var(--skillshare-hsl(var(--background)));
+  color: var(--skillshare-hsl(var(--muted-foreground))-700);
   padding: 8px 12px;
 }
 
@@ -834,7 +834,7 @@
   justify-content: center;
   position: relative;
   overflow: hidden;
-  background: linear-gradient(135deg, var(--skillshare-gray-900) 0%, var(--skillshare-gray-800) 100%);
+  background: linear-gradient(135deg, var(--skillshare-hsl(var(--muted-foreground))-900) 0%, var(--skillshare-hsl(var(--muted-foreground))-800) 100%);
 }
 
 .auth-background {
@@ -916,7 +916,7 @@
 
 /* Auth Card */
 .auth-card {
-  background: var(--skillshare-white);
+  background: var(--skillshare-hsl(var(--background)));
   border-radius: 16px;
   box-shadow: var(--skillshare-shadow-lg);
   padding: 2.5rem;
@@ -940,19 +940,19 @@
   border-radius: 50%;
   margin-bottom: 1.5rem;
   font-size: 1.5rem;
-  color: white;
+  color: hsl(var(--background));
 }
 
 .auth-title {
   font-size: 1.875rem;
   font-weight: 700;
-  color: var(--skillshare-gray-900);
+  color: var(--skillshare-hsl(var(--muted-foreground))-900);
   margin-bottom: 0.5rem;
   line-height: 1.2;
 }
 
 .auth-subtitle {
-  color: var(--skillshare-gray-600);
+  color: var(--skillshare-hsl(var(--muted-foreground))-600);
   font-size: 1rem;
   line-height: 1.5;
 }
@@ -970,7 +970,7 @@
   display: block;
   font-size: 0.875rem;
   font-weight: 600;
-  color: var(--skillshare-gray-700);
+  color: var(--skillshare-hsl(var(--muted-foreground))-700);
   margin-bottom: 0.5rem;
   line-height: 1.4;
 }
@@ -978,31 +978,31 @@
 .form-input {
   width: 100%;
   padding: 12px 16px;
-  border: 2px solid var(--skillshare-gray-200);
+  border: 2px solid var(--skillshare-hsl(var(--muted-foreground))-200);
   border-radius: var(--skillshare-border-radius);
   font-size: 1rem;
   transition: all 0.2s ease;
-  background-color: var(--skillshare-white);
-  color: var(--skillshare-gray-900);
+  background-color: var(--skillshare-hsl(var(--background)));
+  color: var(--skillshare-hsl(var(--muted-foreground))-900);
   line-height: 1.5;
 }
 
 .form-input:focus {
   outline: none;
   border-color: var(--skillshare-primary);
-  box-shadow: 0 0 0 3px rgba(0, 173, 91, 0.1);
-  background-color: var(--skillshare-white);
+  box-shadow: 0 0 0 3px hsl(var(--success) / 0.10);
+  background-color: var(--skillshare-hsl(var(--background)));
 }
 
 .form-input::placeholder {
-  color: var(--skillshare-gray-400);
+  color: var(--skillshare-hsl(var(--muted-foreground))-400);
 }
 
 /* Auth Button */
 .auth-button {
   width: 100%;
   background: linear-gradient(135deg, var(--skillshare-primary), var(--skillshare-primary-dark));
-  color: white;
+  color: hsl(var(--background));
   border: none;
   padding: 14px 24px;
   border-radius: var(--skillshare-border-radius);
@@ -1017,8 +1017,8 @@
 
 .auth-button:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(0, 173, 91, 0.3);
-  background: linear-gradient(135deg, var(--skillshare-primary-dark), #006633);
+  box-shadow: 0 8px 25px hsl(var(--success) / 0.30);
+  background: linear-gradient(135deg, var(--skillshare-primary-dark), hsl(var(--success) / 0.80));
 }
 
 .auth-button:active {
@@ -1036,15 +1036,15 @@
 }
 
 .auth-message.success {
-  background-color: rgba(34, 197, 94, 0.1);
-  color: #15803d;
-  border: 2px solid #22c55e;
+  background-color: hsl(var(--success) / 0.10);
+  color: hsl(var(--success-600));
+  border: 2px solid hsl(var(--success));
 }
 
 .auth-message.error {
-  background-color: rgba(239, 68, 68, 0.1);
+  background-color: hsl(var(--danger) / 0.10);
   color: var(--destructive);
-  border: 2px solid #ef4444;
+  border: 2px solid hsl(var(--destructive));
 }
 
 /* Footer */
@@ -1054,7 +1054,7 @@
 }
 
 .auth-footer p {
-  color: var(--skillshare-gray-600);
+  color: var(--skillshare-hsl(var(--muted-foreground))-600);
   font-size: 0.875rem;
   margin: 0;
 }
@@ -1075,12 +1075,12 @@
 .form-select {
   width: 100%;
   padding: 12px 16px;
-  border: 2px solid var(--skillshare-gray-200);
+  border: 2px solid var(--skillshare-hsl(var(--muted-foreground))-200);
   border-radius: var(--skillshare-border-radius);
   font-size: 1rem;
   transition: all 0.2s ease;
-  background-color: var(--skillshare-white);
-  color: var(--skillshare-gray-900);
+  background-color: var(--skillshare-hsl(var(--background)));
+  color: var(--skillshare-hsl(var(--muted-foreground))-900);
   line-height: 1.5;
   background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%2364748b' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
   background-position: right 12px center;
@@ -1095,14 +1095,14 @@
 .form-select:focus {
   outline: none;
   border-color: var(--skillshare-primary);
-  box-shadow: 0 0 0 3px rgba(0, 173, 91, 0.1);
-  background-color: var(--skillshare-white);
+  box-shadow: 0 0 0 3px hsl(var(--success) / 0.10);
+  background-color: var(--skillshare-hsl(var(--background)));
   background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%2300ad5b' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
 }
 
 .form-select option {
-  background-color: var(--skillshare-white);
-  color: var(--skillshare-gray-700);
+  background-color: var(--skillshare-hsl(var(--background)));
+  color: var(--skillshare-hsl(var(--muted-foreground))-700);
   padding: 8px 12px;
 }
 

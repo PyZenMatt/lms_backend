@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { Card, Button, Alert, Spinner, Form } from '@/components/ui/legacy-shims';
+import { Card, Button, Alert, Spinner, Form } from '@/components/ui';
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 const ReviewDetail = () => {

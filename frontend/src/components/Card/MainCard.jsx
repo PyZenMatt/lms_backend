@@ -1,7 +1,7 @@
 import PropTypes from 'prop-types';
 import React, { useState } from 'react';
 // TODO: Replace legacy-shims usage with native UI primitives (Dropdown, Card, Collapse) once equivalents exist.
-import { Dropdown, Card, Collapse } from '@/components/ui/legacy-shims';
+import { Dropdown, Card, Collapse } from '@/components/ui';
 import { Link } from 'react-router-dom';
 
 import useWindowSize from '../../hooks/useWindowSize';

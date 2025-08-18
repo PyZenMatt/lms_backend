@@ -11,7 +11,7 @@ import {
   SidebarHeader,
   SidebarFooter,
 } from "./ui/sidebar"
-import { Badge } from "./ui/inline-flex items-center rounded-md px-2 py-0.5 text-xs font-medium bg-accent text-accent-foreground"
+import { Badge } from "./ui/badge"
 import { useAuth } from "./AuthContext"
 
 interface AppSidebarProps {
@@ -47,7 +47,7 @@ export function AppSidebar({ currentPage, onPageChange }: AppSidebarProps) {
       <SidebarHeader>
         <div className="flex items-center gap-2 px-4 py-2">
           <div className="size-8 bg-gradient-to-br from-purple-500 to-pink-500 rounded-lg flex items-center justify-center">
-            <Palette className="size-4 text-white" />
+            <Palette className="size-4 text-hsl(var(--background))" />
           </div>
           <div>
             <h2 className="font-medium">ArtLearn</h2>

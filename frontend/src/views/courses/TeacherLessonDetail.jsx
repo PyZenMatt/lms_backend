@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { Button, Spinner, Alert } from '@/components/ui/legacy-shims';
+import { Button, Spinner, Alert } from '@/components/ui';
 import ExerciseCreateModal from '../../components/modals/ExerciseCreateModal';
 import { fetchExercisesForLesson, fetchLessonDetail } from '../../services/api/courses';
 

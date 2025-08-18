@@ -11,7 +11,7 @@ const Card: React.FC<{ className?: string; style?: React.CSSProperties; children
 );
 const CardContent: React.FC<{ children?: React.ReactNode }> = ({ children }) => <div>{children}</div>;
 const H4: React.FC<{ className?: string; children?: React.ReactNode; [key: string]: any }> = ({ className, children, ...props }) => <h4 className={className} {...props}>{children}</h4>;
-const Muted: React.FC<{ children?: React.ReactNode }> = ({ children }) => <span style={{ color: '#888' }}>{children}</span>;
+const Muted: React.FC<{ children?: React.ReactNode }> = ({ children }) => <span style={{ color: 'hsl(var(--muted-foreground))' }}>{children}</span>;
 
 const getUserSafeMessage = (e: any): string => (e && e.message) || 'Errore';
 const useLesson = (_cid: number, _id: number) => ({ data: { title: 'Lezione', videoUrl: '', content: '' }, isLoading: false, error: null, refetch: () => {} });

@@ -1,7 +1,7 @@
 import { useState } from "react"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/bg-card text-card-foreground rounded-lg border border-border shadow-sm"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/card"
 import { Button } from "./ui/button"
-import { Badge } from "./ui/inline-flex items-center rounded-md px-2 py-0.5 text-xs bg-accent text-accent-foreground"
+import { Badge } from "./ui/badge"
 import { Progress } from "./ui/progress"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs"
 import { 
@@ -83,7 +83,7 @@ export function Wallet() {
           <CardHeader className="pb-3">
             <div className="flex items-center gap-3">
               <div className="size-12 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center">
-                <Sparkles className="size-6 text-white" />
+                <Sparkles className="size-6 text-hsl(var(--background))" />
               </div>
               <div>
                 <CardTitle>Creator Token Balance</CardTitle>

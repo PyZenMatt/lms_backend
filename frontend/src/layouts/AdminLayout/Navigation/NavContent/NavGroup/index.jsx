@@ -1,6 +1,6 @@
 import PropTypes from 'prop-types';
 import React from 'react';
-import { ListGroup } from '@/components/ui/legacy-shims';
+import { ListGroup } from '@/components/ui';
 import NavCollapse from '../NavCollapse';
 import NavItem from '../NavItem';
 

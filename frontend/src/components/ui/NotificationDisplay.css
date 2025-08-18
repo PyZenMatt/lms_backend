@@ -7,7 +7,7 @@
 }
 
 .notification {
-  background: white;
+  background: hsl(var(--background));
   border-radius: 8px;
   box-shadow: 0 4px 12px var(--shadow-sm);
   margin-bottom: 12px;
@@ -70,35 +70,35 @@
 
 /* Notification types */
 .notification-success {
-  border-left-color: #4caf50;
+  border-left-color: hsl(var(--success));
 }
 
 .notification-success .notification-icon {
-  color: #4caf50;
+  color: hsl(var(--success));
 }
 
 .notification-error {
-  border-left-color: #f44336;
+  border-left-color: hsl(var(--destructive));
 }
 
 .notification-error .notification-icon {
-  color: #f44336;
+  color: hsl(var(--destructive));
 }
 
 .notification-warning {
-  border-left-color: #ff9800;
+  border-left-color: hsl(var(--warning));
 }
 
 .notification-warning .notification-icon {
-  color: #ff9800;
+  color: hsl(var(--warning));
 }
 
 .notification-info {
-  border-left-color: #2196f3;
+  border-left-color: hsl(var(--info));
 }
 
 .notification-info .notification-icon {
-  color: #2196f3;
+  color: hsl(var(--info));
 }
 
 /* Animation */
@@ -138,7 +138,7 @@
 /* Dark mode support */
 @media (prefers-color-scheme: dark) {
   .notification {
-    background: #2d3748;
+    background: hsl(var(--muted-foreground));
     color: var(--border);
   }
   
@@ -147,7 +147,7 @@
   }
   
   .notification-close {
-    color: #a0aec0;
+    color: hsl(var(--muted-foreground));
   }
   
   .notification-close:hover {

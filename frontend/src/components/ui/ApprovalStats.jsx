@@ -52,31 +52,31 @@ const ApprovalStats = React.memo(() => {
         title: 'Teacher in Attesa',
         value: stats.pendingTeachers,
         icon: 'users',
-        color: '#ff9500',
+        color: 'hsl(var(--warning))',
         subtitle: 'Richieste da processare',
         trend: stats.pendingTeachers > 0 ? 'up' : 'neutral',
-        gradientFrom: '#ff9500',
-        gradientTo: '#ff6b35'
+        gradientFrom: 'hsl(var(--warning))',
+        gradientTo: 'hsl(var(--warning))'
       },
       {
         title: 'Corsi in Attesa',
         value: stats.pendingCourses,
         icon: 'book-open',
-        color: '#00d4aa',
+        color: 'hsl(var(--brand-teal))',
         subtitle: 'In revisione',
         trend: stats.pendingCourses > 0 ? 'up' : 'neutral',
-        gradientFrom: '#00d4aa',
-        gradientTo: '#00a885'
+        gradientFrom: 'hsl(var(--brand-teal))',
+        gradientTo: 'hsl(var(--brand-teal))'
       },
       {
         title: 'Totale Pending',
         value: stats.totalPending,
         icon: 'clock',
-        color: '#6c63ff',
+        color: 'hsl(var(--primary))',
         subtitle: 'Elementi da approvare',
         trend: stats.totalPending > 5 ? 'up' : stats.totalPending > 0 ? 'neutral' : 'down',
-        gradientFrom: '#6c63ff',
-        gradientTo: '#5a54d4'
+        gradientFrom: 'hsl(var(--primary))',
+        gradientTo: 'color-mix(in srgb, hsl(var(--primary)) 85%, hsl(var(--foreground)) 15%)'
       },
       {
         title: 'Approvazioni Settimana',
@@ -87,7 +87,7 @@ const ApprovalStats = React.memo(() => {
         trend: 'up',
         changeValue: `+${stats.lastWeekApprovals}`,
         gradientFrom: 'var(--success)',
-        gradientTo: 'color-mix(in srgb, var(--success) 90%, white)'
+        gradientTo: 'color-mix(in srgb, var(--success) 90%, hsl(var(--background)))'
       }
     ],
     [stats]

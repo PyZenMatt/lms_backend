@@ -14,8 +14,8 @@
 }
 
 .approval-card-header {
-  background: linear-gradient(135deg, #6c63ff 0%, #5a54d4 100%);
-  color: white;
+  background: linear-gradient(135deg, hsl(var(--primary)) 0%, color-mix(in srgb, hsl(var(--primary)) 85%, hsl(var(--foreground)) 15%) 100%);
+  color: hsl(var(--background));
   padding: 20px;
   border-bottom: none;
 }
@@ -46,21 +46,21 @@
   width: 50px;
   height: 50px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #6c63ff 0%, #5a54d4 100%);
+  background: linear-gradient(135deg, hsl(var(--primary)) 0%, color-mix(in srgb, hsl(var(--primary)) 85%, hsl(var(--foreground)) 15%) 100%);
   display: flex;
   align-items: center;
   justify-content: center;
-  color: white;
+  color: hsl(var(--background));
   font-weight: bold;
   font-size: 1.2rem;
   margin-right: 15px;
   flex-shrink: 0;
-  box-shadow: 0 4px 15px rgba(108, 99, 255, 0.3);
+  box-shadow: 0 4px 15px hsl(var(--primary) / 0.30);
 }
 
 .approval-avatar.course-avatar {
   background: linear-gradient(135deg, var(--destructive) 0%, var(--destructive) 100%);
-  box-shadow: 0 4px 15px rgba(255, 107, 107, 0.3);
+  box-shadow: 0 4px 15px hsl(var(--destructive) / 0.30);
 }
 
 .approval-content {
@@ -70,19 +70,19 @@
 
 .approval-title {
   font-weight: 600;
-  color: #2d3436;
+  color: hsl(var(--foreground));
   margin-bottom: 4px;
   font-size: 1rem;
 }
 
 .approval-subtitle {
-  color: #636e72;
+  color: hsl(var(--muted-foreground));
   font-size: 0.85rem;
   margin-bottom: 0;
 }
 
 .approval-meta {
-  color: #74b9ff;
+  color: hsl(var(--info));
   font-size: 0.8rem;
   font-weight: 500;
 }
@@ -114,26 +114,26 @@
 }
 
 .approval-btn-approve {
-  background: linear-gradient(135deg, #00b894 0%, #00a085 100%);
-  color: white;
-  box-shadow: 0 2px 10px rgba(0, 184, 148, 0.3);
+  background: linear-gradient(135deg, hsl(var(--brand-teal)) 0%, hsl(var(--brand-teal)) 100%);
+  color: hsl(var(--background));
+  box-shadow: 0 2px 10px hsl(var(--brand-teal) / 0.30);
 }
 
 .approval-btn-approve:hover:not(:disabled) {
-  background: linear-gradient(135deg, #00a085 0%, #009176 100%);
-  box-shadow: 0 4px 15px rgba(0, 184, 148, 0.4);
+  background: linear-gradient(135deg, hsl(var(--brand-teal)) 0%, hsl(var(--brand-teal)) 100%);
+  box-shadow: 0 4px 15px hsl(var(--brand-teal) / 0.40);
   transform: translateY(-1px);
 }
 
 .approval-btn-reject {
-  background: linear-gradient(135deg, #e17055 0%, #d63447 100%);
-  color: white;
-  box-shadow: 0 2px 10px rgba(225, 112, 85, 0.3);
+  background: linear-gradient(135deg, hsl(var(--warning)) 0%, hsl(var(--danger)) 100%);
+  color: hsl(var(--background));
+  box-shadow: 0 2px 10px hsl(var(--warning) / 0.30);
 }
 
 .approval-btn-reject:hover:not(:disabled) {
-  background: linear-gradient(135deg, #d63447 0%, #c44569 100%);
-  box-shadow: 0 4px 15px rgba(225, 112, 85, 0.4);
+  background: linear-gradient(135deg, hsl(var(--danger)) 0%, hsl(var(--pink)) 100%);
+  box-shadow: 0 4px 15px hsl(var(--warning) / 0.40);
   transform: translateY(-1px);
 }
 
@@ -142,13 +142,13 @@
   align-items: center;
   justify-content: center;
   padding: 40px;
-  color: #636e72;
+  color: hsl(var(--muted-foreground));
 }
 
 .approval-empty {
   text-align: center;
   padding: 40px;
-  color: #636e72;
+  color: hsl(var(--muted-foreground));
 }
 
 .approval-empty-icon {
@@ -175,7 +175,7 @@
 /* Badge per numero di items */
 .approval-badge {
   background: var(--destructive);
-  color: white;
+  color: hsl(var(--background));
   border-radius: 12px;
   padding: 2px 8px;
   font-size: 0.75rem;

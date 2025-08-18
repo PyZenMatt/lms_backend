@@ -51,7 +51,7 @@ export const transformProgressData = (backendData) => {
         earnedDate: achievement.earned_date,
         progress: achievement.progress,
         icon: achievement.icon || 'award',
-        color: achievement.color || '#feca57'
+        color: achievement.color || 'hsl(var(--warning))'
       })) || [],
     recentActivity:
       backendData.recent_activities?.map((activity) => ({
@@ -83,14 +83,14 @@ const getCategoryIcon = (categoryName) => {
 const getCategoryColor = (categoryName) => {
   const colorMap = {
     Pittura: 'var(--destructive)',
-    Scultura: '#4ecdc4',
-    Disegno: '#45b7d1',
-    'Arte Digitale': '#f9ca24',
-    Fotografia: '#a55eea',
-    Ceramica: '#26de81',
-    Gioielleria: '#fd79a8'
+    Scultura: 'hsl(var(--brand-teal))',
+    Disegno: 'hsl(var(--info))',
+    'Arte Digitale': 'hsl(var(--warning))',
+    Fotografia: 'hsl(var(--purple))',
+    Ceramica: 'hsl(var(--success))',
+    Gioielleria: 'hsl(var(--pink))'
   };
-  return colorMap[categoryName] || '#6c5ce7';
+  return colorMap[categoryName] || 'hsl(var(--indigo-600))';
 };
 
 // Helper function to get activity icons

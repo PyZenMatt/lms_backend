@@ -19,7 +19,7 @@
 
 .customProgress .progress-bar {
   border-radius: 50px;
-  background: linear-gradient(90deg, var(--success), color-mix(in srgb, var(--success) 90%, white));
+  background: linear-gradient(90deg, var(--success), color-mix(in srgb, var(--success) 90%, hsl(var(--background))));
   transition: width 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   position: relative;
   overflow: hidden;
@@ -30,11 +30,11 @@
 }
 
 .customProgress .progress-bar.bg-success {
-  background: linear-gradient(90deg, var(--success), color-mix(in srgb, var(--success) 90%, white));
+  background: linear-gradient(90deg, var(--success), color-mix(in srgb, var(--success) 90%, hsl(var(--background))));
 }
 
 .customProgress .progress-bar.bg-info {
-  background: linear-gradient(90deg, var(--info), #6610f2);
+  background: linear-gradient(90deg, var(--info), hsl(var(--indigo-600)));
 }
 
 .customProgress .progress-bar::before {
@@ -88,12 +88,12 @@
 /* Dark mode support */
 @media (prefers-color-scheme: dark) {
   .progressIndicator {
-    background: linear-gradient(135deg, #2d3748 0%, #4a5568 100%);
-    border-color: #4a5568;
+    background: linear-gradient(135deg, hsl(var(--muted-foreground)) 0%, hsl(var(--muted-foreground)) 100%);
+    border-color: hsl(var(--muted-foreground));
   }
   
   .customProgress {
-    background-color: #4a5568;
+    background-color: hsl(var(--muted-foreground));
   }
 }
 

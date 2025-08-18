@@ -137,19 +137,19 @@
 }
 
 .lesson-type-card.selected, .exercise-type-card.selected, .difficulty-card.selected {
-  background: linear-gradient(135deg, var(--primary), color-mix(in srgb, var(--primary) 80%, black));
-  color: white;
+  background: linear-gradient(135deg, var(--primary), color-mix(in srgb, var(--primary) 80%, hsl(var(--foreground))));
+  color: hsl(var(--background));
   animation: selectedGlow 0.5s ease-out;
 }
 
 @keyframes selectedGlow {
-  0% { box-shadow: 0 0 0 rgba(0, 123, 255, 0.7); }
-  100% { box-shadow: 0 0 20px rgba(0, 123, 255, 0.7); }
+  0% { box-shadow: 0 0 0 hsl(var(--primary) / 0.70); }
+  100% { box-shadow: 0 0 20px hsl(var(--primary) / 0.70); }
 }
 
 /* Progress indicators */
 .progress-bar {
-  background: linear-gradient(90deg, var(--primary), color-mix(in srgb, var(--primary) 80%, black));
+  background: linear-gradient(90deg, var(--primary), color-mix(in srgb, var(--primary) 80%, hsl(var(--foreground))));
   animation: progressShine 2s infinite;
 }
 
@@ -227,19 +227,19 @@
 /* Dark mode support */
 @media (prefers-color-scheme: dark) {
   .card {
-    background: #2d3748;
-    border-color: #4a5568;
+    background: hsl(var(--muted-foreground));
+    border-color: hsl(var(--muted-foreground));
   }
   
   .form-control {
-    background-color: #2d3748;
-    border-color: #4a5568;
-    color: #f7fafc;
+    background-color: hsl(var(--muted-foreground));
+    border-color: hsl(var(--muted-foreground));
+    color: hsl(var(--background));
   }
   
   .form-control:focus {
-    background-color: #2d3748;
-    border-color: #3182ce;
-    color: #f7fafc;
+    background-color: hsl(var(--muted-foreground));
+    border-color: hsl(var(--info));
+    color: hsl(var(--background));
   }
 }

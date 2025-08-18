@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Card, Badge, Button, Row, Col, Nav, Spinner } from '@/components/ui/legacy-shims';
+import { Card, Badge, Button, Row, Col, Nav, Spinner } from '@/components/ui';
 import {
   fetchUserNotifications,
   markNotificationRead,

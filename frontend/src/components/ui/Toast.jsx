@@ -1,19 +1,19 @@
 import React from 'react';
-import { Toast, ToastContainer } from '@/components/ui/legacy-shims';
+import { Toast, ToastContainer } from '@/components/ui';
 
 const CustomToast = ({ show, onClose, variant = 'success', title, message, delay = 5000 }) => {
   const getVariantClasses = (variant) => {
     switch (variant) {
       case 'success':
-        return { header: 'bg-success text-white', body: 'text-success' };
+        return { header: 'bg-success text-hsl(var(--background))', body: 'text-success' };
       case 'error':
-        return { header: 'bg-danger text-white', body: 'text-danger' };
+        return { header: 'bg-danger text-hsl(var(--background))', body: 'text-danger' };
       case 'warning':
         return { header: 'bg-warning text-dark', body: 'text-warning' };
       case 'info':
-        return { header: 'bg-info text-white', body: 'text-info' };
+        return { header: 'bg-info text-hsl(var(--background))', body: 'text-info' };
       default:
-        return { header: 'bg-primary text-white', body: 'text-primary' };
+        return { header: 'bg-primary text-hsl(var(--background))', body: 'text-primary' };
     }
   };
 

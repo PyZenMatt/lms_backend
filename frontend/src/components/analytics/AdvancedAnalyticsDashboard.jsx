@@ -9,7 +9,7 @@
  */
 
 import React, { useState, useEffect, useRef } from 'react';
-import { Card, Row, Col, Badge, Button, Dropdown, Form, Alert } from '@/components/ui/legacy-shims';
+import { Card, Row, Col, Badge, Button, Dropdown, Form, Alert } from '@/components/ui';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -169,16 +169,16 @@ const AdvancedAnalyticsDashboard = () => {
         {
           label: 'Revenue (€)',
           data: revenue_data.map((item) => item.amount),
-          borderColor: 'rgb(75, 192, 192)',
-          backgroundColor: 'rgba(75, 192, 192, 0.1)',
+          borderColor: 'hsl(var(--brand-teal))',
+          backgroundColor: 'hsl(var(--brand-teal) / 0.10)',
           fill: true,
           tension: 0.4
         },
         {
           label: 'Predicted',
           data: predictions.revenue || [],
-          borderColor: 'rgba(255, 99, 132, 0.7)',
-          backgroundColor: 'rgba(255, 99, 132, 0.1)',
+          borderColor: 'hsl(var(--destructive) / 0.70)',
+          backgroundColor: 'hsl(var(--destructive) / 0.10)',
           borderDash: [5, 5],
           fill: false,
           tension: 0.4
@@ -204,7 +204,7 @@ const AdvancedAnalyticsDashboard = () => {
             user_engagement.teocoin_transactions || 0,
             user_engagement.social_interactions || 0
           ],
-          backgroundColor: ['rgba(255, 99, 132, 0.8)', 'rgba(54, 162, 235, 0.8)', 'rgba(255, 205, 86, 0.8)', 'rgba(75, 192, 192, 0.8)']
+          backgroundColor: ['hsl(var(--destructive) / 0.80)', 'hsl(var(--info) / 0.80)', 'hsl(var(--warning) / 0.80)', 'hsl(var(--brand-teal) / 0.80)']
         }
       ]
     };
@@ -229,19 +229,19 @@ const AdvancedAnalyticsDashboard = () => {
             performance_metrics.revenue_growth || 0,
             performance_metrics.usage_score || 0
           ],
-          backgroundColor: 'rgba(102, 126, 234, 0.2)',
-          borderColor: 'rgba(102, 126, 234, 1)',
-          pointBackgroundColor: 'rgba(102, 126, 234, 1)',
+          backgroundColor: 'hsl(var(--indigo-500) / 0.20)',
+          borderColor: 'hsl(var(--indigo-500) / 0.10)',
+          pointBackgroundColor: 'hsl(var(--indigo-500) / 0.10)',
           pointBorderColor: 'var(--background)',
           pointHoverBackgroundColor: 'var(--background)',
-          pointHoverBorderColor: 'rgba(102, 126, 234, 1)'
+          pointHoverBorderColor: 'hsl(var(--indigo-500) / 0.10)'
         },
         {
           label: 'Target',
           data: [85, 90, 75, 80, 70, 85], // Target values
-          backgroundColor: 'rgba(75, 192, 192, 0.2)',
-          borderColor: 'rgba(75, 192, 192, 1)',
-          pointBackgroundColor: 'rgba(75, 192, 192, 1)',
+          backgroundColor: 'hsl(var(--brand-teal) / 0.20)',
+          borderColor: 'hsl(var(--brand-teal) / 0.10)',
+          pointBackgroundColor: 'hsl(var(--brand-teal) / 0.10)',
           pointBorderColor: 'var(--background)'
         }
       ]
@@ -270,8 +270,8 @@ const AdvancedAnalyticsDashboard = () => {
         {
           label: 'Activity Count',
           data,
-          borderColor: 'rgb(255, 99, 132)',
-          backgroundColor: 'rgba(255, 99, 132, 0.1)',
+          borderColor: 'hsl(var(--destructive))',
+          backgroundColor: 'hsl(var(--destructive) / 0.10)',
           fill: true,
           tension: 0.4
         }

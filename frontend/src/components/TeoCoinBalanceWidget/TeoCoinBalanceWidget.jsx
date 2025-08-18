@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Card, Button, Alert, Spinner, Badge } from '@/components/ui/legacy-shims';
+import { Card, Button, Alert, Spinner, Badge } from '@/components/ui';
 import stakingService from '../../services/stakingService';
 import { useAuth } from '../../contexts/AuthContext';
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
@@ -237,7 +237,7 @@ const TeoCoinBalanceWidget = ({ variant = 'default', onWithdrawalClick }) => {
   return (
     <>
       <Card className="teocoin-balance-widget border-0 shadow-sm">
-        <Card.Header className="bg-gradient-success text-white border-0">
+        <Card.Header className="bg-gradient-success text-hsl(var(--background)) border-0">
           <div className="d-flex align-items-center justify-content-between">
             <div className="d-flex align-items-center">
               <i className="feather icon-dollar-sign me-2" style={{ fontSize: '1.5rem' }}></i>
@@ -328,7 +328,7 @@ const TeoCoinBalanceWidget = ({ variant = 'default', onWithdrawalClick }) => {
             <div
               className="text-center p-3 rounded mb-4"
               style={{
-                background: 'linear-gradient(135deg, rgba(40, 167, 69, 0.1) 0%, hsl(var(--success) / 0.05) 100%)'
+                background: 'linear-gradient(135deg, hsl(var(--success) / 0.10) 0%, hsl(var(--success) / 0.05) 100%)'
               }}
             >
               <div className="d-flex align-items-center justify-content-center mb-2">
@@ -362,7 +362,7 @@ const TeoCoinBalanceWidget = ({ variant = 'default', onWithdrawalClick }) => {
             <div
               className="text-center p-3 rounded mb-4"
               style={{
-                background: 'linear-gradient(135deg, rgba(23, 162, 184, 0.1) 0%, hsl(var(--info) / 0.05) 100%)'
+                background: 'linear-gradient(135deg, hsl(var(--info) / 0.10) 0%, hsl(var(--info) / 0.05) 100%)'
               }}
             >
               <div className="d-flex align-items-center justify-content-center mb-2">

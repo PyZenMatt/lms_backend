@@ -21,7 +21,7 @@
 
 /* Header */
 .staking-header {
-  background: rgba(255, 255, 255, 0.95);
+  background: hsl(var(--background) / 0.95);
   backdrop-filter: blur(10px);
   border-radius: 15px;
   padding: 1.5rem;
@@ -52,18 +52,18 @@
 }
 
 .modern-alert.alert-danger {
-  background: linear-gradient(135deg, rgba(220, 53, 69, 0.1), hsl(var(--danger) / 0.05));
+  background: linear-gradient(135deg, hsl(var(--danger) / 0.10), hsl(var(--danger) / 0.05));
   border-left: 4px solid var(--destructive);
 }
 
 .modern-alert.alert-success {
-  background: linear-gradient(135deg, rgba(40, 167, 69, 0.1), hsl(var(--success) / 0.05));
+  background: linear-gradient(135deg, hsl(var(--success) / 0.10), hsl(var(--success) / 0.05));
   border-left: 4px solid var(--success);
 }
 
 /* Status Cards */
 .staking-status-card {
-  background: rgba(255, 255, 255, 0.95);
+  background: hsl(var(--background) / 0.95);
   backdrop-filter: blur(10px);
   border-radius: 20px;
   box-shadow: 0 8px 25px var(--shadow-sm);
@@ -101,7 +101,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  color: white;
+  color: hsl(var(--background));
   font-size: 1.5rem;
   box-shadow: 0 4px 15px hsl(var(--shadow) / 0.2);
   position: relative;
@@ -157,7 +157,7 @@
 
 /* Tier Progress Card */
 .tier-progress-card {
-  background: rgba(255, 255, 255, 0.95);
+  background: hsl(var(--background) / 0.95);
   backdrop-filter: blur(10px);
   border-radius: 20px;
   box-shadow: 0 8px 25px var(--shadow-sm);
@@ -195,7 +195,7 @@
 
 /* Actions Card */
 .actions-card {
-  background: rgba(255, 255, 255, 0.95);
+  background: hsl(var(--background) / 0.95);
     background: hsl(var(--background) / 0.95);
   backdrop-filter: blur(10px);
   border-radius: 20px;
@@ -231,7 +231,7 @@
 
 /* Sidebar Cards */
 .earnings-card {
-  background: rgba(255, 255, 255, 0.95);
+  background: hsl(var(--background) / 0.95);
   backdrop-filter: blur(10px);
   border-radius: 20px;
   box-shadow: 0 8px 25px var(--shadow-sm);
@@ -244,7 +244,7 @@
 }
 
 .earnings-card .card-header {
-  background: linear-gradient(135deg, var(--success), color-mix(in srgb, var(--success) 90%, white));
+  background: linear-gradient(135deg, var(--success), color-mix(in srgb, var(--success) 90%, hsl(var(--background))));
   border-radius: 20px 20px 0 0;
   border: none;
   padding: 1rem 1.5rem;
@@ -260,7 +260,7 @@
 }
 
 .chart-card {
-  background: rgba(255, 255, 255, 0.95);
+  background: hsl(var(--background) / 0.95);
   backdrop-filter: blur(10px);
   border-radius: 20px;
   box-shadow: 0 8px 25px var(--shadow-sm);
@@ -289,7 +289,7 @@
 
 .staking-modal .modal-header {
   background: linear-gradient(135deg, var(--primary), var(--secondary));
-  color: white;
+  color: hsl(var(--background));
   border-radius: 20px 20px 0 0;
   padding: 1.5rem;
 }
@@ -350,7 +350,7 @@
 .modern-input:focus {
   border-color: var(--primary);
   box-shadow: 0 0 0 0.2rem color-mix(in srgb, var(--primary) 25%, transparent);
-  background: white;
+  background: hsl(var(--background));
 }
 
 .max-button {
@@ -364,7 +364,7 @@
 
 .max-button:hover {
   background: var(--primary);
-  color: white;
+  color: hsl(var(--background));
   transform: translateY(-1px);
 }
 

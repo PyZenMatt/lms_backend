@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { Row, Col, Card, Button, Spinner, Alert } from '@/components/ui/legacy-shims';
+import { Row, Col, Card, Button, Spinner, Alert } from '@/components/ui';
 
 const AdminExerciseDetail = () => {
   const { exerciseId } = useParams();

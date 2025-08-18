@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { Card, Badge, Spinner, Alert, Row, Col } from '@/components/ui/legacy-shims';
+import { Card, Badge, Spinner, Alert, Row, Col } from '@/components/ui';
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 const ExerciseGradedDetail = () => {

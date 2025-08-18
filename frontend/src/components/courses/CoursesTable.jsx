@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Card, Badge, Button, Row, Col, Collapse, ProgressBar, InputGroup } from '@/components/ui/legacy-shims';
+import { Card, Badge, Button, Row, Col, Collapse, ProgressBar, InputGroup } from '@/components/ui';
 import { Link, useNavigate } from 'react-router-dom';
 
 const CoursesTable = ({
@@ -108,8 +108,8 @@ const CoursesTable = ({
       Business: 'var(--warning)',
       Lingue: 'var(--info)',
       Arte: 'var(--secondary)',
-      Musica: 'color-mix(in srgb, var(--warning) 80%, orange)',
-      Salute: 'color-mix(in srgb, var(--success) 90%, white)',
+      Musica: 'color-mix(in srgb, var(--warning) 80%, hsl(var(--warning)))',
+      Salute: 'color-mix(in srgb, var(--success) 90%, hsl(var(--background)))',
       Sport: 'color-mix(in srgb, var(--destructive) 70%, magenta)',
       Cucina: 'var(--muted-foreground)'
     };
@@ -142,7 +142,7 @@ const CoursesTable = ({
                 background: 'linear-gradient(135deg, var(--primary), color-mix(in srgb, var(--success) 75%, cyan))',
                 border: 'none',
                 borderRadius: '25px',
-                boxShadow: '0 4px 15px rgba(4, 169, 245, 0.3)'
+                boxShadow: '0 4px 15px hsl(var(--brand-primary) / 0.30)'
               }}
             >
               <i className="feather icon-plus me-2"></i>
@@ -161,7 +161,7 @@ const CoursesTable = ({
           <Card.Body
             className="text-center py-5"
             style={{
-              background: 'linear-gradient(135deg, hsl(var(--brand-primary) / 0.05) 0%, rgba(29, 233, 182, 0.05) 100%)',
+              background: 'linear-gradient(135deg, hsl(var(--brand-primary) / 0.05) 0%, hsl(var(--brand-teal) / 0.05) 100%)',
               borderRadius: '15px'
             }}
           >
@@ -171,7 +171,7 @@ const CoursesTable = ({
                 style={{
                   fontSize: '3rem',
                   color: 'var(--primary)',
-                  filter: 'drop-shadow(0 4px 8px rgba(4, 169, 245, 0.3))'
+                  filter: 'drop-shadow(0 4px 8px hsl(var(--brand-primary) / 0.30))'
                 }}
               ></i>
             </div>
@@ -183,7 +183,7 @@ const CoursesTable = ({
               className="px-4 py-2"
               onClick={onCreateCourse}
               style={{
-                background: 'linear-gradient(135deg, var(--success), color-mix(in srgb, var(--success) 90%, white))',
+                background: 'linear-gradient(135deg, var(--success), color-mix(in srgb, var(--success) 90%, hsl(var(--background))))',
                 border: 'none',
                 borderRadius: '25px',
                 boxShadow: '0 4px 15px color-mix(in srgb, var(--success) 30%, transparent)'
@@ -224,7 +224,7 @@ const CoursesTable = ({
                       className="category-inline-flex items-center rounded-md px-2 py-0.5 text-xs font-medium bg-accent text-accent-foreground px-3 py-2"
                       style={{
                         background: `${getCategoryColor(course.category)}dd`,
-                        color: 'white',
+                        color: 'hsl(var(--background))',
                         borderRadius: '15px'
                       }}
                     >
@@ -326,7 +326,7 @@ const CoursesTable = ({
                             backgroundColor: 'var(--bg-bg-card text-card-foreground rounded-lg border border-border shadow-sm text-bg-card text-card-foreground rounded-lg border border-border shadow-sm-foreground border border-border rounded-lg shadow-sm)'
                           }}
                           onMouseEnter={(e) => {
-                            e.target.style.backgroundColor = 'color-mix(in srgb, var(--primary) 8%, white)';
+                            e.target.style.backgroundColor = 'color-mix(in srgb, var(--primary) 8%, hsl(var(--background)))';
                             e.target.style.transform = 'scale(1.02)';
                           }}
                           onMouseLeave={(e) => {
@@ -411,7 +411,7 @@ const CoursesTable = ({
                                         <Badge
                                           className="me-2 px-2 py-1"
                                           style={{
-                                            background: 'linear-gradient(135deg, var(--success), color-mix(in srgb, var(--success) 90%, white))',
+                                            background: 'linear-gradient(135deg, var(--success), color-mix(in srgb, var(--success) 90%, hsl(var(--background))))',
                                             borderRadius: '10px'
                                           }}
                                         >
@@ -510,7 +510,7 @@ const CoursesTable = ({
                                                 <Badge
                                                   className="me-2 px-2 py-1"
                                                   style={{
-                                                    background: 'linear-gradient(135deg, var(--warning), color-mix(in srgb, var(--warning) 80%, orange))',
+                                                    background: 'linear-gradient(135deg, var(--warning), color-mix(in srgb, var(--warning) 80%, hsl(var(--warning))))',
                                                     color: 'var(--foreground)',
                                                     borderRadius: '8px'
                                                   }}

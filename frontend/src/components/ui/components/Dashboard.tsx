@@ -1,5 +1,5 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/bg-card text-card-foreground rounded-lg border border-border shadow-sm"
-import { Badge } from "./ui/inline-flex items-center rounded-md px-2 py-0.5 text-xs bg-accent text-accent-foreground"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/card"
+import { Badge } from "./ui/badge"
 import { Button } from "./ui/button"
 import { Progress } from "./ui/progress"
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar"
@@ -36,11 +36,11 @@ export function Dashboard() {
             </div>
           </CardContent>
         </Card>
-        <Card className="border-orange-200 bg-orange-50/50">
+        <Card className="border-hsl(var(--warning))-200 bg-hsl(var(--warning))-50/50">
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
-              <div className="size-10 bg-orange-500 rounded-full flex items-center justify-center">
-                <UserCheck className="size-5 text-white" />
+              <div className="size-10 bg-hsl(var(--warning))-500 rounded-full flex items-center justify-center">
+                <UserCheck className="size-5 text-hsl(var(--background))" />
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">Pending Reviews</p>
@@ -134,7 +134,7 @@ export function Dashboard() {
             <CardHeader className="pb-3">
               <div className="flex items-center gap-3">
                 <div className="size-10 bg-blue-500 rounded-full flex items-center justify-center">
-                  <UserCheck className="size-5 text-white" />
+                  <UserCheck className="size-5 text-hsl(var(--background))" />
                 </div>
                 <div className="flex-1">
                   <CardTitle className="text-base">Peer Reviews Available</CardTitle>

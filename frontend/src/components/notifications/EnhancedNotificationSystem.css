@@ -8,7 +8,7 @@
 
 .notification-settings {
   padding: 1rem;
-  background: rgba(255, 255, 255, 0.95);
+  background: hsl(var(--background) / 0.95);
   backdrop-filter: blur(10px);
   border-radius: 12px;
   margin-bottom: 1rem;
@@ -79,37 +79,37 @@
 
 /* Toast Variants */
 .enhanced-toast-success {
-  background: linear-gradient(135deg, #4caf50 0%, #45a049 100%);
-  color: white;
-  border-left: 4px solid #2e7d32;
+  background: linear-gradient(135deg, hsl(var(--success)) 0%, hsl(var(--success)) 100%);
+  color: hsl(var(--background));
+  border-left: 4px solid hsl(var(--success) / 0.85);
 }
 
 .enhanced-toast-danger {
-  background: linear-gradient(135deg, #f44336 0%, #d32f2f 100%);
-  color: white;
-  border-left: 4px solid #c62828;
+  background: linear-gradient(135deg, hsl(var(--destructive)) 0%, hsl(var(--destructive)) 100%);
+  color: hsl(var(--background));
+  border-left: 4px solid hsl(var(--destructive));
   animation: toastUrgent 1s ease-in-out infinite alternate;
 }
 
 @keyframes toastUrgent {
   from {
-    box-shadow: 0 8px 25px rgba(244, 67, 54, 0.3);
+    box-shadow: 0 8px 25px hsl(var(--destructive) / 0.30);
   }
   to {
-    box-shadow: 0 12px 35px rgba(244, 67, 54, 0.5);
+    box-shadow: 0 12px 35px hsl(var(--destructive) / 0.50);
   }
 }
 
 .enhanced-toast-warning {
-  background: linear-gradient(135deg, #ff9800 0%, #f57c00 100%);
-  color: white;
-  border-left: 4px solid #ef6c00;
+  background: linear-gradient(135deg, hsl(var(--warning)), hsl(var(--warning-700)));
+  color: hsl(var(--background));
+  border-left: 4px solid hsl(var(--warning-700));
 }
 
 .enhanced-toast-info {
-  background: linear-gradient(135deg, #2196f3 0%, #1976d2 100%);
-  color: white;
-  border-left: 4px solid #1565c0;
+  background: linear-gradient(135deg, hsl(var(--info)) 0%, hsl(var(--info)) 100%);
+  color: hsl(var(--background));
+  border-left: 4px solid hsl(var(--info-700));
 }
 
 /* Toast Header */
@@ -168,7 +168,7 @@
   padding: 0.4rem 1rem;
   background: color-mix(in srgb, var(--background) 20%, transparent);
   border-color: color-mix(in srgb, var(--background) 30%, transparent);
-  color: white;
+  color: hsl(var(--background));
   transition: all 0.3s ease;
 }
 
@@ -244,38 +244,38 @@
 
 /* Dark Mode Support */
 .dark-mode .notification-settings {
-  background: rgba(45, 55, 72, 0.95);
+  background: hsl(var(--foreground) / 0.95);
   border-color: color-mix(in srgb, var(--background) 10%, transparent);
 }
 
 .dark-mode .enhanced-toast-success {
-  background: linear-gradient(135deg, #38a169 0%, #2f855a 100%);
+  background: linear-gradient(135deg, hsl(var(--success)) 0%, hsl(var(--success-700)) 100%);
 }
 
 .dark-mode .enhanced-toast-danger {
-  background: linear-gradient(135deg, var(--destructive) 0%, #c53030 100%);
+  background: linear-gradient(135deg, var(--destructive) 0%, hsl(var(--danger-700)) 100%);
 }
 
 .dark-mode .enhanced-toast-warning {
-  background: linear-gradient(135deg, #ed8936 0%, #dd6b20 100%);
+  background: linear-gradient(135deg, hsl(var(--warning-600)) 0%, hsl(var(--warning-600)) 100%);
 }
 
 .dark-mode .enhanced-toast-info {
-  background: linear-gradient(135deg, #3182ce 0%, #2c5282 100%);
+  background: linear-gradient(135deg, hsl(var(--info)) 0%, hsl(var(--info-600)) 100%);
 }
 
 /* High Contrast Mode */
 @media (prefers-contrast: high) {
   .enhanced-toast {
-    border: 2px solid white;
+    border: 2px solid hsl(var(--background));
   }
   
   .enhanced-toast .toast-header {
-    border-bottom: 2px solid white;
+    border-bottom: 2px solid hsl(var(--background));
   }
   
   .notification-actions .btn {
-    border: 2px solid white;
+    border: 2px solid hsl(var(--background));
   }
 }
 
@@ -326,20 +326,20 @@
 
 /* Notification Permission States */
 .permission-btn.granted {
-  background: linear-gradient(135deg, #4caf50 0%, #45a049 100%);
-  color: white;
-  border-color: #4caf50;
+  background: linear-gradient(135deg, hsl(var(--success)) 0%, hsl(var(--success)) 100%);
+  color: hsl(var(--background));
+  border-color: hsl(var(--success));
 }
 
 .permission-btn.denied {
-  background: linear-gradient(135deg, #f44336 0%, #d32f2f 100%);
-  color: white;
-  border-color: #f44336;
+  background: linear-gradient(135deg, hsl(var(--destructive)) 0%, hsl(var(--destructive)) 100%);
+  color: hsl(var(--background));
+  border-color: hsl(var(--destructive));
   cursor: not-allowed;
 }
 
 .permission-btn.default {
-  background: linear-gradient(135deg, #ff9800 0%, #f57c00 100%);
-  color: white;
-  border-color: #ff9800;
+  background: linear-gradient(135deg, hsl(var(--warning)), hsl(var(--warning-700)));
+  color: hsl(var(--background));
+  border-color: hsl(var(--warning));
 }
