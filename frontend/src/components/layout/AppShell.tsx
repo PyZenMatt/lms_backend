@@ -1,5 +1,5 @@
 import { PropsWithChildren, useEffect } from 'react';
-import { Sidebar, SidebarContent } from '@/components/ui';
+import { Sidebar, SidebarContent, SidebarProvider } from '@/components/ui';
 import { Toaster } from '@/components/ui';
 
 export function AppShell({ children }: PropsWithChildren) {
@@ -11,14 +11,16 @@ export function AppShell({ children }: PropsWithChildren) {
 
   return (
     <div className="bg-background text-foreground min-h-dvh">
-      <div className="flex">
-        <Sidebar className="border-r border-border">
-          <SidebarContent />
-        </Sidebar>
-        <main className="flex-1 p-4 lg:p-6">
-          {children}
-        </main>
-      </div>
+      <SidebarProvider>
+        <div className="flex">
+          <Sidebar className="border-r border-border">
+            <SidebarContent />
+          </Sidebar>
+          <main className="flex-1 p-4 lg:p-6">
+            {children}
+          </main>
+        </div>
+      </SidebarProvider>
       <Toaster />
     </div>
   );
