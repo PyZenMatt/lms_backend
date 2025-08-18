@@ -13,6 +13,7 @@ const BANNED_GLOBAL = [
   /from\s+['"][^'"@]+@\d+(?:\.\d+){0,2}['"\n]/, // versioned import suffix
   /@\/styles\/figma-raw\/[A-Za-z].*\.(t|j)sx?/,      // figma-raw component sourcing
   /@\/components\/legacy-shims/                      // explicit legacy shim path
+  ,/@\/components\/ui\/adapters\/bootstrap/         // adapter layer now banned
 ];
 
 const files = await globby(['src/**/*.{ts,tsx,js,jsx,css,html}']);
