@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { Card, Button, Alert, Spinner, Badge } from 'react-bootstrap';
 import stakingService from '../../services/stakingService';
 import { useAuth } from '../../contexts/AuthContext';
-import './TeoCoinBalanceWidget.scss';
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 const TeoCoinBalanceWidget = ({ variant = 'default', onWithdrawalClick }) => {

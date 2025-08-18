@@ -1,7 +1,11 @@
 {
   "devDependencies": {
     "@babel/preset-react": "^7.27.1",
-    "lint-staged": "^15.0.0"
+    "@types/node": "^24.3.0",
+    "@types/react": "^19.1.10",
+    "@types/react-dom": "^19.1.7",
+    "lint-staged": "^15.0.0",
+    "typescript": "^5.9.2"
   },
   "lint-staged": {
     "frontend/src/**/*.{js,jsx,ts,tsx}": [
@@ -10,5 +14,8 @@
     "**/*.{md,json,yml,yaml}": [
       "prettier --write"
     ]
+  },
+  "dependencies": {
+    "js-yaml": "^4.1.0"
   }
 }

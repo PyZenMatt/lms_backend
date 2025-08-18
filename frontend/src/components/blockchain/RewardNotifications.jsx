@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { Toast, ToastContainer } from 'react-bootstrap';
 import { blockchainAPI } from '../../services/api/blockchainAPI';
 import { useAuth } from '../../contexts/AuthContext';
-import './RewardNotifications.scss';
 
 const RewardNotifications = () => {
   const { user } = useAuth();

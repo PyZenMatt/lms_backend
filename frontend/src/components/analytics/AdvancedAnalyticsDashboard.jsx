@@ -26,7 +26,6 @@ import {
 } from 'chart.js';
 import { Line, Bar, Doughnut, Radar } from 'react-chartjs-2';
 import { useAuth } from '../../contexts/AuthContext';
-import './AdvancedAnalyticsDashboard.css';
 
 ChartJS.register(
   CategoryScale,

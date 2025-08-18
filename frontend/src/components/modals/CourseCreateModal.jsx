@@ -2,7 +2,6 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Modal, Button, Form, Alert, Spinner, Card, Row, Col, Badge, ProgressBar } from 'react-bootstrap';
 import { createCourse } from '../../services/api/courses';
 import CustomToast from '../ui/Toast';
-import '../../assets/css/components/CourseCreateModal.css';
 
 import ErrorDisplay from '../ui/ErrorDisplay';
 import { validateCourseForm, debounce } from '../../utils/formValidation';

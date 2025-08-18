@@ -21,9 +21,9 @@ styles/
 │   ├── auth-layout.module.css
 │   └── navigation.module.css
 ├── themes/             # Temi e variabili globali
-│   ├── variables.css    # CSS Custom Properties
-│   ├── skillshare-theme.css
-│   └── responsive.css
+│   ├── legacy/variables.css    # CSS Custom Properties (legacy, quarantined)
+│   ├── legacy/skillshare-theme.css
+│   └── legacy/responsive.css
 └── global/             # Stili globali e reset
     ├── reset.css
     ├── typography.css

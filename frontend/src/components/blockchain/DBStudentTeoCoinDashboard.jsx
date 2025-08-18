@@ -3,8 +3,6 @@ import { Card, Badge, Spinner, Alert, Button, Row, Col } from 'react-bootstrap';
 import { useAuth } from '../../contexts/AuthContext';
 import PendingWithdrawals from './PendingWithdrawals';
 import BurnDepositInterface from './BurnDepositInterface';
-import './StudentTeoCoinDashboard.scss';
-import './blockchain-responsive.css';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 

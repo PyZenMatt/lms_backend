@@ -11,7 +11,6 @@
 import React, { useEffect, useState } from 'react';
 import { Toast, ToastContainer, Badge, Button } from 'react-bootstrap';
 import { useNotification, NOTIFICATION_TYPES } from '../../contexts/NotificationContext';
-import './EnhancedNotificationSystem.css';
 
 const EnhancedNotificationSystem = () => {
   const { notifications, removeNotification } = useNotification();

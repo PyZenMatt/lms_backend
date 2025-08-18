@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Row, Col, Card, Button, Alert } from 'react-bootstrap';
 import { Link, useNavigate } from 'react-router-dom';
-import './TeacherDashboard.css';
 import RoleGuard from '../../components/guards/RoleGuard';
 
 import DatabaseStaking from '../../components/staking/DatabaseStaking';
@@ -18,7 +17,6 @@ import ExerciseCreateModal from '../../components/modals/ExerciseCreateModal';
 import EnhancedNotificationSystem from '../../components/notifications/EnhancedNotificationSystem';
 
 // Import dashboard styles
-import './dashboard-styles.css';
 
 // Placeholder avatar
 // import avatar1 from '../../assets/images/user/avatar-1.jpg';

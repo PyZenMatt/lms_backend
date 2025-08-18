@@ -1,23 +1,32 @@
+
 import React, { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-// Import reali (se esistono) al posto dei placeholder:
-// import LessonList from '@/features/lessons/components/LessonList';
-// import LessonForm from '@/features/lessons/components/LessonForm';
-// import Modal from '@/components/ui/Modal';
+
+// Tipi minimi per le lezioni
+type Lesson = { id: number; title: string };
 
 // Placeholder per funzioni mancanti (sostituisci con le reali se le hai)
-const getUserSafeMessage = (e) => (e && e.message) || 'Errore';
-const useLessons = () => ({ items: [], isLoading: false, error: null, refetch: () => {} });
-const useLessonActions = () => ({ remove: async (_id) => {}, create: async (_data) => {} });
+const getUserSafeMessage = (e: any): string => (e && e.message) || 'Errore';
+const useLessons = (): { items: Lesson[]; isLoading: boolean; error: any; refetch: () => void } => ({ items: [], isLoading: false, error: null, refetch: () => {} });
+const useLessonActions = (): { remove: (id: number) => Promise<void>; create: (data: any) => Promise<void> } => ({ remove: async (_id: number) => {}, create: async (_data: any) => {} });
 
 // Placeholder components per evitare errori di compilazione (rimuovi quando hai i reali)
-const LessonList = ({ items, loading, error, onRetry, onCreate, onEdit, onDelete }) => (
+const LessonList: React.FC<{
+  items: Lesson[];
+  loading: boolean;
+  error: any;
+  onRetry: () => void;
+  onCreate: () => void;
+  onEdit: (lesson: Lesson) => void;
+  onDelete: (lesson: Lesson) => void;
+}> = ({ items, loading, error, onRetry, onCreate, onEdit, onDelete }) => (
   <div>
     <p>Placeholder LessonList</p>
     {/* TODO: renderizza items */}
   </div>
 );
-const LessonForm = ({ onSubmit }) => (
+
+const LessonForm: React.FC<{ onSubmit: (data: any) => void }> = ({ onSubmit }) => (
   <form
     onSubmit={(e) => {
       e.preventDefault();
@@ -28,7 +37,8 @@ const LessonForm = ({ onSubmit }) => (
     <button type="submit">Invia</button>
   </form>
 );
-const Modal = ({ open, onClose, children }) =>
+
+const Modal: React.FC<{ open: boolean; onClose: () => void; children: React.ReactNode }> = ({ open, onClose, children }) =>
   open ? (
     <div className="modal">
       <button type="button" onClick={onClose}>
@@ -38,21 +48,22 @@ const Modal = ({ open, onClose, children }) =>
     </div>
   ) : null;
 
+
 export default function LessonsListPage() {
   const { courseId } = useParams();
   const cid = Number(courseId ?? NaN);
   const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState(false);
-  const [serverError, setServerError] = useState(null);
+  const [serverError, setServerError] = useState<string | null>(null);
 
   const query = useLessons();
   const actions = useLessonActions();
 
   const onCreate = () => setIsOpen(true);
-  const onEdit = (lesson) => navigate(`/courses/${cid}/lessons/${lesson.id}`);
+  const onEdit = (lesson: Lesson) => navigate(`/courses/${cid}/lessons/${lesson.id}`);
 
-  const onDelete = async (lesson) => {
-    if (!window.confirm(`Eliminare la lezione "${lesson.title}"?`)) return;
+  const onDelete = async (lesson: Lesson) => {
+    if (!window.confirm(`Eliminare la lezione \"${lesson.title}\"?`)) return;
     try {
       await actions.remove(lesson.id);
       // opzionale: query.refetch();

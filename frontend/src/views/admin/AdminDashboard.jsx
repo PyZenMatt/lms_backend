@@ -6,7 +6,6 @@ import PendingTeachersCard from '../../components/cards/PendingTeachersCard';
 import PendingCoursesCard from '../../components/cards/PendingCoursesCard';
 import AdminTeoCoinDashboard from '../../components/blockchain/DBAdminTeoCoinDashboard';
 import TeoCoinWithdrawal from '../../components/TeoCoinWithdrawal';
-import '../dashboard/dashboard-styles.css';
 
 const AdminDashboard = () => {
   const [withdrawalOpen, setWithdrawalOpen] = useState(false);

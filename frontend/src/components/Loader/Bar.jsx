@@ -1,6 +1,5 @@
 import PropTypes from 'prop-types';
 import React from 'react';
-import './Loader.css';
 
 const Bar = ({ animationDuration, progress }) => {
   return (

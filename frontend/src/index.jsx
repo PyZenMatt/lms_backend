@@ -6,6 +6,7 @@ import { AuthProvider } from './contexts/AuthContext';
 import { Web3Provider } from './contexts/Web3Context';
 import { NotificationProvider } from './contexts/NotificationContext';
 
+import './styles/tokens.css';
 import './index.scss';
 import App from './App';
 import reportWebVitals from './reportWebVitals';

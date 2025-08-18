@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { Card, Badge, Button, Row, Col, Collapse, ProgressBar, InputGroup } from 'react-bootstrap';
 import { Link, useNavigate } from 'react-router-dom';
-import './CoursesTable.scss';
 
 const CoursesTable = ({
   courses = [],

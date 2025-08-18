@@ -1,6 +1,5 @@
 import React from 'react';
 import { useNotification, NOTIFICATION_TYPES } from '../../contexts/NotificationContext';
-import './NotificationDisplay.css';
 
 const NotificationDisplay = () => {
   const { notifications, removeNotification } = useNotification();

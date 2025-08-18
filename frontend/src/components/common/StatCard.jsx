@@ -1,6 +1,5 @@
 import React from 'react';
 import { Card } from 'react-bootstrap';
-import './StatCard.scss';
 
 /**
  * StatCard - Componente riutilizzabile per visualizzare statistiche con progress bar

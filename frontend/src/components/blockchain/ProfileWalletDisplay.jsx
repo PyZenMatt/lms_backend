@@ -3,7 +3,6 @@ import { Card, Button, Alert, Badge } from 'react-bootstrap';
 import { web3Service } from '../../services/api/web3Service';
 import { useAuth } from '../../contexts/AuthContext';
 import { connectWallet, disconnectWallet } from '../../services/api/dashboard';
-import './WalletManager.scss';
 
 const ProfileWalletDisplay = ({
   onWalletConnected,

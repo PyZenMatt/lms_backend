@@ -1,6 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { Row, Col, Card, Button, Spinner, Alert } from 'react-bootstrap';
+import { Row, Col, Spinner } from 'react-bootstrap';
+import { Card, CardHeader, CardContent } from '../../components/ui/Card';
+import { Button } from '../../components/ui/Button';
+import { Alert } from '../../components/ui/Alert';
+import { Badge } from '../../components/ui/Badge';
 import { fetchUserRole } from '../../services/api/auth';
 import api from '../../services/core/axiosClient';
 import MainCard from '../../components/Card/MainCard';
@@ -56,7 +60,7 @@ const StudentCourseDetailNew = () => {
 
   if (loading) {
     return (
-      <div className="d-flex justify-content-center align-items-center" style={{ minHeight: '60vh' }}>
+      <div className="flex items-center justify-center min-h-[60vh]">
         <Spinner animation="border" variant="primary" />
       </div>
     );
@@ -64,9 +68,9 @@ const StudentCourseDetailNew = () => {
 
   if (!course) {
     return (
-      <div className="d-flex justify-content-center align-items-center" style={{ minHeight: '60vh' }}>
-        <Alert variant="warning" className="text-center" style={{ maxWidth: '500px' }}>
-          <h3 className="alert-heading">Corso non trovato</h3>
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <Alert variant="default" className="text-center max-w-lg mx-auto">
+          <h3 className="mb-2">Corso non trovato</h3>
           <p>Il corso che stai cercando non esiste o non è più disponibile.</p>
         </Alert>
       </div>
@@ -76,29 +80,26 @@ const StudentCourseDetailNew = () => {
   return (
     <div className="page-wrapper">
       {/* Course Hero Section */}
-      <div className="bg-primary text-white py-4 mb-4">
+      <div className="bg-primary text-primary-foreground py-4 mb-4">
         <div className="container">
           <div className="text-center">
-            <div className="mb-3" style={{ maxWidth: '200px', margin: '0 auto' }}>
+            <div className="mb-3 mx-auto" style={{ maxWidth: '200px' }}>
               {course.cover ? (
                 <img
                   src={course.cover.startsWith('http') ? course.cover : `http://127.0.0.1:8000${course.cover}`}
                   alt={course.title}
-                  className="img-fluid rounded"
+                  className="rounded shadow"
                   style={{ border: '4px solid #fff', boxShadow: '0 10px 20px rgba(0,0,0,0.1)' }}
                 />
               ) : (
-                <div
-                  className="d-flex justify-content-center align-items-center bg-primary-light rounded"
-                  style={{ height: '200px', width: '200px' }}
-                >
-                  <i className="feather icon-book-open" style={{ fontSize: '4rem' }}></i>
+                <div className="flex items-center justify-center bg-muted rounded" style={{ height: '200px', width: '200px' }}>
+                  <i className="feather icon-book-open text-4xl" />
                 </div>
               )}
             </div>
             <h1 className="mb-2">{course.title}</h1>
-            <p className="text-white-50 mb-3">{course.description}</p>
-            <div className="d-inline-block px-3 py-1 rounded bg-primary-light">
+            <p className="text-muted-foreground mb-3">{course.description}</p>
+            <div className="inline-block px-3 py-1 rounded bg-muted">
               <i className="feather icon-user mr-1"></i>
               <strong>Docente:</strong> {course.teacher?.username || 'N/A'}
             </div>
@@ -110,19 +111,16 @@ const StudentCourseDetailNew = () => {
         {/* Course Stats */}
         <Row className="mb-4">
           <Col sm={6} md={3} className="mb-3">
-            <Card className="shadow-sm h-100">
-              <Card.Body className="text-center">
-                <div className="d-flex justify-content-center align-items-center mb-3">
-                  <div
-                    className="rounded-circle bg-primary text-white d-flex justify-content-center align-items-center"
-                    style={{ width: '60px', height: '60px' }}
-                  >
-                    <i className="feather icon-play-circle" style={{ fontSize: '1.5rem' }}></i>
+            <Card>
+              <CardContent className="text-center">
+                <div className="flex items-center justify-center mb-3">
+                  <div className="rounded-full bg-primary text-primary-foreground flex items-center justify-center" style={{ width: '60px', height: '60px' }}>
+                    <i className="feather icon-play-circle text-lg" />
                   </div>
                 </div>
                 <h3 className="mb-1">{lessons.length}</h3>
-                <p className="text-muted mb-0 small text-uppercase">Lezioni</p>
-              </Card.Body>
+                <p className="text-muted-foreground mb-0 text-xs uppercase">Lezioni</p>
+              </CardContent>
             </Card>
           </Col>
 
@@ -205,12 +203,9 @@ const StudentCourseDetailNew = () => {
                       <Card className="shadow-sm h-100">
                         <Card.Body className="position-relative">
                           <div className="position-absolute" style={{ top: '10px', right: '10px' }}>
-                            <div
-                              className="badge badge-primary rounded-circle"
-                              style={{ width: '30px', height: '30px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-                            >
+                            <Badge variant="default" className="rounded-full flex items-center justify-center w-8 h-8 absolute top-2 right-2">
                               {lesson.order || index + 1}
-                            </div>
+                            </Badge>
                           </div>
                           <h5 className="mb-3 pr-4">{lesson.title}</h5>
 
@@ -234,17 +229,15 @@ const StudentCourseDetailNew = () => {
                           </div>
 
                           {Math.random() > 0.7 ? (
-                            <div className="badge badge-success">Completata</div>
+                            <Badge variant="success">Completata</Badge>
                           ) : Math.random() > 0.4 ? (
-                            <div className="badge badge-warning">In Corso</div>
+                            <Badge variant="warning">In Corso</Badge>
                           ) : (
-                            <div className="badge badge-light">Da Iniziare</div>
+                            <Badge variant="light">Da Iniziare</Badge>
                           )}
 
                           <div className="mt-3">
-                            <Link to={`/lezioni/${lesson.id}`} className="btn btn-primary btn-sm">
-                              Visualizza Lezione
-                            </Link>
+                            <Button variant="primary" size="sm" as={Link} to={`/lezioni/${lesson.id}`}>Visualizza Lezione</Button>
                           </div>
                         </Card.Body>
                       </Card>
@@ -259,17 +252,14 @@ const StudentCourseDetailNew = () => {
         {/* Navigation */}
         <Row className="mt-4 mb-5">
           <Col className="text-center">
-            <Link
-              to={userRole === 'admin' ? '/dashboard/admin' : userRole === 'teacher' ? '/dashboard/teacher' : '/dashboard/student'}
-              className="btn btn-primary"
-            >
+            <Button variant="primary" as={Link} to={userRole === 'admin' ? '/dashboard/admin' : userRole === 'teacher' ? '/dashboard/teacher' : '/dashboard/student'}>
               <i className="feather icon-arrow-left mr-2"></i>
               {userRole === 'admin'
                 ? 'Torna alla dashboard admin'
                 : userRole === 'teacher'
                   ? 'Torna alla dashboard docente'
                   : 'Torna alla dashboard studente'}
-            </Link>
+            </Button>
           </Col>
         </Row>
 

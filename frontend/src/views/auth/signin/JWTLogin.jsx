@@ -1,5 +1,7 @@
 import React, { useEffect } from 'react';
-import { Row, Col, Alert, Button } from 'react-bootstrap';
+import { Row, Col } from 'react-bootstrap';
+import { Button } from '../../components/ui/Button';
+import { Alert } from '../../components/ui/Alert';
 import * as Yup from 'yup';
 import { Formik } from 'formik';
 import { login } from '../../../services/api/auth';
@@ -62,59 +64,51 @@ const JWTLogin = () => {
       }}
     >
       {({ errors, handleBlur, handleChange, handleSubmit, isSubmitting, touched, values }) => (
-        <form noValidate onSubmit={handleSubmit}>
-          <div className="form-group mb-3">
+        <form noValidate onSubmit={handleSubmit} className="space-y-4 w-full max-w-md mx-auto mt-12">
+          <div className="flex flex-col gap-2">
             <input
-              className="form-control"
+              className="border rounded px-3 py-2 bg-background text-foreground outline-none"
               placeholder="Inserisci la tua email"
               name="email"
               onBlur={handleBlur}
               onChange={handleChange}
               type="email"
               value={values.email}
+              required
             />
-            {touched.email && errors.email && <small className="text-danger form-text">{errors.email}</small>}
+            {touched.email && errors.email && <span className="text-destructive text-xs">{errors.email}</span>}
           </div>
-          <div className="form-group mb-4">
+          <div className="flex flex-col gap-2">
             <input
-              className="form-control"
+              className="border rounded px-3 py-2 bg-background text-foreground outline-none"
               placeholder="Inserisci la tua password"
               name="password"
               onBlur={handleBlur}
               onChange={handleChange}
               type="password"
               value={values.password}
+              required
             />
-            {touched.password && errors.password && <small className="text-danger form-text">{errors.password}</small>}
+            {touched.password && errors.password && <span className="text-destructive text-xs">{errors.password}</span>}
           </div>
-
-          <div className="mb-4 mt-2 form-check">
-            <input type="checkbox" className="form-check-input" id="customCheck1" />
-            <label className="form-check-label" htmlFor="customCheck1">
-              Ricorda credenziali
-            </label>
-          </div>
-
+          <label className="flex items-center gap-2 mb-2">
+            <input type="checkbox" id="customCheck1" className="accent-primary" />
+            <span>Ricorda credenziali</span>
+          </label>
           {errors.submit && (
-            <Col sm={12}>
-              <Alert variant="danger">{errors.submit}</Alert>
-            </Col>
+            <Alert variant="destructive" className="mb-4 flex items-center">
+              {errors.submit}
+            </Alert>
           )}
-
-          <Row>
-            <Col mt={2}>
-              <Button
-                className="btn-block mb-4"
-                color="primary"
-                disabled={isSubmitting || loading}
-                size="large"
-                type="submit"
-                variant="primary"
-              >
-                {isSubmitting || loading ? 'Accesso in corso...' : 'Accedi'}
-              </Button>
-            </Col>
-          </Row>
+          <Button
+            type="submit"
+            variant="primary"
+            size="md"
+            className="w-full"
+            disabled={isSubmitting || loading}
+          >
+            {isSubmitting || loading ? 'Accesso in corso...' : 'Accedi'}
+          </Button>
         </form>
       )}
     </Formik>

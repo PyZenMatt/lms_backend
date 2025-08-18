@@ -20,9 +20,31 @@ Environment:
 - backend/.env.example
 - frontend/.env.example
 
-Local development:
 
-- Backend: python backend/manage.py runserver
-- Frontend: cd frontend && npm start
+## Contratti API (OpenAPI → Tipi TypeScript)
 
-No secrets are committed; use the provided .env.example templates.
+Per allineare i contratti FE ↔ BE:
+
+1. **Export OpenAPI**
+	- Backend remoto:
+	  ```bash
+	  BACKEND_URL="https://schoolplatform.onrender.com" ./tools/fetch_openapi.sh
+	  ```
+	- Backend locale:
+	  ```bash
+	  ./tools/fetch_openapi.sh
+	  ```
+
+2. **Genera tipi TypeScript**
+	- Da root o da frontend:
+	  ```bash
+	  npm run openapi:gen --prefix frontend
+	  ```
+
+3. **Importa i tipi**
+	- Usa `import { ... } from 'src/lib/api/schema'` nel FE.
+
+4. **Workflow CI**
+	- Vedi `.github/workflows/openapi.yml` per generazione automatica su ogni PR.
+
+No secrets sono committati; usa i template .env.example.

@@ -10,7 +10,6 @@
 
 import React from 'react';
 import { useTheme } from '../../contexts/ThemeContext';
-import './ThemeToggle.css';
 
 const ThemeToggle = ({ className = '', size = 'md', showLabel = false }) => {
   const { isDark, toggleTheme, systemPreference, isManuallySet } = useTheme();

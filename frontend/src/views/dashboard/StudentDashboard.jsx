@@ -1,5 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { Row, Col, Card, Button, Spinner, Alert } from 'react-bootstrap';
+import { Row, Col, Spinner } from 'react-bootstrap';
+import { Card, CardHeader, CardContent, CardFooter } from '../../components/ui/Card';
+import { Button } from '../../components/ui/Button';
+import { Alert } from '../../components/ui/Alert';
 import { Link } from 'react-router-dom';
 import RoleGuard from '../../components/guards/RoleGuard';
 import TeoCoinBalanceWidget from '../../components/TeoCoinBalanceWidget';
@@ -81,10 +84,8 @@ const StudentDashboard = () => {
 
   if (loading) {
     return (
-      <div className="d-flex justify-content-center align-items-center" style={{ minHeight: '60vh' }}>
-        <div className="spinner-border text-primary" role="status">
-          <span className="sr-only">Caricamento...</span>
-        </div>
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <Spinner animation="border" variant="primary" />
       </div>
     );
   }
@@ -95,11 +96,11 @@ const StudentDashboard = () => {
         {/* Hero di benvenuto */}
         <Row className="mb-4">
           <Col md={12}>
-            <Card className="border-0 shadow-sm">
-              <Card.Body className="text-center py-5">
-                <h2 className="fw-bold mb-1 text-dark">Benvenuto, {userProfile?.first_name || userProfile?.username || 'Studente'}!</h2>
-                <p className="text-muted mb-0">Continua il tuo percorso di apprendimento artistico</p>
-              </Card.Body>
+            <Card>
+              <CardHeader className="text-center py-5">
+                <h2 className="font-bold mb-1 text-primary-foreground">Benvenuto, {userProfile?.first_name || userProfile?.username || 'Studente'}!</h2>
+                <p className="text-muted-foreground mb-0">Continua il tuo percorso di apprendimento artistico</p>
+              </CardHeader>
             </Card>
           </Col>
         </Row>
@@ -107,7 +108,7 @@ const StudentDashboard = () => {
         {!!error && (
           <Row className="mb-3">
             <Col md={12}>
-              <Alert variant="danger">{error}</Alert>
+              <Alert variant="destructive">{error}</Alert>
             </Col>
           </Row>
         )}
@@ -132,71 +133,55 @@ const StudentDashboard = () => {
         {/* Lista corsi e TeoCoin Activity */}
         <Row className="mb-4">
           <Col md={8}>
-            <Card className="border-0 shadow-sm">
-              <Card.Header className="bg-light border-0">
-                <div className="d-flex justify-content-between align-items-center">
-                  <Card.Title as="h5" className="mb-0">
-                    I Tuoi Corsi ({courses.length})
-                  </Card.Title>
-                  <Button
-                    variant="outline-primary"
-                    size="sm"
-                    onClick={handleRefreshDashboard}
-                    disabled={loading}
-                    title="Aggiorna elenco corsi"
-                  >
-                    {loading ? <Spinner animation="border" size="sm" /> : <i className="feather icon-refresh-cw"></i>}
-                  </Button>
-                </div>
-              </Card.Header>
-              <Card.Body>
+            <Card>
+              <CardHeader className="flex justify-between items-center">
+                <h5 className="mb-0">I Tuoi Corsi ({courses.length})</h5>
+                <Button variant="outline" size="sm" onClick={handleRefreshDashboard} disabled={loading} title="Aggiorna elenco corsi">
+                  {loading ? <Spinner animation="border" size="sm" /> : <i className="feather icon-refresh-cw"></i>}
+                </Button>
+              </CardHeader>
+              <CardContent>
                 {courses.length === 0 ? (
                   <div className="text-center py-4">
-                    <i className="feather icon-book-open text-muted" style={{ fontSize: '3rem' }}></i>
-                    <p className="text-muted mt-3">Nessun corso acquistato</p>
+                    <i className="feather icon-book-open text-muted-foreground" style={{ fontSize: '3rem' }}></i>
+                    <p className="text-muted-foreground mt-3">Nessun corso acquistato</p>
                   </div>
                 ) : (
-                  <div className="row g-3">
+                  <div className="grid gap-3">
                     {courses.map((course) => (
-                      <div key={course.id} className="col-12">
-                        <div className="card border-0 shadow-sm">
-                          <div className="card-body">
-                            <div className="d-flex justify-content-between align-items-start">
-                              <div className="flex-grow-1">
-                                <h6 className="card-title mb-2">{course.title}</h6>
-                                <div className="d-flex align-items-center text-muted small mb-2">
-                                  <i className="feather icon-play-circle me-1"></i>
+                      <div key={course.id} className="w-full">
+                        <Card>
+                          <CardContent>
+                            <div className="flex justify-between items-start">
+                              <div className="flex-grow">
+                                <h6 className="mb-2">{course.title}</h6>
+                                <div className="flex items-center text-muted-foreground text-sm mb-2">
+                                  <i className="feather icon-play-circle mr-1"></i>
                                   <span>{course.lessons?.length || 0} lezioni disponibili</span>
                                   <span className="mx-2">•</span>
-                                  <i className="feather icon-user me-1"></i>
+                                  <i className="feather icon-user mr-1"></i>
                                   <span>Docente: {course.teacher?.first_name || course.teacher?.username}</span>
                                 </div>
                                 {course.description && (
                                   <p
-                                    className="text-muted small mb-0"
-                                    style={{
-                                      display: '-webkit-box',
-                                      WebkitLineClamp: 2,
-                                      WebkitBoxOrient: 'vertical',
-                                      overflow: 'hidden'
-                                    }}
+                                    className="text-muted-foreground text-sm mb-0 line-clamp-2"
                                   >
                                     {course.description}
                                   </p>
                                 )}
                               </div>
-                              <Link to={`/corsi/${course.id}`} className="btn btn-sm btn-primary ms-3">
-                                <i className="feather icon-arrow-right me-1"></i>
+                              <Button variant="primary" size="sm" className="ml-3" as={Link} to={`/corsi/${course.id}`}>
+                                <i className="feather icon-arrow-right mr-1"></i>
                                 Inizia
-                              </Link>
+                              </Button>
                             </div>
-                          </div>
-                        </div>
+                          </CardContent>
+                        </Card>
                       </div>
                     ))}
                   </div>
                 )}
-              </Card.Body>
+              </CardContent>
             </Card>
           </Col>
           <Col md={4}>
@@ -221,15 +206,13 @@ const StudentDashboard = () => {
         {/* Lista esercizi (StudentSubmissions) */}
         <Row>
           <Col md={12}>
-            <Card className="border-0 shadow-sm">
-              <Card.Header className="bg-light border-0">
-                <Card.Title as="h5" className="mb-1">
-                  I Tuoi Esercizi
-                </Card.Title>
-              </Card.Header>
-              <Card.Body>
+            <Card>
+              <CardHeader>
+                <h5 className="mb-1">I Tuoi Esercizi</h5>
+              </CardHeader>
+              <CardContent>
                 <StudentSubmissions />
-              </Card.Body>
+              </CardContent>
             </Card>
           </Col>
         </Row>

@@ -7,7 +7,9 @@
     "lint": "eslint .",
     "typecheck:e2e": "tsc -p tsconfig.e2e.json --noEmit",
     "e2e:ci": "npm run typecheck:e2e && playwright test --reporter=html",
-    "e2e:report": "playwright show-report"
+  "e2e:report": "playwright show-report",
+  "tokens:check": "bash -c '! rg -n \"#[0-9a-fA-F]{3,6}|rgb\\(|rgba\\(\" src | tee /dev/stderr'",
+  "openapi:gen": "openapi-typescript openapi/openapi.json -o src/lib/api/schema.ts"
   },
   "lint-staged": {
     "**/*.{js,jsx,ts,tsx}": [
@@ -22,6 +24,7 @@
     "@types/node": "^24.3.0",
     "@vitejs/plugin-react": "^5.0.0",
     "babel-plugin-transform-remove-console": "^6.9.4",
+    "openapi-typescript": "^7.9.1",
     "sass-embedded": "^1.90.0",
     "typescript": "^5.9.2",
     "vite": "^7.1.2",

@@ -37,7 +37,6 @@ import {
 } from '@mui/icons-material';
 import { BrowserProvider, Contract, formatEther, parseEther } from 'ethers';
 import { useAuth } from '../../contexts/AuthContext';
-import './TeoCoinManager.scss';
 
 // TeoCoin contract configuration
 const TEOCOIN_CONTRACT = '0x20D6656A31297ab3b8A87291Ed562D4228Be9ff8';
