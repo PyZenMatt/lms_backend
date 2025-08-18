@@ -36,6 +36,19 @@ export * from './components/ui/toggle-group';
 export * from './components/ui/resizable';
 export { cn } from './components/ui/utils';
 
+// ---- Legacy runtime aliases (Bootstrap-like) ----
+// Provide Card.Body / Card.Header / Card.Footer so existing JSX using Card.Body still works at runtime.
+// Types are intentionally not declared to keep migration pressure (TS will flag in TSX, JSX will pass).
+// @ts-ignore
+if (typeof Card !== 'undefined') {
+	// @ts-ignore
+	(Card as any).Body = CardContent;
+	// @ts-ignore
+	(Card as any).Header = CardHeader;
+	// @ts-ignore
+	(Card as any).Footer = CardFooter;
+}
+
 // Legacy fallbacks (kept temporarily; TODO: remove once all imports migrated)
 // Re-export under Legacy* names to avoid collisions
 export { Button as LegacyButton } from './Button';
