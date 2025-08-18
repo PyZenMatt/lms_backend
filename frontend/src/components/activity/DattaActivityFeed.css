@@ -9,7 +9,7 @@
 }
 
 .activity-list-container::-webkit-scrollbar-track {
-  background: #f8f9fa;
+  background: var(--card);
   border-radius: 3px;
 }
 
@@ -23,7 +23,7 @@
 }
 
 .media {
-  border-bottom: 1px solid #f1f3f4;
+  border-bottom: 1px solid var(--card);
   padding-bottom: 0.75rem;
 }
 
@@ -59,7 +59,7 @@
 
 .badge-light-light {
   background-color: rgba(108, 117, 125, 0.1);
-  color: #6c757d;
+  color: var(--muted-foreground);
 }
 
 .f-12 {

@@ -305,8 +305,8 @@ const BurnDepositInterface = ({ onTransactionComplete }) => {
                 variant="primary"
                 onClick={connectMetaMask}
                 style={{
-                  backgroundColor: '#007bff',
-                  borderColor: '#007bff',
+                  backgroundColor: 'var(--primary)',
+                  borderColor: 'var(--primary)',
                   color: 'white',
                   fontWeight: 'bold'
                 }}
@@ -365,8 +365,8 @@ const BurnDepositInterface = ({ onTransactionComplete }) => {
                   disabled={parseFloat(metamaskBalance) <= 0}
                   className="btn-success"
                   style={{
-                    backgroundColor: '#28a745',
-                    borderColor: '#28a745',
+                    backgroundColor: 'var(--success)',
+                    borderColor: 'var(--success)',
                     color: 'white',
                     fontWeight: 'bold'
                   }}
@@ -385,8 +385,8 @@ const BurnDepositInterface = ({ onTransactionComplete }) => {
                   disabled={processing}
                   className="btn-outline-primary"
                   style={{
-                    borderColor: '#007bff',
-                    color: '#007bff',
+                    borderColor: 'var(--primary)',
+                    color: 'var(--primary)',
                     fontWeight: '500'
                   }}
                 >

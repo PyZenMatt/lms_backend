@@ -2,47 +2,47 @@
 
 :root {
   /* Colors - Primary Palette */
-  --primary-color: #007bff;
+  --primary-color: var(--primary);
   --primary-light: #66b3ff;
-  --primary-dark: #0056b3;
+  --primary-dark: color-mix(in srgb, var(--primary) 80%, black);
   
   /* Colors - Secondary Palette */
-  --secondary-color: #6c757d;
+  --secondary-color: var(--muted-foreground);
   --secondary-light: #a6b3bd;
   --secondary-dark: #4a5055;
   
   /* Colors - Status */
-  --success: #28a745;
-  --success-light: #d4edda;
-  --success-dark: #155724;
+  --success: var(--success);
+  --success-light: color-mix(in srgb, var(--success) 16%, white);
+  --success-dark: var(--success-foreground);
   
-  --warning: #ffc107;
-  --warning-light: #fff3cd;
-  --warning-dark: #856404;
+  --warning: var(--warning);
+  --warning-light: color-mix(in srgb, var(--warning) 16%, white);
+  --warning-dark: var(--warning-foreground);
   
-  --danger: #dc3545;
-  --danger-light: #f8d7da;
-  --danger-dark: #721c24;
+  --danger: var(--destructive);
+  --danger-light: color-mix(in srgb, var(--destructive) 12%, white);
+  --danger-dark: var(--destructive-foreground);
   
-  --info: #17a2b8;
-  --info-light: #d1ecf1;
+  --info: var(--info);
+  --info-light: color-mix(in srgb, var(--info) 12%, white);
   --info-dark: #0c525d;
   
   /* Colors - Text */
   --text-primary: #2c3e50;
-  --text-secondary: #6c757d;
+  --text-secondary: var(--muted-foreground);
   --text-muted: #9ca3af;
-  --text-inverse: #ffffff;
+  --text-inverse: var(--background);
   
   /* Colors - Background */
-  --bg-primary: #ffffff;
-  --bg-secondary: #f8f9fa;
-  --bg-tertiary: #e9ecef;
+  --bg-primary: var(--background);
+  --bg-secondary: var(--card);
+  --bg-tertiary: var(--border);
   --bg-dark: #343a40;
   
   /* Colors - Borders */
   --border-color: #e1e5e9;
-  --border-light: #f1f3f4;
+  --border-light: var(--card);
   --border-dark: #adb5bd;
   
   /* Gradients */
@@ -68,10 +68,10 @@
   --radius-full: 50%;
   
   /* Shadows */
-  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1);
-  --shadow-md: 0 2px 6px rgba(0, 0, 0, 0.1);
-  --shadow-lg: 0 4px 12px rgba(0, 0, 0, 0.15);
-  --shadow-xl: 0 8px 24px rgba(0, 0, 0, 0.2);
+  --shadow-sm: 0 1px 3px var(--shadow-sm);
+  --shadow-md: 0 2px 6px var(--shadow-sm);
+  --shadow-lg: 0 4px 12px var(--shadow-md);
+  --shadow-xl: 0 8px 24px var(--shadow-lg);
   
   /* Typography */
   --font-family-base: 'Inter', 'Segoe UI', system-ui, sans-serif;

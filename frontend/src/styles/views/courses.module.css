@@ -7,7 +7,7 @@
 
 /* Course Hero Section */
 .course-hero {
-  background: linear-gradient(-135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(-135deg, var(--primary) 0%, var(--primary) 100%);
   color: white;
   padding: 60px 0 40px 0;
   position: relative;
@@ -22,7 +22,7 @@
   left: -50%;
   width: 200%;
   height: 200%;
-  background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+  background: radial-gradient(circle, color-mix(in srgb, var(--background) 10%, transparent) 0%, transparent 70%);
   animation: rotate 20s linear infinite;
   z-index: 1;
 }
@@ -42,9 +42,9 @@
   width: 150px;
   height: 150px;
   border-radius: 20px;
-  background: rgba(255, 255, 255, 0.2);
+  background: color-mix(in srgb, var(--background) 20%, transparent);
   backdrop-filter: blur(10px);
-  border: 4px solid rgba(255, 255, 255, 0.3);
+  border: 4px solid color-mix(in srgb, var(--background) 30%, transparent);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -65,7 +65,7 @@
   left: -2px;
   right: -2px;
   bottom: -2px;
-  background: linear-gradient(45deg, #FFD700, #FFA500, #FFD700);
+  background: linear-gradient(45deg, var(--warning), var(--warning), var(--warning));
   border-radius: 20px;
   z-index: -1;
   animation: shimmer 3s ease-in-out infinite;
@@ -73,14 +73,14 @@
 
 .course-cover:hover {
   transform: scale(1.05);
-  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 15px 40px var(--shadow-xl);
 }
 
 .course-title {
   font-size: 2.5rem;
   font-weight: 700;
   margin-bottom: 15px;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  text-shadow: 0 2px 4px var(--shadow-sm);
 }
 
 .course-description {
@@ -95,12 +95,12 @@
 .course-teacher {
   font-size: 1.1rem;
   opacity: 0.9;
-  background: rgba(255, 255, 255, 0.2);
+  background: color-mix(in srgb, var(--background) 20%, transparent);
   padding: 8px 20px;
   border-radius: 20px;
   display: inline-block;
   backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  border: 1px solid color-mix(in srgb, var(--background) 20%, transparent);
 }
 
 /* Course Stats */
@@ -119,8 +119,8 @@
   border-radius: 20px;
   padding: 30px 20px;
   text-align: center;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  border: 1px solid color-mix(in srgb, var(--background) 20%, transparent);
+  box-shadow: 0 10px 30px var(--shadow-sm);
   transition: all 0.3s ease;
   position: relative;
   overflow: hidden;
@@ -133,18 +133,18 @@
   left: 0;
   right: 0;
   height: 4px;
-  background: linear-gradient(-135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(-135deg, var(--primary) 0%, var(--primary) 100%);
 }
 
 .course-stat-card:hover {
   transform: translateY(-5px);
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 20px 40px var(--shadow-md);
 }
 
 .stat-icon {
   width: 60px;
   height: 60px;
-  background: linear-gradient(-135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(-135deg, var(--primary) 0%, var(--primary) 100%);
   color: white;
   border-radius: 50%;
   display: flex;
@@ -163,12 +163,12 @@
 .stat-value {
   font-size: 2rem;
   font-weight: 700;
-  color: #04a9f5;
+  color: var(--primary);
   margin-bottom: 5px;
 }
 
 .stat-label {
-  color: #666;
+  color: var(--muted-foreground);
   font-size: 14px;
   text-transform: uppercase;
   letter-spacing: 1px;
@@ -184,7 +184,7 @@
   background: white;
   border-radius: 20px;
   padding: 30px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 10px 30px var(--shadow-sm);
   border: none;
   position: relative;
   overflow: hidden;
@@ -212,7 +212,7 @@
 
 .lessons-title i {
   margin-right: 15px;
-  color: #28a745;
+  color: var(--success);
   font-size: 2rem;
 }
 
@@ -224,7 +224,7 @@
 }
 
 .lesson-card {
-  background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+  background: linear-gradient(135deg, var(--card) 0%, var(--background) 100%);
   border-radius: 15px;
   padding: 25px;
   border: 2px solid #f0f3f6;
@@ -238,8 +238,8 @@
 
 .lesson-card:hover {
   transform: translateY(-5px);
-  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
-  border-color: #28a745;
+  box-shadow: 0 15px 35px var(--shadow-sm);
+  border-color: var(--success);
   text-decoration: none;
   color: inherit;
 }
@@ -286,17 +286,17 @@
   display: flex;
   align-items: center;
   gap: 15px;
-  color: #666;
+  color: var(--muted-foreground);
   font-size: 0.9rem;
   margin-bottom: 15px;
 }
 
 .lesson-meta i {
-  color: #28a745;
+  color: var(--success);
 }
 
 .lesson-progress {
-  background: #e9ecef;
+  background: var(--border);
   height: 6px;
   border-radius: 3px;
   overflow: hidden;
@@ -321,18 +321,18 @@
 }
 
 .lesson-status.completed {
-  background: linear-gradient(-135deg, #28a745, #20c997);
+  background: linear-gradient(-135deg, var(--success), color-mix(in srgb, var(--success) 90%, white));
   color: white;
 }
 
 .lesson-status.in-progress {
-  background: linear-gradient(-135deg, #ffc107, #fd7e14);
+  background: linear-gradient(-135deg, var(--warning), color-mix(in srgb, var(--warning) 80%, orange));
   color: white;
 }
 
 .lesson-status.not-started {
-  background: #e9ecef;
-  color: #6c757d;
+  background: var(--border);
+  color: var(--muted-foreground);
 }
 
 /* Navigation Buttons */
@@ -342,7 +342,7 @@
 }
 
 .btn-back {
-  background: linear-gradient(-135deg, #6c757d 0%, #495057 100%);
+  background: linear-gradient(-135deg, var(--muted-foreground) 0%, var(--muted-foreground) 100%);
   border: none;
   color: white;
   padding: 12px 30px;
@@ -372,7 +372,7 @@
   width: 60px;
   height: 60px;
   border: 4px solid #f3f3f3;
-  border-top: 4px solid #667eea;
+  border-top: 4px solid var(--primary);
   border-radius: 50%;
   animation: spin 1s linear infinite;
 }
@@ -380,7 +380,7 @@
 .error-container {
   text-align: center;
   padding: 60px 20px;
-  color: #dc3545;
+  color: var(--destructive);
 }
 
 /* Floating Decorative Elements */

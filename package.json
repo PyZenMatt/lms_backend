@@ -16,6 +16,8 @@
     ]
   },
   "dependencies": {
+    "glob": "^11.0.3",
     "js-yaml": "^4.1.0"
-  }
+  },
+  "type": "module"
 }

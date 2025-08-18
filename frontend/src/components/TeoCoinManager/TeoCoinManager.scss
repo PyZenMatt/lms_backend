@@ -6,11 +6,11 @@
 .teocoin-manager-dialog {
   .MuiDialog-paper {
     border-radius: 12px;
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 20px 40px var(--shadow-sm);
   }
 
   .MuiDialogTitle-root {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary) 100%);
     color: white;
     padding: 20px 24px;
     
@@ -24,7 +24,7 @@
       
       &:hover {
         color: white;
-        background-color: rgba(255, 255, 255, 0.1);
+        background-color: color-mix(in srgb, var(--background) 10%, transparent);
       }
     }
   }
@@ -40,7 +40,7 @@
     transition: all 0.2s ease;
     
     &:hover {
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      box-shadow: 0 4px 12px var(--shadow-sm);
       transform: translateY(-1px);
     }
   }
@@ -57,13 +57,13 @@
       }
       
       &.Mui-selected {
-        color: #667eea;
+        color: var(--primary);
         font-weight: 600;
       }
     }
     
     .MuiTabs-indicator {
-      background-color: #667eea;
+      background-color: var(--primary);
       height: 3px;
       border-radius: 3px 3px 0 0;
     }
@@ -80,7 +80,7 @@
         border-radius: 8px;
         
         &.Mui-focused .MuiOutlinedInput-notchedOutline {
-          border-color: #667eea;
+          border-color: var(--primary);
           border-width: 2px;
         }
       }
@@ -134,7 +134,7 @@
   .balance-card {
     .MuiTypography-h5 {
       font-weight: 700;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary) 100%);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
@@ -150,7 +150,7 @@
       border: 1px solid rgba(102, 126, 234, 0.2);
       
       .MuiAlert-icon {
-        color: #667eea;
+        color: var(--primary);
       }
     }
   }

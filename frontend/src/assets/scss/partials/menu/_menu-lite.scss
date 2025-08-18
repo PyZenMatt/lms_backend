@@ -14,14 +14,14 @@
     justify-content: center;
 
     i {
-      color: #fff;
+      color: var(--background);
     }
   }
 
   .b-title {
     margin-left: 10px;
     font-weight: 100;
-    color: #fff;
+    color: var(--background);
     font-size: 18px;
   }
 }
@@ -183,7 +183,7 @@
 
     &.open {
       .input-group {
-        background: #fff;
+        background: var(--background);
         border: 1px solid #f1f1f1;
         box-shadow: 0 6px 12px -5px rgba(65, 76, 78, 0.08);
         padding: 5px 5px 5px 20px;
@@ -199,7 +199,7 @@
           border-color: $primary-color;
 
           .input-group-text {
-            color: #fff;
+            color: var(--background);
           }
         }
 
@@ -284,7 +284,7 @@
         z-index: 1001;
         font-size: 40px;
         line-height: 0;
-        color: #fff;
+        color: var(--background);
         text-shadow: 0 -2px 2px rgba(65, 76, 78, 0.12);
       }
     }
@@ -373,7 +373,7 @@
       overflow: hidden;
 
       .pro-head {
-        color: #fff;
+        color: var(--background);
         border-radius: 0.25rem 0.25rem 0 0;
         padding: 15px;
         position: relative;
@@ -385,7 +385,7 @@
         }
 
         .dud-logout {
-          color: #fff;
+          color: var(--background);
           padding-right: 0;
           position: absolute;
           right: 0;
@@ -454,7 +454,7 @@
     display: block;
     width: 100%;
     height: 2.8px;
-    background-color: #fff;
+    background-color: var(--background);
     transition: all 0.3s ease-in-out;
     backface-visibility: hidden;
     border-radius: 2px;
@@ -465,7 +465,7 @@
       position: absolute;
       left: 0;
       height: 2.8px;
-      background-color: #fff;
+      background-color: var(--background);
       transition: all 0.3s;
       backface-visibility: hidden;
       border-radius: 2px;
@@ -635,7 +635,7 @@
   }
 
   .pcoded-badge {
-    color: #fff;
+    color: var(--background);
     font-size: 75%;
     position: absolute;
     right: 30px;
@@ -860,7 +860,7 @@
         left: 15px;
         width: calc(100% - 30px);
         height: 1px;
-        background: rgba(0, 0, 0, 0.1);
+        background: var(--shadow-sm);
       }
     }
 
@@ -1078,7 +1078,7 @@
 
         > a {
           background: darken($menu-dark-background, 6%);
-          color: #fff;
+          color: var(--background);
         }
       }
     }
@@ -1107,7 +1107,7 @@
         left: 0;
         width: 100%;
         height: 100%;
-        background-color: rgba(0, 0, 0, 0.2);
+        background-color: var(--shadow-lg);
         z-index: 1;
       }
     }
@@ -1158,13 +1158,13 @@
 
     > .collapse.show {
       display: flex;
-      background: #fff;
+      background: var(--background);
       box-shadow: 0 1px 20px 0 rgba(69, 90, 100, 0.08);
     }
 
     .mob-toggler {
       display: flex;
-      color: #fff;
+      color: var(--background);
       position: absolute;
       right: 60px;
     }

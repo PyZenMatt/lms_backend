@@ -82,7 +82,7 @@ const getCategoryIcon = (categoryName) => {
 // Helper function to get category colors
 const getCategoryColor = (categoryName) => {
   const colorMap = {
-    Pittura: '#ff6b6b',
+    Pittura: 'var(--destructive)',
     Scultura: '#4ecdc4',
     Disegno: '#45b7d1',
     'Arte Digitale': '#f9ca24',

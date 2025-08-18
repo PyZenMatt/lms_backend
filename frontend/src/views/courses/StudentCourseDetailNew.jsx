@@ -89,7 +89,7 @@ const StudentCourseDetailNew = () => {
                   src={course.cover.startsWith('http') ? course.cover : `http://127.0.0.1:8000${course.cover}`}
                   alt={course.title}
                   className="rounded shadow"
-                  style={{ border: '4px solid #fff', boxShadow: '0 10px 20px rgba(0,0,0,0.1)' }}
+                  style={{ border: '4px solid var(--background)', boxShadow: '0 10px 20px var(--shadow-sm)' }}
                 />
               ) : (
                 <div className="flex items-center justify-center bg-muted rounded" style={{ height: '200px', width: '200px' }}>

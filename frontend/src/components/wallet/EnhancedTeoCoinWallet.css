@@ -4,13 +4,13 @@
  */
 
 .enhanced-teocoin-wallet {
-  box-shadow: 0 2px 6px 0 rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 6px 0 var(--shadow-sm);
   border-radius: 8px;
-  border: 1px solid #e3ebf0;
+  border: 1px solid var(--border);
 }
 
 .enhanced-teocoin-wallet .card-header {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary) 100%);
   color: white;
   border-radius: 8px 8px 0 0;
   border-bottom: none;
@@ -33,7 +33,7 @@
 
 .balance-card:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 4px 12px var(--shadow-md);
 }
 
 .balance-card h3 {
@@ -57,7 +57,7 @@
 
 .quick-actions .btn:hover {
   transform: translateY(-1px);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 4px 8px var(--shadow-md);
 }
 
 .quick-actions .btn i {
@@ -66,7 +66,7 @@
 
 /* Navigation Pills */
 .enhanced-teocoin-wallet .nav-pills .nav-link {
-  color: #495057;
+  color: var(--muted-foreground);
   border-radius: 6px;
   padding: 0.75rem 1.25rem;
   font-weight: 500;
@@ -74,12 +74,12 @@
 }
 
 .enhanced-teocoin-wallet .nav-pills .nav-link:hover {
-  background-color: #f8f9fa;
-  color: #495057;
+  background-color: var(--card);
+  color: var(--muted-foreground);
 }
 
 .enhanced-teocoin-wallet .nav-pills .nav-link.active {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary) 100%);
   color: white;
   box-shadow: 0 3px 8px rgba(102, 126, 234, 0.3);
 }
@@ -87,16 +87,16 @@
 /* Staking Tiers */
 .tier-card {
   transition: all 0.2s ease;
-  background: #fff;
+  background: var(--background);
 }
 
 .tier-card:hover {
-  border-color: #667eea !important;
+  border-color: var(--primary) !important;
   box-shadow: 0 3px 12px rgba(102, 126, 234, 0.15);
 }
 
 .tier-card h6 {
-  color: #495057;
+  color: var(--muted-foreground);
   font-weight: 600;
 }
 
@@ -112,7 +112,7 @@
 
 .enhanced-teocoin-wallet .table th {
   border-top: none;
-  color: #6c757d;
+  color: var(--muted-foreground);
   font-weight: 600;
   font-size: 0.875rem;
   padding: 1rem 0.75rem;
@@ -124,21 +124,21 @@
 }
 
 .enhanced-teocoin-wallet .table tbody tr:hover {
-  background-color: #f8f9fa;
+  background-color: var(--card);
 }
 
 /* Burn Info Section */
 .burn-info {
-  border-left: 4px solid #ffc107;
+  border-left: 4px solid var(--warning);
 }
 
 .burn-info h6 {
-  color: #495057;
+  color: var(--muted-foreground);
   font-weight: 600;
 }
 
 .burn-info ol {
-  color: #6c757d;
+  color: var(--muted-foreground);
 }
 
 .burn-info ol li {
@@ -147,7 +147,7 @@
 
 /* Modal Styles */
 .modal-header {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary) 100%);
   color: white;
   border-bottom: none;
 }
@@ -166,32 +166,32 @@
 }
 
 .modal-footer {
-  border-top: 1px solid #e9ecef;
+  border-top: 1px solid var(--border);
   padding: 1.5rem 2rem;
 }
 
 /* Form Controls */
 .enhanced-teocoin-wallet .form-control {
   border-radius: 6px;
-  border: 1px solid #e3ebf0;
+  border: 1px solid var(--border);
   padding: 0.75rem 1rem;
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
 .enhanced-teocoin-wallet .form-control:focus {
-  border-color: #667eea;
+  border-color: var(--primary);
   box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
 }
 
 .enhanced-teocoin-wallet .form-select {
   border-radius: 6px;
-  border: 1px solid #e3ebf0;
+  border: 1px solid var(--border);
   padding: 0.75rem 1rem;
 }
 
 .enhanced-teocoin-wallet .form-label {
   font-weight: 500;
-  color: #495057;
+  color: var(--muted-foreground);
   margin-bottom: 0.5rem;
 }
 
@@ -203,13 +203,13 @@
 }
 
 .enhanced-teocoin-wallet .alert-success {
-  background-color: #d1edff;
-  color: #0c5460;
+  background-color: color-mix(in srgb, var(--info) 12%, white);
+  color: var(--info-foreground);
 }
 
 .enhanced-teocoin-wallet .alert-danger {
-  background-color: #f8d7da;
-  color: #721c24;
+  background-color: color-mix(in srgb, var(--destructive) 12%, white);
+  color: var(--destructive-foreground);
 }
 
 /* Badge Variants */

@@ -82,12 +82,12 @@ const ApprovalStats = React.memo(() => {
         title: 'Approvazioni Settimana',
         value: stats.lastWeekApprovals,
         icon: 'check-circle',
-        color: '#28a745',
+        color: 'var(--success)',
         subtitle: 'Elementi processati',
         trend: 'up',
         changeValue: `+${stats.lastWeekApprovals}`,
-        gradientFrom: '#28a745',
-        gradientTo: '#20c997'
+        gradientFrom: 'var(--success)',
+        gradientTo: 'color-mix(in srgb, var(--success) 90%, white)'
       }
     ],
     [stats]

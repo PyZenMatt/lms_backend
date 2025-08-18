@@ -3,7 +3,7 @@
 }
 
 .lesson-row:hover {
-  background-color: #f8f9fa;
+  background-color: var(--card);
 }
 
 .teacher-profile-img img {
@@ -13,5 +13,5 @@
 }
 
 .courses-table tr:hover {
-  background-color: #f8f9fa;
+  background-color: var(--card);
 }

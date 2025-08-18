@@ -1,8 +1,8 @@
 /* Datta Able TeoCoin Wallet Styles */
 
 .teocoin-wallet-card {
-  box-shadow: 0 2px 6px 0 rgba(0, 0, 0, 0.05);
-  border: 1px solid #e9ecef;
+  box-shadow: 0 2px 6px 0 var(--shadow-xs);
+  border: 1px solid var(--border);
 }
 
 .wallet-balance {
@@ -14,8 +14,8 @@
 }
 
 .badge-light-warning {
-  background-color: rgba(255, 193, 7, 0.1);
-  color: #ffc107;
+  background-color: color-mix(in srgb, var(--warning) 10%, transparent);
+  color: var(--warning);
 }
 
 .f-w-600 {
@@ -35,18 +35,18 @@
 }
 
 .bg-light {
-  background-color: #f8f9fa !important;
+  background-color: var(--card) !important;
 }
 
 /* Modal enhancements */
 .modal-header {
-  border-bottom: 1px solid #e9ecef;
-  background-color: #f8f9fa;
+  border-bottom: 1px solid var(--border);
+  background-color: var(--card);
 }
 
 .modal-footer {
-  border-top: 1px solid #e9ecef;
-  background-color: #f8f9fa;
+  border-top: 1px solid var(--border);
+  background-color: var(--card);
 }
 
 /* Button hover effects */

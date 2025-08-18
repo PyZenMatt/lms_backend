@@ -75,7 +75,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 8px var(--shadow-sm);
 }
 
 /* Size-specific thumb dimensions */
@@ -118,7 +118,7 @@
 }
 
 .theme-toggle.dark .theme-icon {
-  color: #ffd700;
+  color: var(--warning);
 }
 
 .theme-icon-svg {
@@ -166,7 +166,7 @@
 
 /* Dark mode specific styles */
 .dark-mode .theme-toggle {
-  border-color: rgba(255, 255, 255, 0.2);
+  border-color: color-mix(in srgb, var(--background) 20%, transparent);
 }
 
 .dark-mode .theme-toggle:hover {
@@ -180,7 +180,7 @@
 
 .dark-mode .theme-toggle-thumb {
   background: #1a1d21;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 2px 8px var(--shadow-xl);
 }
 
 /* Accessibility improvements */

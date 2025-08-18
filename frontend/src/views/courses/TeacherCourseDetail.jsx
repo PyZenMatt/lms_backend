@@ -169,7 +169,7 @@ const TeacherCourseDetail = () => {
               <MainCard title={`Lezioni (${lessons.length})`}>
                 {lessons.length === 0 ? (
                   <div className="container mt-4 text-center">
-                    <i className="feather icon-book" style={{ fontSize: '3rem', color: '#999', marginBottom: '1rem' }} />
+                    <i className="feather icon-book" style={{ fontSize: '3rem', color: 'var(--muted-foreground)', marginBottom: '1rem' }} />
                     <h4 className="mb-3">Nessuna lezione</h4>
                     <p className="text-muted mb-4">Questo corso non ha ancora lezioni</p>
                     <Button variant="primary" onClick={() => navigate('/dashboard/teacher')}>

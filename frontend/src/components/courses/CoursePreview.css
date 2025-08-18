@@ -2,7 +2,7 @@
 
 .course-preview {
   min-height: 100vh;
-  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  background: linear-gradient(135deg, var(--card) 0%, var(--border) 100%);
 }
 
 .course-hero {
@@ -19,7 +19,7 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: radial-gradient(circle at top right, rgba(255,255,255,0.1) 0%, transparent 50%);
+  background: radial-gradient(circle at top right, color-mix(in srgb, var(--background) 10%, transparent) 0%, transparent 50%);
   pointer-events: none;
 }
 
@@ -33,11 +33,11 @@
 
 .course-stats-card:hover {
   transform: translateY(-25px);
-  box-shadow: 0 20px 40px rgba(0,0,0,0.1) !important;
+  box-shadow: 0 20px 40px var(--shadow-sm) !important;
 }
 
 .course-placeholder-large {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary) 100%);
   border-radius: 15px;
   position: relative;
   overflow: hidden;
@@ -50,7 +50,7 @@
   left: -100%;
   width: 100%;
   height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+  background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--background) 30%, transparent), transparent);
   animation: shimmer 2s infinite;
 }
 
@@ -76,7 +76,7 @@
 
 .custom-tabs .nav-link {
   border: none;
-  color: #6c757d;
+  color: var(--muted-foreground);
   font-weight: 500;
   padding: 1rem 1.5rem;
   border-radius: 0;
@@ -86,14 +86,14 @@
 }
 
 .custom-tabs .nav-link:hover {
-  color: #007bff;
-  background: rgba(0, 123, 255, 0.05);
+  color: var(--primary);
+  background: color-mix(in srgb, var(--primary) 5%, transparent);
 }
 
 .custom-tabs .nav-link.active {
-  color: #007bff;
-  background: rgba(0, 123, 255, 0.1);
-  border-bottom: 3px solid #007bff;
+  color: var(--primary);
+  background: color-mix(in srgb, var(--primary) 10%, transparent);
+  border-bottom: 3px solid var(--primary);
 }
 
 .custom-tabs .nav-link.active::after {
@@ -104,7 +104,7 @@
   transform: translateX(-50%);
   width: 50px;
   height: 3px;
-  background: linear-gradient(135deg, #007bff, #00d4ff);
+  background: linear-gradient(135deg, var(--primary), color-mix(in srgb, var(--primary) 60%, cyan));
   border-radius: 2px 2px 0 0;
 }
 
@@ -135,7 +135,7 @@
 }
 
 .stats-grid .stat-item {
-  border-bottom: 1px solid #e9ecef;
+  border-bottom: 1px solid var(--border);
 }
 
 .stats-grid .stat-item:last-child {
@@ -145,12 +145,12 @@
 .lessons-accordion {
   border-radius: 15px;
   overflow: hidden;
-  box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+  box-shadow: 0 4px 15px var(--shadow-xs);
 }
 
 .lessons-accordion .accordion-item {
   border: none;
-  border-bottom: 1px solid #e9ecef;
+  border-bottom: 1px solid var(--border);
   background: white;
 }
 
@@ -173,20 +173,20 @@
   background: white;
   border: none;
   padding: 1.5rem;
-  color: #495057;
+  color: var(--muted-foreground);
   font-weight: 500;
   box-shadow: none;
   transition: all 0.3s ease;
 }
 
 .lessons-accordion .accordion-button:hover {
-  background: rgba(0, 123, 255, 0.05);
-  color: #007bff;
+  background: color-mix(in srgb, var(--primary) 5%, transparent);
+  color: var(--primary);
 }
 
 .lessons-accordion .accordion-button:not(.collapsed) {
-  background: rgba(0, 123, 255, 0.1);
-  color: #007bff;
+  background: color-mix(in srgb, var(--primary) 10%, transparent);
+  color: var(--primary);
   box-shadow: none;
 }
 
@@ -202,19 +202,19 @@
 
 .lessons-accordion .accordion-body {
   padding: 0 1.5rem 1.5rem 1.5rem;
-  background: #f8f9fa;
+  background: var(--card);
 }
 
 .lesson-content {
   background: white;
   border-radius: 10px;
   padding: 1.5rem;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+  box-shadow: 0 2px 10px var(--shadow-xs);
 }
 
 .exercises-section {
   background: rgba(255, 193, 7, 0.05);
-  border: 1px solid rgba(255, 193, 7, 0.2);
+  border: 1px solid color-mix(in srgb, var(--warning) 20%, transparent);
   border-radius: 10px;
   padding: 1rem;
   margin-top: 1rem;
@@ -222,19 +222,19 @@
 
 .exercise-item {
   background: white;
-  border: 1px solid #e9ecef !important;
+  border: 1px solid var(--border) !important;
   border-radius: 8px;
   transition: all 0.3s ease;
 }
 
 .exercise-item:hover {
-  border-color: #007bff !important;
-  box-shadow: 0 4px 15px rgba(0, 123, 255, 0.1);
+  border-color: var(--primary) !important;
+  box-shadow: 0 4px 15px color-mix(in srgb, var(--primary) 10%, transparent);
   transform: translateY(-2px);
 }
 
 .lesson-actions {
-  background: rgba(0, 123, 255, 0.05);
+  background: color-mix(in srgb, var(--primary) 5%, transparent);
   border-radius: 8px;
   padding: 1rem;
 }
@@ -318,13 +318,13 @@
 
 /* Progress bar enhancements */
 .progress {
-  background-color: rgba(0, 123, 255, 0.1);
+  background-color: color-mix(in srgb, var(--primary) 10%, transparent);
   border-radius: 10px;
   overflow: hidden;
 }
 
 .progress-bar {
-  background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+  background: linear-gradient(135deg, var(--success) 0%, color-mix(in srgb, var(--success) 90%, white) 100%);
   border-radius: 10px;
   transition: width 0.6s ease;
 }
@@ -352,7 +352,7 @@
 
 .btn:hover {
   transform: translateY(-1px);
-  box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+  box-shadow: 0 4px 15px var(--shadow-lg);
 }
 
 /* Content section spacing */
@@ -361,12 +361,12 @@
 }
 
 .content-section h5 {
-  color: #495057;
+  color: var(--muted-foreground);
   font-weight: 600;
   margin-bottom: 1rem;
 }
 
 .content-section p {
-  color: #6c757d;
+  color: var(--muted-foreground);
   margin-bottom: 1.5rem;
 }

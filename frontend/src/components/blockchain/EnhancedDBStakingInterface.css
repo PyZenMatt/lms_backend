@@ -1,7 +1,7 @@
 /* Enhanced DB Staking Interface - Phase 3 Styles */
 
 .enhanced-staking-interface {
-  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  background: linear-gradient(135deg, var(--card) 0%, var(--border) 100%);
   border-radius: 20px;
   padding: 2rem;
   position: relative;
@@ -15,7 +15,7 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: radial-gradient(circle at top right, rgba(0, 123, 255, 0.05) 0%, transparent 50%);
+  background: radial-gradient(circle at top right, color-mix(in srgb, var(--primary) 5%, transparent) 0%, transparent 50%);
   pointer-events: none;
 }
 
@@ -26,14 +26,14 @@
   border-radius: 15px;
   padding: 1.5rem;
   margin-bottom: 2rem;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 4px 15px var(--shadow-xs);
+  border: 1px solid color-mix(in srgb, var(--background) 30%, transparent);
   position: relative;
   z-index: 2;
 }
 
 .staking-title {
-  background: linear-gradient(135deg, #007bff, #6f42c1);
+  background: linear-gradient(135deg, var(--primary), var(--secondary));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -46,19 +46,19 @@
   border-radius: 15px;
   border: none;
   backdrop-filter: blur(10px);
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 15px var(--shadow-sm);
   position: relative;
   z-index: 2;
 }
 
 .modern-alert.alert-danger {
   background: linear-gradient(135deg, rgba(220, 53, 69, 0.1), rgba(220, 53, 69, 0.05));
-  border-left: 4px solid #dc3545;
+  border-left: 4px solid var(--destructive);
 }
 
 .modern-alert.alert-success {
   background: linear-gradient(135deg, rgba(40, 167, 69, 0.1), rgba(40, 167, 69, 0.05));
-  border-left: 4px solid #28a745;
+  border-left: 4px solid var(--success);
 }
 
 /* Status Cards */
@@ -66,7 +66,7 @@
   background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(10px);
   border-radius: 20px;
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 8px 25px var(--shadow-sm);
   transition: all 0.3s ease;
   position: relative;
   overflow: hidden;
@@ -79,12 +79,12 @@
   left: 0;
   right: 0;
   height: 4px;
-  background: linear-gradient(135deg, #007bff, #6f42c1);
+  background: linear-gradient(135deg, var(--primary), var(--secondary));
 }
 
 .staking-status-card:hover {
   transform: translateY(-4px);
-  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 12px 35px var(--shadow-md);
 }
 
 .status-metric {
@@ -103,7 +103,7 @@
   justify-content: center;
   color: white;
   font-size: 1.5rem;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 4px 15px hsl(var(--shadow) / 0.2);
   position: relative;
   overflow: hidden;
 }
@@ -115,7 +115,7 @@
   left: -100%;
   width: 100%;
   height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+  background: linear-gradient(90deg, transparent, hsl(var(--background) / 0.3), transparent);
   animation: shimmer 2s infinite;
 }
 
@@ -125,15 +125,15 @@
 }
 
 .metric-icon.bg-primary {
-  background: linear-gradient(135deg, #007bff, #0056b3);
+  background: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--primary-alt)));
 }
 
 .metric-icon.bg-success {
-  background: linear-gradient(135deg, #28a745, #1e7e34);
+  background: linear-gradient(135deg, hsl(var(--success)), hsl(var(--success-alt)));
 }
 
 .metric-icon.bg-warning {
-  background: linear-gradient(135deg, #ffc107, #e0a800);
+  background: linear-gradient(135deg, hsl(var(--warning)), hsl(var(--warning-alt)));
 }
 
 .metric-content {
@@ -143,14 +143,14 @@
 .metric-value {
   font-size: 2rem;
   font-weight: 700;
-  color: #495057;
+  color: var(--muted-foreground);
   margin: 0;
   line-height: 1;
 }
 
 .metric-label {
   font-size: 0.9rem;
-  color: #6c757d;
+  color: hsl(var(--muted-foreground));
   margin: 0.25rem 0 0 0;
   font-weight: 500;
 }
@@ -160,23 +160,23 @@
   background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(10px);
   border-radius: 20px;
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 8px 25px var(--shadow-sm);
   transition: all 0.3s ease;
 }
 
 .tier-progress-card:hover {
   transform: translateY(-2px);
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
+  box-shadow: 0 10px 30px var(--shadow-sm);
 }
 
 .tier-progress-bar {
   border-radius: 10px;
   overflow: hidden;
-  background-color: rgba(0, 123, 255, 0.1);
+  background-color: color-mix(in srgb, var(--primary) 10%, transparent);
 }
 
 .tier-progress-bar .progress-bar {
-  background: linear-gradient(135deg, #007bff, #6f42c1);
+  background: linear-gradient(135deg, var(--primary), var(--secondary));
   border-radius: 10px;
   transition: width 0.6s ease;
 }
@@ -196,9 +196,10 @@
 /* Actions Card */
 .actions-card {
   background: rgba(255, 255, 255, 0.95);
+    background: hsl(var(--background) / 0.95);
   backdrop-filter: blur(10px);
   border-radius: 20px;
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 8px 25px hsl(var(--shadow) / 0.1);
 }
 
 .staking-action-btn {
@@ -210,7 +211,7 @@
 
 .staking-action-btn:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2) !important;
+    box-shadow: 0 8px 25px hsl(var(--shadow) / 0.2) !important;
 }
 
 .staking-action-btn::before {
@@ -220,7 +221,7 @@
   left: -100%;
   width: 100%;
   height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--background) 20%, transparent), transparent);
   transition: left 0.5s;
 }
 
@@ -233,17 +234,17 @@
   background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(10px);
   border-radius: 20px;
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 8px 25px var(--shadow-sm);
   transition: all 0.3s ease;
 }
 
 .earnings-card:hover {
   transform: translateY(-4px);
-  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 12px 35px var(--shadow-md);
 }
 
 .earnings-card .card-header {
-  background: linear-gradient(135deg, #28a745, #20c997);
+  background: linear-gradient(135deg, var(--success), color-mix(in srgb, var(--success) 90%, white));
   border-radius: 20px 20px 0 0;
   border: none;
   padding: 1rem 1.5rem;
@@ -251,7 +252,7 @@
 
 .earnings-metric {
   padding: 0.5rem 0;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  border-bottom: 1px solid var(--shadow-xs);
 }
 
 .earnings-metric:last-child {
@@ -262,18 +263,18 @@
   background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(10px);
   border-radius: 20px;
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 8px 25px var(--shadow-sm);
   transition: all 0.3s ease;
 }
 
 .chart-card:hover {
   transform: translateY(-4px);
-  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 12px 35px var(--shadow-md);
 }
 
 .chart-card .card-header {
   background: transparent;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  border-bottom: 1px solid var(--shadow-xs);
   padding: 1.5rem 1.5rem 1rem 1.5rem;
   border-radius: 20px 20px 0 0;
 }
@@ -282,12 +283,12 @@
 .staking-modal .modal-content {
   border-radius: 20px;
   border: none;
-  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 15px 40px var(--shadow-md);
   backdrop-filter: blur(10px);
 }
 
 .staking-modal .modal-header {
-  background: linear-gradient(135deg, #007bff, #6f42c1);
+  background: linear-gradient(135deg, var(--primary), var(--secondary));
   color: white;
   border-radius: 20px 20px 0 0;
   padding: 1.5rem;
@@ -309,7 +310,7 @@
 
 .staking-tabs .nav-link {
   border: none;
-  color: #6c757d;
+  color: var(--muted-foreground);
   font-weight: 500;
   padding: 1rem 1.5rem;
   border-radius: 15px 15px 0 0;
@@ -319,14 +320,14 @@
 }
 
 .staking-tabs .nav-link:hover {
-  color: #007bff;
-  background: rgba(0, 123, 255, 0.05);
+  color: hsl(var(--primary));
+  background: hsl(var(--primary) / 0.05);
 }
 
 .staking-tabs .nav-link.active {
-  color: #007bff;
-  background: rgba(0, 123, 255, 0.1);
-  border-bottom: 3px solid #007bff;
+  color: hsl(var(--primary));
+  background: hsl(var(--primary) / 0.1);
+  border-bottom: 3px solid hsl(var(--primary));
 }
 
 /* Form Elements */
@@ -334,11 +335,11 @@
   display: flex;
   border-radius: 15px;
   overflow: hidden;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 4px 15px hsl(var(--shadow) / 0.05);
 }
 
 .modern-input {
-  border: 2px solid #e9ecef;
+  border: 2px solid var(--border);
   border-radius: 15px 0 0 15px;
   padding: 0.75rem 1rem;
   font-size: 1rem;
@@ -347,14 +348,14 @@
 }
 
 .modern-input:focus {
-  border-color: #007bff;
-  box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+  border-color: var(--primary);
+  box-shadow: 0 0 0 0.2rem color-mix(in srgb, var(--primary) 25%, transparent);
   background: white;
 }
 
 .max-button {
   border-radius: 0 15px 15px 0;
-  border: 2px solid #007bff;
+  border: 2px solid var(--primary);
   border-left: none;
   padding: 0.75rem 1rem;
   font-weight: 600;
@@ -362,7 +363,7 @@
 }
 
 .max-button:hover {
-  background: #007bff;
+  background: var(--primary);
   color: white;
   transform: translateY(-1px);
 }
@@ -370,17 +371,17 @@
 /* Preview Sections */
 .stake-preview,
 .unstake-preview {
-  background: linear-gradient(135deg, rgba(0, 123, 255, 0.05), rgba(0, 123, 255, 0.02));
-  border: 2px solid rgba(0, 123, 255, 0.1);
+  background: linear-gradient(135deg, color-mix(in srgb, var(--primary) 5%, transparent), color-mix(in srgb, var(--primary) 2%, transparent));
+  border: 2px solid color-mix(in srgb, var(--primary) 10%, transparent);
   border-radius: 15px;
   transition: all 0.3s ease;
 }
 
 .stake-preview:hover,
 .unstake-preview:hover {
-  border-color: rgba(0, 123, 255, 0.2);
+  border-color: color-mix(in srgb, var(--primary) 20%, transparent);
   transform: translateY(-2px);
-  box-shadow: 0 4px 15px rgba(0, 123, 255, 0.1);
+  box-shadow: 0 4px 15px color-mix(in srgb, var(--primary) 10%, transparent);
 }
 
 .modern-button {
@@ -395,7 +396,7 @@
 
 .modern-button:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 8px 25px var(--shadow-lg);
 }
 
 .modern-button::before {
@@ -405,7 +406,7 @@
   left: -100%;
   width: 100%;
   height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--background) 20%, transparent), transparent);
   transition: left 0.5s;
 }
 
@@ -522,12 +523,12 @@
 }
 
 .staking-modal .modal-body::-webkit-scrollbar-track {
-  background: #f1f3f4;
+  background: var(--card);
   border-radius: 2px;
 }
 
 .staking-modal .modal-body::-webkit-scrollbar-thumb {
-  background: #007bff;
+  background: var(--primary);
   border-radius: 2px;
 }
 
@@ -544,32 +545,32 @@
 
 /* Loading State */
 .enhanced-staking-interface .spinner-border {
-  box-shadow: 0 4px 15px rgba(0, 123, 255, 0.3);
+  box-shadow: 0 4px 15px color-mix(in srgb, var(--primary) 30%, transparent);
 }
 
 /* Success/Error States */
 .staking-status-card.success {
-  border-left: 4px solid #28a745;
+  border-left: 4px solid var(--success);
 }
 
 .staking-status-card.error {
-  border-left: 4px solid #dc3545;
+  border-left: 4px solid var(--destructive);
 }
 
 /* Tier Badge Glow Effect */
 .staking-header .badge {
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 4px 15px var(--shadow-lg);
   animation: pulse 2s infinite;
 }
 
 @keyframes pulse {
   0% {
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 4px 15px var(--shadow-lg);
   }
   50% {
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 6px 20px var(--shadow-xl);
   }
   100% {
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 4px 15px var(--shadow-lg);
   }
 }

@@ -3,13 +3,13 @@
 
 /* Import Skillshare Variables */
 :root {
-  --skillshare-primary: #00ad5b;
-  --skillshare-primary-dark: #008845;
+  --skillshare-primary: var(--success);
+  --skillshare-primary-dark: var(--success);
   --skillshare-secondary: #002333;
   --skillshare-accent: #ff6b35;
   --skillshare-gray-50: #f8fafc;
   --skillshare-gray-100: #f1f5f9;
-  --skillshare-gray-200: #e2e8f0;
+  --skillshare-gray-200: var(--border);
   --skillshare-gray-300: #cbd5e1;
   --skillshare-gray-400: #94a3b8;
   --skillshare-gray-500: #64748b;
@@ -17,11 +17,11 @@
   --skillshare-gray-700: #334155;
   --skillshare-gray-800: #1e293b;
   --skillshare-gray-900: #0f172a;
-  --skillshare-white: #ffffff;
+  --skillshare-white: var(--background);
   --skillshare-error: #ef4444;
   --skillshare-border-radius: 8px;
-  --skillshare-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-  --skillshare-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  --skillshare-shadow: 0 4px 6px -1px var(--shadow-sm), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --skillshare-shadow-lg: 0 10px 15px -3px var(--shadow-sm), 0 4px 6px -2px var(--shadow-xs);
 }
 
 /* Profile Wrapper */
@@ -158,23 +158,23 @@
   height: 120px;
   border-radius: 50%;
   object-fit: cover; /* This fixes the image sizing issues */
-  border: 4px solid rgba(255, 255, 255, 0.3);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  border: 4px solid color-mix(in srgb, var(--background) 30%, transparent);
+  box-shadow: 0 8px 32px var(--shadow-sm);
   transition: all 0.3s ease;
   display: block;
 }
 
 .skillshare-avatar-image:hover {
   transform: scale(1.05);
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 12px 40px var(--shadow-lg);
 }
 
 .skillshare-avatar-placeholder {
   width: 120px;
   height: 120px;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.2);
-  border: 4px solid rgba(255, 255, 255, 0.3);
+  background: color-mix(in srgb, var(--background) 20%, transparent);
+  border: 4px solid color-mix(in srgb, var(--background) 30%, transparent);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -187,7 +187,7 @@
 
 .skillshare-avatar-placeholder:hover {
   transform: scale(1.05);
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 12px 40px var(--shadow-lg);
 }
 
 /* Profile Info */
@@ -199,7 +199,7 @@
   font-size: 2.2rem;
   font-weight: 700;
   margin: 0 0 1rem 0;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  text-shadow: 0 2px 4px var(--shadow-lg);
 }
 
 .skillshare-profile-meta {
@@ -211,11 +211,11 @@
 
 .skillshare-profile-role,
 .skillshare-profile-profession {
-  background: rgba(255, 255, 255, 0.2);
+  background: color-mix(in srgb, var(--background) 20%, transparent);
   padding: 0.5rem 1rem;
   border-radius: 20px;
   backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.3);
+  border: 1px solid color-mix(in srgb, var(--background) 30%, transparent);
   display: flex;
   align-items: center;
   gap: 0.5rem;
@@ -650,6 +650,6 @@
   
   .skillshare-auth-card {
     box-shadow: none;
-    border: 1px solid #ccc;
+    border: 1px solid var(--border);
   }
 }

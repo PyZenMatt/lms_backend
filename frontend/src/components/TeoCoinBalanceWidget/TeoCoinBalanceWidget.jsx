@@ -346,7 +346,7 @@ const TeoCoinBalanceWidget = ({ variant = 'default', onWithdrawalClick }) => {
             <div
               className="text-center p-3 rounded mb-4"
               style={{
-                background: 'linear-gradient(135deg, rgba(255, 193, 7, 0.1) 0%, rgba(255, 193, 7, 0.05) 100%)'
+                background: 'linear-gradient(135deg, color-mix(in srgb, var(--warning) 10%, transparent) 0%, rgba(255, 193, 7, 0.05) 100%)'
               }}
             >
               <div className="d-flex align-items-center justify-content-center mb-2">

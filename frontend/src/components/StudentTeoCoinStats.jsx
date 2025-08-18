@@ -111,7 +111,7 @@ const StudentTeoCoinStats = () => {
             <div
               className="text-center p-3 rounded"
               style={{
-                background: 'linear-gradient(135deg, rgba(255, 193, 7, 0.1) 0%, rgba(255, 193, 7, 0.05) 100%)'
+                background: 'linear-gradient(135deg, color-mix(in srgb, var(--warning) 10%, transparent) 0%, rgba(255, 193, 7, 0.05) 100%)'
               }}
             >
               <i className="feather icon-send text-warning" style={{ fontSize: '2rem' }}></i>

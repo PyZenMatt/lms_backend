@@ -3,7 +3,7 @@
   .card-body {
     h6 {
       font-weight: 600;
-      color: #6c757d;
+      color: var(--muted-foreground);
     }
 
     h3 {
@@ -20,7 +20,7 @@
       margin-top: 30px;
       height: 7px;
       border-radius: 10px;
-      background-color: #e9ecef;
+      background-color: var(--border);
 
       .progress-bar {
         border-radius: 10px;
@@ -32,7 +32,7 @@
       p {
         margin-bottom: 0;
         font-weight: 500;
-        color: #6c757d;
+        color: var(--muted-foreground);
       }
     }
   }
@@ -40,28 +40,28 @@
 
 // Progress bar theme colors
 .progress-c-theme {
-  background: linear-gradient(45deg, #4099ff, #73b4ff);
+  background: linear-gradient(45deg, var(--primary), #73b4ff);
 }
 
 .progress-c-theme2 {
-  background: linear-gradient(45deg, #2ed8b6, #59e0c5);
+  background: linear-gradient(45deg, color-mix(in srgb, var(--success) 75%, cyan), #59e0c5);
 }
 
 .progress-c-theme3 {
-  background: linear-gradient(45deg, #FFB64D, #ffcb80);
+  background: linear-gradient(45deg, var(--warning), #ffcb80);
 }
 
 // Icon colors
 .text-c-green {
-  color: #2ed8b6 !important;
+  color: color-mix(in srgb, var(--success) 75%, cyan) !important;
 }
 
 .text-c-blue {
-  color: #4099ff !important;
+  color: var(--primary) !important;
 }
 
 .text-c-orange {
-  color: #FFB64D !important;
+  color: var(--warning) !important;
 }
 
 .text-c-red {

@@ -103,7 +103,7 @@ const StudentSubmissions = () => {
                     style={{
                       cursor: isClickable ? 'pointer' : 'default',
                       transition: 'all 0.2s ease',
-                      border: isClickable ? '1px solid #e9ecef' : '1px solid #f8f9fa'
+                      border: isClickable ? '1px solid var(--border)' : '1px solid var(--card)'
                     }}
                   >
                     <Card.Body className="p-3">

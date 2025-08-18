@@ -5,7 +5,7 @@
 }
 
 .gas-free-status .card-header {
-  background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+  background: linear-gradient(135deg, var(--success) 0%, color-mix(in srgb, var(--success) 90%, white) 100%);
   color: white;
   border-bottom: none;
 }
@@ -17,14 +17,14 @@
 
 .status-item {
   padding: 0.75rem;
-  background: #f8f9fa;
+  background: var(--card);
   border-radius: 0.5rem;
-  border-left: 4px solid #28a745;
+  border-left: 4px solid var(--success);
 }
 
 .status-item h6 {
   margin-bottom: 0.5rem;
-  color: #495057;
+  color: var(--muted-foreground);
   font-weight: 600;
 }
 
@@ -34,7 +34,7 @@
 }
 
 .contract-info {
-  background: #f8f9fa;
+  background: var(--card);
   padding: 1rem;
   border-radius: 0.5rem;
   margin-top: 1rem;
@@ -46,14 +46,14 @@
 
 .contract-list small {
   display: block;
-  color: #6c757d;
+  color: var(--muted-foreground);
   font-weight: 500;
 }
 
 .contract-list code {
   font-size: 0.8rem;
-  color: #495057;
-  background: #e9ecef;
+  color: var(--muted-foreground);
+  background: var(--border);
   padding: 0.2rem 0.4rem;
   border-radius: 0.25rem;
   word-break: break-all;
@@ -63,7 +63,7 @@
   background: #e7f3ff;
   padding: 1rem;
   border-radius: 0.5rem;
-  border-left: 4px solid #007bff;
+  border-left: 4px solid var(--primary);
 }
 
 .allowance-info {
@@ -78,18 +78,18 @@
   padding: 1rem;
   background: white;
   border-radius: 0.5rem;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 4px var(--shadow-sm);
 }
 
 .allowance-stat .stat-value {
   font-size: 1.5rem;
   font-weight: bold;
-  color: #28a745;
+  color: var(--success);
 }
 
 .allowance-stat .stat-label {
   font-size: 0.8rem;
-  color: #6c757d;
+  color: var(--muted-foreground);
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
@@ -115,36 +115,36 @@
   padding: 1rem;
   background: white;
   border-radius: 0.5rem;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 4px var(--shadow-sm);
   margin-bottom: 1rem;
 }
 
 .metric-value {
   font-size: 1.8rem;
   font-weight: bold;
-  color: #007bff;
+  color: var(--primary);
   margin-bottom: 0.25rem;
 }
 
 .metric-label {
   font-size: 0.8rem;
-  color: #6c757d;
+  color: var(--muted-foreground);
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
 
 /* Zero-MATIC Discount Interface Styles */
 .zero-matic-discount {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary) 100%);
   color: white;
   border-radius: 1rem;
   padding: 1.5rem;
   margin-bottom: 1.5rem;
-  box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+  box-shadow: 0 8px 32px var(--shadow-sm);
 }
 
 .zero-matic-discount .card-header {
-  background: rgba(255,255,255,0.1);
+  background: color-mix(in srgb, var(--background) 10%, transparent);
   border: none;
   border-radius: 0.5rem;
   margin-bottom: 1rem;
@@ -156,7 +156,7 @@
 }
 
 .discount-info {
-  background: rgba(255,255,255,0.1);
+  background: color-mix(in srgb, var(--background) 10%, transparent);
   padding: 1rem;
   border-radius: 0.5rem;
   margin: 1rem 0;
@@ -181,7 +181,7 @@
 }
 
 .allowance-status {
-  background: rgba(255,255,255,0.1);
+  background: color-mix(in srgb, var(--background) 10%, transparent);
   padding: 1rem;
   border-radius: 0.5rem;
   margin: 1rem 0;
@@ -195,7 +195,7 @@
 }
 
 .gas-free-badge {
-  background: #28a745;
+  background: var(--success);
   color: white;
   padding: 0.25rem 0.75rem;
   border-radius: 1rem;
@@ -218,19 +218,19 @@
 }
 
 .discount-controls .btn-primary {
-  background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+  background: linear-gradient(135deg, var(--success) 0%, color-mix(in srgb, var(--success) 90%, white) 100%);
   border: none;
 }
 
 .discount-controls .btn-primary:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+  box-shadow: 0 4px 12px color-mix(in srgb, var(--success) 30%, transparent);
 }
 
 .success-message {
   background: rgba(40, 167, 69, 0.1);
-  border: 1px solid rgba(40, 167, 69, 0.3);
-  color: #155724;
+  border: 1px solid color-mix(in srgb, var(--success) 30%, transparent);
+  color: var(--success-foreground);
   padding: 1rem;
   border-radius: 0.5rem;
   margin: 1rem 0;
@@ -239,7 +239,7 @@
 .error-message {
   background: rgba(220, 53, 69, 0.1);
   border: 1px solid rgba(220, 53, 69, 0.3);
-  color: #721c24;
+  color: var(--destructive-foreground);
   padding: 1rem;
   border-radius: 0.5rem;
   margin: 1rem 0;
@@ -252,11 +252,11 @@
   border-radius: 1rem;
   padding: 1.5rem;
   margin-bottom: 1.5rem;
-  box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+  box-shadow: 0 8px 32px var(--shadow-sm);
 }
 
 .tier-info {
-  background: rgba(255,255,255,0.1);
+  background: color-mix(in srgb, var(--background) 10%, transparent);
   padding: 1rem;
   border-radius: 0.5rem;
   margin: 1rem 0;
@@ -278,7 +278,7 @@
 
 .tier-bronze { background: #CD7F32; }
 .tier-silver { background: #C0C0C0; color: #333; }
-.tier-gold { background: #FFD700; color: #333; }
+.tier-gold { background: var(--warning); color: #333; }
 .tier-platinum { background: #E5E4E2; color: #333; }
 .tier-diamond { background: #B9F2FF; color: #333; }
 
@@ -290,7 +290,7 @@
 }
 
 .stat-item {
-  background: rgba(255,255,255,0.1);
+  background: color-mix(in srgb, var(--background) 10%, transparent);
   padding: 1rem;
   border-radius: 0.5rem;
   text-align: center;
@@ -308,15 +308,15 @@
 }
 
 .staking-form {
-  background: rgba(255,255,255,0.1);
+  background: color-mix(in srgb, var(--background) 10%, transparent);
   padding: 1rem;
   border-radius: 0.5rem;
   margin: 1rem 0;
 }
 
 .staking-form .form-control {
-  background: rgba(255,255,255,0.2);
-  border: 1px solid rgba(255,255,255,0.3);
+  background: color-mix(in srgb, var(--background) 20%, transparent);
+  border: 1px solid color-mix(in srgb, var(--background) 30%, transparent);
   color: white;
   margin-bottom: 1rem;
 }
@@ -326,7 +326,7 @@
 }
 
 .staking-form .form-control:focus {
-  background: rgba(255,255,255,0.3);
+  background: color-mix(in srgb, var(--background) 30%, transparent);
   border-color: rgba(255,255,255,0.5);
   color: white;
   box-shadow: 0 0 0 0.2rem rgba(255,255,255,0.25);
@@ -338,11 +338,11 @@
 
 .tier-progress .progress {
   height: 8px;
-  background: rgba(255,255,255,0.2);
+  background: color-mix(in srgb, var(--background) 20%, transparent);
 }
 
 .tier-progress .progress-bar {
-  background: linear-gradient(90deg, #28a745 0%, #20c997 100%);
+  background: linear-gradient(90deg, var(--success) 0%, color-mix(in srgb, var(--success) 90%, white) 100%);
 }
 
 /* Responsive Design */
@@ -384,7 +384,7 @@
   height: 16px;
   margin: auto;
   border: 2px solid transparent;
-  border-top-color: #ffffff;
+  border-top-color: var(--background);
   border-radius: 50%;
   animation: spin 1s linear infinite;
   top: 0;
@@ -402,12 +402,12 @@
 .status-item:hover {
   transform: translateY(-2px);
   transition: transform 0.2s ease;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  box-shadow: 0 4px 12px var(--shadow-sm);
 }
 
 .allowance-stat:hover,
 .metric:hover {
   transform: translateY(-2px);
   transition: transform 0.2s ease;
-  box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+  box-shadow: 0 4px 16px var(--shadow-md);
 }

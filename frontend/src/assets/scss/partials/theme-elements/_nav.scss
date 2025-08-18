@@ -23,17 +23,17 @@
 
 .nav-pills {
   padding: 15px;
-  background-color: #fff;
-  box-shadow: 0 3px 10px 0 rgba(0, 0, 0, 0.05);
+  background-color: var(--background);
+  box-shadow: 0 3px 10px 0 var(--shadow-xs);
   .nav-link {
     border-radius: 5px;
   }
 
   .nav-link.active,
   .show > .nav-link {
-    color: #fff;
+    color: var(--background);
     background: $primary-color;
-    box-shadow: 0 5px 15px 0 rgba(0, 0, 0, 0.2);
+    box-shadow: 0 5px 15px 0 var(--shadow-lg);
   }
 }
 
@@ -57,7 +57,7 @@
   .nav-link.active {
     border: none;
     color: $theme-heading-color;
-    box-shadow: 0 -5px 10px 0 rgba(0, 0, 0, 0.05);
+    box-shadow: 0 -5px 10px 0 var(--shadow-xs);
   }
 }
 
@@ -67,8 +67,8 @@
 
 .tab-content {
   padding: 35px 30px;
-  background: #fff;
-  box-shadow: 0 3px 10px 0 rgba(0, 0, 0, 0.05);
+  background: var(--background);
+  box-shadow: 0 3px 10px 0 var(--shadow-xs);
 
   > .tab-pane {
     display: none;

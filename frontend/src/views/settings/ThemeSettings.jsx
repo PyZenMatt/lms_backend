@@ -26,21 +26,21 @@ const ThemeSettings = () => {
       name: 'Light Theme',
       description: 'Clean and bright interface perfect for daytime use',
       icon: '☀️',
-      gradient: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
+      gradient: 'linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(var(--accent)) 100%)'
     },
     {
       id: 'dark',
       name: 'Dark Theme',
       description: 'Easy on the eyes for extended use and low-light environments',
       icon: '🌙',
-      gradient: 'linear-gradient(135deg, #2c3e50 0%, #4a6741 100%)'
+      gradient: 'linear-gradient(135deg, hsl(var(--background)) 0%, hsl(var(--foreground)) 100%)'
     },
     {
       id: 'auto',
       name: 'System Preference',
       description: 'Automatically matches your device settings',
       icon: '🔄',
-      gradient: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)'
+      gradient: 'linear-gradient(135deg, hsl(var(--accent)) 0%, hsl(var(--destructive)) 100%)'
     }
   ];
 

@@ -102,18 +102,18 @@ const CoursesTable = ({
 
   const getCategoryColor = (category) => {
     const categoryColors = {
-      Programmazione: '#007bff',
-      Design: '#28a745',
-      Marketing: '#dc3545',
-      Business: '#ffc107',
-      Lingue: '#17a2b8',
-      Arte: '#6f42c1',
-      Musica: '#fd7e14',
-      Salute: '#20c997',
-      Sport: '#e83e8c',
-      Cucina: '#6c757d'
+      Programmazione: 'var(--primary)',
+      Design: 'var(--success)',
+      Marketing: 'var(--destructive)',
+      Business: 'var(--warning)',
+      Lingue: 'var(--info)',
+      Arte: 'var(--secondary)',
+      Musica: 'color-mix(in srgb, var(--warning) 80%, orange)',
+      Salute: 'color-mix(in srgb, var(--success) 90%, white)',
+      Sport: 'color-mix(in srgb, var(--destructive) 70%, magenta)',
+      Cucina: 'var(--muted-foreground)'
     };
-    return categoryColors[category] || '#6c757d';
+    return categoryColors[category] || 'var(--muted-foreground)';
   };
 
   const getCompletionPercentage = (course) => {
@@ -128,7 +128,7 @@ const CoursesTable = ({
       <div className="courses-grid-modern">
         <div className="empty-state text-center py-5">
           <div className="mb-4">
-            <i className="feather icon-book-open" style={{ fontSize: '4rem', color: '#6c757d' }}></i>
+            <i className="feather icon-book-open" style={{ fontSize: '4rem', color: 'var(--muted-foreground)' }}></i>
           </div>
           <h4 className="mb-3 text-muted">Nessun corso trovato</h4>
           <p className="text-muted mb-4">Inizia creando il tuo primo corso per condividere le tue conoscenze!</p>
@@ -139,7 +139,7 @@ const CoursesTable = ({
               className="px-4 py-2"
               onClick={onCreateCourse}
               style={{
-                background: 'linear-gradient(135deg, #04a9f5, #1de9b6)',
+                background: 'linear-gradient(135deg, var(--primary), color-mix(in srgb, var(--success) 75%, cyan))',
                 border: 'none',
                 borderRadius: '25px',
                 boxShadow: '0 4px 15px rgba(4, 169, 245, 0.3)'
@@ -170,7 +170,7 @@ const CoursesTable = ({
                 className="feather icon-plus-circle"
                 style={{
                   fontSize: '3rem',
-                  color: '#04a9f5',
+                  color: 'var(--primary)',
                   filter: 'drop-shadow(0 4px 8px rgba(4, 169, 245, 0.3))'
                 }}
               ></i>
@@ -183,10 +183,10 @@ const CoursesTable = ({
               className="px-4 py-2"
               onClick={onCreateCourse}
               style={{
-                background: 'linear-gradient(135deg, #28a745, #20c997)',
+                background: 'linear-gradient(135deg, var(--success), color-mix(in srgb, var(--success) 90%, white))',
                 border: 'none',
                 borderRadius: '25px',
-                boxShadow: '0 4px 15px rgba(40, 167, 69, 0.3)'
+                boxShadow: '0 4px 15px color-mix(in srgb, var(--success) 30%, transparent)'
               }}
             >
               <i className="feather icon-plus me-2"></i>
@@ -262,12 +262,12 @@ const CoursesTable = ({
                             fontSize: '0.875rem'
                           }}
                           onMouseEnter={(e) => {
-                            e.target.style.backgroundColor = '#f8f9fa';
-                            e.target.style.color = '#007bff';
+                            e.target.style.backgroundColor = 'var(--card)';
+                            e.target.style.color = 'var(--primary)';
                           }}
                           onMouseLeave={(e) => {
                             e.target.style.backgroundColor = 'transparent';
-                            e.target.style.color = '#6c757d';
+                            e.target.style.color = 'var(--muted-foreground)';
                           }}
                           title={`Clicca per vedere le ${course.lessons?.length || 0} lezioni`}
                         >
@@ -323,14 +323,14 @@ const CoursesTable = ({
                           style={{
                             cursor: 'pointer',
                             transition: 'all 0.2s ease',
-                            backgroundColor: '#f8f9fa'
+                            backgroundColor: 'var(--card)'
                           }}
                           onMouseEnter={(e) => {
-                            e.target.style.backgroundColor = '#e3f2fd';
+                            e.target.style.backgroundColor = 'color-mix(in srgb, var(--primary) 8%, white)';
                             e.target.style.transform = 'scale(1.02)';
                           }}
                           onMouseLeave={(e) => {
-                            e.target.style.backgroundColor = '#f8f9fa';
+                            e.target.style.backgroundColor = 'var(--card)';
                             e.target.style.transform = 'scale(1)';
                           }}
                           title={`Clicca per vedere le ${course.lessons?.length || 0} lezioni`}
@@ -383,7 +383,7 @@ const CoursesTable = ({
                             size="sm"
                             onClick={() => handleCreateLesson(course.id)}
                             style={{
-                              background: 'linear-gradient(135deg, #04a9f5, #1de9b6)',
+                              background: 'linear-gradient(135deg, var(--primary), color-mix(in srgb, var(--success) 75%, cyan))',
                               border: 'none',
                               borderRadius: '15px'
                             }}
@@ -411,7 +411,7 @@ const CoursesTable = ({
                                         <Badge
                                           className="me-2 px-2 py-1"
                                           style={{
-                                            background: 'linear-gradient(135deg, #28a745, #20c997)',
+                                            background: 'linear-gradient(135deg, var(--success), color-mix(in srgb, var(--success) 90%, white))',
                                             borderRadius: '10px'
                                           }}
                                         >
@@ -471,8 +471,8 @@ const CoursesTable = ({
                                   <div
                                     className="exercises-section mt-3 p-3 rounded"
                                     style={{
-                                      background: 'linear-gradient(135deg, rgba(255, 193, 7, 0.1) 0%, rgba(255, 193, 7, 0.05) 100%)',
-                                      border: '2px solid rgba(255, 193, 7, 0.2)'
+                                      background: 'linear-gradient(135deg, color-mix(in srgb, var(--warning) 10%, transparent) 0%, rgba(255, 193, 7, 0.05) 100%)',
+                                      border: '2px solid color-mix(in srgb, var(--warning) 20%, transparent)'
                                     }}
                                   >
                                     <div className="d-flex justify-content-between align-items-center mb-3">
@@ -510,8 +510,8 @@ const CoursesTable = ({
                                                 <Badge
                                                   className="me-2 px-2 py-1"
                                                   style={{
-                                                    background: 'linear-gradient(135deg, #ffc107, #fd7e14)',
-                                                    color: '#000',
+                                                    background: 'linear-gradient(135deg, var(--warning), color-mix(in srgb, var(--warning) 80%, orange))',
+                                                    color: 'var(--foreground)',
                                                     borderRadius: '8px'
                                                   }}
                                                 >
@@ -589,7 +589,7 @@ const CoursesTable = ({
                               variant="primary"
                               onClick={() => onCreateLesson(course.id)}
                               style={{
-                                background: 'linear-gradient(135deg, #04a9f5, #1de9b6)',
+                                background: 'linear-gradient(135deg, var(--primary), color-mix(in srgb, var(--success) 75%, cyan))',
                                 border: 'none',
                                 borderRadius: '15px'
                               }}

@@ -16,7 +16,7 @@
   width: 250px;
   height: 250px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #4099ff 0%, #73b4ff 100%);
+  background: linear-gradient(135deg, var(--primary) 0%, #73b4ff 100%);
   opacity: 0.15;
   will-change: transform;
 }
@@ -73,7 +73,7 @@
   width: 40px;
   height: 40px;
   border-radius: 50%;
-  background-color: #4099ff;
+  background-color: var(--primary);
   color: white;
   display: flex;
   align-items: center;
@@ -90,7 +90,7 @@
 
 .card-hover-shadow:hover {
   transform: translateY(-3px);
-  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.08) !important;
+  box-shadow: 0 6px 15px var(--shadow-xs) !important;
 }
 
 /* Hero section ottimizzata */

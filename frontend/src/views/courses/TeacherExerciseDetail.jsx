@@ -245,7 +245,7 @@ const TeacherExerciseDetail = () => {
           <MainCard title={`Consegne Studenti (${submissions.length})`}>
             {submissions.length === 0 ? (
               <div className="text-center py-4">
-                <i className="feather icon-inbox" style={{ fontSize: '3rem', color: '#999', marginBottom: '1rem' }}></i>
+                <i className="feather icon-inbox" style={{ fontSize: '3rem', color: 'var(--muted-foreground)', marginBottom: '1rem' }}></i>
                 <h4 className="mb-3">Nessuna consegna</h4>
                 <p className="text-muted">Nessuno studente ha ancora consegnato questo esercizio</p>
               </div>

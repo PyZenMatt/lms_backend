@@ -5,8 +5,8 @@
 .btn-theme,
 a.btn-theme {
   background: $theme-color;
-  color: #fff;
-  box-shadow: 0 10px 20px 0 rgba(0, 0, 0, 0.2);
+  color: var(--background);
+  box-shadow: 0 10px 20px 0 var(--shadow-lg);
   border-color: #1de1c2;
   border-radius: 0.25rem;
   padding: 11px 25px;
@@ -15,12 +15,12 @@ a.btn-theme {
   &:focus,
   &:not(:disabled):not(.disabled):active {
     background-image: $theme-color;
-    color: #fff;
+    color: var(--background);
     box-shadow: none;
   }
 
   &.active {
-    background-image: #fff !important;
+    background-image: var(--background) !important;
     color: $default-color;
     border: 1px solid $theme-border;
     box-shadow: none;
@@ -28,7 +28,7 @@ a.btn-theme {
 }
 
 .btn-outline-theme {
-  background-image: #fff !important;
+  background-image: var(--background) !important;
   color: $default-color;
   border: 1px solid $theme-border;
   box-shadow: none;
@@ -36,23 +36,23 @@ a.btn-theme {
   &:active,
   &:focus,
   &:not(:disabled):not(.disabled):active {
-    background-image: #fff;
+    background-image: var(--background);
     color: $default-color;
     border: 1px solid $theme-border;
   }
 
   &.active {
     background: $theme-color !important;
-    color: #fff;
-    box-shadow: 0 10px 20px 0 rgba(0, 0, 0, 0.2);
+    color: var(--background);
+    box-shadow: 0 10px 20px 0 var(--shadow-lg);
     border: 1px solid transparent;
   }
 }
 
 .btn-theme2 {
   background: $theme-color2;
-  color: #fff;
-  box-shadow: 0 10px 20px 0 rgba(0, 0, 0, 0.2);
+  color: var(--background);
+  box-shadow: 0 10px 20px 0 var(--shadow-lg);
   border: 1px solid transparent;
   border-radius: 10px;
   padding: 14px 25px;
@@ -61,12 +61,12 @@ a.btn-theme {
   &:focus,
   &:not(:disabled):not(.disabled):active {
     background-image: $theme-color2;
-    color: #fff;
+    color: var(--background);
     box-shadow: none;
   }
 
   &.active {
-    background-image: #fff !important;
+    background-image: var(--background) !important;
     color: $default-color;
     border: 1px solid $theme-border;
     box-shadow: none;
@@ -74,7 +74,7 @@ a.btn-theme {
 }
 
 .btn-outline-theme2 {
-  background-image: #fff !important;
+  background-image: var(--background) !important;
   color: $default-color;
   border: 1px solid $theme-border;
   box-shadow: none;
@@ -82,15 +82,15 @@ a.btn-theme {
   &:active,
   &:focus,
   &:not(:disabled):not(.disabled):active {
-    background-image: #fff;
+    background-image: var(--background);
     color: $default-color;
     border: 1px solid $theme-border;
   }
 
   &.active {
     background: $theme-color2 !important;
-    color: #fff;
-    box-shadow: 0 10px 20px 0 rgba(0, 0, 0, 0.2);
+    color: var(--background);
+    box-shadow: 0 10px 20px 0 var(--shadow-lg);
     border: 1px solid transparent;
   }
 }

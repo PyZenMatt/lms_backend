@@ -49,7 +49,7 @@ const ProfileProgress = () => {
           progress: 75,
           coursesCompleted: 6,
           totalCourses: 8,
-          color: '#ff6b6b'
+    color: 'hsl(var(--destructive))'
         },
         {
           id: 'sculpture',
@@ -58,7 +58,7 @@ const ProfileProgress = () => {
           progress: 40,
           coursesCompleted: 2,
           totalCourses: 5,
-          color: '#4ecdc4'
+    color: 'hsl(var(--success))'
         },
         {
           id: 'drawing',
@@ -67,7 +67,7 @@ const ProfileProgress = () => {
           progress: 90,
           coursesCompleted: 4,
           totalCourses: 4,
-          color: '#45b7d1'
+    color: 'hsl(var(--primary))'
         },
         {
           id: 'digital',
@@ -76,7 +76,7 @@ const ProfileProgress = () => {
           progress: 25,
           coursesCompleted: 0,
           totalCourses: 8,
-          color: '#f9ca24'
+    color: 'hsl(var(--warning))'
         }
       ],
       achievements: [
@@ -87,7 +87,7 @@ const ProfileProgress = () => {
           earned: true,
           earnedDate: '2024-01-15',
           icon: 'award',
-          color: '#feca57'
+    color: 'hsl(var(--warning))'
         },
         {
           id: 2,
@@ -96,7 +96,7 @@ const ProfileProgress = () => {
           earned: true,
           earnedDate: '2024-03-10',
           icon: 'star',
-          color: '#ff6b6b'
+    color: 'hsl(var(--destructive))'
         },
         {
           id: 3,
@@ -105,7 +105,7 @@ const ProfileProgress = () => {
           earned: false,
           progress: 75,
           icon: 'image',
-          color: '#48dbfb'
+    color: 'hsl(var(--accent))'
         },
         {
           id: 4,
@@ -114,7 +114,7 @@ const ProfileProgress = () => {
           earned: true,
           earnedDate: '2024-02-20',
           icon: 'dollar-sign',
-          color: '#1dd1a1'
+    color: 'hsl(var(--success))'
         },
         {
           id: 5,
@@ -123,7 +123,7 @@ const ProfileProgress = () => {
           earned: false,
           progress: 87,
           icon: 'target',
-          color: '#fd79a8'
+    color: 'hsl(var(--muted))'
         }
       ],
       recentActivity: [

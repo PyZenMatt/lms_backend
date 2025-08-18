@@ -24,7 +24,7 @@
 
 .category-option:hover {
   transform: translateY(-3px) scale(1.02);
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 8px 25px var(--shadow-md);
 }
 
 .category-option.selected {
@@ -51,7 +51,7 @@
   left: -100%;
   width: 100%;
   height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+  background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--background) 30%, transparent), transparent);
   transition: left 0.5s;
 }
 
@@ -61,8 +61,8 @@
 
 .image-upload-area:hover {
   transform: scale(1.02);
-  border-color: #007bff;
-  box-shadow: 0 10px 30px rgba(0, 123, 255, 0.2);
+  border-color: var(--primary);
+  box-shadow: 0 10px 30px color-mix(in srgb, var(--primary) 20%, transparent);
 }
 
 /* Button animations */
@@ -79,7 +79,7 @@
   left: 50%;
   width: 0;
   height: 0;
-  background: rgba(255, 255, 255, 0.3);
+  background: color-mix(in srgb, var(--background) 30%, transparent);
   border-radius: 50%;
   transform: translate(-50%, -50%);
   transition: width 0.6s, height 0.6s;
@@ -93,12 +93,12 @@
 /* Form field focus animations */
 .form-control {
   transition: all 0.3s ease;
-  border: 2px solid #e9ecef;
+  border: 2px solid var(--border);
 }
 
 .form-control:focus {
-  border-color: #007bff;
-  box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+  border-color: var(--primary);
+  box-shadow: 0 0 0 0.2rem color-mix(in srgb, var(--primary) 25%, transparent);
   transform: translateY(-2px);
 }
 
@@ -115,13 +115,13 @@
 /* Card hover effects */
 .card {
   transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-  border: 1px solid rgba(0, 0, 0, 0.05);
+  border: 1px solid var(--shadow-xs);
 }
 
 .card:hover {
   transform: translateY(-5px);
-  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
-  border-color: rgba(0, 123, 255, 0.3);
+  box-shadow: 0 15px 35px var(--shadow-sm);
+  border-color: color-mix(in srgb, var(--primary) 30%, transparent);
 }
 
 /* Type selection cards */
@@ -133,11 +133,11 @@
 
 .lesson-type-card:hover, .exercise-type-card:hover, .difficulty-card:hover {
   transform: translateY(-3px) scale(1.02);
-  border-color: #007bff;
+  border-color: var(--primary);
 }
 
 .lesson-type-card.selected, .exercise-type-card.selected, .difficulty-card.selected {
-  background: linear-gradient(135deg, #007bff, #0056b3);
+  background: linear-gradient(135deg, var(--primary), color-mix(in srgb, var(--primary) 80%, black));
   color: white;
   animation: selectedGlow 0.5s ease-out;
 }
@@ -149,7 +149,7 @@
 
 /* Progress indicators */
 .progress-bar {
-  background: linear-gradient(90deg, #007bff, #0056b3);
+  background: linear-gradient(90deg, var(--primary), color-mix(in srgb, var(--primary) 80%, black));
   animation: progressShine 2s infinite;
 }
 
@@ -197,7 +197,7 @@
 .form-floating .form-control:focus ~ label,
 .form-floating .form-control:not(:placeholder-shown) ~ label {
   transform: scale(0.85) translateY(-0.5rem) translateX(0.15rem);
-  color: #007bff;
+  color: var(--primary);
 }
 
 /* Image preview zoom effect */

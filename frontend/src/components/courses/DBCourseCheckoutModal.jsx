@@ -259,7 +259,7 @@ const DBCourseCheckoutModal = ({ course, show, handleClose, onPurchaseComplete }
 
         <div
           className="payment-option-card mb-4 p-3"
-          style={{ border: '2px solid #007bff', borderRadius: '8px', backgroundColor: '#f8f9ff' }}
+          style={{ border: '2px solid var(--primary)', borderRadius: '8px', backgroundColor: 'color-mix(in srgb, var(--primary) 4%, white)' }}
         >
           <div className="d-flex justify-content-between align-items-center mb-2">
             <h5 className="mb-0 text-primary">💳 Pagamento con Carta</h5>
@@ -621,11 +621,11 @@ const StripeCardForm = ({ course, finalPrice, fiatPrice, paymentResult, onPaymen
       <div
         className="card-element-container mb-3"
         style={{
-          border: '2px solid #007bff',
+          border: '2px solid var(--primary)',
           borderRadius: '8px',
           padding: '15px',
-          background: '#fff',
-          boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+          background: 'var(--background)',
+          boxShadow: '0 2px 4px var(--shadow-sm)'
         }}
       >
         <CardElement
@@ -633,17 +633,17 @@ const StripeCardForm = ({ course, finalPrice, fiatPrice, paymentResult, onPaymen
             style: {
               base: {
                 fontSize: '16px',
-                color: '#424770',
+                color: 'var(--muted-foreground)',
                 '::placeholder': {
-                  color: '#aab7c4'
+                  color: 'color-mix(in srgb, var(--muted-foreground) 60%, var(--card))'
                 },
                 fontFamily: 'Arial, sans-serif',
                 fontSmoothing: 'antialiased',
                 padding: '12px'
               },
               invalid: {
-                color: '#fa755a',
-                iconColor: '#fa755a'
+                color: 'var(--destructive)',
+                iconColor: 'var(--destructive)'
               }
             },
             hidePostalCode: false,

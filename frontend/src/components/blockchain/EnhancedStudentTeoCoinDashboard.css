@@ -1,7 +1,7 @@
 /* Enhanced Student TeoCoin Dashboard - Phase 3 Styles */
 
 .enhanced-student-teocoin-dashboard {
-  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  background: linear-gradient(135deg, var(--card) 0%, var(--border) 100%);
   border-radius: 20px;
   padding: 2rem;
   position: relative;
@@ -25,14 +25,14 @@
   backdrop-filter: blur(10px);
   border-radius: 15px;
   padding: 1.5rem;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 4px 15px var(--shadow-xs);
+  border: 1px solid color-mix(in srgb, var(--background) 30%, transparent);
   position: relative;
   z-index: 2;
 }
 
 .dashboard-title {
-  background: linear-gradient(135deg, #28a745, #20c997);
+  background: linear-gradient(135deg, var(--success), color-mix(in srgb, var(--success) 90%, white));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -45,14 +45,14 @@
   border-radius: 15px;
   border: none;
   backdrop-filter: blur(10px);
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 15px var(--shadow-sm);
   position: relative;
   z-index: 2;
 }
 
 .modern-alert.alert-danger {
   background: linear-gradient(135deg, rgba(220, 53, 69, 0.1), rgba(220, 53, 69, 0.05));
-  border-left: 4px solid #dc3545;
+  border-left: 4px solid var(--destructive);
 }
 
 /* Balance Cards */
@@ -60,7 +60,7 @@
   background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(10px);
   border-radius: 20px;
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 8px 25px var(--shadow-sm);
   transition: all 0.3s ease;
   position: relative;
   overflow: hidden;
@@ -73,12 +73,12 @@
   left: 0;
   right: 0;
   height: 4px;
-  background: linear-gradient(135deg, #28a745, #20c997);
+  background: linear-gradient(135deg, var(--success), color-mix(in srgb, var(--success) 90%, white));
 }
 
 .balance-card:hover {
   transform: translateY(-8px);
-  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 15px 35px var(--shadow-md);
 }
 
 .balance-icon {
@@ -90,7 +90,7 @@
   justify-content: center;
   color: white;
   font-size: 1.5rem;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 4px 15px var(--shadow-lg);
   position: relative;
   overflow: hidden;
 }
@@ -102,7 +102,7 @@
   left: -100%;
   width: 100%;
   height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+  background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--background) 30%, transparent), transparent);
   animation: shimmer 2s infinite;
 }
 
@@ -112,21 +112,21 @@
 }
 
 .balance-icon.bg-primary {
-  background: linear-gradient(135deg, #007bff, #0056b3);
+  background: linear-gradient(135deg, var(--primary), color-mix(in srgb, var(--primary) 80%, black));
 }
 
 .balance-icon.bg-info {
-  background: linear-gradient(135deg, #17a2b8, #117a8b);
+  background: linear-gradient(135deg, var(--info), #117a8b);
 }
 
 .balance-icon.bg-warning {
-  background: linear-gradient(135deg, #ffc107, #e0a800);
+  background: linear-gradient(135deg, var(--warning), #e0a800);
 }
 
 .balance-value {
   font-size: 2.2rem;
   font-weight: 700;
-  color: #495057;
+  color: var(--muted-foreground);
   margin: 0;
   line-height: 1;
 }
@@ -146,7 +146,7 @@
   background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(10px);
   border-radius: 20px;
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 8px 25px var(--shadow-sm);
   transition: all 0.3s ease;
   position: relative;
   overflow: hidden;
@@ -159,12 +159,12 @@
   left: 0;
   right: 0;
   height: 4px;
-  background: linear-gradient(135deg, #ffc107, #fd7e14);
+  background: linear-gradient(135deg, var(--warning), color-mix(in srgb, var(--warning) 80%, orange));
 }
 
 .achievements-preview-card:hover {
   transform: translateY(-4px);
-  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.12);
+  box-shadow: 0 12px 30px var(--shadow-sm);
 }
 
 .achievement-item {
@@ -184,12 +184,12 @@
 
 .achievement-icon.completed {
   background: rgba(40, 167, 69, 0.1);
-  border: 2px solid #28a745;
+  border: 2px solid var(--success);
 }
 
 .achievement-icon.incomplete {
   background: rgba(108, 117, 125, 0.1);
-  border: 2px solid #6c757d;
+  border: 2px solid var(--muted-foreground);
   opacity: 0.7;
 }
 
@@ -203,13 +203,13 @@
   background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(10px);
   border-radius: 20px;
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 8px 25px var(--shadow-sm);
   transition: all 0.3s ease;
 }
 
 .transactions-card:hover {
   transform: translateY(-2px);
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
+  box-shadow: 0 10px 30px var(--shadow-sm);
 }
 
 .transactions-list {
@@ -222,12 +222,12 @@
 }
 
 .transactions-list::-webkit-scrollbar-track {
-  background: #f1f3f4;
+  background: var(--card);
   border-radius: 2px;
 }
 
 .transactions-list::-webkit-scrollbar-thumb {
-  background: #28a745;
+  background: var(--success);
   border-radius: 2px;
 }
 
@@ -235,7 +235,7 @@
   display: flex;
   align-items: center;
   padding: 1rem 0;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  border-bottom: 1px solid var(--shadow-xs);
   transition: all 0.3s ease;
 }
 
@@ -277,12 +277,12 @@
 
 .transaction-amount {
   font-weight: 700;
-  color: #28a745;
+  color: var(--success);
   margin-left: auto;
 }
 
 .transaction-description {
-  color: #495057;
+  color: var(--muted-foreground);
   font-weight: 500;
   margin-bottom: 0.25rem;
 }
@@ -295,12 +295,12 @@
 .analytics-modal .modal-content {
   border-radius: 20px;
   border: none;
-  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 15px 40px var(--shadow-md);
   backdrop-filter: blur(10px);
 }
 
 .analytics-modal .modal-header {
-  background: linear-gradient(135deg, #28a745, #20c997);
+  background: linear-gradient(135deg, var(--success), color-mix(in srgb, var(--success) 90%, white));
   color: white;
   border-radius: 20px 20px 0 0;
   padding: 1.5rem;
@@ -323,7 +323,7 @@
 
 .analytics-tabs .nav-link {
   border: none;
-  color: #6c757d;
+  color: var(--muted-foreground);
   font-weight: 500;
   padding: 1rem 1.5rem;
   border-radius: 15px 15px 0 0;
@@ -333,20 +333,20 @@
 }
 
 .analytics-tabs .nav-link:hover {
-  color: #28a745;
+  color: var(--success);
   background: rgba(40, 167, 69, 0.05);
 }
 
 .analytics-tabs .nav-link.active {
-  color: #28a745;
+  color: var(--success);
   background: rgba(40, 167, 69, 0.1);
-  border-bottom: 3px solid #28a745;
+  border-bottom: 3px solid var(--success);
 }
 
 /* Achievement Cards in Modal */
 .achievement-card {
   background: rgba(255, 255, 255, 0.7);
-  border: 1px solid rgba(0, 0, 0, 0.05) !important;
+  border: 1px solid var(--shadow-xs) !important;
   transition: all 0.3s ease;
 }
 
@@ -370,12 +370,12 @@
 
 .achievement-icon-large.completed {
   background: rgba(40, 167, 69, 0.1);
-  border: 3px solid #28a745;
+  border: 3px solid var(--success);
 }
 
 .achievement-icon-large.incomplete {
   background: rgba(108, 117, 125, 0.1);
-  border: 3px solid #6c757d;
+  border: 3px solid var(--muted-foreground);
   opacity: 0.7;
 }
 
@@ -387,7 +387,7 @@
 
 .stat-item:hover {
   transform: translateY(-4px);
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 8px 25px var(--shadow-md);
 }
 
 /* Progress Bar Enhancements */
@@ -398,7 +398,7 @@
 }
 
 .progress-bar {
-  background: linear-gradient(135deg, #28a745, #20c997);
+  background: linear-gradient(135deg, var(--success), color-mix(in srgb, var(--success) 90%, white));
   border-radius: 10px;
   transition: width 0.6s ease;
 }
@@ -424,11 +424,11 @@
 
 .btn:hover {
   transform: translateY(-1px);
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 4px 15px var(--shadow-lg);
 }
 
 .btn-outline-primary:hover {
-  box-shadow: 0 4px 15px rgba(0, 123, 255, 0.3);
+  box-shadow: 0 4px 15px color-mix(in srgb, var(--primary) 30%, transparent);
 }
 
 /* Responsive Design */
@@ -551,7 +551,7 @@
 
 /* Loading State */
 .enhanced-teocoin-dashboard .spinner-border {
-  box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
+  box-shadow: 0 4px 15px color-mix(in srgb, var(--success) 30%, transparent);
 }
 
 /* Card Hover Effects */
@@ -569,8 +569,8 @@
   bottom: 0;
   border-radius: 20px;
   padding: 1px;
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.3), transparent);
-  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  background: linear-gradient(135deg, color-mix(in srgb, var(--background) 30%, transparent), transparent);
+  mask: linear-gradient(var(--background) 0 0) content-box, linear-gradient(var(--background) 0 0);
   mask-composite: exclude;
   pointer-events: none;
 }

@@ -48,7 +48,7 @@ const TeoCoinManagerDemo = () => {
             size="large"
             onClick={() => setManagerOpen(true)}
             sx={{
-              background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+              background: 'linear-gradient(135deg, var(--primary) 0%, var(--primary) 100%)',
               px: 4,
               py: 1.5,
               fontSize: '1.1rem',

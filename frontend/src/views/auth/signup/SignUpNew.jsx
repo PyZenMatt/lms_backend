@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Row, Col, Form, Spinner } from 'react-bootstrap';
-import { Card, CardHeader, CardContent } from '../../components/ui/Card';
+import { Card, CardHeader, CardContent } from '../../components/ui';
 import { Button } from '../../components/ui/Button';
 import { Alert } from '../../components/ui/Alert';
 import { NavLink, useNavigate } from 'react-router-dom';

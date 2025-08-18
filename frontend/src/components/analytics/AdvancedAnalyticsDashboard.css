@@ -7,7 +7,7 @@
 }
 
 .analytics-header {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary) 100%);
   color: white;
   padding: 2rem;
   border-radius: 20px;
@@ -56,7 +56,7 @@
 
 .kpi-card:hover {
   transform: translateY(-5px);
-  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 15px 35px var(--shadow-sm);
 }
 
 .kpi-card.kpi-success {
@@ -104,7 +104,7 @@
   font-weight: 600;
   padding: 0.25rem 0.5rem;
   border-radius: 20px;
-  background: rgba(255, 255, 255, 0.2);
+  background: color-mix(in srgb, var(--background) 20%, transparent);
   backdrop-filter: blur(10px);
 }
 
@@ -120,18 +120,18 @@
 .chart-card {
   border: none;
   border-radius: 16px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 4px 20px var(--shadow-xs);
   transition: all 0.3s ease;
   overflow: hidden;
 }
 
 .chart-card:hover {
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+  box-shadow: 0 8px 30px var(--shadow-sm);
 }
 
 .chart-card .card-header {
-  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
-  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+  background: linear-gradient(135deg, #f8fafc 0%, var(--border) 100%);
+  border-bottom: 1px solid var(--shadow-xs);
   padding: 1.25rem 1.5rem;
 }
 
@@ -156,7 +156,7 @@
 
 /* Custom Metrics */
 .custom-metric {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary) 100%);
   color: white;
   padding: 1.5rem;
   border-radius: 16px;
@@ -178,7 +178,7 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: radial-gradient(circle at 30% 20%, rgba(255, 255, 255, 0.1) 0%, transparent 50%);
+  background: radial-gradient(circle at 30% 20%, color-mix(in srgb, var(--background) 10%, transparent) 0%, transparent 50%);
 }
 
 .custom-metric > * {
@@ -210,7 +210,7 @@
   font-weight: 600;
   padding: 0.25rem 0.75rem;
   border-radius: 20px;
-  background: rgba(255, 255, 255, 0.2);
+  background: color-mix(in srgb, var(--background) 20%, transparent);
   backdrop-filter: blur(10px);
   display: inline-block;
 }
@@ -333,16 +333,16 @@
 
 .dark-mode .chart-card {
   background: #2d3748;
-  color: #e2e8f0;
+  color: var(--border);
 }
 
 .dark-mode .chart-card .card-header {
   background: linear-gradient(135deg, #374151 0%, #4b5563 100%);
-  border-bottom-color: rgba(255, 255, 255, 0.1);
+  border-bottom-color: color-mix(in srgb, var(--background) 10%, transparent);
 }
 
 .dark-mode .chart-card .card-header h5 {
-  color: #e2e8f0;
+  color: var(--border);
 }
 
 .dark-mode .custom-metric {
@@ -394,7 +394,7 @@
 }
 
 .advanced-analytics-dashboard::-webkit-scrollbar-thumb {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary) 100%);
   border-radius: 4px;
 }
 

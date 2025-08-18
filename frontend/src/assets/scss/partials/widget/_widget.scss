@@ -28,7 +28,7 @@
 
     .label {
       border-radius: 15px;
-      box-shadow: 0 5px 10px 0 rgba(0, 0, 0, 0.2);
+  box-shadow: 0 5px 10px 0 hsl(var(--shadow) / 0.2);
     }
   }
 }
@@ -54,7 +54,7 @@
   .card-block,
   .card-body {
     code {
-      background-color: #eee;
+  background-color: hsl(var(--muted) / 0.9);
       margin: 5px;
       display: inline-block;
       border-radius: 3px;

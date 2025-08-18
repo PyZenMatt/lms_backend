@@ -431,9 +431,9 @@ section {
   }
 
   .btn-primary-glow {
-    background: #000;
-    color: #fff;
-    border: 2px solid #fff;
+    background: var(--foreground);
+    color: var(--background);
+    border: 2px solid var(--background);
   }
 }
 

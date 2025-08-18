@@ -1,6 +1,6 @@
 .courses-grid-modern {
   .course-card {
-    border: 1px solid #e9ecef;
+    border: 1px solid var(--border);
     border-radius: 16px;
     transition: all 0.3s ease;
     overflow: hidden;
@@ -10,7 +10,7 @@
     margin-right: auto;
     &:hover {
       transform: translateY(-4px);
-      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12) !important;
+      box-shadow: 0 8px 25px var(--shadow-sm) !important;
     }
     // ...resto delle regole .course-card...
   }
@@ -21,7 +21,7 @@
 
     &:hover {
       transform: translateY(-4px);
-      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12) !important;
+      box-shadow: 0 8px 25px var(--shadow-sm) !important;
     }
 
     .course-image-container {
@@ -41,7 +41,7 @@
         align-items: center;
         justify-content: center;
         height: 100%;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: linear-gradient(135deg, var(--primary) 0%, var(--primary) 100%);
         color: white;
 
         i {
@@ -98,7 +98,7 @@
     .course-stats {
       .stat-item {
         border-radius: 8px;
-        border: 1px solid #e9ecef;
+        border: 1px solid var(--border);
 
         .stat-value {
           font-size: 1.1rem;
@@ -123,8 +123,8 @@
     }
 
     .course-expanded-content {
-      background: #f8f9fa;
-      border-top: 1px solid #e9ecef;
+      background: var(--card);
+      border-top: 1px solid var(--border);
 
       .lessons-grid {
         .lesson-card {
@@ -134,7 +134,7 @@
 
           &:hover {
             transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 4px 12px var(--shadow-sm);
           }
 
           .lesson-title {
@@ -201,7 +201,7 @@
     .course-content {
       .lessons-section {
         .section-title {
-          color: #495057;
+          color: var(--muted-foreground);
           font-weight: 600;
           font-size: 1.1rem;
         }
@@ -225,13 +225,13 @@
 
           .exercises-section {
             .exercise-item {
-              background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
-              border-left: 4px solid #ffc107;
+              background: linear-gradient(135deg, color-mix(in srgb, var(--warning) 16%, white) 0%, color-mix(in srgb, var(--warning) 24%, white) 100%);
+              border-left: 4px solid var(--warning);
               transition: all 0.2s ease;
 
               &:hover {
                 transform: translateX(2px);
-                box-shadow: 0 2px 8px rgba(255, 193, 7, 0.2);
+                box-shadow: 0 2px 8px color-mix(in srgb, var(--warning) 20%, transparent);
               }
 
               .exercise-number {
@@ -246,19 +246,19 @@
 
     // Badge styles
     .course-badge {
-      background: linear-gradient(135deg, #007bff, #0056b3);
+      background: linear-gradient(135deg, var(--primary), color-mix(in srgb, var(--primary) 80%, black));
       font-size: 0.75rem;
       padding: 0.4rem 0.8rem;
     }
 
     .lesson-badge {
-      background: linear-gradient(135deg, #28a745, #1e7e34);
+      background: linear-gradient(135deg, var(--success), #1e7e34);
       font-size: 0.75rem;
       padding: 0.3rem 0.6rem;
     }
 
     .exercise-badge {
-      background: linear-gradient(135deg, #ffc107, #e0a800);
+      background: linear-gradient(135deg, var(--warning), #e0a800);
       color: #212529 !important;
       font-size: 0.75rem;
       padding: 0.3rem 0.6rem;
@@ -335,10 +335,10 @@
   .lesson-accordion-item {
     .lesson-header {
       transition: all 0.3s ease;
-      border: 1px solid #e9ecef !important;
+      border: 1px solid var(--border) !important;
       
       &:hover {
-        border-color: #007bff !important;
+        border-color: var(--primary) !important;
         box-shadow: 0 2px 8px rgba(0, 123, 255, 0.15);
         transform: translateY(-1px);
       }
@@ -350,13 +350,13 @@
       }
       
       .lesson-title {
-        color: #495057;
+        color: var(--muted-foreground);
         font-weight: 600;
         margin-bottom: 0.25rem;
       }
       
       .lesson-meta {
-        color: #6c757d;
+        color: var(--muted-foreground);
         
         .feather {
           width: 12px;
@@ -367,13 +367,13 @@
     
     .lesson-exercises-content {
       .exercises-section {
-        background-color: #fff9f0 !important;
-        border-left: 4px solid #ffc107 !important;
+        background-color: var(--background)9f0 !important;
+        border-left: 4px solid var(--warning) !important;
         margin-left: 1rem;
         margin-top: 0.5rem;
         
         h6 {
-          color: #856404;
+          color: var(--warning-foreground);
           font-weight: 600;
         }
         
@@ -382,8 +382,8 @@
           border: 1px solid #f0f0f0;
           
           &:hover {
-            border-color: #ffc107;
-            box-shadow: 0 2px 4px rgba(255, 193, 7, 0.2);
+            border-color: var(--warning);
+            box-shadow: 0 2px 4px color-mix(in srgb, var(--warning) 20%, transparent);
             transform: translateX(2px);
           }
           
@@ -393,7 +393,7 @@
           }
           
           h6 {
-            color: #495057;
+            color: var(--muted-foreground);
             font-weight: 500;
           }
           
@@ -411,7 +411,7 @@
         
         .empty-exercises {
           .feather {
-            color: #6c757d;
+            color: var(--muted-foreground);
           }
           
           .btn {

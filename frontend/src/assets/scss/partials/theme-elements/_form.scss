@@ -114,8 +114,8 @@ select.form-control-lg:not([size]):not([multiple]) {
   margin: 2px 0 0;
   list-style: none;
   font-size: 14px;
-  background-color: #ffffff;
-  border: 1px solid #cccccc;
+  background-color: var(--background);
+  border: 1px solid var(--border)ccc;
   border-radius: 4px;
   box-shadow: 0 6px 12px rgba(0, 0, 0, 0.175);
   background-clip: padding-box;
@@ -139,7 +139,7 @@ select.form-control-lg:not([size]):not([multiple]) {
 }
 
 .was-validated .form-control:invalid ~ .invalid-feedback {
-  background: #fff;
+  background: var(--background);
   margin-top: 0;
   padding-top: 0.25em;
 }

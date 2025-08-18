@@ -35,10 +35,10 @@
 .brand {
   font-size: 2.5rem;
   font-weight: 700;
-  color: #00ad5b;
+  color: var(--success);
   margin: 0;
   letter-spacing: -0.025em;
-  background: linear-gradient(135deg, #00ad5b 0%, #008845 100%);
+  background: linear-gradient(135deg, var(--success) 0%, var(--success) 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -48,8 +48,8 @@
 .authCard {
   background: white;
   border-radius: 12px;
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-  border: 1px solid #e2e8f0;
+  box-shadow: 0 10px 15px -3px var(--shadow-sm), 0 4px 6px -2px var(--shadow-xs);
+  border: 1px solid var(--border);
   overflow: hidden;
 }
 
@@ -94,7 +94,7 @@
 .formInput {
   width: 100%;
   padding: 0.75rem 1rem;
-  border: 1px solid #d1d5db;
+  border: 1px solid var(--border);
   border-radius: 8px;
   font-size: 1rem;
   transition: all 0.15s ease-in-out;
@@ -103,14 +103,14 @@
 
 .formInput:focus {
   outline: none;
-  border-color: #00ad5b;
+  border-color: var(--success);
   box-shadow: 0 0 0 3px rgba(0, 173, 91, 0.1);
 }
 
 .formSelect {
   width: 100%;
   padding: 0.75rem 1rem;
-  border: 1px solid #d1d5db;
+  border: 1px solid var(--border);
   border-radius: 8px;
   font-size: 1rem;
   background-color: white;
@@ -124,14 +124,14 @@
 
 .formSelect:focus {
   outline: none;
-  border-color: #00ad5b;
+  border-color: var(--success);
   box-shadow: 0 0 0 3px rgba(0, 173, 91, 0.1);
 }
 
 /* Submit Button */
 .submitButton {
   width: 100%;
-  background: linear-gradient(135deg, #00ad5b 0%, #008845 100%);
+  background: linear-gradient(135deg, var(--success) 0%, var(--success) 100%);
   color: white;
   border: none;
   padding: 0.875rem 1.5rem;
@@ -144,7 +144,7 @@
 }
 
 .submitButton:hover {
-  background: linear-gradient(135deg, #008845 0%, #006633 100%);
+  background: linear-gradient(135deg, var(--success) 0%, #006633 100%);
   transform: translateY(-1px);
   box-shadow: 0 4px 12px rgba(0, 173, 91, 0.4);
 }
@@ -158,18 +158,18 @@
   text-align: center;
   margin-top: 1.5rem;
   padding-top: 1.5rem;
-  border-top: 1px solid #e2e8f0;
+  border-top: 1px solid var(--border);
 }
 
 .authLink {
-  color: #00ad5b;
+  color: var(--success);
   text-decoration: none;
   font-weight: 500;
   transition: color 0.15s ease-in-out;
 }
 
 .authLink:hover {
-  color: #008845;
+  color: var(--success);
   text-decoration: underline;
 }
 
@@ -187,7 +187,7 @@
 .errorMessage {
   background-color: #fef2f2;
   border: 1px solid #fecaca;
-  color: #dc2626;
+  color: var(--destructive);
   padding: 0.75rem 1rem;
   border-radius: 8px;
   margin-bottom: 1rem;
@@ -203,7 +203,7 @@
   display: flex;
   align-items: center;
   padding: 0.75rem;
-  border: 1px solid #d1d5db;
+  border: 1px solid var(--border);
   border-radius: 8px;
   margin-bottom: 0.5rem;
   cursor: pointer;
@@ -211,7 +211,7 @@
 }
 
 .roleOption:hover {
-  border-color: #00ad5b;
+  border-color: var(--success);
   background-color: #f0fdf4;
 }
 

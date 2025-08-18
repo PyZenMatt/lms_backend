@@ -92,14 +92,14 @@ export const ThemeProvider = ({ children }) => {
       root.style.setProperty('--bs-card-bg', '#2d3748');
       root.style.setProperty('--bs-navbar-bg', '#1a202c');
       root.style.setProperty('--bs-sidebar-bg', '#2d3748');
-      root.style.setProperty('--bs-primary', '#667eea');
+      root.style.setProperty('--bs-primary', 'var(--primary)');
       root.style.setProperty('--bs-secondary', '#4a5568');
       root.style.setProperty('--bs-success', '#38a169');
       root.style.setProperty('--bs-warning', '#ed8936');
-      root.style.setProperty('--bs-danger', '#e53e3e');
+      root.style.setProperty('--bs-danger', 'var(--destructive)');
       root.style.setProperty('--bs-info', '#3182ce');
       root.style.setProperty('--bs-light', '#4a5568');
-      root.style.setProperty('--bs-dark', '#e2e8f0');
+      root.style.setProperty('--bs-dark', 'var(--border)');
       root.style.setProperty('--bs-border-color', 'rgba(255, 255, 255, 0.125)');
       root.style.setProperty('--bs-text-muted', '#a0aec0');
 
@@ -111,24 +111,24 @@ export const ThemeProvider = ({ children }) => {
       body.classList.remove('dark-mode', 'dark-layout');
 
       // Reset CSS custom properties to default light theme
-      root.style.setProperty('--bs-body-bg', '#ffffff');
+      root.style.setProperty('--bs-body-bg', 'var(--background)');
       root.style.setProperty('--bs-body-color', '#888');
-      root.style.setProperty('--bs-card-bg', '#ffffff');
-      root.style.setProperty('--bs-navbar-bg', '#ffffff');
-      root.style.setProperty('--bs-sidebar-bg', '#ffffff');
-      root.style.setProperty('--bs-primary', '#04a9f5');
+      root.style.setProperty('--bs-card-bg', 'var(--background)');
+      root.style.setProperty('--bs-navbar-bg', 'var(--background)');
+      root.style.setProperty('--bs-sidebar-bg', 'var(--background)');
+      root.style.setProperty('--bs-primary', 'var(--primary)');
       root.style.setProperty('--bs-secondary', '#748892');
-      root.style.setProperty('--bs-success', '#1de9b6');
+      root.style.setProperty('--bs-success', 'color-mix(in srgb, var(--success) 75%, cyan)');
       root.style.setProperty('--bs-warning', '#f4c22b');
       root.style.setProperty('--bs-danger', '#f44236');
-      root.style.setProperty('--bs-info', '#17a2b8');
+      root.style.setProperty('--bs-info', 'var(--info)');
       root.style.setProperty('--bs-light', '#f2f2f2');
       root.style.setProperty('--bs-dark', '#37474f');
       root.style.setProperty('--bs-border-color', '#eaeaea');
       root.style.setProperty('--bs-text-muted', '#888');
 
       // Update meta theme-color for mobile browsers
-      updateMetaThemeColor('#ffffff');
+      updateMetaThemeColor('var(--background)');
     }
   };
 
@@ -188,14 +188,14 @@ export const ThemeProvider = ({ children }) => {
   const getThemeColors = () => {
     if (isDark) {
       return {
-        primary: '#667eea',
+        primary: 'var(--primary)',
         secondary: '#4a5568',
         success: '#38a169',
         warning: '#ed8936',
-        danger: '#e53e3e',
+        danger: 'var(--destructive)',
         info: '#3182ce',
         light: '#4a5568',
-        dark: '#e2e8f0',
+        dark: 'var(--border)',
         background: '#1a1d21',
         surface: '#2d3748',
         text: '#adb7be',
@@ -204,16 +204,16 @@ export const ThemeProvider = ({ children }) => {
       };
     } else {
       return {
-        primary: '#04a9f5',
+        primary: 'var(--primary)',
         secondary: '#748892',
-        success: '#1de9b6',
+        success: 'color-mix(in srgb, var(--success) 75%, cyan)',
         warning: '#f4c22b',
         danger: '#f44236',
-        info: '#17a2b8',
+        info: 'var(--info)',
         light: '#f2f2f2',
         dark: '#37474f',
-        background: '#ffffff',
-        surface: '#ffffff',
+        background: 'var(--background)',
+        surface: 'var(--background)',
         text: '#888',
         textMuted: '#888',
         border: '#eaeaea'

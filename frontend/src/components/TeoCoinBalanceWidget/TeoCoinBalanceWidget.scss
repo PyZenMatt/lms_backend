@@ -1,6 +1,6 @@
 // TeoCoin Balance Widget Styles
 .teocoin-balance-widget {
-  background: linear-gradient(135deg, #f8f9ff 0%, #e8f0fe 100%);
+  background: linear-gradient(135deg, color-mix(in srgb, var(--primary) 4%, white) 0%, #e8f0fe 100%);
   border-radius: 16px;
   border: 1px solid rgba(102, 126, 234, 0.1);
   transition: all 0.3s ease-in-out;
@@ -20,7 +20,7 @@
   }
 
   .MuiTypography-h4 {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary) 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -29,7 +29,7 @@
   }
 
   .MuiButton-contained {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary) 100%);
     border-radius: 12px;
     padding: 12px 24px;
     font-weight: 600;
@@ -69,14 +69,14 @@
   }
 
   .MuiIconButton-root {
-    color: #667eea;
+    color: var(--primary);
     
     &:hover {
       background-color: rgba(102, 126, 234, 0.1);
     }
     
     &:disabled {
-      color: #ccc;
+      color: var(--border);
     }
   }
 
@@ -104,7 +104,7 @@
 // Loading state
 .teocoin-balance-widget {
   .MuiCircularProgress-root {
-    color: #667eea;
+    color: var(--primary);
   }
 }
 

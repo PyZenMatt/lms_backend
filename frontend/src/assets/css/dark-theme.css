@@ -44,12 +44,12 @@
   --bs-success-hover: #059669;
   --bs-success-rgb: 16, 185, 129;
   
-  --bs-warning: #f59e0b;
-  --bs-warning-hover: #d97706;
+  --bs-warning: var(--warning);
+  --bs-warning-hover: var(--warning);
   --bs-warning-rgb: 245, 158, 11;
   
   --bs-danger: #ef4444;
-  --bs-danger-hover: #dc2626;
+  --bs-danger-hover: var(--destructive);
   --bs-danger-rgb: 239, 68, 68;
   
   --bs-info: #06b6d4;
@@ -61,7 +61,7 @@
   --bs-light-rgb: 71, 85, 105;
   
   --bs-dark: #f1f5f9;
-  --bs-dark-hover: #e2e8f0;
+  --bs-dark-hover: var(--border);
   --bs-dark-rgb: 241, 245, 249;
   
   /* Navigation */
@@ -94,8 +94,8 @@
   --bs-table-border-color: rgba(148, 163, 184, 0.2);
   
   /* Shadows */
-  --bs-box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.3);
-  --bs-box-shadow-sm: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.2);
+  --bs-box-shadow: 0 0.5rem 1rem var(--shadow-xl);
+  --bs-box-shadow-sm: 0 0.125rem 0.25rem var(--shadow-lg);
   --bs-box-shadow-lg: 0 1rem 3rem rgba(0, 0, 0, 0.4);
   
   /* Scrollbars */

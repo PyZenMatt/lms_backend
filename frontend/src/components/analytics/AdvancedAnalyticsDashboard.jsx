@@ -232,8 +232,8 @@ const AdvancedAnalyticsDashboard = () => {
           backgroundColor: 'rgba(102, 126, 234, 0.2)',
           borderColor: 'rgba(102, 126, 234, 1)',
           pointBackgroundColor: 'rgba(102, 126, 234, 1)',
-          pointBorderColor: '#fff',
-          pointHoverBackgroundColor: '#fff',
+          pointBorderColor: 'var(--background)',
+          pointHoverBackgroundColor: 'var(--background)',
           pointHoverBorderColor: 'rgba(102, 126, 234, 1)'
         },
         {
@@ -242,7 +242,7 @@ const AdvancedAnalyticsDashboard = () => {
           backgroundColor: 'rgba(75, 192, 192, 0.2)',
           borderColor: 'rgba(75, 192, 192, 1)',
           pointBackgroundColor: 'rgba(75, 192, 192, 1)',
-          pointBorderColor: '#fff'
+          pointBorderColor: 'var(--background)'
         }
       ]
     };

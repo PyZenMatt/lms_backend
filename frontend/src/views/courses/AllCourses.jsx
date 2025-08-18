@@ -209,7 +209,7 @@ const AllCourses = () => {
                 onMouseLeave={(e) => (e.currentTarget.style.transform = 'translateY(0)')}
               >
                 {/* Course Image */}
-                <div style={{ height: '200px', backgroundColor: '#f8f9fa', position: 'relative' }}>
+                <div style={{ height: '200px', backgroundColor: 'var(--card)', position: 'relative' }}>
                   {course.cover_image_url ? (
                     <Card.Img
                       variant="top"
@@ -269,7 +269,7 @@ const AllCourses = () => {
                     </div>
 
                     {/* Dual Pricing Display */}
-                    <div className="pricing-section p-2" style={{ backgroundColor: '#f8f9fa', borderRadius: '6px' }}>
+                    <div className="pricing-section p-2" style={{ backgroundColor: 'var(--card)', borderRadius: '6px' }}>
                       {course.price_eur > 0 ? (
                         <>
                           <div className="d-flex justify-content-between align-items-center mb-1">

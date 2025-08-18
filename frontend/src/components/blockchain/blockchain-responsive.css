@@ -43,21 +43,21 @@
 
 /* Balance Overview Component Specific Styles */
 .balance-overview-card {
-  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  background: linear-gradient(135deg, var(--card) 0%, var(--border) 100%);
   border: none !important;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1) !important;
+  box-shadow: 0 4px 15px var(--shadow-sm) !important;
   transition: all 0.3s ease;
 }
 
 .balance-overview-card:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15) !important;
+  box-shadow: 0 8px 25px var(--shadow-md) !important;
 }
 
 .balance-overview-card .card-header {
   background: rgba(255, 255, 255, 0.8);
   backdrop-filter: blur(10px);
-  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  border-bottom: 1px solid var(--shadow-xs);
 }
 
 /* Burn Deposit Interface Responsiveness */
@@ -130,7 +130,7 @@
 .balance-overview-card .balance-amount {
   font-size: 1.75rem;
   font-weight: 700;
-  color: #007bff;
+  color: var(--primary);
 }
 
 @media (max-width: 768px) {
@@ -148,19 +148,19 @@
 /* Ensure consistent card styling across all blockchain components */
 .blockchain-component-col .card {
   border: none;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 15px var(--shadow-sm);
   transition: all 0.3s ease;
   border-radius: 15px;
 }
 
 .blockchain-component-col .card:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 8px 25px var(--shadow-md);
 }
 
 .blockchain-component-col .card-header {
   background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(10px);
-  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  border-bottom: 1px solid var(--shadow-xs);
   border-radius: 15px 15px 0 0 !important;
 }

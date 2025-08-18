@@ -24,7 +24,7 @@
 
 .dashboard-stat-card:hover {
   transform: translateY(-3px);
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12) !important;
+  box-shadow: 0 8px 25px var(--shadow-sm) !important;
 }
 
 .dashboard-stat-card .stat-icon {
@@ -61,7 +61,7 @@
 /* Goal Progress Cards */
 .goal-progress .progress {
   border-radius: 10px;
-  background-color: rgba(0, 0, 0, 0.05);
+  background-color: var(--shadow-xs);
 }
 
 .goal-progress .progress-bar {
@@ -79,8 +79,8 @@
 
 .course-card:hover {
   transform: translateY(-2px);
-  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
-  border-color: #04a9f5 !important;
+  box-shadow: 0 0.5rem 1rem var(--shadow-md) !important;
+  border-color: var(--primary) !important;
 }
 
 .course-card::before {
@@ -90,7 +90,7 @@
   left: 0;
   right: 0;
   height: 4px;
-  background: linear-gradient(90deg, #04a9f5, #1de9b6);
+  background: linear-gradient(90deg, var(--primary), color-mix(in srgb, var(--success) 75%, cyan));
   transform: scaleX(0);
   transition: transform 0.3s ease;
 }
@@ -107,7 +107,7 @@
 }
 
 .course-card:hover .course-title {
-  color: #04a9f5;
+  color: var(--primary);
 }
 
 .course-card .course-description {
@@ -120,12 +120,12 @@
 }
 
 .course-card .stat-box:hover {
-  background-color: #e9ecef !important;
+  background-color: var(--border) !important;
   transform: translateY(-1px);
 }
 
 .course-card .btn-primary {
-  background: linear-gradient(135deg, #04a9f5, #1de9b6);
+  background: linear-gradient(135deg, var(--primary), color-mix(in srgb, var(--success) 75%, cyan));
   border: none;
   border-radius: 8px;
   font-weight: 500;
@@ -140,8 +140,8 @@
 }
 
 .course-card .btn-outline-primary {
-  border-color: #04a9f5;
-  color: #04a9f5;
+  border-color: var(--primary);
+  color: var(--primary);
   border-radius: 8px;
   font-weight: 500;
   padding: 0.6rem 1.5rem;
@@ -149,8 +149,8 @@
 }
 
 .course-card .btn-outline-primary:hover {
-  background: linear-gradient(135deg, #04a9f5, #1de9b6);
-  border-color: #04a9f5;
+  background: linear-gradient(135deg, var(--primary), color-mix(in srgb, var(--success) 75%, cyan));
+  border-color: var(--primary);
   color: white;
   transform: translateY(-1px);
   box-shadow: 0 4px 12px rgba(4, 169, 245, 0.3);
@@ -173,33 +173,33 @@
 
 /* Progress Colors using Datta Able theme */
 .progress-c-theme .progress-bar {
-  background: linear-gradient(90deg, #04a9f5, #1de9b6);
+  background: linear-gradient(90deg, var(--primary), color-mix(in srgb, var(--success) 75%, cyan));
 }
 
 .progress-c-theme2 .progress-bar {
-  background: linear-gradient(90deg, #1de9b6, #f4c22b);
+  background: linear-gradient(90deg, color-mix(in srgb, var(--success) 75%, cyan), #f4c22b);
 }
 
 .progress-c-theme3 .progress-bar {
-  background: linear-gradient(90deg, #f4c22b, #ff6b6b);
+  background: linear-gradient(90deg, #f4c22b, var(--destructive));
 }
 
 /* Badge Enhancements */
 .badge.bg-success {
-  background: linear-gradient(135deg, #1de9b6, #20c997) !important;
+  background: linear-gradient(135deg, color-mix(in srgb, var(--success) 75%, cyan), color-mix(in srgb, var(--success) 90%, white)) !important;
 }
 
 .badge.bg-warning {
-  background: linear-gradient(135deg, #f4c22b, #fd7e14) !important;
+  background: linear-gradient(135deg, #f4c22b, color-mix(in srgb, var(--warning) 80%, orange)) !important;
   color: #212529 !important;
 }
 
 .badge.bg-danger {
-  background: linear-gradient(135deg, #f44236, #e83e8c) !important;
+  background: linear-gradient(135deg, #f44236, color-mix(in srgb, var(--destructive) 70%, magenta)) !important;
 }
 
 .badge.bg-primary {
-  background: linear-gradient(135deg, #04a9f5, #1de9b6) !important;
+  background: linear-gradient(135deg, var(--primary), color-mix(in srgb, var(--success) 75%, cyan)) !important;
 }
 
 /* Responsive Enhancements */
@@ -239,7 +239,7 @@
 
 .admin-action-btn:hover {
   transform: translateY(-3px);
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15) !important;
+  box-shadow: 0 8px 25px var(--shadow-md) !important;
   background: white;
 }
 
@@ -257,13 +257,13 @@
   border-radius: 12px;
   background: rgba(255, 255, 255, 0.5);
   transition: all 0.3s ease;
-  border: 1px solid rgba(0, 0, 0, 0.05);
+  border: 1px solid var(--shadow-xs);
 }
 
 .platform-activity .activity-item:hover {
   background: rgba(255, 255, 255, 0.8);
   transform: translateX(5px);
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 15px var(--shadow-sm);
 }
 
 /* Admin Metrics */
@@ -295,7 +295,7 @@
 
 .course-card:hover {
   transform: translateY(-2px);
-  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+  box-shadow: 0 0.5rem 1rem var(--shadow-md) !important;
   border-color: #5e72e4 !important;
 }
 
@@ -326,7 +326,7 @@
 
 .course-card .progress {
   border-radius: 10px;
-  background-color: #f1f3f4;
+  background-color: var(--card);
 }
 
 .course-card .progress-bar {
@@ -350,22 +350,22 @@
 }
 
 .course-card .bg-light {
-  background-color: #f8f9fa !important;
+  background-color: var(--card) !important;
   border-radius: 6px;
   transition: background-color 0.2s ease;
 }
 
 .course-card .bg-light:hover {
-  background-color: #e9ecef !important;
+  background-color: var(--border) !important;
 }
 
 /* Stats colors */
 .text-success {
-  color: #28a745 !important;
+  color: var(--success) !important;
 }
 
 .text-warning {
-  color: #ffc107 !important;
+  color: var(--warning) !important;
 }
 
 /* Responsive adjustments */
@@ -384,14 +384,14 @@
    ========================= */
 
 .submission-card {
-  border: 1px solid #e9ecef;
+  border: 1px solid var(--border);
   border-radius: 12px;
   transition: all 0.2s ease;
-  background: #fff;
+  background: var(--background);
 }
 
 .submission-card:hover {
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 4px 12px var(--shadow-xs);
   border-color: #d6d8db;
 }
 
@@ -401,8 +401,8 @@
 
 .submission-clickable:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
-  border-color: #007bff;
+  box-shadow: 0 6px 20px var(--shadow-sm);
+  border-color: var(--primary);
 }
 
 .submission-icon-wrapper {
@@ -427,7 +427,7 @@
 
 .submission-details {
   font-size: 0.8rem;
-  color: #6c757d;
+  color: var(--muted-foreground);
 }
 
 .submission-details i {
@@ -448,7 +448,7 @@
 
 .submission-status small {
   font-size: 0.7rem;
-  color: #6c757d;
+  color: var(--muted-foreground);
 }
 
 /* Status color variations */
@@ -457,7 +457,7 @@
 }
 
 .bg-warning.bg-opacity-10 {
-  background-color: rgba(255, 193, 7, 0.1) !important;
+  background-color: color-mix(in srgb, var(--warning) 10%, transparent) !important;
 }
 
 .bg-danger.bg-opacity-10 {
@@ -470,23 +470,23 @@
 
 /* Enhanced badges */
 .badge.bg-success {
-  background: linear-gradient(135deg, #28a745, #20c997) !important;
+  background: linear-gradient(135deg, var(--success), color-mix(in srgb, var(--success) 90%, white)) !important;
   border: none;
 }
 
 .badge.bg-warning {
-  background: linear-gradient(135deg, #ffc107, #fd7e14) !important;
+  background: linear-gradient(135deg, var(--warning), color-mix(in srgb, var(--warning) 80%, orange)) !important;
   border: none;
   color: #212529 !important;
 }
 
 .badge.bg-danger {
-  background: linear-gradient(135deg, #dc3545, #e83e8c) !important;
+  background: linear-gradient(135deg, var(--destructive), color-mix(in srgb, var(--destructive) 70%, magenta)) !important;
   border: none;
 }
 
 .badge.bg-info {
-  background: linear-gradient(135deg, #17a2b8, #007bff) !important;
+  background: linear-gradient(135deg, var(--info), var(--primary)) !important;
   border: none;
 }
 
@@ -527,7 +527,7 @@
 }
 
 .balance-card:hover, .wallet-address-card:hover, .teacher-stats-card:hover {
-  box-shadow: 0 0.25rem 0.5rem rgba(0, 0, 0, 0.1);
+  box-shadow: 0 0.25rem 0.5rem var(--shadow-sm);
   border-color: #5e72e4;
 }
 
@@ -536,7 +536,7 @@
 }
 
 .balance-card .card-title, .wallet-address-card .card-title, .teacher-stats-card .card-title {
-  color: #6c757d;
+  color: var(--muted-foreground);
   font-size: 0.875rem;
   font-weight: 500;
   text-transform: uppercase;
@@ -555,7 +555,7 @@
   justify-content: space-between;
   align-items: center;
   padding: 0.5rem 0;
-  border-bottom: 1px solid #f8f9fa;
+  border-bottom: 1px solid var(--card);
 }
 
 .teacher-stats-card .stat-item:last-child {
@@ -570,7 +570,7 @@
 
 .teacher-stats-card .stat-label {
   font-size: 0.75rem;
-  color: #6c757d;
+  color: var(--muted-foreground);
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
@@ -599,14 +599,14 @@
 .balance-amount .currency {
   font-size: 0.875rem;
   font-weight: 500;
-  color: #6c757d;
+  color: var(--muted-foreground);
   text-transform: uppercase;
 }
 
 .balance-amount-secondary .amount-secondary {
   font-size: 1.25rem;
   font-weight: 500;
-  color: #6c757d;
+  color: var(--muted-foreground);
 }
 
 .balance-amount-secondary .currency-secondary {
@@ -618,7 +618,7 @@
 
 .balance-details {
   padding-top: 0.75rem;
-  border-top: 1px solid #f8f9fa;
+  border-top: 1px solid var(--card);
 }
 
 .refresh-btn {
@@ -639,12 +639,12 @@
   padding: 1rem;
   border-radius: 0.5rem;
   margin-bottom: 0.75rem;
-  background-color: #f8f9fa;
+  background-color: var(--card);
   transition: all 0.3s ease;
 }
 
 .transaction-item:hover {
-  background-color: #e9ecef;
+  background-color: var(--border);
   transform: translateX(2px);
 }
 
@@ -670,7 +670,7 @@
 }
 
 .transaction-meta {
-  color: #6c757d;
+  color: var(--muted-foreground);
   font-size: 0.75rem;
 }
 
@@ -680,11 +680,11 @@
 }
 
 .transaction-amount .text-success {
-  color: #28a745 !important;
+  color: var(--success) !important;
 }
 
 .transaction-amount .text-danger {
-  color: #dc3545 !important;
+  color: var(--destructive) !important;
 }
 
 /* Wallet and Transaction Unified Styling */
@@ -696,7 +696,7 @@
 
 .wallet-transactions-unified .card-header {
   background-color: transparent;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  border-bottom: 1px solid color-mix(in srgb, var(--background) 10%, transparent);
   color: white;
 }
 
@@ -710,7 +710,7 @@
 }
 
 .wallet-transactions-unified .border-bottom {
-  border-bottom-color: rgba(255, 255, 255, 0.1) !important;
+  border-bottom-color: color-mix(in srgb, var(--background) 10%, transparent) !important;
 }
 
 .wallet-transactions-unified .transaction-title {
@@ -734,18 +734,18 @@
 }
 
 .wallet-transactions-unified .btn-outline-primary {
-  border-color: rgba(255, 255, 255, 0.3);
+  border-color: color-mix(in srgb, var(--background) 30%, transparent);
   color: white;
 }
 
 .wallet-transactions-unified .btn-outline-primary:hover {
-  background-color: rgba(255, 255, 255, 0.1);
+  background-color: color-mix(in srgb, var(--background) 10%, transparent);
   border-color: white;
   color: white;
 }
 
 .wallet-transactions-unified .border-top {
-  border-top-color: rgba(255, 255, 255, 0.1) !important;
+  border-top-color: color-mix(in srgb, var(--background) 10%, transparent) !important;
 }
 
 /* Balance Display Styling for unified look */
@@ -775,12 +775,12 @@
 }
 
 .refresh-btn {
-  border-color: rgba(255, 255, 255, 0.3) !important;
+  border-color: color-mix(in srgb, var(--background) 30%, transparent) !important;
   color: white !important;
 }
 
 .refresh-btn:hover {
-  background-color: rgba(255, 255, 255, 0.1) !important;
+  background-color: color-mix(in srgb, var(--background) 10%, transparent) !important;
   border-color: white !important;
 }
 
@@ -803,7 +803,7 @@
 /* Transaction items specific styling */
 .wallet-style .transaction-item {
   background-color: transparent !important;
-  border-bottom-color: rgba(255, 255, 255, 0.1) !important;
+  border-bottom-color: color-mix(in srgb, var(--background) 10%, transparent) !important;
   width: 100% !important;
   display: block !important;
 }
@@ -859,7 +859,7 @@
 
 /* Hash styling improvements */
 .wallet-style .hash code {
-  background-color: rgba(255,255,255,0.1) !important;
+  background-color: color-mix(in srgb, var(--background) 10%, transparent) !important;
   color: #bdc3c7 !important;
   padding: 2px 4px !important;
   border-radius: 3px !important;
