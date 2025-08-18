@@ -14,12 +14,12 @@
 }
 
 .activity-list-container::-webkit-scrollbar-thumb {
-  background: #dee2e6;
+  background: hsl(var(--muted));
   border-radius: 3px;
 }
 
 .activity-list-container::-webkit-scrollbar-thumb:hover {
-  background: #adb5bd;
+  background: hsl(var(--muted-foreground));
 }
 
 .media {

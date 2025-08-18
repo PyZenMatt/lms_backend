@@ -53,7 +53,7 @@
 
 .form-control-lg:focus {
   border-color: var(--primary);
-  box-shadow: 0 0 0 0.2rem rgba(4, 169, 245, 0.15);
+  box-shadow: 0 0 0 0.2rem hsl(var(--brand-primary) / 0.15);
   transform: translateY(-1px);
 }
 
@@ -119,9 +119,9 @@
 
 .image-upload-area:hover {
   border-color: var(--primary);
-  background: linear-gradient(135deg, rgba(4, 169, 245, 0.05) 0%, rgba(29, 233, 182, 0.05) 100%);
+  background: linear-gradient(135deg, hsl(var(--brand-primary) / 0.05) 0%, rgba(29, 233, 182, 0.05) 100%);
   transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(4, 169, 245, 0.15);
+  box-shadow: 0 8px 25px hsl(var(--brand-primary) / 0.15);
 }
 
 .image-upload-area.drag-over {
@@ -223,7 +223,7 @@
 
 .learning-objectives-container .form-control:focus {
   border-color: var(--primary);
-  box-shadow: 0 0 0 0.2rem rgba(4, 169, 245, 0.15);
+  box-shadow: 0 0 0 0.2rem hsl(var(--brand-primary) / 0.15);
 }
 
 /* =========================

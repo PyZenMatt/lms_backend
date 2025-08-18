@@ -76,7 +76,7 @@ const StudentSubmissions = () => {
       ) : submissions.length === 0 ? (
         <div className="text-center py-5">
           <div className="mb-4">
-            <i className="feather icon-file-text" style={{ fontSize: '4rem', color: '#dee2e6' }}></i>
+            <i className="feather icon-file-text" style={{ fontSize: '4rem', color: 'hsl(var(--muted))' }}></i>
           </div>
           <h5 className="text-muted mb-3">Nessuna sottomissione trovata</h5>
           <p className="text-muted">

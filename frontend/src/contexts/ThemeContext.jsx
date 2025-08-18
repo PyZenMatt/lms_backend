@@ -100,7 +100,7 @@ export const ThemeProvider = ({ children }) => {
       root.style.setProperty('--bs-info', '#3182ce');
       root.style.setProperty('--bs-light', '#4a5568');
       root.style.setProperty('--bs-dark', 'var(--border)');
-      root.style.setProperty('--bs-border-color', 'rgba(255, 255, 255, 0.125)');
+      root.style.setProperty('--bs-border-color', 'hsl(var(--background) / 0.125)');
       root.style.setProperty('--bs-text-muted', '#a0aec0');
 
       // Update meta theme-color for mobile browsers
@@ -200,7 +200,7 @@ export const ThemeProvider = ({ children }) => {
         surface: '#2d3748',
         text: '#adb7be',
         textMuted: '#a0aec0',
-        border: 'rgba(255, 255, 255, 0.125)'
+        border: 'hsl(var(--background) / 0.125)'
       };
     } else {
       return {

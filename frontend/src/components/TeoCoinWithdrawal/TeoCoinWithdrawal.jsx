@@ -580,7 +580,7 @@ const TeoCoinWithdrawal = ({ open, onClose, userBalance = 0 }) => {
                     display="flex"
                     justifyContent="space-between"
                     alignItems="center"
-                    sx={{ py: 1, borderBottom: index < 2 ? '1px solid #eee' : 'none' }}
+                    sx={{ py: 1, borderBottom: index < 2 ? '1px solid hsl(var(--muted))' : 'none' }}
                   >
                     <Box>
                       <Typography variant="body2">{withdrawal.amount} TEO</Typography>

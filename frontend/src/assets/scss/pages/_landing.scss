@@ -143,7 +143,7 @@ html {
       
       &:hover {
         transform: translateY(-8px) scale(1.03);
-        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.25) !important;
+        box-shadow: 0 20px 40px hsl(var(--foreground) / 0.25) !important;
         
         .card-body {
           i {
@@ -319,7 +319,7 @@ html {
     h2 {
       font-size: 2.5rem;
       font-weight: 700;
-      color: #333;
+      color: hsl(var(--muted-foreground));
       margin-bottom: 15px;
     }
     
@@ -357,7 +357,7 @@ html {
     
     h4 {
       font-weight: 600;
-      color: #333;
+      color: hsl(var(--muted-foreground));
       margin-bottom: 15px;
     }
     
@@ -460,7 +460,7 @@ html {
     h2 {
       font-size: 2.5rem;
       font-weight: 700;
-      color: #333;
+      color: hsl(var(--muted-foreground));
       margin-bottom: 15px;
     }
     
@@ -531,7 +531,7 @@ html {
     
     h4, h5 {
       font-weight: 600;
-      color: #333;
+      color: hsl(var(--muted-foreground));
       margin-bottom: 15px;
     }
     
@@ -554,7 +554,7 @@ html {
     h2 {
       font-size: 2.5rem;
       font-weight: 700;
-      color: #333;
+      color: hsl(var(--muted-foreground));
       margin-bottom: 15px;
     }
   }
@@ -580,7 +580,7 @@ html {
     
     h4 {
       font-weight: 600;
-      color: #333;
+      color: hsl(var(--muted-foreground));
       margin-bottom: 15px;
     }
     
@@ -661,7 +661,7 @@ html {
 
 /* Footer */
 .landing-footer {
-  background: #333;
+  background: hsl(var(--muted-foreground));
   color: white;
   text-align: center;
   padding: 40px 0;

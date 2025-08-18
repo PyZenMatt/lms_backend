@@ -1,0 +1,17 @@
+:root {
+  /* alias verso la tua palette principale */
+  --success: var(--green-500);
+  --success-600: var(--green-600);
+  --success-700: var(--green-700);
+
+  --danger: var(--red-500);
+  --warning: var(--amber-500);
+  --info: var(--cyan-500);
+
+  --brand-primary: var(--blue-500);
+  --brand-teal: var(--teal-400);
+
+  /* gradienti */
+  --gradient-accent-mint: linear-gradient(135deg, hsl(var(--teal-600)), hsl(var(--green-400)));
+  --gradient-accent-indigo: linear-gradient(135deg, hsl(var(--indigo-500)), hsl(var(--indigo-600)));
+}

@@ -1,18 +1,19 @@
 {
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "vite build",
-    "preview": "vite preview",
-    "test": "vitest",
-    "lint": "eslint .",
-    "typecheck:e2e": "tsc -p tsconfig.e2e.json --noEmit",
-    "e2e:ci": "npm run typecheck:e2e && playwright test --reporter=html",
-    "e2e:report": "playwright show-report",
-    "tokens:check": "bash -c '! rg -n \"#[0-9a-fA-F]{3,6}|rgb\\(|rgba\\(\" src | tee /dev/stderr'",
-    "tokens:replace": "node scripts/tokenize-css.js",
-    "openapi:gen": "openapi-typescript openapi/openapi.json -o src/lib/api/schema.ts",
-    "tokens:apply": "node scripts/tokenize-css.mjs --root src --mapping scripts/color-mapping.js --ext css,scss,js,jsx,ts,tsx --write --report .tokenize-report.json"
+  "dev": "vite",
+  "build": "vite build",
+  "preview": "vite preview",
+  "test": "vitest",
+  "lint": "eslint .",
+  "typecheck": "tsc --noEmit",
+  "typecheck:e2e": "tsc -p tsconfig.e2e.json --noEmit",
+  "e2e:ci": "npm run typecheck:e2e && playwright test --reporter=html",
+  "e2e:report": "playwright show-report",
+  "tokens:check": "bash -c '! rg -n \"#[0-9a-fA-F]{3,6}|rgb\\(|rgba\\(\" src | tee /dev/stderr'",
+  "tokens:replace": "node scripts/tokenize-css.js",
+  "openapi:gen": "openapi-typescript openapi/openapi.json -o src/lib/api/schema.ts",
+  "tokens:apply": "node scripts/tokenize-css.mjs --root src --mapping scripts/color-mapping.js --ext css,scss,js,jsx,ts,tsx --write --report .tokenize-report.json"
   },
     "lint-staged": {
     "**/*.{js,jsx,ts,tsx}": [

@@ -102,7 +102,7 @@
 }
 
 .exercise-description {
-  color: rgba(255, 255, 255, 0.9);
+  color: hsl(var(--background) / 0.90);
   font-size: 1.2rem;
   line-height: 1.6;
   position: relative;
@@ -166,7 +166,7 @@
 }
 
 .submission-text {
-  color: rgba(255, 255, 255, 0.9);
+  color: hsl(var(--background) / 0.90);
   line-height: 1.6;
   white-space: pre-wrap;
   font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
@@ -230,7 +230,7 @@
 }
 
 .form-textarea::placeholder {
-  color: rgba(255, 255, 255, 0.6);
+  color: hsl(var(--background) / 0.60);
 }
 
 /* Action Buttons */
@@ -366,7 +366,7 @@
 }
 
 .tips-list li {
-  color: rgba(255, 255, 255, 0.9);
+  color: hsl(var(--background) / 0.90);
   margin-bottom: 10px;
   padding-left: 25px;
   position: relative;

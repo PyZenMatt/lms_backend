@@ -277,10 +277,10 @@
 }
 
 .tier-bronze { background: #CD7F32; }
-.tier-silver { background: #C0C0C0; color: #333; }
-.tier-gold { background: var(--warning); color: #333; }
-.tier-platinum { background: #E5E4E2; color: #333; }
-.tier-diamond { background: #B9F2FF; color: #333; }
+.tier-silver { background: #C0C0C0; color: hsl(var(--muted-foreground)); }
+.tier-gold { background: var(--warning); color: hsl(var(--muted-foreground)); }
+.tier-platinum { background: #E5E4E2; color: hsl(var(--muted-foreground)); }
+.tier-diamond { background: #B9F2FF; color: hsl(var(--muted-foreground)); }
 
 .staking-stats {
   display: grid;

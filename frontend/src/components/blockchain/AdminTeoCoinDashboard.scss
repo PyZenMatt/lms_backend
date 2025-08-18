@@ -82,7 +82,7 @@
       
       .stat-label {
         font-size: 0.9rem;
-        color: rgba(255, 255, 255, 0.8);
+        color: hsl(var(--background) / 0.80);
         margin-top: 0.5rem;
       }
     }
@@ -159,19 +159,19 @@
     border-radius: 6px;
     
     &::placeholder {
-      color: rgba(255, 255, 255, 0.6);
+      color: hsl(var(--background) / 0.60);
     }
     
     &:focus {
       background: color-mix(in srgb, var(--background) 15%, transparent);
-      border-color: rgba(255, 255, 255, 0.5);
+      border-color: hsl(var(--background) / 0.50);
       color: white;
-      box-shadow: 0 0 0 0.2rem rgba(255, 255, 255, 0.25);
+      box-shadow: 0 0 0 0.2rem hsl(var(--background) / 0.25);
     }
   }
   
   .text-muted {
-    color: rgba(255, 255, 255, 0.8) !important;
+    color: hsl(var(--background) / 0.80) !important;
   }
   
   // Alert styles
@@ -217,12 +217,12 @@
         
         .transaction-user {
           font-size: 0.9rem;
-          color: rgba(255, 255, 255, 0.8);
+          color: hsl(var(--background) / 0.80);
         }
         
         .transaction-date {
           font-size: 0.8rem;
-          color: rgba(255, 255, 255, 0.6);
+          color: hsl(var(--background) / 0.60);
         }
       }
       

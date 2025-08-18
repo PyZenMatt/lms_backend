@@ -43,7 +43,7 @@
   /* Colors - Borders */
   --border-color: #e1e5e9;
   --border-light: var(--card);
-  --border-dark: #adb5bd;
+  --border-dark: hsl(var(--muted-foreground));
   
   /* Gradients */
   --gradient-primary: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);

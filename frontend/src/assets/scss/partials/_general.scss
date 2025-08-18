@@ -387,7 +387,7 @@ p.text-muted {
 
   pre code {
     font-size: inherit;
-    color: #333;
+    color: hsl(var(--muted-foreground));
   }
 }
 
@@ -410,12 +410,12 @@ p.text-muted {
 }
 
 .table {
-  --bs-table-striped-bg: rgba(4, 169, 245, 0.05);
+  --bs-table-striped-bg: hsl(var(--brand-primary) / 0.05);
 }
 
 .table-hover tbody tr:hover {
   color: #212529;
-  background: rgba(4, 169, 245, 0.05);
+  background: hsl(var(--brand-primary) / 0.05);
 
   > * {
     --bs-table-color-state: #212529;
@@ -423,7 +423,7 @@ p.text-muted {
 }
 
 .table-hover > tbody > tr:hover > * {
-  --bs-table-bg-state: rgba(4, 169, 245, 0.05);
+  --bs-table-bg-state: hsl(var(--brand-primary) / 0.05);
 }
 
 .btn-check:checked + .btn:not([class*='btn-']),

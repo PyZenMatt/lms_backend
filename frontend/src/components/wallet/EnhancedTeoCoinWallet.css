@@ -22,7 +22,7 @@
 }
 
 .enhanced-teocoin-wallet .card-header .text-muted {
-  color: rgba(255, 255, 255, 0.8) !important;
+  color: hsl(var(--background) / 0.80) !important;
 }
 
 /* Balance Cards */

@@ -7,7 +7,7 @@
 }
 
 .dashboard-header {
-  background: rgba(255, 255, 255, 0.9);
+  background: hsl(var(--background) / 0.90);
   backdrop-filter: blur(10px);
   border-radius: 20px;
   padding: 2rem;
@@ -26,7 +26,7 @@
 }
 
 .analytics-filter-btn {
-  background: rgba(255, 255, 255, 0.9);
+  background: hsl(var(--background) / 0.90);
   backdrop-filter: blur(10px);
   border: 1px solid color-mix(in srgb, var(--primary) 20%, transparent);
   color: var(--primary);
@@ -102,7 +102,7 @@
 }
 
 .metric-icon.bg-success {
-  background: linear-gradient(135deg, var(--success), #1e7e34);
+  background: linear-gradient(135deg, var(--success), hsl(var(--success-700)));
 }
 
 .metric-icon.bg-warning {
@@ -229,17 +229,17 @@
 }
 
 .alert-success {
-  background: linear-gradient(135deg, rgba(40, 167, 69, 0.1), rgba(40, 167, 69, 0.05));
+  background: linear-gradient(135deg, rgba(40, 167, 69, 0.1), hsl(var(--success) / 0.05));
   border-left: 4px solid var(--success);
 }
 
 .alert-warning {
-  background: linear-gradient(135deg, color-mix(in srgb, var(--warning) 10%, transparent), rgba(255, 193, 7, 0.05));
+  background: linear-gradient(135deg, color-mix(in srgb, var(--warning) 10%, transparent), hsl(var(--warning) / 0.05));
   border-left: 4px solid var(--warning);
 }
 
 .alert-info {
-  background: linear-gradient(135deg, rgba(23, 162, 184, 0.1), rgba(23, 162, 184, 0.05));
+  background: linear-gradient(135deg, rgba(23, 162, 184, 0.1), hsl(var(--info) / 0.05));
   border-left: 4px solid var(--info);
 }
 

@@ -32,7 +32,7 @@
       }
       
       small {
-        color: rgba(255, 255, 255, 0.8);
+        color: hsl(var(--background) / 0.80);
       }
       
       .btn-close {

@@ -193,7 +193,7 @@ const AllCourses = () => {
           <Col xs={12}>
             <Card className="text-center py-5">
               <Card.Body>
-                <i className="feather icon-palette" style={{ fontSize: '3rem', color: '#dee2e6' }}></i>
+                <i className="feather icon-palette" style={{ fontSize: '3rem', color: 'hsl(var(--muted))' }}></i>
                 <h4 className="mt-3 text-muted">Nessun corso d'arte trovato</h4>
                 <p className="text-muted">Prova a modificare i filtri di ricerca</p>
               </Card.Body>
@@ -219,7 +219,7 @@ const AllCourses = () => {
                     />
                   ) : (
                     <div className="d-flex align-items-center justify-content-center h-100">
-                      <i className="feather icon-palette" style={{ fontSize: '3rem', color: '#dee2e6' }}></i>
+                      <i className="feather icon-palette" style={{ fontSize: '3rem', color: 'hsl(var(--muted))' }}></i>
                     </div>
                   )}
 

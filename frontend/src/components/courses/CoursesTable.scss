@@ -57,7 +57,7 @@
 
       .expand-btn {
         backdrop-filter: blur(10px);
-        background: rgba(255, 255, 255, 0.9) !important;
+        background: hsl(var(--background) / 0.90) !important;
         border: none;
         width: 32px;
         height: 32px;
@@ -252,7 +252,7 @@
     }
 
     .lesson-badge {
-      background: linear-gradient(135deg, var(--success), #1e7e34);
+      background: linear-gradient(135deg, var(--success), hsl(var(--success-700)));
       font-size: 0.75rem;
       padding: 0.3rem 0.6rem;
     }

@@ -2,12 +2,12 @@
 
 /* Tutti gli elementi con background bianco o molto chiaro */
 .bg-white, .bg-light, .card.bg-white, .card.bg-light, .card, .alert.bg-white, .alert.bg-light, .modal-content.bg-white, .modal-content.bg-light, .submission-card, .course-card, .empty-state, .balance-card, .wallet-address-card, .teacher-stats-card, .dashboard-stat-card, .goal-progress, .wallet-style, .balances-display, .transaction-item, .main-card, .profile-avatar-placeholder {
-  color: #222 !important;
+  color: hsl(var(--foreground)) !important;
 }
 
 /* Forza testo scuro anche su bottoni chiari */
 .btn.bg-white, .btn.bg-light, .btn.btn-outline-light, .btn.btn-outline-white {
-  color: #222 !important;
+  color: hsl(var(--foreground)) !important;
   border-color: var(--border) !important;
 }
 
@@ -16,19 +16,19 @@
 .btn[style*="background-color: var(--primary)"],
 .btn[style*="background-color: rgb(0, 123, 255)"],
 .btn[style*="color: white"] {
-  color: #222 !important;
+  color: hsl(var(--foreground)) !important;
   border-color: var(--primary) !important;
   background-color: #e9f2ff !important;
 }
 
 /* Forza testo scuro su header gradienti blu */
 .card-header.bg-gradient-primary, .bg-gradient-primary, .card-header.bg-gradient-secondary, .bg-gradient-secondary {
-  color: #222 !important;
+  color: hsl(var(--foreground)) !important;
 }
 
 /* Forza testo scuro su alert-info */
 .alert.alert-info, .alert-info {
-  color: #222 !important;
+  color: hsl(var(--foreground)) !important;
 }
 
 /* Forza testo scuro su header e bottoni custom dei componenti blockchain */
@@ -37,7 +37,7 @@
 .card-header.bg-gradient-danger,
 .card-header.bg-white,
 .card-header.bg-light {
-  color: #222 !important;
+  color: hsl(var(--foreground)) !important;
 }
 
 /* Forza testo scuro su tutti i bottoni con background chiaro o gradienti chiari */
@@ -48,38 +48,38 @@
 .btn.bg-light,
 .btn.btn-outline-light,
 .btn.btn-outline-white {
-  color: #222 !important;
+  color: hsl(var(--foreground)) !important;
   border-color: var(--border) !important;
 }
 
 /* Forza testo scuro su badge chiari o gradienti chiari */
 .badge.bg-light, .badge.bg-white, .badge.bg-gradient-primary, .badge.bg-gradient-secondary {
-  color: #222 !important;
+  color: hsl(var(--foreground)) !important;
 }
 
 /* Forza testo scuro su alert chiari o gradienti chiari */
 .alert.bg-light, .alert.bg-white, .alert.alert-info, .alert.bg-gradient-primary, .alert.bg-gradient-secondary {
-  color: #222 !important;
+  color: hsl(var(--foreground)) !important;
 }
 
 /* Forza testo scuro su card-body chiari */
 .card-body.bg-white, .card-body.bg-light, .card-body.bg-gradient-primary, .card-body.bg-gradient-secondary {
-  color: #222 !important;
+  color: hsl(var(--foreground)) !important;
 }
 
 /* Badge chiari: testo scuro */
 .badge.bg-light, .badge.bg-white {
-  color: #222 !important;
+  color: hsl(var(--foreground)) !important;
 }
 
 /* Alert chiari: testo scuro */
 .alert.bg-light, .alert.bg-white {
-  color: #222 !important;
+  color: hsl(var(--foreground)) !important;
 }
 
 /* Fix per input e placeholder su sfondo chiaro */
 input.bg-white, input.bg-light, textarea.bg-white, textarea.bg-light {
-  color: #222 !important;
+  color: hsl(var(--foreground)) !important;
 }
 
 ::placeholder {
@@ -89,20 +89,20 @@ input.bg-white, input.bg-light, textarea.bg-white, textarea.bg-light {
 
 /* Forza testo scuro su card-header chiari */
 .card-header.bg-white, .card-header.bg-light {
-  color: #222 !important;
+  color: hsl(var(--foreground)) !important;
 }
 
 /* Fix per testo nei modali chiari */
 .modal-content.bg-white, .modal-content.bg-light {
-  color: #222 !important;
+  color: hsl(var(--foreground)) !important;
 }
 
 /* Fix per testo nei dropdown chiari */
 .dropdown-menu.bg-white, .dropdown-menu.bg-light {
-  color: #222 !important;
+  color: hsl(var(--foreground)) !important;
 }
 
 /* Fix per testo nei nav chiari */
 .nav.bg-white, .nav.bg-light {
-  color: #222 !important;
+  color: hsl(var(--foreground)) !important;
 }

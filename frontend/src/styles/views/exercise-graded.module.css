@@ -38,7 +38,7 @@
 .solution-content pre {
   max-height: 400px;
   overflow-y: auto;
-  border: 1px solid #dee2e6;
+  border: 1px solid hsl(var(--muted));
   font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
   font-size: 0.9rem;
   line-height: 1.4;

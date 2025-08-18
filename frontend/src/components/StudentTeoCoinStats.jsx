@@ -87,7 +87,7 @@ const StudentTeoCoinStats = () => {
             <div
               className="text-center p-3 rounded"
               style={{
-                background: 'linear-gradient(135deg, rgba(40, 167, 69, 0.1) 0%, rgba(40, 167, 69, 0.05) 100%)'
+                background: 'linear-gradient(135deg, rgba(40, 167, 69, 0.1) 0%, hsl(var(--success) / 0.05) 100%)'
               }}
             >
               <i className="feather icon-award text-success" style={{ fontSize: '2rem' }}></i>
@@ -99,7 +99,7 @@ const StudentTeoCoinStats = () => {
             <div
               className="text-center p-3 rounded"
               style={{
-                background: 'linear-gradient(135deg, rgba(23, 162, 184, 0.1) 0%, rgba(23, 162, 184, 0.05) 100%)'
+                background: 'linear-gradient(135deg, rgba(23, 162, 184, 0.1) 0%, hsl(var(--info) / 0.05) 100%)'
               }}
             >
               <i className="feather icon-percent text-info" style={{ fontSize: '2rem' }}></i>
@@ -111,7 +111,7 @@ const StudentTeoCoinStats = () => {
             <div
               className="text-center p-3 rounded"
               style={{
-                background: 'linear-gradient(135deg, color-mix(in srgb, var(--warning) 10%, transparent) 0%, rgba(255, 193, 7, 0.05) 100%)'
+                background: 'linear-gradient(135deg, color-mix(in srgb, var(--warning) 10%, transparent) 0%, hsl(var(--warning) / 0.05) 100%)'
               }}
             >
               <i className="feather icon-send text-warning" style={{ fontSize: '2rem' }}></i>
@@ -138,7 +138,7 @@ const StudentTeoCoinStats = () => {
           <div
             className="p-3 rounded"
             style={{
-              background: 'linear-gradient(135deg, rgba(220, 53, 69, 0.1) 0%, rgba(220, 53, 69, 0.05) 100%)'
+              background: 'linear-gradient(135deg, rgba(220, 53, 69, 0.1) 0%, hsl(var(--danger) / 0.05) 100%)'
             }}
           >
             <h5 className="text-danger mb-2">

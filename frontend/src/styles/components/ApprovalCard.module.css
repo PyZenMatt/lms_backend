@@ -153,7 +153,7 @@
 
 .approval-empty-icon {
   font-size: 3rem;
-  color: #ddd;
+  color: hsl(var(--muted));
   margin-bottom: 15px;
 }
 

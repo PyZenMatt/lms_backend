@@ -231,7 +231,7 @@ const TeacherDashboard = () => {
       progressColor: 'progress-c-theme',
       iconColor: 'text-primary',
       description: 'Corsi pubblicati e disponibili',
-      bgGradient: 'linear-gradient(135deg, rgba(4, 169, 245, 0.1) 0%, rgba(4, 169, 245, 0.05) 100%)'
+      bgGradient: 'linear-gradient(135deg, rgba(4, 169, 245, 0.1) 0%, hsl(var(--brand-primary) / 0.05) 100%)'
     },
     {
       title: 'Guadagni Mensili',

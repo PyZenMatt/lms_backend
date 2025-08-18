@@ -36,7 +36,7 @@
     }
     
     .h6 {
-      color: rgba(255, 255, 255, 0.9);
+      color: hsl(var(--background) / 0.90);
       font-weight: 500;
       font-size: 0.9rem;
     }
@@ -65,8 +65,8 @@
       transition: all 0.2s ease;
       
       &:hover {
-        background: rgba(255, 255, 255, 0.25);
-        border-color: rgba(255, 255, 255, 0.5);
+        background: hsl(var(--background) / 0.25);
+        border-color: hsl(var(--background) / 0.50);
         color: white;
         transform: translateY(-1px);
       }
@@ -74,18 +74,18 @@
       &:active,
       &:focus {
         background: color-mix(in srgb, var(--background) 30%, transparent);
-        border-color: rgba(255, 255, 255, 0.6);
+        border-color: hsl(var(--background) / 0.60);
         color: white;
-        box-shadow: 0 0 0 0.2rem rgba(255, 255, 255, 0.25);
+        box-shadow: 0 0 0 0.2rem hsl(var(--background) / 0.25);
       }
       
       &.btn-primary {
         background: color-mix(in srgb, var(--background) 20%, transparent);
-        border: 1px solid rgba(255, 255, 255, 0.4);
+        border: 1px solid hsl(var(--background) / 0.40);
         
         &:hover {
           background: color-mix(in srgb, var(--background) 30%, transparent);
-          border-color: rgba(255, 255, 255, 0.6);
+          border-color: hsl(var(--background) / 0.60);
         }
       }
       
@@ -109,11 +109,11 @@
     
     // Testo e contenuto
     .text-muted {
-      color: rgba(255, 255, 255, 0.8) !important;
+      color: hsl(var(--background) / 0.80) !important;
     }
     
     small {
-      color: rgba(255, 255, 255, 0.9);
+      color: hsl(var(--background) / 0.90);
     }
     
     // Indirizzo wallet
@@ -133,7 +133,7 @@
     .info-row {
       .label,
       .value {
-        color: rgba(255, 255, 255, 0.9);
+        color: hsl(var(--background) / 0.90);
         font-size: 0.85rem;
       }
       
@@ -150,11 +150,11 @@
       padding: 1rem;
       
       .text-muted {
-        color: rgba(255, 255, 255, 0.8) !important;
+        color: hsl(var(--background) / 0.80) !important;
       }
       
       a {
-        color: rgba(255, 255, 255, 0.9);
+        color: hsl(var(--background) / 0.90);
         text-decoration: underline;
         
         &:hover {
@@ -219,7 +219,7 @@
     }
     
     .modal-footer {
-      border-top: 1px solid #dee2e6;
+      border-top: 1px solid hsl(var(--muted));
       
       .btn {
         border-radius: 8px;

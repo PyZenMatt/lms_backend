@@ -44,7 +44,7 @@
   flex: 1;
   font-size: 14px;
   line-height: 1.4;
-  color: #333;
+  color: hsl(var(--muted-foreground));
 }
 
 .notification-close {
@@ -65,7 +65,7 @@
 
 .notification-close:hover {
   background: var(--shadow-sm);
-  color: #333;
+  color: hsl(var(--muted-foreground));
 }
 
 /* Notification types */

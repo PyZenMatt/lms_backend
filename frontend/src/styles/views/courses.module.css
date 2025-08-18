@@ -204,7 +204,7 @@
 .lessons-title {
   font-size: 1.8rem;
   font-weight: 700;
-  color: #333;
+  color: hsl(var(--muted-foreground));
   margin-bottom: 25px;
   display: flex;
   align-items: center;
@@ -277,7 +277,7 @@
 .lesson-title {
   font-size: 1.3rem;
   font-weight: 600;
-  color: #333;
+  color: hsl(var(--muted-foreground));
   margin-bottom: 10px;
   line-height: 1.4;
 }

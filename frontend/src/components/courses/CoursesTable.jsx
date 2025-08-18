@@ -161,7 +161,7 @@ const CoursesTable = ({
           <Card.Body
             className="text-center py-5"
             style={{
-              background: 'linear-gradient(135deg, rgba(4, 169, 245, 0.05) 0%, rgba(29, 233, 182, 0.05) 100%)',
+              background: 'linear-gradient(135deg, hsl(var(--brand-primary) / 0.05) 0%, rgba(29, 233, 182, 0.05) 100%)',
               borderRadius: '15px'
             }}
           >
@@ -471,7 +471,7 @@ const CoursesTable = ({
                                   <div
                                     className="exercises-section mt-3 p-3 rounded"
                                     style={{
-                                      background: 'linear-gradient(135deg, color-mix(in srgb, var(--warning) 10%, transparent) 0%, rgba(255, 193, 7, 0.05) 100%)',
+                                      background: 'linear-gradient(135deg, color-mix(in srgb, var(--warning) 10%, transparent) 0%, hsl(var(--warning) / 0.05) 100%)',
                                       border: '2px solid color-mix(in srgb, var(--warning) 20%, transparent)'
                                     }}
                                   >
@@ -503,7 +503,7 @@ const CoursesTable = ({
                                           <div
                                             key={exercise.id}
                                             className="exercise-item d-flex justify-content-between align-items-center p-2 mb-2 rounded"
-                                            style={{ background: 'rgba(255, 255, 255, 0.7)' }}
+                                            style={{ background: 'hsl(var(--background) / 0.70)' }}
                                           >
                                             <div className="flex-grow-1">
                                               <div className="d-flex align-items-center mb-1">
