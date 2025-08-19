@@ -1,0 +1,376 @@
+/* @ts-nocheck */
+import React, { useEffect, useState } from 'react';
+import { useParams, Link } from 'react-router-dom';
+import { Container, Card, Button, Alert, Spinner, Badge, Form } from '@/components/ui';
+import { fetchUserRole } from '../../services/api/auth';
+import MainCard from '../../components/Card/MainCard';
+
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
+const StudentExerciseDetailNew = () => {
+  const { exerciseId } = useParams();
+  const [exercise, setExercise] = useState(null);
+  const [submission, setSubmission] = useState(null);
+  const [solution, setSolution] = useState('');
+  const [status, setStatus] = useState('');
+  const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState('');
+  const [userRole, setUserRole] = useState('');
+
+  // Helper: fetch exercise details
+  const fetchExercise = async () => {
+    const token = localStorage.getItem('token') || localStorage.getItem('access');
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/v1/exercises/${exerciseId}/`, {
+        headers: token ? { Authorization: `Bearer ${token}` } : {}
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setExercise(data);
+      } else {
+        setError('Errore nel caricamento esercizio');
+      }
+    } catch (err) {
+      setError('Errore nel caricamento esercizio');
+    }
+  };
+
+  // Helper: fetch user's submission for this exercise
+  const fetchSubmissionSafe = async () => {
+    const token = localStorage.getItem('token') || localStorage.getItem('access');
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/v1/exercises/${exerciseId}/my_submission/`, {
+        headers: token ? { Authorization: `Bearer ${token}` } : {}
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setSubmission(data);
+        // Mappa campi modello a status leggibile
+        let s = '';
+        if (data.is_approved) s = 'approved';
+        else if (data.reviewed) s = 'rejected';
+        else s = 'in_review';
+        setStatus(s);
+      } else if (res.status === 404 || res.status === 400) {
+        // Tratta 404 e 400 come "nessuna submission"
+        setSubmission(null);
+        setStatus('');
+      } else {
+        console.error('❌ Errore nel recupero submission:', res.status);
+        setSubmission(null);
+        setStatus('');
+      }
+    } catch (err) {
+      // Non è un errore se non c'è submission
+      setSubmission(null);
+      setStatus('');
+    }
+  };
+
+  // Initial load
+  useEffect(() => {
+    let isMounted = true;
+    (async () => {
+      setLoading(true);
+      try {
+        await Promise.all([fetchExercise(), fetchSubmissionSafe()]);
+      } finally {
+        if (isMounted) setLoading(false);
+      }
+    })();
+    return () => {
+      isMounted = false;
+    };
+  }, [exerciseId]);
+
+  useEffect(() => {
+    const fetchRole = async () => {
+      try {
+        const role = await fetchUserRole();
+        setUserRole(role);
+      } catch {
+        setUserRole('');
+      }
+    };
+    fetchRole();
+  }, []);
+
+  // Valuta possibilità di invio con coercizione booleana
+  const isApproved = !!submission?.is_approved;
+  const isReviewed = !!submission?.reviewed;
+  const canSubmit = !submission || (!isApproved && isReviewed);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError('');
+    setSubmitting(true);
+    const token = localStorage.getItem('token') || localStorage.getItem('access');
+
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/v1/exercises/${exerciseId}/submit/`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { Authorization: `Bearer ${token}` } : {})
+        },
+        body: JSON.stringify({ content: solution })
+      });
+
+      if (res.ok) {
+        // Refresha i dati reali dal backend
+        await fetchSubmissionSafe();
+        setSolution('');
+      } else {
+        // Prova a leggere l'errore server per feedback migliore
+        try {
+          const data = await res.json();
+          setError(data?.error || data?.detail || "Errore nell'invio della soluzione");
+        } catch {
+          setError("Errore nell'invio della soluzione");
+        }
+      }
+    } catch (err) {
+      setError("Errore nell'invio della soluzione");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const getStatusBadge = (status) => {
+    switch (status) {
+      case 'approved':
+        return { variant: 'success', icon: 'check-circle', text: 'Approvato' };
+      case 'rejected':
+        return { variant: 'danger', icon: 'x-circle', text: 'Respinto' };
+      case 'in_review':
+        return { variant: 'warning', icon: 'clock', text: 'In revisione' };
+      default:
+        return { variant: 'secondary', icon: 'circle', text: 'Non inviato' };
+    }
+  };
+
+  if (loading) {
+    return (
+      <Container className="d-flex justify-content-center align-items-center" style={{ minHeight: '60vh' }}>
+        <Spinner animation="border" variant="primary" />
+      </Container>
+    );
+  }
+
+  if (error) {
+    return (
+      <Container>
+        <div className="grid grid-cols-12 gap-4 justify-content-center">
+          <div className="col-span-12 md:col-span-8">
+            <Alert variant="danger" className="text-center">
+              <i className="feather icon-border rounded-md p-3 bg-muted text-muted-foreground-triangle mr-2"></i>
+              {error}
+            </Alert>
+          </div>
+        </div>
+      </Container>
+    );
+  }
+
+  if (!exercise) {
+    return (
+      <Container>
+        <div className="grid grid-cols-12 gap-4 justify-content-center">
+          <div className="col-span-12 md:col-span-8">
+            <Alert variant="warning" className="text-center">
+              <i className="feather icon-border rounded-md p-3 bg-muted text-muted-foreground-triangle mr-2"></i>
+              Esercizio non trovato
+            </Alert>
+          </div>
+        </div>
+      </Container>
+    );
+  }
+
+  const statusBadge = getStatusBadge(submission?.status || status);
+
+  return (
+    <Container fluid>
+      {/* Header */}
+      <div className="grid grid-cols-12 gap-4 mb-4">
+        <div className="col-span-12">
+          <MainCard>
+            <div className="d-flex justify-content-between align-items-start">
+              <div>
+                <h1 className="mb-3">
+                  <i className="feather icon-target text-primary mr-2"></i>
+                  {exercise.title}
+                </h1>
+                <p className="text-muted mb-3">{exercise.description}</p>
+                <Badge bg={statusBadge.variant} className="p-2">
+                  <i className={`feather icon-${statusBadge.icon} mr-1`}></i>
+                  {statusBadge.text}
+                </Badge>
+              </div>
+
+              <Link
+                to={
+                  exercise.lesson
+                    ? `/lezioni/${exercise.lesson}`
+                    : userRole === 'admin'
+                      ? '/dashboard/admin'
+                      : userRole === 'teacher'
+                        ? '/dashboard/teacher'
+                        : '/dashboard/student'
+                }
+                className="inline-flex items-center justify-center rounded-md h-9 px-4 py-2 text-sm font-medium bg-primary text-primary-foreground inline-flex items-center justify-center rounded-md h-9 px-4 py-2 text-sm font-medium bg-primary text-primary-foreground-outline-primary d-flex align-items-center"
+              >
+                <i className="feather icon-arrow-left mr-2"></i>
+                {exercise.lesson
+                  ? 'Torna alla lezione'
+                  : userRole === 'admin'
+                    ? 'Torna alla dashboard admin'
+                    : userRole === 'teacher'
+                      ? 'Torna alla dashboard docente'
+                      : 'Torna alla dashboard studente'}
+              </Link>
+            </div>
+          </MainCard>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-12 gap-4">
+        {/* Main Content */}
+        <div className="col-span-12 lg:col-span-8">
+          {/* Submission Status */}
+          {submission && (
+            <Card className="mb-4">
+              <Card.Header>
+                <h5 className="mb-0">
+                  <i className="feather icon-file-text text-primary mr-2"></i>
+                  Stato della Sottomissione
+                </h5>
+              </Card.Header>
+              <Card.Body>
+                <div className="d-flex justify-content-between align-items-center mb-3">
+                  <span className="fw-bold">Stato attuale:</span>
+                  <Badge bg={statusBadge.variant} className="p-2">
+                    <i className={`feather icon-${statusBadge.icon} mr-1`}></i>
+                    {statusBadge.text}
+                  </Badge>
+                </div>
+
+                <div className="bg-light p-3 rounded">
+                  <strong className="d-block mb-2">Soluzione inviata:</strong>
+                  <pre className="mb-0 text-wrap">{submission.content}</pre>
+                </div>
+
+                {submission.feedback && (
+                  <Alert variant="info" className="mt-3">
+                    <strong>Feedback del docente:</strong>
+                    <div className="mt-2">{submission.feedback}</div>
+                  </Alert>
+                )}
+              </Card.Body>
+            </Card>
+          )}
+
+          {/* Solution Form */}
+          {canSubmit && (
+            <Card className="mb-4">
+              <Card.Header>
+                <h5 className="mb-0">
+                  <i className="feather icon-edit text-primary mr-2"></i>
+                  Invia la tua soluzione
+                </h5>
+              </Card.Header>
+              <Card.Body>
+                <Form onSubmit={handleSubmit}>
+                  <Form.Group className="mb-3">
+                    <Form.Label className="fw-bold">
+                      <i className="feather icon-code mr-2"></i>
+                      La tua soluzione
+                    </Form.Label>
+                    <Form.Control
+                      as="textarea"
+                      rows={10}
+                      value={solution}
+                      onChange={(e) => setSolution(e.target.value)}
+                      placeholder="Scrivi qui la tua soluzione..."
+                      required
+                      style={{ fontFamily: 'Monaco, Consolas, "Courier New", monospace' }}
+                    />
+                  </Form.Group>
+
+                  <div className="d-flex justify-content-end">
+                    <Button type="submit" variant="primary" disabled={submitting || !solution.trim()} className="d-flex align-items-center">
+                      {submitting ? <Spinner animation="border" size="sm" className="mr-2" /> : <i className="feather icon-send mr-2"></i>}
+                      {submitting ? 'Invio in corso...' : 'Invia soluzione'}
+                    </Button>
+                  </div>
+                </Form>
+              </Card.Body>
+            </Card>
+          )}
+
+          {/* Cannot Submit Info */}
+          {!canSubmit && submission?.is_approved && (
+            <Alert variant="success">
+              <i className="feather icon-check-circle mr-2"></i>
+              <strong>Ottimo lavoro!</strong> La tua soluzione è stata approvata.
+            </Alert>
+          )}
+
+          {!canSubmit && submission && !submission.is_approved && !submission.reviewed && (
+            <Alert variant="info">
+              <i className="feather icon-clock mr-2"></i>
+              <strong>In attesa di revisione</strong> La tua soluzione è in fase di valutazione.
+            </Alert>
+          )}
+        </div>
+
+        {/* Sidebar */}
+        <div className="col-span-12 lg:col-span-4">
+          {/* Tips Card */}
+          <Card className="border-primary">
+            <Card.Header className="bg-primary text-hsl(var(--background))">
+              <h6 className="mb-0">
+                <i className="feather icon-lightbulb mr-2"></i>
+                Consigli per una buona soluzione
+              </h6>
+            </Card.Header>
+            <Card.Body>
+              <ul className="list-unstyled mb-0">
+                <li className="mb-2">
+                  <i className="feather icon-check text-success mr-2"></i>
+                  Leggi attentamente la consegna
+                </li>
+                <li className="mb-2">
+                  <i className="feather icon-check text-success mr-2"></i>
+                  Scrivi codice pulito e commentato
+                </li>
+                <li className="mb-2">
+                  <i className="feather icon-check text-success mr-2"></i>
+                  Testa la tua soluzione
+                </li>
+                <li className="mb-0">
+                  <i className="feather icon-check text-success mr-2"></i>
+                  Chiedi aiuto se necessario
+                </li>
+              </ul>
+            </Card.Body>
+          </Card>
+
+          {/* Exercise Info */}
+          {exercise.max_score && (
+            <Card className="mt-3">
+              <Card.Body className="text-center">
+                <i className="feather icon-award text-warning mb-2" style={{ fontSize: '2rem' }}></i>
+                <h6>Punteggio massimo</h6>
+                <h4 className="text-primary mb-0">{exercise.max_score} punti</h4>
+              </Card.Body>
+            </Card>
+          )}
+        </div>
+      </div>
+    </Container>
+  );
+};
+
+export default StudentExerciseDetailNew;

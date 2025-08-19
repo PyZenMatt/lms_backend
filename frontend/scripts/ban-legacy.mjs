@@ -2,18 +2,29 @@ import { globby } from 'globby';
 import fs from 'node:fs/promises';
 
 // Scan only relevant surfaces to cut false positives (variable names, component filenames).
-// Only core Bootstrap tokens we must eradicate from runtime markup
-const BANNED_CLASS_TOKENS = ['btn','alert','badge','modal'];
+// Expanded Bootstrap / legacy design-system tokens that must disappear from runtime markup
+// (We purposely keep tokens granular so we can quickly extend without false positives.)
+const BANNED_CLASS_TOKENS = [
+  'btn', // btn, btn-primary, btn-outline-*
+  'alert',
+  'badge',
+  'modal',
+  'card', // card, card-body, etc.
+  'form-control',
+  'input-group',
+  'dropdown', // dropdown-menu, dropdown-item
+];
 // Global patterns limited to explicit imports + lingering .scss
 const BANNED_GLOBAL = [
   /react-bootstrap(?!-icons)/,
   /['"]bootstrap\//,
   /legacy-shims/,
-  /\.scss\b/,
+  /\.scss\b/, // orphan scss imports (should migrate to tokens + tailwind)
   /from\s+['"][^'"@]+@\d+(?:\.\d+){0,2}['"\n]/, // versioned import suffix
   /@\/styles\/figma-raw\/[A-Za-z].*\.(t|j)sx?/,      // figma-raw component sourcing
-  /@\/components\/legacy-shims/                      // explicit legacy shim path
-  ,/@\/components\/ui\/adapters\/bootstrap/         // adapter layer now banned
+  /@\/components\/legacy-shims/,                      // explicit legacy shim path
+  /@\/components\/ui\/adapters\//,                   // any adapter layer under ui/adapters now banned
+  /@\/styles\/legacy\//                               // legacy style directory
 ];
 
 const files = await globby(['src/**/*.{ts,tsx,js,jsx,css,html}']);
@@ -33,11 +44,12 @@ for (const f of files) {
   while((m = classAttrRe.exec(raw))) {
     const val = m[2]||m[3]||m[4]||'';
     for (const token of BANNED_CLASS_TOKENS) {
+      // match the bare token or token-* pattern inside class list boundaries
       const re = new RegExp(`(^|\s)${token}(-[a-z0-9]+)?(\s|$)`);
       if (re.test(val)) { offenders.push(f); flagged = true; break; }
-      // contextual variants like btn-primary, alert-success etc.
+      // contextual variants (Bootstrap palette) for button / alert / badge
       if (/^(btn|alert|badge)/.test(token)) {
-        const variantRe = new RegExp(`(^|\s)${token}-(primary|secondary|success|danger|warning|info|light|dark)(\s|$)`);
+        const variantRe = new RegExp(`(^|\s)${token}-(primary|secondary|success|danger|warning|info|light|dark|outline-primary|outline-secondary)(\s|$)`);
         if (variantRe.test(val)) { offenders.push(f); flagged = true; break; }
       }
     }

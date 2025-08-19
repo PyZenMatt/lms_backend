@@ -28,17 +28,7 @@ export default defineConfig({
   css: {
     preprocessorOptions: {
       scss: { 
-        charset: false,
-        quietDeps: true,
-        logger: {
-          warn: function(message) {
-            // Suppress Sass deprecation warnings
-            if (message.includes('deprecation') || message.includes('deprecated')) {
-              return;
-            }
-            console.warn(message);
-          }
-        }
+        charset: false
       },
       less: { charset: false }
     },

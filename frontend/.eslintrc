@@ -11,7 +11,10 @@
     "plugin:jsx-a11y/recommended",
     "plugin:react-hooks/recommended",
     "eslint:recommended",
-    "plugin:react/recommended"
+    "plugin:react/recommended",
+    "plugin:import/errors",
+    "plugin:import/warnings",
+    "plugin:import/typescript"
   ],
   "settings": {
     "react": {
@@ -43,12 +46,14 @@
     },
     "ecmaVersion": 12
   },
-  "plugins": ["prettier", "react", "react-hooks"],
+  "plugins": ["prettier", "react", "react-hooks", "import"],
   "rules": {
     "react/jsx-uses-react": "error",
     "react/jsx-uses-vars": "error",
     "react/react-in-jsx-scope": "off",
-    "no-undef": "off",
+  // Disallow using JSX components / identifiers that are not defined in scope
+  "react/jsx-no-undef": "error",
+  "no-undef": "error",
     "react/display-name": "off",
     "react/jsx-filename-extension": "off",
     "no-param-reassign": "off",
@@ -61,7 +66,11 @@
      "react-hooks/exhaustive-deps": "warn",
     "import/order": "off",
     "import/no-cycle": "off",
-    "no-console": "off",
+  "no-console": "off",
+  // Import integrity rules
+  "import/named": "error",
+  "import/default": "error",
+  "import/no-named-as-default-member": "error",
     "jsx-a11y/anchor-is-valid": "off",
     "jsx-a11y/label-has-for": "off",
     "jsx-a11y/label-has-associated-control": "off",
@@ -73,7 +82,14 @@
     "no-restricted-imports": [
       "error",
       {
-        "patterns": ["@mui/*/*/*", "!@mui/material/test-utils/*"]
+        "paths": [
+          {
+            "name": "@/components/ui",
+            "importNames": ["default"],
+            "message": "Usa import nominati dal barrel UI (es. { Button, Dialog })."
+          }
+        ],
+  "patterns": ["@mui/*/*/*", "!@mui/material/test-utils/*", "**/*.jsx"]
       }
     ],
      "no-unused-vars": [
