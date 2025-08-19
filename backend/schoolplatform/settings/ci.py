@@ -57,15 +57,15 @@ INSTALLED_APPS = [
     # 'rest_framework_simplejwt',
 
     # Project apps
-    'backend.api',
-    'backend.blockchain',
+    'api',
+    'blockchain',
     'backend.core',
-    'backend.courses',
-    'backend.notifications',
-    'backend.payments',
-    'backend.rewards',
-    'backend.services',
-    'backend.users',
+    'courses',
+    'notifications',
+    'payments',
+    'rewards',
+    'services',
+    'users',
 ]
 
 # ⚠️ Blocca chiavi/valori dev: in dev.py c'erano default hardcoded per key/wallet.
