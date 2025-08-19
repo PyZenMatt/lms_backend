@@ -9,6 +9,12 @@ from drf_spectacular.views import (
     SpectacularSwaggerView,
 )
 
+# Health check endpoint
+from django.http import HttpResponse
+
+def healthz(_):
+    return HttpResponse("ok", content_type="text/plain")
+
 urlpatterns = [
     path("admin/logout/", custom_admin_logout, name="admin_logout"),
     path("admin/", admin.site.urls),
@@ -30,6 +36,7 @@ urlpatterns = [
         name="swagger-ui",
     ),
     path("api/redoc/", SpectacularRedocView.as_view(url_name="schema"), name="redoc"),
+    path("healthz/", healthz),
 ]
 
 # Serve media files in development
