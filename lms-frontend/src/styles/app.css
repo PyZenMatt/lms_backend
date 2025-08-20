@@ -1,0 +1,7 @@
+/* 1) Token del tema (FigmaMake) */
+@import "./theme/globals.css";
+
+/* 2) Tailwind */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
