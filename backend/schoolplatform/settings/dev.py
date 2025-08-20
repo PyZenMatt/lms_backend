@@ -1,7 +1,5 @@
 from .base import *
 
-["http://localhost:5173"]
-
 CORS_ALLOW_CREDENTIALS = True 
 DEBUG = True
 ALLOWED_HOSTS = ["localhost", "127.0.0.1"]

@@ -208,10 +208,9 @@ class TeoCoinUserTester:
 
     def generate_frontend_urls(self):
         """Generate URLs for user testing"""
-        print(f"\n🌐 Frontend URLs for testing:")
-        print(f"   Main withdrawal page: {self.base_url}/frontend/withdrawal/")
-        print(f"   Demo testing page: {self.base_url}/frontend/withdrawal/demo/")
-        print(f"   Balance API: {self.base_url}/frontend/api/balance/")
+    print(f"\n🌐 Frontend URLs for testing:")
+    print("   ℹ️ Note: frontend client has been removed from this repository.")
+    print(f"   Backend API base: {self.base_url}/api/")
 
     def run_complete_test(self):
         """Run complete user testing flow"""

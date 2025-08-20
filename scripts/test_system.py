@@ -84,18 +84,8 @@ def main():
         for migration in pending[:3]:  # Mostra solo le prime 3
             print(f"      - {migration.strip()}")
     
-    # 6. Check frontend files
-    print("\n6. Controllo file frontend...")
-    frontend_files = [
-        '/home/teo/Project/school/schoolplatform/frontend/src/components/teacher/TeacherDiscountNotification.jsx',
-        '/home/teo/Project/school/schoolplatform/frontend/src/components/teacher/TeacherAbsorptionDashboard.jsx'
-    ]
-    
-    for file_path in frontend_files:
-        if os.path.exists(file_path):
-            print(f"   ✅ {os.path.basename(file_path)}: Presente")
-        else:
-            print(f"   ❌ {os.path.basename(file_path)}: Mancante")
+    # 6. Frontend checks skipped: frontend client removed from repo
+    print("\n6. Frontend checks skipped: frontend client removed from repository")
     
     print("\n" + "=" * 50)
     print("📋 RIEPILOGO:")
@@ -106,7 +96,7 @@ def main():
     
     print("\n🎯 PROSSIMI PASSI:")
     print("1. Avvia il server Django: python3 manage.py runserver")
-    print("2. Avvia il frontend React: npm start")
+    print("2. Frontend client has been removed from this repository. No npm/start instructions.")
     print("3. Testa il flusso completo con utenti teacher/student")
     print("4. Verifica notifiche in tempo reale")
 

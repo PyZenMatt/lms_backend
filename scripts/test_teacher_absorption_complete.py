@@ -70,16 +70,15 @@ def main():
     # 2. Frontend Components
     print_section("2. FRONTEND COMPONENTS", "-")
     
-    frontend_files = [
-        ('/home/teo/Project/school/schoolplatform/frontend/src/components/teacher/TeacherDiscountNotification.jsx', 'Notification Component'),
-        ('/home/teo/Project/school/schoolplatform/frontend/src/components/teacher/TeacherAbsorptionDashboard.jsx', 'Dashboard Component')
-    ]
-    
-    for file_path, description in frontend_files:
-        if os.path.exists(file_path):
-            print(f"✅ {description}: Presente")
-        else:
-            print(f"❌ {description}: Mancante")
+    # Frontend was removed from this repository. The following checks are
+    # intentionally disabled. If you reintroduce a client, re-enable or
+    # update the checks below.
+    # frontend_files = [
+    # ('/home/teo/Project/school/schoolplatform/frontend/src/components/teacher/TeacherDiscountNotification.jsx', 'Notification Component'),
+    # ('/home/teo/Project/school/schoolplatform/frontend/src/components/teacher/TeacherAbsorptionDashboard.jsx', 'Dashboard Component')
+    # ]
+
+    print("ℹ️ Frontend checks skipped: client removed from repo")
     
     # 3. Integration Check
     print_section("3. INTEGRATION CHECK", "-")

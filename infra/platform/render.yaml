@@ -43,17 +43,4 @@ services:
     healthCheckPath: /admin/login/
     
   - type: static
-    name: schoolplatform-frontend
-    env: static
-    buildCommand: "cd schoolplatform/frontend && npm install && npm run build"
-    staticPublishPath: "schoolplatform/frontend/dist"
-    envVars:
-      - key: VITE_API_BASE_URL
-        sync: false
-      - key: VITE_STRIPE_PUBLISHABLE_KEY
-        sync: false
-      - key: VITE_TEOCOIN_CONTRACT_ADDRESS
-        sync: false
-      - key: VITE_POLYGON_RPC_URL
-        sync: false
-    autoDeploy: true
+  # Frontend static service removed: repository now backend-centric

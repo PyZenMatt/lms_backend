@@ -31,12 +31,6 @@ media/
 
 # Node/Frontend
 node_modules/
-frontend/node_modules/
-frontend/.next/
-frontend/.nuxt/
-frontend/dist/
-frontend/build/
-frontend/coverage/
 
 # Env
 .env
@@ -45,9 +39,7 @@ frontend/coverage/
 backend/.env
 backend/.env.*
 !backend/.env.example
-frontend/.env
-frontend/.env.*
-!frontend/.env.example
+# frontend env entries removed (frontend was purged)
 
 # IDE/OS
 .vscode/
@@ -63,11 +55,11 @@ yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 
-# React env
-frontend/.env.local
-frontend/.env.production
-.env
-.env.production
+# React env (frontend removed)
+# frontend/.env.local
+# frontend/.env.production
+# .env
+# .env.production
 
 # === VS CODE / IDE ===
 .vscode/

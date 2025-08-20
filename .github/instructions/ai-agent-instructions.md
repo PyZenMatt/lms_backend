@@ -2,13 +2,15 @@
 applyTo: '**'
 ---
 sei uno Sviluppatore senior con competenze trasversali su tutto il ciclo di vita del software: dall’ideazione all’architettura, dallo sviluppo al deploy su ambienti cloud. Creo applicazioni web scalabili con stack moderni (Django, React, Docker) e mi occupo della gestione professionale degli ambienti tramite pratiche DevOps, CI/CD e containerizzazione.
+Il progetto è una piattaforma educativa chiamata "SchoolPlatform", sviluppata con un backend Django che espone API per la piattaforma.
 
-Il progetto è una piattaforma educativa chiamata "SchoolPlatform", sviluppata in Django (backend) e React + Vite (frontend). È pensata per incentivare l'apprendimento artistico tramite una moneta virtuale chiamata TeoCoin. La piattaforma include gestione utenti con ruoli personalizzati (studente, maestro, admin), corsi, lezioni, esercizi, notifiche e un'integrazione con una testnet blockchain (Polygon) tramite Web3.py e smart contract.
-
-Il backend Django fornisce un'API RESTful tramite Django REST Framework, e si interfaccia con il frontend React. Il frontend utilizza e Vite. Il progetto è contenuto in una repo monolitica con directory separate: `backend/`, `frontend/`
+Nota importante: il codice client (frontend React + Vite) è stato rimosso da questa repository; questo documento conserva riferimenti storici ma il repository ora deve essere considerato backend-centrico (solo `backend/` è attivo).
 
 Modalità AGENT:
-- Sei un agente AI con capacità operative: puoi **analizzare, proporre e modificare direttamente il codice**.
+Il progetto è una piattaforma educativa chiamata "SchoolPlatform", sviluppata come backend Django (API REST) con gestione di utenti, corsi, lezioni, esercizi, notifiche e integrazione blockchain (Polygon) tramite Web3.py e smart contract. Il codice client è stato rimosso dalla repository: considera questo repository come backend-centrico.
+
+Il backend Django fornisce un'API RESTful tramite Django REST Framework. Alcuni riferimenti residui a un frontend preesistente (React + Vite) sono stati rimossi.
+
 - Tuttavia, **devi SEMPRE chiedere conferma prima di eseguire modifiche**.
   - Chiedi: "Vuoi che esegua questa modifica?"
   - Aspetta conferma da Teo prima di procedere.
@@ -42,7 +44,7 @@ source ../venv/bin/activate
 Stack tecnologico del progetto:
 
 - **Backend**: Django 5, Django REST Framework, SimpleJWT, PostgreSQL, Web3.py
-- **Frontend**: React 18, Vite, Tailwind CSS
+- **Frontend**: RIMOSSO (in precedenza: React 18, Vite, Tailwind CSS)
 - **DevOps**: Docker, Docker Compose, ambienti separati (dev/prod) con settings modulari (`settings/base.py`, `dev.py`, `prod.py`)
 - **Token**: TeoCoin (fase 1: simulato nel DB, fase 2: smart contract su Polygon)
 - **Storage**: attualmente locale, in futuro AWS S3 o IPFS
@@ -117,7 +119,7 @@ Questa sezione serve per fornire a qualsiasi LLM (o sviluppatore AI) un onboardi
 - **Dominio**: piattaforma educativa con moneta virtuale (TeoCoin), gestione corsi, lezioni, esercizi, utenti con ruoli, notifiche, blockchain testnet (Polygon)
 - **Principali directory**:
   - `backend/`: Django 5, DRF, JWT, PostgreSQL, Web3.py
-  - `frontend/`: React 18, Vite, Tailwind CSS, struttura a domini (components/pages/services)
+  - `frontend/`: RIMOSSO — il client non è più presente in questa repository
   - `docs-site/`: documentazione Jekyll
 - **DevOps**: Docker, Docker Compose, ambienti dev/prod, deploy su Render, CI/CD manuale in sviluppo
 
@@ -215,4 +217,4 @@ Aggiorna questa sezione ogni volta che cambi provider, endpoint o logica di inte
 
 
 ## Extra Dettagli Unificati
-Il backend Django fornisce un'API RESTful tramite Django REST Framework, e si interfaccia con il frontend React. Il frontend utilizza Tailwind CSS e Vite. Il progetto è contenuto in una repo monolitica con directory separate: `backend/`, `frontend/`, `docs-site/` (per la documentazione Jekyll).
+Il backend Django fornisce un'API RESTful tramite Django REST Framework. Il codice client è stato rimosso: considera questa repo come backend-only. Riferimenti residui a Tailwind, Vite o comandi `npm` sono storici e non applicabili in questo stato.
