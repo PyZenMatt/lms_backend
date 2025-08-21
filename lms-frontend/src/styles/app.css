@@ -1,7 +1,23 @@
-/* 1) Token del tema (FigmaMake) */
+/* src/styles/app.css */
 @import "./theme/globals.css";
 
-/* 2) Tailwind */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Applica sempre i token al documento */
+@layer base {
+  html, body, #root {
+    height: 100%;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+  * {
+    @apply border-border;
+  }
+
+  ::placeholder {
+    @apply text-muted-foreground;
+  }
+}

@@ -51,7 +51,6 @@ MIDDLEWARE = [
     # 'core.middleware.AutoJWTFromSessionMiddleware',  # RIMOSSO: causava problemi con logout e duplicava funzionalità JWT
     "core.middleware.APITimingMiddleware",
     "core.middleware.GlobalErrorHandlingMiddleware",
-    "core.middleware.APITimingMiddleware",
 ]
 
 SESSION_COOKIE_DOMAIN = None
