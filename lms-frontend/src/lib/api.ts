@@ -1,5 +1,5 @@
 // src/lib/api.ts
-import { API_BASE_URL, API_REFRESH_PATH } from "./config";
+import { API_BASE_URL, API_REFRESH_PATH, API } from "./config";
 import { getAccessToken, getRefreshToken, saveTokens, clearTokens } from "./auth";
 
 type HttpMethod = "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
@@ -14,7 +14,7 @@ type ApiResult<T = any> = {
 
 let refreshing: Promise<string | null> | null = null;
 
-async function doFetch(input: string, init: RequestInit): Promise<Response> {
+async function doFetch(input: string, init: any): Promise<Response> {
   return fetch(input, {
     credentials: "include", // CORS dev coerente col BE
     ...init,
@@ -47,8 +47,9 @@ async function refreshAccessToken(): Promise<string | null> {
         const json = await res.json().catch(() => ({}));
         const nextAccess = json?.access as string | undefined;
         const nextRefresh = json?.refresh as string | undefined; // in alcuni back ritorna anche refresh
-        if (!nextAccess) return null;
-        saveTokens(nextAccess, nextRefresh || null);
+  if (!nextAccess) return null;
+  // saveTokens expects a Tokens object
+  saveTokens({ access: nextAccess, refresh: nextRefresh ?? "" });
         return nextAccess;
       } catch {
         return null;
@@ -62,10 +63,28 @@ async function refreshAccessToken(): Promise<string | null> {
 
 async function apiFetch<T = any>(
   path: string,
-  init: RequestInit = {},
+  init: any = {},
   retryOn401 = true
 ): Promise<ApiResult<T>> {
-  const url = path.startsWith("http") ? path : API_BASE_URL + path.replace(/^\/+/, "/");
+  let url: string
+  if (path.startsWith("http")) {
+    url = path
+  } else {
+    // normalize leading slash
+    const p = path.replace(/^\/+/, "/")
+    // If caller passed /v1/... or /api/v1/..., use API.base (which is normalized to .../api/v1)
+    if (/^\/v1(\/|$)/.test(p)) {
+      url = API.base + p.replace(/^\/v1/, "")
+    } else if (/^\/api\/v1(\/|$)/.test(p)) {
+      url = API.base + p.replace(/^\/api\/v1/, "")
+    } else if (/^\/api(\/|$)/.test(p)) {
+      // caller passed /api/..., join with API_BASE_URL (which equals the configured /api base)
+      url = API_BASE_URL + p.replace(/^\/api/, "")
+    } else {
+      // generic: join with API_BASE_URL
+      url = API_BASE_URL + p
+    }
+  }
   const res = await doFetch(url, { ...init, headers: withAuthHeaders(init) });
 
   // Fast path
@@ -106,13 +125,13 @@ function bodyOf(data?: any): BodyInit | undefined {
 }
 
 export const api = {
-  get:  <T = any>(path: string, init?: RequestInit) => apiFetch<T>(path, { ...init, method: "GET" }),
-  delete:<T = any>(path: string, init?: RequestInit) => apiFetch<T>(path, { ...init, method: "DELETE" }),
-  post: <T = any>(path: string, data?: any, init?: RequestInit) =>
+  get:  <T = any>(path: string, init?: any) => apiFetch<T>(path, { ...init, method: "GET" }),
+  delete:<T = any>(path: string, init?: any) => apiFetch<T>(path, { ...init, method: "DELETE" }),
+  post: <T = any>(path: string, data?: any, init?: any) =>
     apiFetch<T>(path, { ...init, method: "POST", body: bodyOf(data) }),
-  put:  <T = any>(path: string, data?: any, init?: RequestInit) =>
+  put:  <T = any>(path: string, data?: any, init?: any) =>
     apiFetch<T>(path, { ...init, method: "PUT", body: bodyOf(data) }),
-  patch:<T = any>(path: string, data?: any, init?: RequestInit) =>
+  patch:<T = any>(path: string, data?: any, init?: any) =>
     apiFetch<T>(path, { ...init, method: "PATCH", body: bodyOf(data) }),
 };
 

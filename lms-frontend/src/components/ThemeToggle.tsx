@@ -1,4 +1,4 @@
-import React from "react";
+// React import not required with new JSX transform
 import useTheme from "@/hooks/useTheme";
 
 export default function ThemeToggle() {

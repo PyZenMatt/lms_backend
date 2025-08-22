@@ -200,8 +200,36 @@ class SubmitExerciseView(APIView):
 class ReviewExerciseView(APIView):
     permission_classes = [IsAuthenticated]
 
-    def post(self, request, submission_id):
-        submission = get_object_or_404(ExerciseSubmission, id=submission_id)
+    def post(self, request, submission_id=None, exercise_id=None):
+        """
+        Accept either a submission_id (preferred) or an exercise_id in the URL.
+        If called with an exercise_id, resolve the ExerciseSubmission assigned to the
+        current user (reviewer) for that exercise and use it. This keeps backward
+        compatibility with endpoints that post using either parameter name.
+        """
+        submission = None
+        # If exercise_id was provided (URLs declare <exercise_id>), try to find
+        # the submission for this exercise assigned to the current reviewer.
+        if exercise_id is not None and submission_id is None:
+            submission = (
+                ExerciseSubmission.objects.filter(exercise_id=exercise_id)
+                .filter(reviewers__id=request.user.id)
+                .first()
+            )
+            if not submission:
+                # No submission assigned to this reviewer for that exercise
+                return Response(
+                    {"detail": "Nessuna submission assegnata a te per questo esercizio."},
+                    status=404,
+                )
+
+        # Fallback to submission_id if provided or if the exercise lookup failed
+        if submission is None and submission_id is not None:
+            submission = get_object_or_404(ExerciseSubmission, id=submission_id)
+
+        # If still no submission, return not found
+        if submission is None:
+            return Response({"error": "Submission non trovata."}, status=404)
 
         if submission.student == request.user:
             return Response(

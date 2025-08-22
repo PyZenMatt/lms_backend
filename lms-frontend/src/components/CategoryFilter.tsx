@@ -1,5 +1,5 @@
 // src/components/CategoryFilter.tsx
-import React from "react";
+// React import not required with new JSX transform
 import { CATEGORIES } from "../services/courses";
 
 type Props = {

@@ -1,5 +1,5 @@
 // src/components/CourseCard.tsx
-import React from "react";
+// React import not required with new JSX transform
 
 export type Course = {
   id: number | string;

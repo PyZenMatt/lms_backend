@@ -1,6 +1,6 @@
 // src/pages/CourseDetail.tsx
 import React from "react";
-import { useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import { api } from "../lib/api";
 import BuyCourseButton from "../components/BuyCourseButton";
 
@@ -12,13 +12,17 @@ type Course = {
   cover_image_url?: string;
   cover_url?: string;
   price_eur?: number | null;
-  is_enrolled?: boolean | "true" | "false" | null;
+  is_enrolled?: boolean | "true" | "false" | 1 | 0 | null;
 };
 
 const fmtEUR = (v?: number | null) =>
   typeof v === "number"
     ? new Intl.NumberFormat("it-IT", { style: "currency", currency: "EUR" }).format(v)
     : "—";
+
+function isEnrolledFlag(v: Course["is_enrolled"]): boolean {
+  return v === true || v === "true" || v === 1 || v === "1";
+}
 
 export default function CourseDetail() {
   const { id } = useParams<{ id: string }>();
@@ -37,19 +41,13 @@ export default function CourseDetail() {
       setLoading(false);
     }
     load();
-    return () => {
-      mounted = false;
-    };
+    return () => { mounted = false; };
   }, [courseId]);
 
-  const enrolled =
-    course?.is_enrolled === true ||
-    course?.is_enrolled === "true" ||
-    (course as any)?.is_enrolled === 1;
-
-  const cover = course?.cover_image ?? course?.cover_image_url ?? course?.cover_url;
-
   if (!Number.isFinite(courseId)) return <div className="p-6">ID corso non valido.</div>;
+
+  const enrolled = isEnrolledFlag(course?.is_enrolled ?? null);
+  const cover = course?.cover_image ?? course?.cover_image_url ?? course?.cover_url;
 
   return (
     <div className="space-y-4">
@@ -67,27 +65,28 @@ export default function CourseDetail() {
             <div className="flex-1 space-y-2">
               <h1 className="text-2xl font-semibold">{course.title}</h1>
               <div className="text-sm text-muted-foreground">
-                {course.description ?? "—"}
+                {course.description || "—"}
               </div>
-              <div className="text-base font-medium">
-                {fmtEUR(course.price_eur ?? null)}
-              </div>
+              <div className="text-base font-medium">{fmtEUR(course.price_eur ?? null)}</div>
 
-              {!enrolled && (
-                <div className="pt-2">
+              <div className="pt-2 flex items-center gap-2">
+                {enrolled ? (
+                  <Link
+                    to={`/learn/${courseId}`}
+                    className="h-10 inline-flex items-center rounded-lg bg-muted px-4 hover:opacity-90"
+                    data-testid="go-to-course"
+                  >
+                    Vai al corso
+                  </Link>
+                ) : (
                   <BuyCourseButton
                     courseId={courseId}
-                    // stesso stile del tuo bottone originale
-                    className="h-10 rounded-lg bg-primary px-4 text-primary-foreground hover:opacity-90 inline-flex items-center"
-                    // in caso la card fosse cliccabile, evita bubbling
-                    stopPropagation
-                    // usa navigate interno per evitare conflitti con wrapper <Link>
-                    useNavigateMode
+                    className="h-10 inline-flex items-center rounded-lg bg-primary px-4 text-primary-foreground hover:opacity-90"
                   >
                     Acquista
                   </BuyCourseButton>
-                </div>
-              )}
+                )}
+              </div>
             </div>
           </div>
         </>

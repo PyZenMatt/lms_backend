@@ -1,5 +1,5 @@
 // src/components/Pagination.tsx
-import React from "react";
+// React import not required with new JSX transform
 
 type Props = {
   page: number;

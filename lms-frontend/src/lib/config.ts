@@ -21,3 +21,4 @@ export const API = {
 export const API_BASE_URL = BASE;
 export const API_LOGIN_PATH = "/v1/token/";
 export const API_REFRESH_PATH = "/v1/token/refresh/";
+export const API_PING_PATH = "/v1/ping/";

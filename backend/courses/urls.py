@@ -146,7 +146,7 @@ urlpatterns = [
         name="submit-exercise",
     ),
     path(
-        "exercises/<int:submission_id>/review/",
+        "exercises/<int:exercise_id>/review/",
         ReviewExerciseView.as_view(),
         name="review-exercise",
     ),

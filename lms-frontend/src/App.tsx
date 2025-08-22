@@ -1,5 +1,5 @@
 // src/App.tsx
-import React from "react";
+// React import not required with new JSX transform
 import { Routes, Route, Navigate } from "react-router-dom";
 import AppLayout from "./components/layout/AppLayout";
 import TopProgressBar from "./components/TopProgressBar";
@@ -8,6 +8,13 @@ import ErrorBoundary from "./components/ErrorBoundary";
 import CourseDetail from "./pages/CourseDetail"
 import CourseCheckout from "./pages/CourseCheckout"
 import PaymentReturn from "./pages/PaymentReturn"
+import StudentCourse from "./pages/StudentCourse"
+import MyExercises from "./pages/MyExercises"
+import ExerciseSubmit from "./pages/ExerciseSubmit"
+import LessonPage from "./pages/LessonPage"
+import ReviewsAssigned from "./pages/ReviewsAssigned"
+import ReviewSubmission from "./pages/ReviewSubmission"
+import ReviewsHistory from "./pages/ReviewsHistory"
 import { ProtectedRoute, RoleRoute } from "./routes/ProtectedRoute";
 import CoursesList from "./pages/CoursesList";
 import Notifications from "./pages/Notifications";
@@ -20,6 +27,12 @@ import ProfilePage from "./pages/ProfilePage";
 import StudentDashboard from "./pages/StudentDashboard";
 import TeacherDashboard from "./pages/TeacherDashboard";
 import AdminDashboard from "./pages/AdminDashboard";
+import { useParams } from "react-router-dom";
+
+function BuyRedirect() {
+  const { id } = useParams();
+  return <Navigate to={`/courses/${id}/checkout`} replace />;
+}
 
 export default function App() {
   return (
@@ -39,22 +52,85 @@ export default function App() {
           <Route path="/courses" element={<ErrorBoundary><CoursesList /></ErrorBoundary>} />
           <Route path="/courses/:id" element={<ErrorBoundary><CourseDetail /></ErrorBoundary>} />
 
-          <Route
-            path="courses/:id/checkout"
-            element={
-            <ProtectedRoute>
-              <ErrorBoundary><CourseCheckout /></ErrorBoundary>
-            </ProtectedRoute>            
-            }          
+            <Route
+              path="/learn/:id"
+              element={
+                <ProtectedRoute>
+                  <ErrorBoundary><StudentCourse /></ErrorBoundary>
+                </ProtectedRoute>
+              }
             />
 
-      <Route path="payments/return" element={<ErrorBoundary><PaymentReturn /></ErrorBoundary>} />
+            <Route
+              path="/my/exercises"
+              element={
+                <ProtectedRoute>
+                  <ErrorBoundary><MyExercises /></ErrorBoundary>
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
+              path="/exercises/:id/submit"
+              element={
+                <ProtectedRoute>
+                  <ErrorBoundary><ExerciseSubmit /></ErrorBoundary>
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
+              path="/lessons/:id"
+              element={
+                <ProtectedRoute>
+                  <ErrorBoundary><LessonPage /></ErrorBoundary>
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
+              path="/courses/:id/checkout"
+              element={
+                <ProtectedRoute>
+                  <ErrorBoundary><CourseCheckout /></ErrorBoundary>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/courses/:id/buy"
+              element={<BuyRedirect />}
+            />
+            <Route path="/payments/return" element={<ErrorBoundary><PaymentReturn /></ErrorBoundary>} />
           {/* Protected (any role) */}
           <Route
             path="/notifications"
             element={
               <ProtectedRoute>
                 <ErrorBoundary><Notifications /></ErrorBoundary>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/reviews/assigned"
+            element={
+              <ProtectedRoute>
+                <ErrorBoundary><ReviewsAssigned /></ErrorBoundary>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/reviews/:id/review"
+            element={
+              <ProtectedRoute>
+                <ErrorBoundary><ReviewSubmission /></ErrorBoundary>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/reviews/history"
+            element={
+              <ProtectedRoute>
+                <ErrorBoundary><ReviewsHistory /></ErrorBoundary>
               </ProtectedRoute>
             }
           />

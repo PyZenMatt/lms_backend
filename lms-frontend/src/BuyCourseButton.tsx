@@ -8,7 +8,7 @@ type Props = {
   children?: React.ReactNode
   /** Path di destinazione custom (opzionale). Default: /courses/:id/checkout */
   to?: string
-  /** Se true blocca gli eventi (utile dentro card/link wrapper). Default: false */
+  /** Se true blocca gli eventi (utile dentro card/link wrapper). Default: true */
   stopPropagation?: boolean
 }
 
@@ -17,7 +17,7 @@ export default function BuyCourseButton({
   className,
   children,
   to,
-  stopPropagation = false,
+  stopPropagation = true,
 }: Props) {
   const navigate = useNavigate()
   const target = to || `/courses/${courseId}/checkout`

@@ -7,6 +7,7 @@ import { useQueryState } from "../lib/useQueryState";
 import CourseCard from "../components/CourseCard";
 import CategoryFilter from "../components/CategoryFilter";
 import BuyCourseButton from "../components/BuyCourseButton";
+import { Link } from "react-router-dom";
 
 const PAGE_SIZE = 9;
 
@@ -28,7 +29,7 @@ function priceValue(c: Course): number | null {
 // --- enrolled helper (robusto) ---
 function isEnrolled(c: Course): boolean {
   const v: any = (c as any).is_enrolled;
-  return v === true || v === "true" || v === 1;
+  return v === true || v === "true" || v === 1 || v === "1";
 }
 
 // --- category helpers ---
@@ -55,8 +56,8 @@ const byString = (sel: (c: Course) => string | undefined | null, dir: 1 | -1 = 1
 const byNumber = (sel: (c: Course) => number | null | undefined, dir: 1 | -1 = 1): Comparator =>
   (a, b) => {
     const A = sel(a), B = sel(b);
-    const aNa = A === null || A === undefined || Number.isNaN(A as number);
-    const bNa = B === null || B === undefined || Number.isNaN(B as number);
+    const aNa = A == null || Number.isNaN(A as number);
+    const bNa = B == null || Number.isNaN(B as number);
     if (aNa && bNa) return 0;
     if (aNa) return 1;
     if (bNa) return -1;
@@ -217,23 +218,32 @@ export default function CoursesList() {
       {!error && items.length > 0 && (
         <>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {items.map((c) => (
-              <div key={c.id} className="space-y-2">
-                <CourseCard course={c} />
-                {!isEnrolled(c) && (
-                  <div onClick={(e) => e.stopPropagation()}>
-                    <BuyCourseButton
-                      courseId={c.id}
-                      className="inline-flex items-center rounded-lg bg-primary px-3 py-2 text-primary-foreground hover:opacity-90"
-                      stopPropagation
-                      useNavigateMode
-                    >
-                      Compra
-                    </BuyCourseButton>
+            {items.map((c) => {
+              const enrolled = isEnrolled(c);
+              return (
+                <div key={c.id} className="space-y-2">
+                  <CourseCard course={c} />
+                  <div className="flex gap-2">
+                    {enrolled ? (
+                      <Link
+                        to={`/learn/${c.id}`}
+                        className="inline-flex items-center rounded-lg bg-muted px-3 py-2 hover:opacity-90"
+                        data-testid={`go-to-course-${c.id}`}
+                      >
+                        Vai al corso
+                      </Link>
+                    ) : (
+                      <BuyCourseButton
+                        courseId={c.id}
+                        className="inline-flex items-center rounded-lg bg-primary px-3 py-2 text-primary-foreground hover:opacity-90"
+                      >
+                        Compra
+                      </BuyCourseButton>
+                    )}
                   </div>
-                )}
-              </div>
-            ))}
+                </div>
+              );
+            })}
           </div>
 
           <Pagination className="pt-4" page={page} pageSize={PAGE_SIZE} total={count} onPageChange={toPage} />

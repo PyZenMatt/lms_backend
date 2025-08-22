@@ -1,5 +1,5 @@
 // src/components/NotificationItem.tsx
-import React from "react";
+// React import not required with new JSX transform
 import type { NotificationItem as N } from "../types/notification";
 
 type Props = {

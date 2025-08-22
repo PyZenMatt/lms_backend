@@ -4,6 +4,7 @@ import { Link, NavLink, Outlet, useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import NotificationsBell from "../NotificationsBell";
 import ThemeToggle from "../ThemeToggle";
+import { getProfile } from "../../services/profile";
 
 function cls(...xs: Array<string | false | undefined | null>) {
   return xs.filter(Boolean).join(" ");
@@ -13,11 +14,25 @@ export default function AppLayout() {
   const { isAuthenticated, role, logout } = useAuth();
   const navigate = useNavigate();
   const [open, setOpen] = React.useState(false);
+  const [profileName, setProfileName] = React.useState<string | null>(null);
 
   async function onLogout() {
     await logout();
     navigate("/", { replace: true });
   }
+
+  React.useEffect(() => {
+    let mounted = true
+    async function load() {
+      try {
+        const p = await getProfile()
+        if (!mounted) return
+        if (p) setProfileName(p.first_name ? `${p.first_name} ${p.last_name ?? ""}`.trim() : (p.username ?? null))
+      } catch {}
+    }
+    if (isAuthenticated) load()
+    return () => { mounted = false }
+  }, [isAuthenticated])
 
   // ✅ Admin → /admin, Teacher → /teacher, altri → /dashboard
   const dashHref = role === "admin" ? "/admin" : role === "teacher" ? "/teacher" : "/dashboard";
@@ -78,6 +93,7 @@ export default function AppLayout() {
             {/* Desktop links */}
             <nav className="ml-4 hidden items-center gap-1 md:flex">
               <NavLinkItem to="/courses">Corsi</NavLinkItem>
+              {isAuthenticated && <NavLinkItem to="/reviews/assigned">Revisioni</NavLinkItem>}
               {isAuthenticated && <NavLinkItem to={dashHref}>Dashboard</NavLinkItem>}
             </nav>
           </div>
@@ -116,12 +132,22 @@ export default function AppLayout() {
         {open && (
           <div className="border-t md:hidden">
             <div className="mx-auto flex max-w-7xl flex-col gap-1 px-4 py-2">
+              {isAuthenticated && (
+                <div className="px-3 py-2 text-sm text-foreground">{profileName ?? "Utente"}</div>
+              )}
               <NavLinkItem to="/courses" end>
                 Corsi
               </NavLinkItem>
               {isAuthenticated && <NavLinkItem to={dashHref}>Dashboard</NavLinkItem>}
               {isAuthenticated ? (
                 <>
+                  <Link
+                    to="/reviews/assigned"
+                    className="px-3 py-2 text-sm text-muted-foreground hover:text-foreground"
+                    onClick={() => setOpen(false)}
+                  >
+                    Revisioni
+                  </Link>
                   <Link
                     to="/notifications"
                     className="px-3 py-2 text-sm text-muted-foreground hover:text-foreground"
