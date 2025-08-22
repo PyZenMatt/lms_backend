@@ -1,8 +1,15 @@
-import React from "react";
-import { apiFetch } from "../lib/api";
-import { API_LOGIN_PATH } from "../lib/config";
-import { loadTokens, saveTokens, clearTokens, getRoleFromToken } from "../lib/auth";
-import { fetchServerRole } from "../lib/role";
+// src/context/AuthContext.tsx
+import React, { useContext, useEffect, useMemo, useState } from "react";
+import { API } from "../lib/config";
+import {
+  saveTokens,
+  loadTokens,
+  clearTokens,
+  getRoleFromToken,
+  getAccessToken,
+  getRefreshToken,
+  type Tokens,
+} from "../lib/auth";
 
 type Role = "student" | "teacher" | "admin" | null;
 
@@ -11,68 +18,126 @@ type AuthCtx = {
   isAuthenticated: boolean;
   role: Role;
   isTeacher: boolean;
-  isStudent: boolean;
-  login: (email: string, password: string) => Promise<boolean>;
+  login: (usernameOrEmail: string, password: string) => Promise<boolean>;
   logout: () => void;
   refreshRole: () => Promise<void>;
 };
 
-export const AuthContext = React.createContext<AuthCtx | null>(null);
-export function useAuth() {
-  const ctx = React.useContext(AuthContext);
+const Ctx = React.createContext<AuthCtx | undefined>(undefined);
+export const useAuth = () => {
+  const ctx = useContext(Ctx);
   if (!ctx) throw new Error("useAuth outside provider");
   return ctx;
+};
+
+async function httpJSON<T>(
+  url: string,
+  body: unknown,
+  extraHeaders?: Record<string, string>
+): Promise<{ ok: boolean; status: number; data?: T }> {
+  const res = await fetch(url, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      ...(extraHeaders || {}),
+    },
+    body: JSON.stringify(body ?? {}),
+  });
+  let data: any = undefined;
+  try {
+    data = await res.json();
+  } catch {}
+  return { ok: res.ok, status: res.status, data };
 }
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [{ booting, isAuthenticated, role }, setState] = React.useState(() => {
-    const hasTokens = !!loadTokens();
-    // Prova a leggere subito il ruolo dal JWT (potrebbe non esserci)
-    const initialRole = getRoleFromToken() as Role;
-    return { booting: hasTokens && !initialRole, isAuthenticated: hasTokens, role: initialRole };
-  });
+  const [{ booting, isAuthenticated, role }, setAuth] = useState<{
+    booting: boolean;
+    isAuthenticated: boolean;
+    role: Role;
+  }>({ booting: true, isAuthenticated: !!loadTokens(), role: getRoleFromToken() });
 
-  // Se abbiamo token ma il ruolo non è nel JWT, chiedilo al server
-  React.useEffect(() => {
+  // Boot: se ho token ma non ho role nel JWT, provo a leggerlo dal server
+  useEffect(() => {
     (async () => {
-      if (booting) {
-        const srvRole = await fetchServerRole();
-        setState(s => ({ ...s, booting: false, role: srvRole ?? s.role }));
+      const tokens = loadTokens();
+      if (!tokens) {
+        setAuth({ booting: false, isAuthenticated: false, role: null });
+        return;
       }
+      let r = getRoleFromToken();
+      if (!r) {
+        try {
+          const res = await fetch(API.role, {
+            headers: { Authorization: `Bearer ${tokens.access}` },
+          });
+          if (res.ok) {
+            const data = await res.json();
+            r = (data?.role as Role) ?? r;
+          }
+        } catch {}
+      }
+      setAuth({ booting: false, isAuthenticated: true, role: r });
     })();
-  }, [booting]);
+  }, []);
 
-  async function refreshRole() {
-    const srvRole = await fetchServerRole();
-    setState(s => ({ ...s, role: srvRole ?? s.role }));
-  }
+  async function login(usernameOrEmail: string, password: string): Promise<boolean> {
+    // 1) tentativo: email/password (CustomTokenObtainPair)
+    let r = await httpJSON<Tokens>(API.token, { email: usernameOrEmail, password });
+    // 2) fallback: username/password (SimpleJWT default) se 400
+    if (!r.ok && r.status === 400) {
+      r = await httpJSON<Tokens>(API.token, { username: usernameOrEmail, password });
+    }
+    if (!r.ok || !r.data?.access || !r.data?.refresh) return false;
 
-  async function login(email: string, password: string) {
-    const res = await apiFetch<{ access: string; refresh: string }>(API_LOGIN_PATH, {
-      method: "POST",
-      body: { email, password },
-    });
-    if (!res.ok || !res.data?.access || !res.data?.refresh) return false;
+    saveTokens({ access: r.data.access, refresh: r.data.refresh });
+    const deducedRole = getRoleFromToken();
 
-    saveTokens({ access: res.data.access, refresh: res.data.refresh });
-    const jwtRole = getRoleFromToken() as Role;
-    setState({ booting: !jwtRole, isAuthenticated: true, role: jwtRole });
-    if (!jwtRole) await refreshRole();
+    // Prova a perfezionare il ruolo dal server (opzionale)
+    let finalRole = deducedRole;
+    try {
+      const res = await fetch(API.role, {
+        headers: { Authorization: `Bearer ${r.data.access}` },
+      });
+      if (res.ok) {
+        const data = await res.json();
+        finalRole = (data?.role as Role) ?? finalRole;
+      }
+    } catch {}
+
+    setAuth({ booting: false, isAuthenticated: true, role: finalRole });
     return true;
   }
 
   function logout() {
     clearTokens();
-    setState({ booting: false, isAuthenticated: false, role: null });
+    setAuth({ booting: false, isAuthenticated: false, role: null });
   }
 
-  const value: AuthCtx = {
-    booting,
-    isAuthenticated,
-    role,
-    isTeacher: role === "teacher",
-    isStudent: role === "student",
-    login, logout, refreshRole,
-  };
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+  async function refreshRole() {
+    const token = getAccessToken();
+    if (!token) return;
+    try {
+      const res = await fetch(API.role, { headers: { Authorization: `Bearer ${token}` } });
+      if (res.ok) {
+        const data = await res.json();
+        setAuth((s) => ({ ...s, role: (data?.role as Role) ?? s.role }));
+      }
+    } catch {}
+  }
+
+  const value = useMemo<AuthCtx>(
+    () => ({
+      booting,
+      isAuthenticated,
+      role,
+      isTeacher: role === "teacher" || role === "admin",
+      login,
+      logout,
+      refreshRole,
+    }),
+    [booting, isAuthenticated, role]
+  );
+
+  return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }

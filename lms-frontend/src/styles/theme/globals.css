@@ -39,6 +39,35 @@
   --sidebar-accent-foreground: oklch(0.205 0 0);
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
+
+  /* Token HSL completi. Varianti gestite da .dark su <html>. Obiettivo: alto contrasto per primary/accent e foreground abbinati. */
+  /* Base */
+  --background-hsl: hsl(0 0% 100%);
+  --foreground-hsl: hsl(222.2 84% 4.9%);
+  /* Surfaces */
+  --card-hsl: hsl(0 0% 100%);
+  --card-foreground-hsl: hsl(222.2 84% 4.9%);
+  --popover-hsl: hsl(0 0% 100%);
+  --popover-foreground-hsl: hsl(222.2 84% 4.9%);
+  /* Borders / inputs */
+  --border-hsl: hsl(214.3 31.8% 91.4%);
+  --input-hsl: hsl(214.3 31.8% 91.4%);
+  --ring-hsl: hsl(215 20.2% 65.1%);
+  /* Primary (blu) — foreground chiaro in light, scuro in dark */
+  --primary-hsl: hsl(221.2 83.2% 53.3%);
+  --primary-foreground-hsl: hsl(210 40% 98%);
+  /* Secondary / Muted / Accent */
+  --secondary-hsl: hsl(210 40% 96.1%);
+  --secondary-foreground-hsl: hsl(222.2 47.4% 11.2%);
+  --muted-hsl: hsl(210 40% 96.1%);
+  --muted-foreground-hsl: hsl(215.4 16.3% 46.9%);
+  --accent-hsl: hsl(210 40% 96.1%);
+  --accent-foreground-hsl: hsl(222.2 47.4% 11.2%);
+  /* Danger */
+  --destructive-hsl: hsl(0 84.2% 60.2%);
+  --destructive-foreground-hsl: hsl(210 40% 98%);
+  /* Radius */
+  --radius-hsl: 0.5rem;
 }
 
 .dark {
@@ -76,6 +105,33 @@
   --sidebar-accent-foreground: oklch(0.985 0 0);
   --sidebar-border: oklch(0.269 0 0);
   --sidebar-ring: oklch(0.439 0 0);
+
+  /* Token HSL completi. Varianti gestite da .dark su <html>. Obiettivo: alto contrasto per primary/accent e foreground abbinati. */
+  /* Base */
+  --background-hsl: hsl(222.2 84% 4.9%);
+  --foreground-hsl: hsl(210 40% 98%);
+  /* Surfaces */
+  --card-hsl: hsl(222.2 84% 4.9%);
+  --card-foreground-hsl: hsl(210 40% 98%);
+  --popover-hsl: hsl(222.2 84% 4.9%);
+  --popover-foreground-hsl: hsl(210 40% 98%);
+  /* Borders / inputs */
+  --border-hsl: hsl(217.2 32.6% 17.5%);
+  --input-hsl: hsl(217.2 32.6% 17.5%);
+  --ring-hsl: hsl(217.2 32.6% 17.5%);
+  /* Primary */
+  --primary-hsl: hsl(217.2 91.2% 59.8%);
+  --primary-foreground-hsl: hsl(222.2 47.4% 11.2%);
+  /* Secondary / Muted / Accent */
+  --secondary-hsl: hsl(217.2 32.6% 17.5%);
+  --secondary-foreground-hsl: hsl(210 40% 98%);
+  --muted-hsl: hsl(217.2 32.6% 17.5%);
+  --muted-foreground-hsl: hsl(215 20.2% 65.1%);
+  --accent-hsl: hsl(217.2 32.6% 17.5%);
+  --accent-foreground-hsl: hsl(210 40% 98%);
+  /* Danger */
+  --destructive-hsl: hsl(0 62.8% 30.6%);
+  --destructive-foreground-hsl: hsl(0 85.7% 97.3%);
 }
 
 @theme inline {

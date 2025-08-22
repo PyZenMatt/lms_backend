@@ -10,7 +10,7 @@ function cls(...xs: Array<string | false | undefined | null>) {
 }
 
 export default function AppLayout() {
-  const { isAuthenticated, isTeacher, logout } = useAuth();
+  const { isAuthenticated, role, logout } = useAuth();
   const navigate = useNavigate();
   const [open, setOpen] = React.useState(false);
 
@@ -19,7 +19,8 @@ export default function AppLayout() {
     navigate("/", { replace: true });
   }
 
-  const dashHref = isTeacher ? "/teacher" : "/dashboard";
+  // ✅ Admin → /admin, Teacher → /teacher, altri → /dashboard
+  const dashHref = role === "admin" ? "/admin" : role === "teacher" ? "/teacher" : "/dashboard";
 
   const NavLinkItem = ({
     to,
@@ -57,9 +58,15 @@ export default function AppLayout() {
               onClick={() => setOpen((v) => !v)}
               aria-label="Toggle menu"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 24 24" fill="none"
-                   stroke="currentColor" strokeWidth="2">
-                <path d="M4 6h16M4 12h16M4 18h16"/>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-4 w-4"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+              >
+                <path d="M4 6h16M4 12h16M4 18h16" />
               </svg>
             </button>
 
@@ -112,11 +119,7 @@ export default function AppLayout() {
               <NavLinkItem to="/courses" end>
                 Corsi
               </NavLinkItem>
-              {isAuthenticated && (
-                <NavLinkItem to={dashHref}>
-                  Dashboard
-                </NavLinkItem>
-              )}
+              {isAuthenticated && <NavLinkItem to={dashHref}>Dashboard</NavLinkItem>}
               {isAuthenticated ? (
                 <>
                   <Link
@@ -150,7 +153,7 @@ export default function AppLayout() {
         <Outlet />
       </main>
 
-      {/* Footer (opzionale, semplice placeholder) */}
+      {/* Footer */}
       <footer className="border-t py-6 text-center text-xs text-muted-foreground">
         © {new Date().getFullYear()} LMS – All rights reserved.
       </footer>

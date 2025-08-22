@@ -1,45 +1,49 @@
-// Token storage + decode role dal JWT
-type Tokens = { access: string; refresh: string };
+// src/lib/auth.ts
+export type Tokens = { access: string; refresh: string };
 
-const LS_ACCESS = "access_token";
-const LS_REFRESH = "refresh_token";
+const ACCESS_KEY = "access_token";
+const REFRESH_KEY = "refresh_token";
 
-let accessMem: string | null = null;
-let refreshMem: string | null = null;
+export function saveTokens(t: Tokens) {
+  localStorage.setItem(ACCESS_KEY, t.access);
+  localStorage.setItem(REFRESH_KEY, t.refresh);
+}
 
 export function loadTokens(): Tokens | null {
-  const a = localStorage.getItem(LS_ACCESS);
-  const r = localStorage.getItem(LS_REFRESH);
-  accessMem = a;
-  refreshMem = r;
-  return a && r ? { access: a, refresh: r } : null;
+  const access = localStorage.getItem(ACCESS_KEY);
+  const refresh = localStorage.getItem(REFRESH_KEY);
+  if (!access || !refresh) return null;
+  return { access, refresh };
 }
-export function saveTokens(t: Tokens) {
-  accessMem = t.access; refreshMem = t.refresh;
-  localStorage.setItem(LS_ACCESS, t.access);
-  localStorage.setItem(LS_REFRESH, t.refresh);
-}
+
 export function clearTokens() {
-  accessMem = null; refreshMem = null;
-  localStorage.removeItem(LS_ACCESS);
-  localStorage.removeItem(LS_REFRESH);
+  localStorage.removeItem(ACCESS_KEY);
+  localStorage.removeItem(REFRESH_KEY);
 }
-export function getAccessToken() { return accessMem; }
-export function getRefreshToken() { return refreshMem; }
 
-export function decodeJwt<T = any>(token: string | null): T | null {
-  if (!token) return null;
+export function getAccessToken(): string | null {
+  return localStorage.getItem(ACCESS_KEY);
+}
+
+export function getRefreshToken(): string | null {
+  return localStorage.getItem(REFRESH_KEY);
+}
+
+type Role = "student" | "teacher" | "admin" | null;
+
+export function getRoleFromToken(): Role {
+  const raw = getAccessToken();
+  if (!raw) return null;
   try {
-    const base64 = token.split(".")[1].replace(/-/g, "+").replace(/_/g, "/");
-    const json = decodeURIComponent(atob(base64).split("").map(c =>
-      "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2)
-    ).join(""));
-    return JSON.parse(json);
-  } catch { return null; }
-}
-
-export function getRoleFromToken(): string | null {
-  const payload = decodeJwt(getAccessToken());
-  // Adegua la chiave se diversa (es. 'user_role', 'groups'…)
-  return payload?.role ?? null;
+    const payload = JSON.parse(atob(raw.split(".")[1] || ""));
+    // 1) role diretto nel JWT
+    if (typeof payload.role === "string") return payload.role as Role;
+    // 2) flag booleani nel JWT
+    if (payload.is_admin) return "admin";
+    if (payload.is_teacher) return "teacher";
+    // 3) default prudente
+    return "student";
+  } catch {
+    return null;
+  }
 }

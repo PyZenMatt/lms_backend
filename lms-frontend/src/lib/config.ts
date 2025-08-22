@@ -1,8 +1,23 @@
-export const API_BASE_URL =
-  (import.meta as any).env.VITE_API_BASE_URL?.replace(/\/+$/, "") || "http://localhost:8000/api/v1";
+// src/lib/config.ts
+// Base URL resiliente: accetta sia .../api che .../api/v1 e garantisce che API.base finisca con /api/v1
 
-export const API_LOGIN_PATH =
-  (import.meta as any).env.VITE_API_LOGIN_PATH || "/auth/token/";
+const RAW_BASE = import.meta.env.VITE_API_BASE_URL ?? "http://127.0.0.1:8000/api";
+const BASE = RAW_BASE.replace(/\/+$/, ""); // senza trailing slash
+const V1 = BASE.endsWith("/v1") ? BASE : `${BASE}/v1`;
 
-export const API_REFRESH_PATH =
-  (import.meta as any).env.VITE_API_REFRESH_PATH || "/auth/token/refresh/";
+export const API = {
+  base: V1,
+  token: `${V1}/token/`,
+  refresh: `${V1}/token/refresh/`,
+  logout: `${V1}/logout/`,
+  role: `${V1}/dashboard/role/`,
+  notifications: {
+    list: `${V1}/notifications/`,
+    unreadCount: `${V1}/notifications/unread-count/`,
+  },
+};
+
+// Export di compatibilità se in giro ci sono import "vecchi"
+export const API_BASE_URL = BASE;
+export const API_LOGIN_PATH = "/v1/token/";
+export const API_REFRESH_PATH = "/v1/token/refresh/";

@@ -2,209 +2,118 @@
 import { API_BASE_URL, API_REFRESH_PATH } from "./config";
 import { getAccessToken, getRefreshToken, saveTokens, clearTokens } from "./auth";
 
-export type ApiMethodOptions = {
-  headers?: Record<string, string>;
-  query?: Record<string, string | number | boolean | null | undefined>;
-  body?: any;
-  signal?: AbortSignal;
+type HttpMethod = "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
+
+type ApiResult<T = any> = {
+  ok: boolean;
+  status: number;
+  data?: T;
+  error?: unknown;
+  response?: Response;
 };
 
-type Ok<T> = { ok: true; status: number; data: T };
-type Err = { ok: false; status: number; error?: any };
-export type ApiResult<T> = Ok<T> | Err;
+let refreshing: Promise<string | null> | null = null;
 
-// ---- 403 handler globale ----
-let onForbidden: (ctx: { status: number; url: string }) => void = () => {
-  if (typeof window !== "undefined") window.location.href = "/forbidden";
-};
-export function setOnForbidden(handler: typeof onForbidden) { onForbidden = handler; }
-
-// ---- Event helpers ----
-function emitLoading(delta: number) {
-  if (typeof window !== "undefined")
-    window.dispatchEvent(new CustomEvent("api:loading", { detail: { delta } }));
-}
-function emitToast(message: string, variant: "error" | "success" | "info" | "warning" = "error") {
-  if (typeof window !== "undefined")
-    window.dispatchEvent(new CustomEvent("toast:show", { detail: { message, variant } }));
+async function doFetch(input: string, init: RequestInit): Promise<Response> {
+  return fetch(input, {
+    credentials: "include", // CORS dev coerente col BE
+    ...init,
+  });
 }
 
-// ---- Utils ----
-function joinUrl(base: string, path: string) {
-  if (/^https?:\/\//i.test(path)) return path;
-  if (path.startsWith("/")) return `${base}${path}`;
-  return `${base}/${path}`;
-}
-function toQueryString(q?: ApiMethodOptions["query"]) {
-  if (!q) return "";
-  const p = Object.entries(q)
-    .filter(([, v]) => v !== undefined && v !== null)
-    .map(([k, v]) => `${encodeURIComponent(k)}=${encodeURIComponent(String(v))}`)
-    .join("&");
-  return p ? `?${p}` : "";
-}
-function isFormData(v: any): v is FormData {
-  return typeof FormData !== "undefined" && v instanceof FormData;
-}
-async function parseResponse<T>(res: Response): Promise<{ data?: T; error?: any }> {
-  const ct = res.headers.get("content-type") || "";
-  if (ct.includes("application/json")) {
-    try {
-      const json = await res.json();
-      return res.ok ? { data: json as T } : { error: json };
-    } catch {
-      return res.ok ? { data: undefined as unknown as T } : { error: { message: "Invalid JSON" } };
-    }
-  }
-  if (res.status === 204 || res.status === 205) return { data: undefined as unknown as T };
-  try {
-    const txt = await res.text();
-    return res.ok ? { data: (txt as unknown as T) } : { error: txt };
-  } catch {
-    return res.ok ? { data: undefined as unknown as T } : { error: { message: "Unknown error" } };
-  }
-}
-
-// ---- Core fetch con auto-refresh + eventi ----
-export async function apiFetch<T = any>(path: string, opts: ApiMethodOptions & { method?: string } = {}): Promise<ApiResult<T>> {
-  const url = joinUrl(API_BASE_URL, path) + toQueryString(opts.query);
-  const headers: Record<string, string> = { ...(opts.headers || {}) };
-  const hasBody = typeof opts.body !== "undefined" && opts.body !== null;
-  const useForm = hasBody && isFormData(opts.body);
-  if (hasBody && !useForm) {
-    headers["Content-Type"] = headers["Content-Type"] || "application/json";
-  }
+function withAuthHeaders(init?: RequestInit): Headers {
+  const h = new Headers(init?.headers || {});
+  if (!h.has("Accept")) h.set("Accept", "application/json");
+  // NON forzare Content-Type se body è FormData
+  const hasFormData = init?.body && typeof FormData !== "undefined" && init?.body instanceof FormData;
+  if (!hasFormData && !h.has("Content-Type")) h.set("Content-Type", "application/json");
   const access = getAccessToken();
-  if (access) headers["Authorization"] = `Bearer ${access}`;
+  if (access && !h.has("Authorization")) h.set("Authorization", `Bearer ${access}`);
+  return h;
+}
 
-  emitLoading(+1);
-  let res1: Response;
-  try {
-    res1 = await fetch(url, {
-      method: opts.method || (hasBody ? "POST" : "GET"),
-      headers,
-      body: useForm ? (opts.body as BodyInit) : hasBody ? JSON.stringify(opts.body) : undefined,
-      signal: opts.signal,
-      credentials: "include",
-    });
-  } catch (e: any) {
-    emitLoading(-1);
-    emitToast("Errore di rete. Controlla la connessione.", "error");
-    return { ok: false, status: 0, error: e?.message || "network" };
-  }
-  emitLoading(-1);
-
-  if (res1.status === 403) {
-    onForbidden({ status: 403, url });
-    const parsed = await parseResponse<T>(res1);
-    return { ok: false, status: 403, error: parsed.error };
-  }
-
-  if (res1.status === 401) {
-    const refresh = getRefreshToken();
-    if (!refresh) {
-      clearTokens();
-      emitToast("Sessione scaduta. Effettua di nuovo l’accesso.", "warning");
-      const parsed = await parseResponse<T>(res1);
-      return { ok: false, status: 401, error: parsed.error };
-    }
-
-    // refresh
-    emitLoading(+1);
-    let refreshRes: Response;
-    try {
-      refreshRes = await fetch(joinUrl(API_BASE_URL, API_REFRESH_PATH), {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ refresh }),
-        credentials: "include",
-      });
-    } catch (e: any) {
-      emitLoading(-1);
-      clearTokens();
-      emitToast("Impossibile rinnovare la sessione.", "warning");
-      const parsed = await parseResponse<T>(res1);
-      return { ok: false, status: 401, error: parsed.error };
-    }
-    emitLoading(-1);
-
-    if (!refreshRes.ok) {
-      clearTokens();
-      emitToast("Sessione scaduta. Effettua di nuovo l’accesso.", "warning");
-      const parsed = await parseResponse<T>(res1);
-      return { ok: false, status: 401, error: parsed.error };
-    }
-
-    try {
-      const rj = (await refreshRes.json()) as { access: string; refresh?: string };
-      if (rj?.access) {
-        saveTokens({ access: rj.access, refresh: rj.refresh ?? refresh });
-      } else {
-        clearTokens();
-        emitToast("Sessione scaduta. Effettua di nuovo l’accesso.", "warning");
-        const parsed = await parseResponse<T>(res1);
-        return { ok: false, status: 401, error: parsed.error };
+async function refreshAccessToken(): Promise<string | null> {
+  if (!getRefreshToken()) return null;
+  if (!refreshing) {
+    refreshing = (async () => {
+      try {
+        const res = await doFetch(API_BASE_URL + API_REFRESH_PATH, {
+          method: "POST",
+          headers: { "Content-Type": "application/json", Accept: "application/json" },
+          body: JSON.stringify({ refresh: getRefreshToken() }),
+        });
+        // SimpleJWT di solito ritorna solo "access"
+        if (!res.ok) return null;
+        const json = await res.json().catch(() => ({}));
+        const nextAccess = json?.access as string | undefined;
+        const nextRefresh = json?.refresh as string | undefined; // in alcuni back ritorna anche refresh
+        if (!nextAccess) return null;
+        saveTokens(nextAccess, nextRefresh || null);
+        return nextAccess;
+      } catch {
+        return null;
+      } finally {
+        refreshing = null;
       }
-    } catch {
-      clearTokens();
-      emitToast("Sessione scaduta. Effettua di nuovo l’accesso.", "warning");
-      const parsed = await parseResponse<T>(res1);
-      return { ok: false, status: 401, error: parsed.error };
-    }
+    })();
+  }
+  return refreshing;
+}
 
-    // retry singolo
-    const headers2: Record<string, string> = { ...(opts.headers || {}) };
-    if (hasBody && !useForm) headers2["Content-Type"] = headers2["Content-Type"] || "application/json";
-    const newAccess = getAccessToken();
-    if (newAccess) headers2["Authorization"] = `Bearer ${newAccess}`;
+async function apiFetch<T = any>(
+  path: string,
+  init: RequestInit = {},
+  retryOn401 = true
+): Promise<ApiResult<T>> {
+  const url = path.startsWith("http") ? path : API_BASE_URL + path.replace(/^\/+/, "/");
+  const res = await doFetch(url, { ...init, headers: withAuthHeaders(init) });
 
-    emitLoading(+1);
-    let res2: Response;
-    try {
-      res2 = await fetch(url, {
-        method: opts.method || (hasBody ? "POST" : "GET"),
-        headers: headers2,
-        body: useForm ? (opts.body as BodyInit) : hasBody ? JSON.stringify(opts.body) : undefined,
-        signal: opts.signal,
-        credentials: "include",
-      });
-    } catch (e: any) {
-      emitLoading(-1);
-      emitToast("Errore di rete. Controlla la connessione.", "error");
-      return { ok: false, status: 0, error: e?.message || "network" };
-    }
-    emitLoading(-1);
-
-    if (res2.status === 403) {
-      onForbidden({ status: 403, url });
-      const parsed = await parseResponse<T>(res2);
-      return { ok: false, status: 403, error: parsed.error };
-    }
-
-    const parsed2 = await parseResponse<T>(res2);
-    if (res2.ok) return { ok: true, status: res2.status, data: parsed2.data as T };
-    if (res2.status === 401) {
-      clearTokens();
-      emitToast("Sessione scaduta. Effettua di nuovo l’accesso.", "warning");
-    }
-    if (res2.status >= 500) emitToast("Errore del server. Riprova più tardi.", "error");
-    return { ok: false, status: res2.status, error: parsed2.error };
+  // Fast path
+  if (res.status !== 401) {
+    return parseResponse<T>(res);
   }
 
-  const parsed1 = await parseResponse<T>(res1);
-  if (res1.ok) return { ok: true, status: res1.status, data: parsed1.data as T };
-  if (res1.status >= 500) emitToast("Errore del server. Riprova più tardi.", "error");
-  return { ok: false, status: res1.status, error: parsed1.error };
+  // 401 → prova refresh una sola volta
+  if (!retryOn401) {
+    return parseResponse<T>(res);
+  }
+
+  const newAccess = await refreshAccessToken();
+  if (!newAccess) {
+    clearTokens();
+    return parseResponse<T>(res);
+  }
+
+  // Retry con nuovo token
+  const retryHeaders = new Headers(init.headers || {});
+  retryHeaders.set("Authorization", `Bearer ${newAccess}`);
+  const res2 = await doFetch(url, { ...init, headers: retryHeaders });
+  return parseResponse<T>(res2);
 }
 
-// ---- Helper DX ----
-async function handle<T>(method: string, path: string, opts: ApiMethodOptions = {}): Promise<ApiResult<T>> {
-  return apiFetch<T>(path, { ...opts, method });
+async function parseResponse<T>(res: Response): Promise<ApiResult<T>> {
+  const ct = res.headers.get("Content-Type") || "";
+  const isJson = ct.includes("application/json");
+  const data = isJson ? await res.json().catch(() => undefined) : undefined;
+  return { ok: res.ok, status: res.status, data, response: res, ...(res.ok ? {} : { error: data }) };
 }
+
+// Helpers DX
+function bodyOf(data?: any): BodyInit | undefined {
+  if (data == null) return undefined;
+  if (typeof FormData !== "undefined" && data instanceof FormData) return data;
+  return JSON.stringify(data);
+}
+
 export const api = {
-  get:   <T = any>(path: string, opts?: ApiMethodOptions) => handle<T>("GET", path, opts),
-  post:  <T = any>(path: string, body?: any, opts?: ApiMethodOptions) => handle<T>("POST",  path, { ...(opts || {}), body }),
-  put:   <T = any>(path: string, body?: any, opts?: ApiMethodOptions) => handle<T>("PUT",   path, { ...(opts || {}), body }),
-  patch: <T = any>(path: string, body?: any, opts?: ApiMethodOptions) => handle<T>("PATCH", path, { ...(opts || {}), body }),
-  delete:<T = any>(path: string, opts?: ApiMethodOptions) => handle<T>("DELETE", path, opts),
+  get:  <T = any>(path: string, init?: RequestInit) => apiFetch<T>(path, { ...init, method: "GET" }),
+  delete:<T = any>(path: string, init?: RequestInit) => apiFetch<T>(path, { ...init, method: "DELETE" }),
+  post: <T = any>(path: string, data?: any, init?: RequestInit) =>
+    apiFetch<T>(path, { ...init, method: "POST", body: bodyOf(data) }),
+  put:  <T = any>(path: string, data?: any, init?: RequestInit) =>
+    apiFetch<T>(path, { ...init, method: "PUT", body: bodyOf(data) }),
+  patch:<T = any>(path: string, data?: any, init?: RequestInit) =>
+    apiFetch<T>(path, { ...init, method: "PATCH", body: bodyOf(data) }),
 };
+
+export { apiFetch };

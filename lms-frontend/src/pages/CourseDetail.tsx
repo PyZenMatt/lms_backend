@@ -1,7 +1,8 @@
 // src/pages/CourseDetail.tsx
 import React from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { api } from "../lib/api";
+import BuyCourseButton from "../components/BuyCourseButton";
 
 type Course = {
   id: number;
@@ -15,11 +16,12 @@ type Course = {
 };
 
 const fmtEUR = (v?: number | null) =>
-  typeof v === "number" ? new Intl.NumberFormat("it-IT", { style: "currency", currency: "EUR" }).format(v) : "—";
+  typeof v === "number"
+    ? new Intl.NumberFormat("it-IT", { style: "currency", currency: "EUR" }).format(v)
+    : "—";
 
 export default function CourseDetail() {
   const { id } = useParams<{ id: string }>();
-  const navigate = useNavigate();
   const courseId = Number(id);
 
   const [loading, setLoading] = React.useState(true);
@@ -35,13 +37,15 @@ export default function CourseDetail() {
       setLoading(false);
     }
     load();
-    return () => { mounted = false; };
+    return () => {
+      mounted = false;
+    };
   }, [courseId]);
 
   const enrolled =
     course?.is_enrolled === true ||
     course?.is_enrolled === "true" ||
-    course?.is_enrolled === 1;
+    (course as any)?.is_enrolled === 1;
 
   const cover = course?.cover_image ?? course?.cover_image_url ?? course?.cover_url;
 
@@ -62,17 +66,26 @@ export default function CourseDetail() {
             )}
             <div className="flex-1 space-y-2">
               <h1 className="text-2xl font-semibold">{course.title}</h1>
-              <div className="text-sm text-muted-foreground">{course.description ?? "—"}</div>
-              <div className="text-base font-medium">{fmtEUR(course.price_eur ?? null)}</div>
+              <div className="text-sm text-muted-foreground">
+                {course.description ?? "—"}
+              </div>
+              <div className="text-base font-medium">
+                {fmtEUR(course.price_eur ?? null)}
+              </div>
 
               {!enrolled && (
                 <div className="pt-2">
-                  <button
-                    onClick={() => navigate(`/courses/${courseId}/buy`)}
-                    className="h-10 rounded-lg bg-primary px-4 text-primary-foreground hover:opacity-90"
+                  <BuyCourseButton
+                    courseId={courseId}
+                    // stesso stile del tuo bottone originale
+                    className="h-10 rounded-lg bg-primary px-4 text-primary-foreground hover:opacity-90 inline-flex items-center"
+                    // in caso la card fosse cliccabile, evita bubbling
+                    stopPropagation
+                    // usa navigate interno per evitare conflitti con wrapper <Link>
+                    useNavigateMode
                   >
                     Acquista
-                  </button>
+                  </BuyCourseButton>
                 </div>
               )}
             </div>

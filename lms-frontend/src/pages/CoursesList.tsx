@@ -6,14 +6,15 @@ import Pagination from "../components/Pagination";
 import { useQueryState } from "../lib/useQueryState";
 import CourseCard from "../components/CourseCard";
 import CategoryFilter from "../components/CategoryFilter";
+import BuyCourseButton from "../components/BuyCourseButton";
 
 const PAGE_SIZE = 9;
 
 // --- helpers prezzo (robusto) ---
 function priceValue(c: Course): number | null {
   const raw: any =
-    c.price ??
-    c.price_amount ??
+    (c as any).price ??
+    (c as any).price_amount ??
     (typeof (c as any).price === "object" ? (c as any).price?.value : null);
 
   if (typeof raw === "number") return raw;
@@ -24,12 +25,18 @@ function priceValue(c: Course): number | null {
   return null;
 }
 
+// --- enrolled helper (robusto) ---
+function isEnrolled(c: Course): boolean {
+  const v: any = (c as any).is_enrolled;
+  return v === true || v === "true" || v === 1;
+}
+
 // --- category helpers ---
 function slugify(x: string) {
   return x.trim().toLowerCase().replace(/\s+/g, "-");
 }
 function courseCategorySlug(c: Course): string | null {
-  const cat: any = c.category;
+  const cat: any = (c as any).category;
   if (!cat) return null;
   if (typeof cat === "string") return slugify(cat);
   if (typeof cat === "object") {
@@ -68,12 +75,12 @@ const byDate = (sel: (c: Course) => string | undefined, dir: 1 | -1 = 1): Compar
   };
 
 const LOCAL_ORDERING: Record<string, Comparator> = {
-  "title": byString((c) => c.title, +1),
-  "-title": byString((c) => c.title, -1),
+  "title": byString((c) => (c as any).title, +1),
+  "-title": byString((c) => (c as any).title, -1),
   "price": byNumber((c) => priceValue(c), +1),
   "-price": byNumber((c) => priceValue(c), -1),
-  "created_at": byDate((c) => c.created_at, +1),
-  "-created_at": byDate((c) => c.created_at, -1),
+  "created_at": byDate((c) => (c as any).created_at, +1),
+  "-created_at": byDate((c) => (c as any).created_at, -1),
 };
 
 const ORDERING_OPTIONS = [
@@ -137,7 +144,7 @@ export default function CoursesList() {
     if (cmp) list.sort(cmp);
 
     setItems(list);
-    setCount(res.count);
+    setCount((res as any).count);
     setLoading(false);
   }
 
@@ -211,7 +218,21 @@ export default function CoursesList() {
         <>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {items.map((c) => (
-              <CourseCard key={c.id} course={c} />
+              <div key={c.id} className="space-y-2">
+                <CourseCard course={c} />
+                {!isEnrolled(c) && (
+                  <div onClick={(e) => e.stopPropagation()}>
+                    <BuyCourseButton
+                      courseId={c.id}
+                      className="inline-flex items-center rounded-lg bg-primary px-3 py-2 text-primary-foreground hover:opacity-90"
+                      stopPropagation
+                      useNavigateMode
+                    >
+                      Compra
+                    </BuyCourseButton>
+                  </div>
+                )}
+              </div>
             ))}
           </div>
 

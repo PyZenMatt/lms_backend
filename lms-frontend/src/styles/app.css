@@ -11,13 +11,26 @@
     height: 100%;
   }
   body {
+    background: var(--background-hsl);
+    color: var(--foreground-hsl);
     @apply bg-background text-foreground;
   }
   * {
+    border-color: var(--border-hsl);
     @apply border-border;
   }
 
   ::placeholder {
+    color: var(--muted-foreground-hsl);
     @apply text-muted-foreground;
   }
 }
+/* --- Safety net: testo leggibile sui bottoni primari --- */
+@layer components {
+  /* Caso più comune: qualcuno ha messo text-foreground su bg-primary */
+  .bg-primary.text-foreground { color: var(--color-primary-foreground) !important; }
+
+  /* Se manca completamente una text-*, garantiamo il colore corretto */
+  .bg-primary:not([class*="text-"]) { color: var(--color-primary-foreground) !important; }
+}
+
