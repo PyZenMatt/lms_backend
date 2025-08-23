@@ -47,7 +47,7 @@ export default function ReviewsAssigned() {
                   {it.student?.name ? `Studente: ${it.student.name}` : ""} {it.submitted_at ? `• Inviato: ${new Date(it.submitted_at).toLocaleString()}` : ""}
                 </div>
               </div>
-              { (it.submission_id && it.submission_id > 0) ? (
+        { (it.submission_id && it.submission_id > 0) ? (
                 <Link
                   to={`/reviews/${it.submission_id}/review`}
                   className="rounded-lg bg-primary px-3 py-1 text-sm text-primary-foreground hover:opacity-90"
@@ -56,10 +56,10 @@ export default function ReviewsAssigned() {
                 </Link>
               ) : it.exercise_id ? (
                 <Link
-                  to={`/learn/${it.course_id ?? ''}`}
-                  className="rounded-lg bg-secondary px-3 py-1 text-sm text-secondary-foreground hover:opacity-90"
+          to={`/reviews/${it.exercise_id}/review`}
+          className="rounded-lg bg-secondary px-3 py-1 text-sm text-secondary-foreground hover:opacity-90"
                 >
-                  Apri esercizio
+          Apri review (da esercizio)
                 </Link>
               ) : (
                 <div className="rounded-lg bg-gray-100 px-3 py-1 text-sm text-muted-foreground">N/D</div>

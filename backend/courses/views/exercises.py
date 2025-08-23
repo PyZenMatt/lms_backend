@@ -505,8 +505,10 @@ class AssignedReviewsView(APIView):
         )
         data = [
             {
-                "pk": r.pk,
-                "submission_pk": r.submission.pk,
+                "pk": r.pk,  # review id
+                "submission_id": r.submission.pk,
+                "submission_pk": r.submission.pk,  # backward compat
+                "exercise_id": getattr(r.submission, "exercise_id", None),
                 "exercise_title": r.submission.exercise.title,
                 "assigned_at": r.assigned_at,
                 "student_username": (

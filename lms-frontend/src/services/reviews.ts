@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 // src/services/reviews.ts
 import { api } from "../lib/api"
 
@@ -77,7 +78,8 @@ function normSubmission(raw: any): Submission {
     : undefined
   return {
     id: asNumber(raw?.id ?? raw?.submission_id) ?? 0,
-    exercise_id: asNumber(raw?.exercise_id ?? raw?.exercise) ?? 0,
+  // prefer explicit exercise_id, else nested exercise.id
+  exercise_id: asNumber(raw?.exercise_id ?? raw?.exercise?.id ?? raw?.exerciseId) ?? 0,
     lesson_id: asNumber(raw?.lesson_id ?? raw?.lesson) ?? undefined,
     course_id: asNumber(raw?.course_id ?? raw?.course) ?? undefined,
     student,
@@ -99,8 +101,8 @@ export async function listAssignedReviews(): Promise<Result<AssignedReview[]>> {
   for (const url of candidates) {
     const res = await api.get<any>(url)
     if (res.ok) {
-  // debug: expose raw backend payload to help trace missing submission_id
-  try { console.debug("[reviews.listAssignedReviews] url=", url, "raw=", res.data) } catch(e) {}
+      // debug: expose raw backend payload to help trace missing submission_id
+      console.debug?.("[reviews.listAssignedReviews] url=", url, "raw=", res.data)
       const arr = Array.isArray(res.data) ? res.data : (res.data?.results ?? [])
       return { ok: true, status: res.status, data: arr.map(normAssigned) }
     }
@@ -144,9 +146,11 @@ export async function getSubmission(submissionId: number): Promise<Result<Submis
   ]
   let lastNotFound = 404
   for (const url of paths) {
-    const res = await api.get<any>(url)
+  const res = await api.get<any>(url)
     // if server responds 403 (Forbidden) the resource exists but you lack perms — return that to caller
     if (res.ok) {
+  // mark which style worked for this id
+  if (url.includes("/submissions/")) endpointCache.set(submissionId, "submission")
       // normalize if array or results
         // If the endpoint returned an exercise detail (e.g. /v1/exercises/:id/)
         // try to extract an embedded submission object (common keys) or
@@ -154,16 +158,18 @@ export async function getSubmission(submissionId: number): Promise<Result<Submis
         let raw = res.data
         if (Array.isArray(raw)) raw = raw[0]
         if (raw && raw.results && Array.isArray(raw.results)) raw = raw.results[0]
-        if (raw && typeof raw === "object") {
+    if (raw && typeof raw === "object") {
           // common embedded submission fields
           const candidate = raw.my_submission ?? raw.submission ?? raw.latest_submission ?? raw.student_submission ?? (Array.isArray(raw.submissions) ? raw.submissions[0] : undefined)
           if (candidate) {
-            if (candidate.exercise_id) endpointCache.set(Number(candidate.exercise_id), "exercise")
-            return { ok: true, status: res.status, data: normSubmission(candidate) }
+      // ensure exercise_id is populated from nested exercise if present
+      if (!candidate.exercise_id && candidate.exercise?.id) candidate.exercise_id = candidate.exercise.id
+      if (candidate.exercise_id) endpointCache.set(Number(candidate.exercise_id), "exercise")
+      return { ok: true, status: res.status, data: normSubmission(candidate) }
           }
 
           // no embedded submission — attempt to build a synthetic submission from exercise fields
-          const synthesized = {
+          const synthesized: any = {
             id: asNumber(raw.id ?? raw.exercise_id) ?? submissionId,
             exercise_id: asNumber(raw.id ?? raw.exercise_id) ?? submissionId,
             lesson_id: asNumber(raw.lesson_id ?? raw.lesson) ?? undefined,
@@ -175,9 +181,9 @@ export async function getSubmission(submissionId: number): Promise<Result<Submis
             status: raw.status ?? undefined,
             title: raw.title ?? raw.name ?? undefined,
           }
-    endpointCache.set(Number(synthesized.exercise_id ?? synthesized.id), "exercise")
-    synthesized.__from_exercise = true
-    return { ok: true, status: res.status, data: normSubmission(synthesized) }
+          endpointCache.set(Number(synthesized.exercise_id ?? synthesized.id), "exercise")
+          synthesized.__from_exercise = true
+          return { ok: true, status: res.status, data: normSubmission(synthesized) }
         }
     }
     const status = (res as any).status ?? res.status
@@ -205,20 +211,26 @@ export async function sendReview(
   }
   if (payload.decision) body.decision = payload.decision
   // prefer cached endpoint if available to avoid POSTing to many 404s
-  const preferred = endpointCache.get(submissionId)
   // Build candidate paths. If caller provided an exerciseId, prefer the exercise-scoped endpoint
   const makePaths = () => {
     const base = [] as string[]
+    const hint = endpointCache.get(submissionId)
     if (exerciseId) base.push(`/v1/exercises/${exerciseId}/review/`)
-    base.push(`/v1/exercises/${submissionId}/review/`)
-    base.push(`/v1/submissions/${submissionId}/review/`)
+    // If we know this id is a submission, try submission route first
+    if (hint === "submission") {
+      base.push(`/v1/submissions/${submissionId}/review/`)
+      base.push(`/v1/exercises/${submissionId}/review/`)
+    } else {
+      base.push(`/v1/exercises/${submissionId}/review/`)
+      base.push(`/v1/submissions/${submissionId}/review/`)
+    }
     base.push(`/v1/reviews/${submissionId}/submit/`)
     base.push(`/v1/reviews/${submissionId}/`)
     return base
   }
   const paths = makePaths()
   for (const url of paths) {
-  try { console.debug("[reviews.sendReview] POSTing", url, body) } catch(e) {}
+    console.debug?.("[reviews.sendReview] POSTing", url, body)
   const res = await api.post<any>(url, body)
     if (res.ok) {
       // cache which style worked
@@ -228,7 +240,7 @@ export async function sendReview(
       return { ok: true, status: res.status, data: res.data }
     }
     if (![404, 405, 422].includes((res as any).status ?? res.status)) {
-  try { console.debug("[reviews.sendReview] POST failed non-404", url, (res as any)) } catch(e) {}
+      console.debug?.("[reviews.sendReview] POST failed non-404", url, (res as any))
   return { ok: false, status: res.status, error: (res as any).error }
     }
   }

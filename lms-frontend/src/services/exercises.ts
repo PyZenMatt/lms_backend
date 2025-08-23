@@ -192,8 +192,10 @@ export async function listReviewHistory(): Promise<Result<unknown[]>> {
   return { ok: true, status: res.status, data }
 }
 
-export async function postReview(submissionId: number, payload: { grade?: number; comment?: string }): Promise<Result<unknown>> {
-  const res = await api.post<unknown>(`/api/v1/exercises/${submissionId}/review/`, payload)
+export async function postReview(exerciseOrSubmissionId: number, payload: { grade?: number; score?: number; comment?: string }): Promise<Result<unknown>> {
+  const score = payload.score ?? payload.grade
+  const body = { score, grade: score, comment: payload.comment ?? "" }
+  const res = await api.post<unknown>(`/v1/exercises/${exerciseOrSubmissionId}/review/`, body)
   if (!res.ok) return { ok: false, status: res.status, error: res.error }
   return { ok: true, status: res.status, data: res.data }
 }

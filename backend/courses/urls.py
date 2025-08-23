@@ -150,6 +150,22 @@ urlpatterns = [
         ReviewExerciseView.as_view(),
         name="review-exercise",
     ),
+    # Compatibility aliases: allow posting review by submission_id or legacy patterns
+    path(
+        "submissions/<int:submission_id>/review/",
+        ReviewExerciseView.as_view(),
+        name="review-by-submission",
+    ),
+    path(
+        "reviews/<int:submission_id>/submit/",
+        ReviewExerciseView.as_view(),
+        name="review-submit-compat",
+    ),
+    path(
+        "reviews/<int:submission_id>/",
+        ReviewExerciseView.as_view(),
+        name="review-submit-compat2",
+    ),
     # --- Nuovi endpoint peer review ---
     path(
         "exercises/<int:exercise_id>/my_submission/",
