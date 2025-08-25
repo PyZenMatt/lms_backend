@@ -1,79 +1,96 @@
-// src/components/TopProgressBar.tsx
-import React from "react";
+import { useEffect, useRef, useState } from "react";
+import eventBus from "../lib/eventBus";
 
 /**
- * Barra di progresso globale:
- * - Mostra una barra in alto quando ci sono richieste API in corso (eventi "api:loading").
- * - Debounce: compare solo dopo 120ms (evita flicker su richieste istantanee).
- * - Avanza fino al 90% mentre è attiva; quando finisce, va al 100% e scompare.
+ * Global top progress bar driven by "api:loading" events.
+ * Uses the new eventBus when available and falls back to window CustomEvent for compatibility.
+ * Include this near your App root.
  */
 export default function TopProgressBar() {
-  const [active, setActive] = React.useState(0);     // conteggio richieste in corso
-  const [width, setWidth] = React.useState(0);       // larghezza %
-  const [visible, setVisible] = React.useState(false);
-  const incTimer = React.useRef<number | null>(null);
-  const showTimer = React.useRef<number | null>(null);
+  const [active, setActive] = useState(0);
+  const [width, setWidth] = useState(0);
+  const [visible, setVisible] = useState(false);
+  const incTimer = useRef<number | null>(null);
+  const showTimer = useRef<number | null>(null);
 
-  // Ascolta gli eventi di caricamento emessi da api.ts (emitLoading(+1/-1))
-  React.useEffect(() => {
-    function onLoading(e: Event) {
-      const { delta } = (e as CustomEvent<{ delta: number }>).detail || { delta: 0 };
+  useEffect(() => {
+    // handler for eventBus
+    const off = eventBus.on("api:loading", (e: CustomEvent<{ delta: number }>) => {
+      const delta = e?.detail?.delta ?? 0;
+      setActive((n) => Math.max(0, n + (Number.isFinite(delta) ? delta : 0)));
+    });
+
+    // fallback to window events for backward compatibility
+    function onWindowLoading(e: Event) {
+      const { delta } = ((e as CustomEvent<{ delta: number }>).detail || { delta: 0 });
       setActive((n) => Math.max(0, n + (Number.isFinite(delta) ? delta : 0)));
     }
-    window.addEventListener("api:loading", onLoading as EventListener);
-    return () => window.removeEventListener("api:loading", onLoading as EventListener);
+    window.addEventListener("api:loading", onWindowLoading as EventListener);
+
+    return () => {
+      off();
+      window.removeEventListener("api:loading", onWindowLoading as EventListener);
+    };
   }, []);
 
-  // Gestione visibilità + animazione
-  React.useEffect(() => {
-    // cleanup utility
+  useEffect(() => {
+    // helpers
     const stopInc = () => {
-      if (incTimer.current) { window.clearInterval(incTimer.current); incTimer.current = null; }
+      if (incTimer.current) {
+        window.clearInterval(incTimer.current);
+        incTimer.current = null;
+      }
     };
     const stopShowDelay = () => {
-      if (showTimer.current) { window.clearTimeout(showTimer.current); showTimer.current = null; }
+      if (showTimer.current) {
+        window.clearTimeout(showTimer.current);
+        showTimer.current = null;
+      }
     };
 
     if (active > 0) {
-      // Mostra la barra con un piccolo ritardo per evitare flash
       if (!visible && !showTimer.current) {
-        showTimer.current = window.setTimeout(() => { setVisible(true); setWidth(10); }, 120);
+        showTimer.current = window.setTimeout(() => {
+          setVisible(true);
+          setWidth(10);
+        }, 120);
       }
-      // Avanza gradualmente verso ~90%
       if (!incTimer.current) {
         incTimer.current = window.setInterval(() => {
           setWidth((w) => (w < 90 ? Math.min(90, w + 8 + Math.random() * 10) : w));
         }, 200) as unknown as number;
       }
     } else {
-      // Fine: completa al 100% e poi nascondi
       stopShowDelay();
       stopInc();
       if (visible) {
         setWidth(100);
-        const t = window.setTimeout(() => { setVisible(false); setWidth(0); }, 250);
+        const t = window.setTimeout(() => {
+          setVisible(false);
+          setWidth(0);
+        }, 250);
         return () => window.clearTimeout(t);
       } else {
         setWidth(0);
       }
     }
 
-    return () => { stopShowDelay(); /* incTimer lo lasciamo attivo mentre active>0 */ };
+    return () => {
+      stopShowDelay();
+    };
   }, [active, visible]);
 
   return (
-    <div className="pointer-events-none fixed left-0 right-0 top-0 z-[9999] h-0">
+    <div style={{ pointerEvents: "none", position: "fixed", left: 0, right: 0, top: 0, zIndex: 9999, height: 0 }}>
       <div
-        className={[
-          "transition-[width,opacity] duration-200 will-change-[width,opacity]",
-          "h-0.5 sm:h-[2px]",                    // più visibile: 2px su schermi >= sm
-          visible ? "opacity-100" : "opacity-0",
-          // colore più evidente; se il tuo primary è poco contrastato, cambia in bg-blue-500
-          "bg-primary",
-          // leggero bagliore per separarla dallo sfondo
-          "shadow-[0_0_8px_rgba(0,0,0,0.10)]",
-        ].join(" ")}
-        style={{ width: `${width}%` }}
+        style={{
+          transition: "width 200ms ease, opacity 200ms ease",
+          height: 2,
+          background: "var(--color-primary, #06b6d4)",
+          boxShadow: "0 0 8px rgba(0,0,0,0.08)",
+          width: `${width}%`,
+          opacity: visible ? 1 : 0,
+        }}
       />
     </div>
   );

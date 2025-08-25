@@ -5,7 +5,7 @@
 // - Reads base URL from VITE_API_BASE_URL (default http://127.0.0.1:8000/api).
 // - Handles 401 → refresh token (once) via `${BASE}${API_REFRESH_PATH}`.
 
-type Json = Record<string, any>;
+import eventBus from "./eventBus";
 
 export type ApiResult<T = any> = {
   ok: boolean;
@@ -106,9 +106,20 @@ function isJsonResponse(res: Response) {
   return ct.includes("application/json");
 }
 
-function dispatchLoading(delta: 1 | -1) {
+function dispatchLoading(delta: 1 | -1, key?: string) {
   try {
-    window.dispatchEvent(new CustomEvent("api:loading", { detail: { delta } }));
+    // Emit on new eventBus for internal consumers
+    try {
+      eventBus.emit("api:loading", { delta, key });
+    } catch {
+      // ignore
+    }
+    // Back-compat: also emit old window CustomEvent so existing listeners keep working
+    try {
+      window.dispatchEvent(new CustomEvent("api:loading", { detail: { delta } }));
+    } catch {
+      // ignore
+    }
   } catch {
     // ignore
   }
@@ -221,12 +232,35 @@ async function coreRequest<T>(
         // optionally clear tokens only on explicit instruction
         // clearTokens();
       }
+      const detail = { status: res.status, url, method, data };
+      try {
+        eventBus.emit("api:error", detail);
+      } catch {
+        // ignore
+      }
+      try {
+        window.dispatchEvent(new CustomEvent("api:error", { detail }));
+      } catch {
+        // ignore
+      }
       return { ok: false, status: res.status, error: data ?? { message: "Request failed" } };
     }
 
     return { ok: true, status: res.status, data: data as T };
   } catch (error: any) {
-    return { ok: false, status: 0, error: error?.message || String(error) };
+    const message = error?.message || String(error);
+    const detail = { status: 0, url, method, message };
+    try {
+      eventBus.emit("api:error", detail);
+    } catch {
+      // ignore
+    }
+    try {
+      window.dispatchEvent(new CustomEvent("api:error", { detail }));
+    } catch {
+      // ignore
+    }
+    return { ok: false, status: 0, error: message };
   } finally {
     dispatchLoading(-1);
     // abort controller cleanup (no op)

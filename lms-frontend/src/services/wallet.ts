@@ -197,3 +197,7 @@ export async function applyDiscount(body: {
   if (payload.course_price === undefined && payload.price_eur !== undefined) payload.course_price = payload.price_eur;
   return tryPost<Record<string, unknown>>(fallbacks, payload);
 }
+
+// Backwards-compatible aliases requested by integration:
+export const getBalance = getWallet;
+export const calculateDiscount = checkDiscount;
