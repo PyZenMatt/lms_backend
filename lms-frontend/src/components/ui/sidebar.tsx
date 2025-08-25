@@ -8,10 +8,11 @@ import { cn } from "@/lib/utils";
  */
 
 export type SidebarItem = {
-  to: string;
+  to?: string; // if absent, item may be an action (onClick)
   label: React.ReactNode;
   icon?: React.ReactNode;
   end?: boolean;
+  onClick?: () => void;
 };
 
 export function Sidebar({
@@ -50,20 +51,36 @@ export function Sidebar({
       <nav className="flex-1 overflow-y-auto p-2">
         <ul className="space-y-1">
           {items.map((it) => (
-            <li key={String(it.to)}>
-              <NavLink
-                to={it.to}
-                end={it.end}
-                className={({ isActive }) =>
-                  cn(
-                    "flex items-center gap-2 rounded-lg px-2 py-2 text-sm hover:bg-[--color-sidebar-accent]",
-                    isActive && "bg-[--color-sidebar-accent] text-[--color-sidebar-primary]"
-                  )
-                }
-              >
-                {it.icon && <span className="grid h-5 w-5 place-items-center">{it.icon}</span>}
-                <span className={cn(collapsed && "sr-only")}>{it.label}</span>
-              </NavLink>
+            <li key={String(it.to ?? it.label)}>
+              {it.onClick && !it.to ? (
+                // action button (e.g. Logout)
+                <button
+                  type="button"
+                  onClick={it.onClick}
+                  className={cn(
+                    "flex w-full items-center gap-2 rounded-lg px-2 py-2 text-sm text-left hover:bg-[--color-sidebar-accent]",
+                    // actions don't have an active state
+                    ""
+                  )}
+                >
+                  {it.icon && <span className="grid h-5 w-5 place-items-center">{it.icon}</span>}
+                  <span className={cn(collapsed && "sr-only")}>{it.label}</span>
+                </button>
+              ) : (
+                <NavLink
+                  to={it.to ?? "#"}
+                  end={it.end}
+                  className={({ isActive }) =>
+                    cn(
+                      "flex items-center gap-2 rounded-lg px-2 py-2 text-sm hover:bg-[--color-sidebar-accent]",
+                      isActive && "bg-[--color-sidebar-accent] text-[--color-sidebar-primary]"
+                    )
+                  }
+                >
+                  {it.icon && <span className="grid h-5 w-5 place-items-center">{it.icon}</span>}
+                  <span className={cn(collapsed && "sr-only")}>{it.label}</span>
+                </NavLink>
+              )}
             </li>
           ))}
         </ul>

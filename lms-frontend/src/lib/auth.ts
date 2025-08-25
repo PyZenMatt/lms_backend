@@ -47,3 +47,35 @@ export function getRoleFromToken(): Role {
     return null;
   }
 }
+
+export type JwtUser = {
+  username?: string;
+  email?: string;
+  first_name?: string;
+  last_name?: string;
+  [k: string]: any;
+};
+
+export function getUserFromToken(): JwtUser | null {
+  const raw = getAccessToken();
+  if (!raw) return null;
+  try {
+    const payload = JSON.parse(atob(raw.split(".")[1] || ""));
+    const user: JwtUser = {};
+    if (payload.username) user.username = payload.username;
+    if (payload.email) user.email = payload.email;
+    if (payload.first_name) user.first_name = payload.first_name;
+    if (payload.last_name) user.last_name = payload.last_name;
+    // some tokens embed user under 'user' key
+    if (payload.user && typeof payload.user === "object") {
+      const u = payload.user as any;
+      if (!user.username && u.username) user.username = u.username;
+      if (!user.email && u.email) user.email = u.email;
+      if (!user.first_name && u.first_name) user.first_name = u.first_name;
+      if (!user.last_name && u.last_name) user.last_name = u.last_name;
+    }
+    return user;
+  } catch {
+    return null;
+  }
+}

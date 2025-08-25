@@ -1,193 +1,107 @@
-// src/components/layout/AppLayout.tsx
-import React from "react";
-import { Link, NavLink, Outlet, useNavigate } from "react-router-dom";
-import { useAuth } from "../../context/AuthContext";
-import NotificationsBell from "../NotificationsBell";
-import ThemeToggle from "../ThemeToggle";
-import { getProfile } from "../../services/profile";
+import * as React from "react";
+import { Sidebar, type SidebarItem } from "@/components/ui/sidebar";
+import { cn } from "@/lib/utils";
+import ThemeToggle from "@/components/ThemeToggle";
+import NotificationsBell from "@/components/NotificationsBell";
+import { useAuth } from "@/context/AuthContext";
 
-function cls(...xs: Array<string | false | undefined | null>) {
-  return xs.filter(Boolean).join(" ");
-}
-
-export default function AppLayout() {
+export default function AppLayout({
+  items,
+  footer,
+  children,
+}: {
+  items?: SidebarItem[];
+  footer?: React.ReactNode;
+  children?: React.ReactNode;
+}) {
+  const [collapsed, setCollapsed] = React.useState(false);
   const { isAuthenticated, role, logout } = useAuth();
-  const navigate = useNavigate();
-  const [open, setOpen] = React.useState(false);
-  const [profileName, setProfileName] = React.useState<string | null>(null);
 
-  async function onLogout() {
-    await logout();
-    navigate("/", { replace: true });
+  // Default items if none provided — includes icons and role-based links
+  const defaultItems: SidebarItem[] = [];
+
+  // Common top items — role-aware dashboard and menus
+  if (role === "teacher" || role === "admin") {
+    // teacher/admin: dashboard goes to /teacher, studio goes to course creation
+    defaultItems.push({ to: "/teacher", label: "🏠 Dashboard", end: true });
+    defaultItems.push({ to: "/studio/courses/new", label: "🏫 Studio Docente" });
+    defaultItems.push({ to: "/courses", label: "📚 Corsi" });
+    defaultItems.push({ to: "/wallet", label: "👛 Wallet" });
+    // teachers don't need 'I miei esercizi' in the sidebar; they manage exercises via Studio
+  } else {
+    // student / anonymous sidebar — learning-focused
+    defaultItems.push({ to: "/dashboard", label: "🏠 Dashboard", end: true });
+    defaultItems.push({ to: "/courses", label: "🔎 Esplora Corsi" });
+    defaultItems.push({ to: "/my/courses", label: "📘 I miei corsi" });
+    defaultItems.push({ to: "/wallet", label: "👛 Wallet" });
+    defaultItems.push({ to: "/my/exercises", label: "📝 I miei esercizi" });
   }
 
-  React.useEffect(() => {
-    let mounted = true
-    async function load() {
-      try {
-        const p = await getProfile()
-        if (!mounted) return
-        if (p) setProfileName(p.first_name ? `${p.first_name} ${p.last_name ?? ""}`.trim() : (p.username ?? null))
-      } catch (e) {
-        // ignore profile fetch errors
-        void e
-      }
-    }
-    if (isAuthenticated) load()
-    return () => { mounted = false }
-  }, [isAuthenticated])
+  // Auth-only items
+  if (isAuthenticated) {
+    // link to assigned reviews list by default
+    defaultItems.push({ to: "/reviews/assigned", label: "🔎 Revisioni" });
+  }
 
-  // ✅ Admin → /admin, Teacher → /teacher, altri → /dashboard
-  const dashHref = role === "admin" ? "/admin" : role === "teacher" ? "/teacher" : "/dashboard";
+  // Admin-only
+  if (role === "admin") {
+    defaultItems.push({ to: "/admin", label: "⚙️ Admin" });
+  }
 
-  const NavLinkItem = ({
-    to,
-    children,
-    end,
-  }: {
-    to: string;
-    children: React.ReactNode;
-    end?: boolean;
-  }) => (
-    <NavLink
-      to={to}
-      end={end}
-      className={({ isActive }) =>
-        cls(
-          "px-3 py-2 rounded-md text-sm font-medium transition-colors",
-          isActive ? "bg-accent text-foreground" : "text-muted-foreground hover:text-foreground"
-        )
-      }
-      onClick={() => setOpen(false)}
-    >
-      {children}
-    </NavLink>
-  );
+  defaultItems.push({ to: "/notifications", label: "🔔 Notifiche" });
+
+  const sidebarItems = items && items.length > 0 ? items : defaultItems;
+
+  // Add Login/Register or Logout action at the end
+  const trailingItems: SidebarItem[] = [];
+  if (isAuthenticated) {
+    trailingItems.push({ label: "⇦ Logout", icon: "⏏️", onClick: () => logout() });
+  } else {
+    trailingItems.push({ to: "/login", label: "🔐 Login" });
+    trailingItems.push({ to: "/register", label: "✍️ Registrati" });
+  }
+
+  const finalItems = [...sidebarItems, ...trailingItems];
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
-      {/* Top Nav */}
-      <header className="sticky top-0 z-40 border-b bg-card/80 backdrop-blur">
-        <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-2">
-          {/* Brand + mobile menu button */}
-          <div className="flex items-center gap-3">
-            <button
-              className="inline-flex h-9 w-9 items-center justify-center rounded-md border md:hidden"
-              onClick={() => setOpen((v) => !v)}
-              aria-label="Toggle menu"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-4 w-4"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-              >
-                <path d="M4 6h16M4 12h16M4 18h16" />
-              </svg>
-            </button>
-
-            <Link to="/" className="flex items-center gap-2">
-              <div className="h-8 w-8 rounded bg-primary/20" />
-              <span className="text-base font-semibold">LMS</span>
-            </Link>
-
-            {/* Desktop links */}
-            <nav className="ml-4 hidden items-center gap-1 md:flex">
-              <NavLinkItem to="/courses">Corsi</NavLinkItem>
-              <NavLinkItem to="/wallet">Wallet</NavLinkItem>
-              {isAuthenticated && <NavLinkItem to="/reviews/assigned">Revisioni</NavLinkItem>}
-              {isAuthenticated && <NavLinkItem to={dashHref}>Dashboard</NavLinkItem>}
-            </nav>
-          </div>
-
-          {/* Right side */}
-          <div className="flex items-center gap-2">
-            <ThemeToggle />
-            {isAuthenticated ? (
-              <>
-                <Link
-                  to="/notifications"
-                  className="hidden md:inline-flex items-center gap-2 rounded-md px-3 py-2 text-sm text-muted-foreground hover:text-foreground"
-                  onClick={() => setOpen(false)}
-                >
-                  <NotificationsBell />
-                  <span className="sr-only md:not-sr-only">Notifiche</span>
-                </Link>
-                <NavLinkItem to="/profile">Profilo</NavLinkItem>
-                <button
-                  onClick={onLogout}
-                  className="inline-flex h-9 items-center rounded-md bg-primary px-3 text-sm text-primary-foreground hover:opacity-90"
-                >
-                  Logout
-                </button>
-              </>
-            ) : (
-              <>
-                <NavLinkItem to="/login">Login</NavLinkItem>
-                <NavLinkItem to="/register">Registrati</NavLinkItem>
-              </>
-            )}
-          </div>
-        </div>
-
-        {/* Mobile menu */}
-        {open && (
-          <div className="border-t md:hidden">
-            <div className="mx-auto flex max-w-7xl flex-col gap-1 px-4 py-2">
-              {isAuthenticated && (
-                <div className="px-3 py-2 text-sm text-foreground">{profileName ?? "Utente"}</div>
-              )}
-              <NavLinkItem to="/courses" end>
-                Corsi
-              </NavLinkItem>
-              <NavLinkItem to="/wallet">Wallet</NavLinkItem>
-              {isAuthenticated && <NavLinkItem to={dashHref}>Dashboard</NavLinkItem>}
-              {isAuthenticated ? (
-                <>
-                  <Link
-                    to="/reviews/assigned"
-                    className="px-3 py-2 text-sm text-muted-foreground hover:text-foreground"
-                    onClick={() => setOpen(false)}
-                  >
-                    Revisioni
-                  </Link>
-                  <Link
-                    to="/notifications"
-                    className="px-3 py-2 text-sm text-muted-foreground hover:text-foreground"
-                    onClick={() => setOpen(false)}
-                  >
-                    Notifiche
-                  </Link>
-                  <NavLinkItem to="/profile">Profilo</NavLinkItem>
-                  <button
-                    onClick={onLogout}
-                    className="mt-1 inline-flex h-9 items-center rounded-md bg-primary px-3 text-sm text-primary-foreground hover:opacity-90"
-                  >
-                    Logout
-                  </button>
-                </>
-              ) : (
-                <>
-                  <NavLinkItem to="/login">Login</NavLinkItem>
-                  <NavLinkItem to="/register">Registrati</NavLinkItem>
-                </>
-              )}
+    <div className="flex min-h-screen bg-background text-foreground">
+      <Sidebar
+        items={finalItems}
+        footer={
+          footer ?? (
+            <div className="flex items-center justify-between gap-2">
+              <ThemeToggle />
+              <div className="text-xs text-muted-foreground">v1.0 • beta</div>
             </div>
+          )
+        }
+        collapsed={collapsed}
+        onToggle={setCollapsed}
+      />
+
+      <div className="flex w-full flex-col">
+        {/* Topbar with toggles */}
+        <header className="sticky top-0 z-10 flex h-14 items-center justify-between border-b bg-background/90 px-3 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+          <div className="flex items-center gap-2">
+            <button
+              className="inline-flex items-center justify-center rounded-md border px-2 py-1 text-sm md:hidden"
+              onClick={() => setCollapsed((v) => !v)}
+            >
+              Menu
+            </button>
+            <span className="text-sm text-muted-foreground">SchoolPlatform</span>
           </div>
-        )}
-      </header>
+          <div className="flex items-center gap-2">
+            <NotificationsBell />
+            <ThemeToggle />
+          </div>
+        </header>
 
-      {/* Page content */}
-      <main className="mx-auto max-w-7xl px-4 py-6">
-        <Outlet />
-      </main>
-
-      {/* Footer */}
-      <footer className="border-t py-6 text-center text-xs text-muted-foreground">
-        © {new Date().getFullYear()} LMS – All rights reserved.
-      </footer>
+        <main className={cn("mx-auto w-full max-w-[1200px] p-3 md:p-6")}>
+          {children}
+        </main>
+      </div>
     </div>
   );
 }
+

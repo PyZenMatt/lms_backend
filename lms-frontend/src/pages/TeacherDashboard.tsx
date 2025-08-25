@@ -1,5 +1,6 @@
 // src/pages/TeacherDashboard.tsx
 import React from "react";
+import { getUserFromToken, getAccessToken } from "../lib/auth";
 import { Link } from "react-router-dom";
 import { getTeacherDashboard, type Course, type TeacherStats } from "../services/teacher";
 import DrfPager from "../components/DrfPager";
@@ -49,6 +50,23 @@ export default function TeacherDashboard() {
         <div>
           <h1 className="text-2xl font-semibold">Teacher Dashboard</h1>
           <p className="text-sm text-muted-foreground">Panoramica corsi e metriche</p>
+          {(() => {
+            const u = getUserFromToken();
+            const raw = getAccessToken();
+            if (!raw) {
+              return <div className="mt-1 text-sm text-muted-foreground">Non sei autenticato (nessun token)</div>;
+            }
+            if (!u || (!u.first_name && !u.username && !u.email)) {
+              return (
+                <div className="mt-1 text-sm text-muted-foreground">
+                  Nessuna informazione utente trovata nel token.
+                  <div className="mt-1 text-xs text-muted-foreground">Token presente: sì — payload: <code className="ml-1">{JSON.stringify(u ?? {})}</code></div>
+                </div>
+              );
+            }
+            const name = u.first_name || u.username || u.email || "Docente";
+            return <div className="mt-1 text-sm text-muted-foreground">Connesso come: {name}</div>;
+          })()}
         </div>
         <div className="flex gap-2">
           <Link

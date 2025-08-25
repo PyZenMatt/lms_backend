@@ -1,5 +1,6 @@
 // src/pages/StudentDashboard.tsx
 import React from "react";
+import { getUserFromToken, getAccessToken } from "../lib/auth";
 import { getEnrolledCourses, type Course } from "../services/student";
 import DrfPager from "../components/DrfPager";
 
@@ -44,6 +45,23 @@ export default function StudentDashboard() {
       <div>
         <h1 className="text-2xl font-semibold">I miei corsi</h1>
         <p className="text-sm text-muted-foreground">Corsi a cui sei iscritto</p>
+        {(() => {
+          const u = getUserFromToken();
+          const raw = getAccessToken();
+          if (!raw) {
+            return <div className="mt-2 text-sm text-muted-foreground">Non sei autenticato (nessun token)</div>;
+          }
+          if (!u || (!u.first_name && !u.username && !u.email)) {
+            return (
+              <div className="mt-2 text-sm text-muted-foreground">
+                Nessuna informazione utente trovata nel token.
+                <div className="mt-1 text-xs text-muted-foreground">Token presente: sì — payload: <code className="ml-1">{JSON.stringify(u ?? {})}</code></div>
+              </div>
+            );
+          }
+          const name = u.first_name || u.username || u.email || "Utente";
+          return <div className="mt-2 text-sm text-muted-foreground">Connesso come: {name}</div>;
+        })()}
       </div>
 
       {loading && <div>Caricamento…</div>}

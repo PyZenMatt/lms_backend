@@ -1,5 +1,8 @@
 import { useEffect, useState } from "react";
-import { getWallet, getTransactions, type WalletInfo, type WalletTransaction } from "../services/wallet";
+import { getWallet, getTransactions, type WalletInfo, type WalletTransaction } from "@/services/wallet";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Table, THead, TBody, TR, TH, TD, TableEmpty } from "@/components/ui/table";
+import { Skeleton } from "@/components/ui/skeleton";
 
 type Page<T> = { count: number; next?: string | null; previous?: string | null; results: T[] };
 
@@ -36,93 +39,102 @@ export default function WalletPage() {
   }, [page]);
 
   return (
-    <div className="mx-auto max-w-5xl p-4 md:p-6 space-y-6">
+    <div className="space-y-6">
       <h1 className="text-2xl font-semibold">Wallet TEO</h1>
 
-      {/* Stato */}
-      {loading && <div className="animate-pulse h-24 rounded-xl bg-gray-200/50" />}
+      {/* Card saldo */}
+      {loading && <Skeleton className="h-24 rounded-2xl" />}
       {error && (
         <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-red-700">
           {error} — Assicurati di essere loggato.
-          {/* se l'errore è un 404 collettivo potremmo anche mostrare gli endpoint provati */}
         </div>
       )}
-
-      {/* Card saldo */}
       {wallet && (
-        <div className="rounded-2xl border bg-white p-5 shadow-sm">
-          <div className="flex items-start justify-between">
-            <div>
-              <div className="text-sm text-gray-500">Saldo disponibile</div>
-              <div className="mt-1 text-3xl font-bold">{wallet.balance_teo.toFixed(2)} TEO</div>
-              {typeof wallet.balance_eur === "number" && (
-                <div className="text-sm text-gray-500">≈ {wallet.balance_eur.toFixed(2)} EUR</div>
+        <Card>
+          <CardHeader>
+            <CardTitle>Saldo disponibile</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex items-start justify-between">
+              <div>
+                <div className="mt-1 text-3xl font-bold">{wallet.balance_teo.toFixed(2)} TEO</div>
+                {typeof wallet.balance_eur === "number" && (
+                  <div className="text-sm text-muted-foreground">≈ {wallet.balance_eur.toFixed(2)} EUR</div>
+                )}
+              </div>
+              {wallet.address && (
+                <div className="text-right">
+                  <div className="text-xs text-muted-foreground">Indirizzo</div>
+                  <div className="font-mono text-sm break-all">{wallet.address}</div>
+                </div>
               )}
             </div>
-            {wallet.address && (
-              <div className="text-right">
-                <div className="text-xs text-gray-500">Indirizzo</div>
-                <div className="font-mono text-sm break-all">{wallet.address}</div>
+            {wallet.updated_at && (
+              <div className="mt-3 text-xs text-muted-foreground">
+                Aggiornato: {new Date(wallet.updated_at).toLocaleString()}
               </div>
             )}
-          </div>
-          {wallet.updated_at && (
-            <div className="mt-3 text-xs text-gray-500">Aggiornato: {new Date(wallet.updated_at).toLocaleString()}</div>
-          )}
-        </div>
+          </CardContent>
+        </Card>
       )}
 
       {/* Movimenti */}
-      <div className="rounded-2xl border bg-white shadow-sm">
-        <div className="flex items-center justify-between p-4">
-          <h2 className="text-lg font-medium">Movimenti</h2>
-          <div className="text-sm text-gray-500">Totale: {count}</div>
-        </div>
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between">
+          <CardTitle>Movimenti</CardTitle>
+          <div className="text-sm text-muted-foreground">Totale: {count}</div>
+        </CardHeader>
+        <CardContent>
+          {tx.length === 0 && !loading ? (
+            <TableEmpty>Nessun movimento</TableEmpty>
+          ) : (
+            <div className="overflow-x-auto">
+              <Table>
+                <THead>
+                  <TR>
+                    <TH>Data</TH>
+                    <TH>Tipo</TH>
+                    <TH>Descrizione</TH>
+                    <TH className="text-right">Importo (TEO)</TH>
+                  </TR>
+                </THead>
+                <TBody>
+                  {tx.map((r) => (
+                    <TR key={String(r.id)}>
+                      <TD>{new Date(r.created_at).toLocaleString()}</TD>
+                      <TD>{r.type}</TD>
+                      <TD>{r.description ?? "-"}</TD>
+                      <TD className="text-right font-medium">
+                        {r.amount_teo >= 0 ? "+" : ""}
+                        {r.amount_teo.toFixed(2)}
+                      </TD>
+                    </TR>
+                  ))}
+                </TBody>
+              </Table>
+            </div>
+          )}
 
-        <div className="overflow-x-auto">
-          <table className="min-w-full text-sm">
-            <thead className="bg-gray-50">
-              <tr className="text-left">
-                <th className="px-4 py-2">Data</th>
-                <th className="px-4 py-2">Tipo</th>
-                <th className="px-4 py-2">Descrizione</th>
-                <th className="px-4 py-2 text-right">Importo (TEO)</th>
-              </tr>
-            </thead>
-            <tbody>
-              {tx.map((r) => (
-                <tr key={String(r.id)} className="border-t">
-                  <td className="px-4 py-2">{new Date(r.created_at).toLocaleString()}</td>
-                  <td className="px-4 py-2">{r.type}</td>
-                  <td className="px-4 py-2">{r.description ?? "-"}</td>
-                  <td className="px-4 py-2 text-right font-medium">
-                    {r.amount_teo >= 0 ? "+" : ""}
-                    {r.amount_teo.toFixed(2)}
-                  </td>
-                </tr>
-              ))}
-              {!loading && tx.length === 0 && (
-                <tr><td className="px-4 py-6 text-center text-gray-500" colSpan={4}>Nessun movimento</td></tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-
-        {/* Paginazione semplice */}
-        <div className="flex items-center justify-between p-4">
-          <button
-            className="rounded-lg border px-3 py-1 text-sm disabled:opacity-50"
-            onClick={() => setPage(p => Math.max(1, p - 1))}
-            disabled={page === 1 || loading}
-          >Precedente</button>
-          <div className="text-sm">Pagina {page}</div>
-          <button
-            className="rounded-lg border px-3 py-1 text-sm disabled:opacity-50"
-            onClick={() => setPage(p => p + 1)}
-            disabled={loading || (page * 20 >= count)}
-          >Successiva</button>
-        </div>
-      </div>
+          {/* Paginazione semplice */}
+          <div className="mt-4 flex items-center justify-between">
+            <button
+              className="rounded-lg border px-3 py-1 text-sm disabled:opacity-50"
+              onClick={() => setPage((p) => Math.max(1, p - 1))}
+              disabled={page === 1 || loading}
+            >
+              Precedente
+            </button>
+            <div className="text-sm">Pagina {page}</div>
+            <button
+              className="rounded-lg border px-3 py-1 text-sm disabled:opacity-50"
+              onClick={() => setPage((p) => p + 1)}
+              disabled={loading || page * 20 >= count}
+            >
+              Successiva
+            </button>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }

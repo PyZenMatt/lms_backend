@@ -1,7 +1,7 @@
 // src/App.tsx
 // React import not required with new JSX transform
 import { Routes, Route, Navigate } from "react-router-dom";
-import AppLayout from "./components/layout/AppLayout";
+import AppLayoutRoute from "./routes/AppLayoutRoute";
 import TopProgressBar from "./components/TopProgressBar";
 import ToastHost from "./components/ToastHost";
 import ErrorBoundary from "./components/ErrorBoundary";
@@ -45,7 +45,7 @@ export default function App() {
       <ToastHost />
 
       <Routes>
-        <Route element={<AppLayout />}>
+        <Route element={<AppLayoutRoute />}>
           {/* Public */}
           <Route index element={<Navigate to="/courses" replace />} />
           <Route path="/login" element={<ErrorBoundary><Login /></ErrorBoundary>} />
