@@ -31,6 +31,7 @@ import CoursesStudioList from "./pages/studio/CoursesStudioList"
 import CourseStudioForm from "./pages/studio/CourseStudioForm"
 import CourseBuilder from "./pages/studio/CourseBuilder"
 import { useParams } from "react-router-dom";
+import WalletPage from "./pages/WalletPage";
 
 function BuyRedirect() {
   const { id } = useParams();
@@ -186,6 +187,16 @@ export default function App() {
               <RoleRoute allow="admin">
                 <ErrorBoundary><AdminDashboard /></ErrorBoundary>
               </RoleRoute>
+            }
+          />
+
+          {/* Wallet */}
+          <Route
+            path="/wallet"
+            element={
+              <ProtectedRoute>
+                <ErrorBoundary><WalletPage /></ErrorBoundary>
+              </ProtectedRoute>
             }
           />
 

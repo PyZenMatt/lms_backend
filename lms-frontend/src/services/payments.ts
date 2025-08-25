@@ -62,11 +62,45 @@ export async function getPaymentSummary(
   if (!res.ok) return { ok: false, status: res.status, error: (res as any).error }
 
   const raw = res.data ?? {}
-  const price_eur = asNumber(raw.price_eur ?? raw.price ?? raw.base_price ?? raw.original_price)
-  const discount_percent = asNumber(raw.discount_percent ?? raw.discountPct)
-  const total_eur = asNumber(raw.total_eur ?? raw.total ?? raw.final_price)
-  const teo_required = asNumber(raw.teo_required ?? raw.teo_cost ?? raw.teocoin_required)
-  const currency = String(raw.currency ?? "EUR")
+  const pricing = (raw.pricing ?? raw.pricing_summary) as Record<string, any> | undefined
+  const firstOption = Array.isArray(raw.pricing_options) && raw.pricing_options.length ? (raw.pricing_options[0] as Record<string, any>) : undefined
+
+  const price_eur =
+    asNumber(raw.price_eur ?? raw.price ?? raw.base_price ?? raw.original_price) ??
+    asNumber(pricing?.original_price) ??
+    asNumber(firstOption?.price) ??
+    undefined
+
+  const discount_percent = asNumber(raw.discount_percent ?? raw.discountPct ?? pricing?.discount_percent ?? firstOption?.discount_percent)
+
+  const total_eur =
+    asNumber(raw.total_eur ?? raw.total ?? raw.final_price) ??
+    asNumber(pricing?.final_price) ??
+    asNumber(firstOption?.final_price) ??
+    undefined
+
+  // Compute teo_required carefully: prefer explicit teocoin pricing option (and only if not disabled).
+  // Avoid falling back to fiat price (firstOption.price) which would show e.g. 49.99 TEO incorrectly.
+  let teo_required = asNumber(raw.teo_required ?? raw.teo_cost ?? raw.teocoin_required) ?? undefined
+
+  const teocoinOption = Array.isArray(raw.pricing_options)
+    ? (raw.pricing_options as Record<string, any>[]).find((o) => o.method === "teocoin")
+    : undefined
+
+  if (teocoinOption && !teocoinOption.disabled) {
+    const optPriceNum = asNumber(teocoinOption.price)
+    if (optPriceNum !== undefined) {
+      teo_required = optPriceNum
+    } else if (teocoinOption.discount_percent && price_eur !== undefined) {
+      const pct = Number(teocoinOption.discount_percent)
+      if (Number.isFinite(pct) && price_eur !== undefined) {
+        // assume 1 TEO = 1 EUR for DB-based system
+        teo_required = Math.round((price_eur * pct) / 100)
+      }
+    }
+  }
+
+  const currency = String(raw.currency ?? pricing?.currency ?? firstOption?.currency ?? "EUR")
 
   const summary: PaymentSummary = {
     course_id: Number(courseId),

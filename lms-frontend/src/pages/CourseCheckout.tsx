@@ -1,11 +1,12 @@
 // src/pages/CourseCheckout.tsx
 import React from "react"
-import { useParams, useNavigate, Link } from "react-router-dom"
-import { getPaymentSummary, createPaymentIntent, purchaseCourse } from "../services/payments"
+import { useParams, Link } from "react-router-dom"
+import { getPaymentSummary, createPaymentIntent } from "../services/payments"
 import { getCourse } from "../services/courses"
 import { loadStripe } from "@stripe/stripe-js"
 import type { Stripe } from "@stripe/stripe-js"
 import { Elements, PaymentElement, useElements, useStripe } from "@stripe/react-stripe-js"
+import TeoDiscountWidget from "../components/checkout/TeoDiscountWidget"
 
 type SummaryState = {
   price_eur?: number
@@ -23,13 +24,15 @@ function maskKey(pk?: string | null) {
 
 function getPublishableKeyFromEnv(): string | null {
   // preferisci .env Vite
-  const pk = (import.meta as any).env?.VITE_STRIPE_PUBLISHABLE_KEY || (window as any)?.VITE_STRIPE_PUBLISHABLE_KEY
+  const metaEnv = (import.meta as { env?: Record<string, string> }).env
+  const winEnv = (window as unknown as Record<string, string | undefined>)
+  const pk = metaEnv?.VITE_STRIPE_PUBLISHABLE_KEY || winEnv?.VITE_STRIPE_PUBLISHABLE_KEY
   return typeof pk === "string" ? pk : null
 }
 
 export default function CourseCheckout() {
   const { id } = useParams<{ id: string }>()
-  const navigate = useNavigate()
+  
   const courseId = Number(id)
 
   const [loading, setLoading] = React.useState(true)
@@ -42,7 +45,10 @@ export default function CourseCheckout() {
   const [clientSecret, setClientSecret] = React.useState<string | null>(null)
   const [publishableKey, setPublishableKey] = React.useState<string | null>(null)
 
-  const [studentAddress, setStudentAddress] = React.useState<string>("")
+  // (discount override stored directly on summary via setSummary in onApply)
+  const [teoDiscountApplied, setTeoDiscountApplied] = React.useState<boolean>(false)
+
+  // wallet address not needed during checkout
 
   React.useEffect(() => {
     let mounted = true
@@ -60,7 +66,7 @@ export default function CourseCheckout() {
           currency: s.data.currency || "EUR",
         })
       }
-      setTitle(c.ok ? (c.data.title ?? `Corso #${courseId}`) : `Corso #${courseId}`)
+  setTitle(c.ok ? (c.data?.title ?? `Corso #${courseId}`) : `Corso #${courseId}`)
       setLoading(false)
     })()
     return () => {
@@ -90,7 +96,19 @@ export default function CourseCheckout() {
     }
 
     // 2) Creo l'intent sul BE (restituisce client_secret)
-    const res = await createPaymentIntent(courseId, {})
+    const intentPayload: Record<string, unknown> = {}
+    if (summary.discount_percent && summary.discount_percent > 0) {
+      // require the discount to be applied via widget before creating intent
+      if (!teoDiscountApplied) {
+        setSubmitting(null)
+        setError("Devi prima applicare lo sconto TEO prima di procedere al pagamento.")
+        return
+      }
+      intentPayload.use_teocoin_discount = true
+      intentPayload.discount_percent = summary.discount_percent
+      intentPayload.discount_eur = summary.price_eur && summary.discount_percent ? (summary.price_eur * (summary.discount_percent / 100)) : undefined
+    }
+    const res = await createPaymentIntent(courseId, intentPayload)
     setSubmitting(null)
 
     if (!res.ok) {
@@ -116,20 +134,7 @@ export default function CourseCheckout() {
     setError("Il server non ha fornito dati di pagamento utilizzabili (client_secret assente).")
   }
 
-  async function onPayTeo() {
-    setSubmitting("teo")
-    setError(null)
-    const res = await purchaseCourse(courseId, {
-      method: "teocoin",
-      student_address: studentAddress || undefined,
-    })
-    setSubmitting(null)
-    if (!res.ok) {
-      setError(`Acquisto con TeoCoin fallito (HTTP ${res.status})`)
-      return
-    }
-    navigate(`/courses/${courseId}`)
-  }
+  // Full TeoCoin payment removed: platform uses TEO only for discounts.
 
   if (loading) return <div className="p-6">Caricamento…</div>
 
@@ -173,9 +178,7 @@ export default function CourseCheckout() {
                   Totale: <b>{summary.total_eur.toFixed(2)} {summary.currency || "EUR"}</b>
                 </div>
               )}
-              {summary.teo_required !== undefined && (
-                <div className="text-sm">Oppure <b>{summary.teo_required} TEO</b></div>
-              )}
+              {/* Full-TEO payment not supported in checkout; only discounts available */}
             </>
           ) : (
             <div className="text-sm opacity-70">
@@ -185,6 +188,24 @@ export default function CourseCheckout() {
         </div>
 
         <div className="space-y-4">
+          {/* Teo Discount Widget */}
+      <TeoDiscountWidget
+            priceEUR={summary.price_eur ?? (summary.total_eur ?? 0)}
+            courseId={courseId}
+            onApply={(finalPriceEUR, discountEUR, details) => {
+              // apply discount locally to the summary and record teo details
+              setSummary((s) => ({
+                ...s,
+                total_eur: finalPriceEUR,
+                discount_percent: (details && (details.discount_percent as number)) ?? s.discount_percent,
+                teo_required: (details && (details.teo_required as number)) ?? s.teo_required,
+              }))
+        setTeoDiscountApplied(true)
+              // optional: you can store details in state or send analytics
+              console.debug("TEO discount applied", { finalPriceEUR, discountEUR, details })
+            }}
+          />
+
           {!clientSecret ? (
             <>
               <button
@@ -195,24 +216,7 @@ export default function CourseCheckout() {
                 {submitting === "card" ? "Creo pagamento…" : "Paga con carta (Stripe)"}
               </button>
 
-              {summary.teo_required !== undefined && (
-                <div className="space-y-2">
-                  <input
-                    type="text"
-                    placeholder="Wallet address (opzionale)"
-                    value={studentAddress}
-                    onChange={(e) => setStudentAddress(e.target.value)}
-                    className="w-full rounded-xl border px-3 py-2"
-                  />
-                  <button
-                    onClick={onPayTeo}
-                    disabled={!!submitting}
-                    className="w-full rounded-xl px-4 py-2 border bg-white disabled:opacity-50"
-                  >
-                    {submitting === "teo" ? "Processo in corso…" : "Paga con TeoCoin"}
-                  </button>
-                </div>
-              )}
+              {/* Full TeoCoin payment removed: no wallet input or full-TEO payment allowed */}
             </>
           ) : (
             <StripeElementsBlock

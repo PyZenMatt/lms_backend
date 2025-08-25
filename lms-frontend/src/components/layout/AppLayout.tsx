@@ -28,7 +28,10 @@ export default function AppLayout() {
         const p = await getProfile()
         if (!mounted) return
         if (p) setProfileName(p.first_name ? `${p.first_name} ${p.last_name ?? ""}`.trim() : (p.username ?? null))
-      } catch {}
+      } catch (e) {
+        // ignore profile fetch errors
+        void e
+      }
     }
     if (isAuthenticated) load()
     return () => { mounted = false }
@@ -93,6 +96,7 @@ export default function AppLayout() {
             {/* Desktop links */}
             <nav className="ml-4 hidden items-center gap-1 md:flex">
               <NavLinkItem to="/courses">Corsi</NavLinkItem>
+              <NavLinkItem to="/wallet">Wallet</NavLinkItem>
               {isAuthenticated && <NavLinkItem to="/reviews/assigned">Revisioni</NavLinkItem>}
               {isAuthenticated && <NavLinkItem to={dashHref}>Dashboard</NavLinkItem>}
             </nav>
@@ -138,6 +142,7 @@ export default function AppLayout() {
               <NavLinkItem to="/courses" end>
                 Corsi
               </NavLinkItem>
+              <NavLinkItem to="/wallet">Wallet</NavLinkItem>
               {isAuthenticated && <NavLinkItem to={dashHref}>Dashboard</NavLinkItem>}
               {isAuthenticated ? (
                 <>
