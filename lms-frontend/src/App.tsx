@@ -56,55 +56,53 @@ export default function App() {
           <Route path="/courses" element={<ErrorBoundary><CoursesList /></ErrorBoundary>} />
           <Route path="/courses/:id" element={<ErrorBoundary><CourseDetail /></ErrorBoundary>} />
 
-            <Route
-              path="/learn/:id"
-              element={
-                <ProtectedRoute>
-                  <ErrorBoundary><StudentCourse /></ErrorBoundary>
-                </ProtectedRoute>
-              }
-            />
+          <Route
+            path="/learn/:id"
+            element={
+              <ProtectedRoute>
+                <ErrorBoundary><StudentCourse /></ErrorBoundary>
+              </ProtectedRoute>
+            }
+          />
 
-            <Route
-              path="/my/exercises"
-              element={
-                <ProtectedRoute>
-                  <ErrorBoundary><MyExercises /></ErrorBoundary>
-                </ProtectedRoute>
-              }
-            />
+          <Route
+            path="/my/exercises"
+            element={
+              <ProtectedRoute>
+                <ErrorBoundary><MyExercises /></ErrorBoundary>
+              </ProtectedRoute>
+            }
+          />
 
-            <Route
-              path="/exercises/:id/submit"
-              element={
-                <ProtectedRoute>
-                  <ErrorBoundary><ExerciseSubmit /></ErrorBoundary>
-                </ProtectedRoute>
-              }
-            />
+          <Route
+            path="/exercises/:id/submit"
+            element={
+              <ProtectedRoute>
+                <ErrorBoundary><ExerciseSubmit /></ErrorBoundary>
+              </ProtectedRoute>
+            }
+          />
 
-            <Route
-              path="/lessons/:id"
-              element={
-                <ProtectedRoute>
-                  <ErrorBoundary><LessonPage /></ErrorBoundary>
-                </ProtectedRoute>
-              }
-            />
+          <Route
+            path="/lessons/:id"
+            element={
+              <ProtectedRoute>
+                <ErrorBoundary><LessonPage /></ErrorBoundary>
+              </ProtectedRoute>
+            }
+          />
 
-            <Route
-              path="/courses/:id/checkout"
-              element={
-                <ProtectedRoute>
-                  <ErrorBoundary><CourseCheckout /></ErrorBoundary>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/courses/:id/buy"
-              element={<BuyRedirect />}
-            />
-            <Route path="/payments/return" element={<ErrorBoundary><PaymentReturn /></ErrorBoundary>} />
+          <Route
+            path="/courses/:id/checkout"
+            element={
+              <ProtectedRoute>
+                <ErrorBoundary><CourseCheckout /></ErrorBoundary>
+              </ProtectedRoute>
+            }
+          />
+          <Route path="/courses/:id/buy" element={<BuyRedirect />} />
+          <Route path="/payments/return" element={<ErrorBoundary><PaymentReturn /></ErrorBoundary>} />
+
           {/* Protected (any role) */}
           <Route
             path="/notifications"
@@ -154,6 +152,8 @@ export default function App() {
               </ProtectedRoute>
             }
           />
+
+          {/* ADMIN only */}
           <Route
             path="/admin"
             element={
@@ -162,7 +162,6 @@ export default function App() {
               </RoleRoute>
             }
           />
-
 
           {/* TEACHER only */}
           <Route
@@ -179,16 +178,6 @@ export default function App() {
           <Route path="studio/courses/new" element={<ProtectedRoute><ErrorBoundary><CourseStudioForm /></ErrorBoundary></ProtectedRoute>} />
           <Route path="studio/courses/:id/edit" element={<ProtectedRoute><ErrorBoundary><CourseStudioForm /></ErrorBoundary></ProtectedRoute>} />
           <Route path="studio/courses/:id/builder" element={<ProtectedRoute><ErrorBoundary><CourseBuilder /></ErrorBoundary></ProtectedRoute>} />
-
-          {/* ADMIN only */}
-          <Route
-            path="/admin"
-            element={
-              <RoleRoute allow="admin">
-                <ErrorBoundary><AdminDashboard /></ErrorBoundary>
-              </RoleRoute>
-            }
-          />
 
           {/* Wallet */}
           <Route

@@ -322,3 +322,16 @@ export function getApiBase() {
 // Convenience: attach to window for debugging (dev only)
 // @ts-ignore
 if (typeof window !== "undefined") (window as any).__api_base__ = BASE;
+
+// Back-compat: re-export showToast from the ToastHost so existing imports keep working
+try {
+  // dynamic import to avoid cyclic issues at module init time
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  const th = require("@/components/ToastHost");
+  if (th && typeof th.showToast === "function") {
+    // @ts-ignore
+    exports.showToast = th.showToast;
+  }
+} catch {
+  // ignore if not available
+}
