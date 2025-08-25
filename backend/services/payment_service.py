@@ -16,6 +16,7 @@ from rewards.models import BlockchainTransaction
 from users.models import User
 
 from .base import TransactionalService
+from django.db import transaction
 from .exceptions import (
     CourseNotFoundError,
     InsufficientTeoCoinsError,
@@ -38,7 +39,7 @@ class PaymentService(TransactionalService):
         user_id: int,
         course_id: int,
         teocoin_to_spend: Decimal,
-        wallet_address: str,
+        wallet_address: Optional[str] = None,
     ) -> Dict[str, Any]:
         """
         Create a hybrid payment intent: deduct TeoCoin for discount, pay remainder with fiat (Stripe).
@@ -51,7 +52,9 @@ class PaymentService(TransactionalService):
             dict: Success status, client_secret, payment_intent_id, discounted_amount, discount_applied, etc.
         """
 
-        def _hybrid_intent():
+        # We'll perform DB reads/writes in short atomic blocks, and call Stripe
+        # outside of those blocks to avoid long-lived SQLite locks.
+        try:
             # Validate user and course
             try:
                 user = User.objects.get(pk=user_id)
@@ -61,12 +64,6 @@ class PaymentService(TransactionalService):
                 course = Course.objects.get(id=course_id)
             except Course.DoesNotExist:
                 raise CourseNotFoundError(course_id)
-
-            # Validate wallet
-            if not wallet_address:
-                raise PaymentServiceException(
-                    "Wallet address required for hybrid payment", "WALLET_REQUIRED", 400
-                )
 
             # Validate not already enrolled
             from courses.models import CourseEnrollment
@@ -82,43 +79,69 @@ class PaymentService(TransactionalService):
                     "TeoCoin amount must be positive", "INVALID_TEOCOIN_AMOUNT", 400
                 )
 
-            # Check user balance
-            balance = self._get_user_balance(wallet_address)
+            # Check user balance without holding a long transaction
+            if wallet_address:
+                balance = self._get_user_balance(wallet_address)
+            else:
+                from services.db_teocoin_service import db_teocoin_service
+                balance = db_teocoin_service.get_available_balance(user)
+
             if balance < teocoin_to_spend:
                 raise InsufficientTeoCoinsError(
                     required=float(teocoin_to_spend), available=float(balance)
                 )
 
-            # Calculate discount: assume 1 TEO = 1 EUR discount, but cap at max allowed by course discount percent
-            max_discount_eur = (
-                course.price_eur * Decimal(course.teocoin_discount_percent or 0) / 100
-            ).quantize(Decimal("0.01"))
-            teocoin_to_use = min(teocoin_to_spend, max_discount_eur)
+            # Use DBTeoCoinService.calculate_discount to determine how much TEO
+            # can be applied for this user/course price (keeps logic consistent)
+            from services.db_teocoin_service import db_teocoin_service
+
+            discount_info = db_teocoin_service.calculate_discount(user=user, course_price=course.price_eur)
+            # discount_info keys: discount_amount (EUR), final_price (EUR), teo_required
+            const_teo_allowed = Decimal(str(discount_info.get("teo_required", discount_info.get("discount_amount", 0))))
+            teocoin_to_use = min(teocoin_to_spend, const_teo_allowed)
             if teocoin_to_use <= 0:
                 raise PaymentServiceException(
                     "No discount available for this course", "NO_DISCOUNT", 400
                 )
 
-            # Calculate new price
-            discounted_price = (course.price_eur - teocoin_to_use).quantize(
-                Decimal("0.01")
-            )
+            discounted_price = (course.price_eur - teocoin_to_use).quantize(Decimal("0.01"))
             if discounted_price < 0:
                 discounted_price = Decimal("0.00")
 
-            # Deduct TeoCoin: create a pending BlockchainTransaction (actual transfer after Stripe success)
-            pending_tx = BlockchainTransaction.objects.create(
-                user=user,
-                amount=-teocoin_to_use,
-                transaction_type="hybrid_discount_pending",
-                status="pending",
-                from_address=wallet_address,
-                to_address=getattr(settings, "REWARD_POOL_ADDRESS", "reward_pool"),
-                related_object_id=str(course.pk),
-                notes=f"Hybrid payment discount for course: {course.title}",
-            )
+            # For DB-only flows (no wallet_address) we apply the DB deduction
+            # immediately to reflect the discount in the user's balance. For
+            # on-chain flows we create a pending blockchain transaction that
+            # will be finalized after Stripe success.
+            pending_tx = None
+            if wallet_address:
+                # Create pending blockchain transaction (pending status)
+                with transaction.atomic():
+                    pending_tx = BlockchainTransaction.objects.create(
+                        user=user,
+                        amount=-teocoin_to_use,
+                        transaction_type="hybrid_discount_pending",
+                        status="pending",
+                        from_address=wallet_address,
+                        to_address=getattr(settings, "REWARD_POOL_ADDRESS", "reward_pool"),
+                        related_object_id=str(course.pk),
+                        notes=f"Hybrid payment discount for course: {course.title} (on-chain)",
+                    )
+            else:
+                # DB-only: create a pending DB transaction and do NOT deduct yet.
+                # Deduction will occur only after Stripe confirms payment (in process_successful_hybrid_payment).
+                with transaction.atomic():
+                    pending_tx = BlockchainTransaction.objects.create(
+                        user=user,
+                        amount=-teocoin_to_use,
+                        transaction_type="hybrid_discount_pending",
+                        status="pending",
+                        from_address=None,
+                        to_address=getattr(settings, "REWARD_POOL_ADDRESS", "reward_pool"),
+                        related_object_id=str(course.pk),
+                        notes=f"Hybrid payment discount for course: {course.title} (db-pending)",
+                    )
 
-            # Create Stripe payment intent for discounted price
+            # Create Stripe payment intent OUTSIDE of DB transaction to avoid locking
             try:
                 import stripe
 
@@ -144,6 +167,14 @@ class PaymentService(TransactionalService):
                     500,
                 )
             except stripe.error.StripeError as e:
+                # If Stripe fails, try to roll back pending_tx status to 'failed'
+                try:
+                    if pending_tx:
+                        pending_tx.status = "failed"
+                        pending_tx.error_message = str(e)
+                        pending_tx.save()
+                except Exception:
+                    pass
                 raise PaymentServiceException(
                     f"Payment processing error: {str(e)}", "STRIPE_ERROR", 400
                 )
@@ -152,6 +183,8 @@ class PaymentService(TransactionalService):
                 "success": True,
                 "client_secret": intent.client_secret,
                 "payment_intent_id": intent.id,
+                "final_price_eur": float(discounted_price),
+                "discount_eur": float(teocoin_to_use),
                 "discounted_amount": float(discounted_price),
                 "discount_applied": float(teocoin_to_use),
                 "original_price": float(course.price_eur),
@@ -159,9 +192,6 @@ class PaymentService(TransactionalService):
                 "course_title": course.title,
                 "teocoin_reward": course.teocoin_reward,
             }
-
-        try:
-            return self.execute_in_transaction(_hybrid_intent)
         except Exception as e:
             self.log_error(f"Failed to create hybrid payment intent: {str(e)}")
             raise
@@ -209,28 +239,58 @@ class PaymentService(TransactionalService):
                     400,
                 )
 
-            # Find pending hybrid discount transaction
+            # Find most recent hybrid discount transaction (pending or completed)
             pending_tx = (
                 BlockchainTransaction.objects.filter(
                     user=user,
-                    transaction_type="hybrid_discount_pending",
+                    transaction_type__in=["hybrid_discount_pending", "hybrid_discount"],
                     related_object_id=str(course.id),
-                    status="pending",
                 )
                 .order_by("-created_at")
                 .first()
             )
-            if not pending_tx:
-                raise PaymentServiceException(
-                    "No pending TeoCoin discount found for this payment",
-                    "NO_PENDING_DISCOUNT",
-                    400,
-                )
 
-            # Mark TeoCoin deduction as completed
-            pending_tx.status = "completed"
-            pending_tx.transaction_type = "hybrid_discount"
-            pending_tx.save()
+            # It's acceptable if no pending_tx is found (the DB deduction may
+            # have been handled elsewhere); in that case we continue.
+            if pending_tx:
+                # If still pending and on-chain, mark completed
+                if pending_tx.status == "pending" and pending_tx.from_address:
+                    pending_tx.status = "completed"
+                    pending_tx.transaction_type = "hybrid_discount"
+                    pending_tx.save()
+                # If DB-only pending (from_address is None and status pending),
+                # perform the actual DB deduction now that Stripe confirmed.
+                elif pending_tx.status == "pending" and not pending_tx.from_address:
+                    try:
+                        from services.db_teocoin_service import db_teocoin_service
+
+                        teo_amount = abs(pending_tx.amount)
+                        with transaction.atomic():
+                            success = db_teocoin_service.deduct_balance(
+                                user=user,
+                                amount=teo_amount,
+                                transaction_type="spent_discount",
+                                description=f"Applied DB discount for course: {course.title}",
+                                course=course,
+                            )
+                            if success:
+                                pending_tx.status = "completed"
+                                pending_tx.transaction_type = "hybrid_discount"
+                                pending_tx.notes = (pending_tx.notes or "") + " (db-deducted after stripe)"
+                                pending_tx.save()
+                            else:
+                                pending_tx.status = "failed"
+                                pending_tx.error_message = "DB deduction failed during post-payment processing"
+                                pending_tx.save()
+                                self.log_error(f"Failed to deduct DB TeoCoin for pending_tx {pending_tx.id} after Stripe success")
+                    except Exception as e:
+                        try:
+                            pending_tx.status = "failed"
+                            pending_tx.error_message = str(e)
+                            pending_tx.save()
+                        except Exception:
+                            pass
+                        self.log_error(f"Exception while deducting DB TeoCoin for pending_tx {getattr(pending_tx, 'id', '<unknown>')}: {e}")
 
             # Enroll user
             from courses.models import CourseEnrollment
@@ -240,12 +300,20 @@ class PaymentService(TransactionalService):
                     "Already enrolled in this course", "ALREADY_ENROLLED", 400
                 )
 
+            # determine teocoin amount to record on enrollment (only if tx completed)
+            teocoin_for_enrollment = Decimal("0")
+            if pending_tx and pending_tx.status == "completed":
+                try:
+                    teocoin_for_enrollment = Decimal(str(abs(pending_tx.amount)))
+                except Exception:
+                    teocoin_for_enrollment = Decimal("0")
+
             enrollment = CourseEnrollment.objects.create(
                 student=user,
                 course=course,
                 payment_method="hybrid",
                 amount_paid_eur=Decimal(intent.amount) / 100,
-                amount_paid_teocoin=abs(pending_tx.amount),
+                amount_paid_teocoin=teocoin_for_enrollment,
                 stripe_payment_intent_id=payment_intent_id,
                 teocoin_reward_given=course.teocoin_reward,
                 enrolled_at=__import__("django.utils.timezone").utils.timezone.now(),

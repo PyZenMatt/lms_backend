@@ -189,20 +189,30 @@ export default function CourseCheckout() {
 
         <div className="space-y-4">
           {/* Teo Discount Widget */}
-      <TeoDiscountWidget
+          <TeoDiscountWidget
             priceEUR={summary.price_eur ?? (summary.total_eur ?? 0)}
             courseId={courseId}
             onApply={(finalPriceEUR, discountEUR, details) => {
-              // apply discount locally to the summary and record teo details
+              // Normalize returned fields: prefer backend-provided final_price_eur/discount_eur
+              const d = (details || {}) as Record<string, any>;
+              const final = Number(
+                d.final_price_eur ?? d.finalPriceEUR ?? finalPriceEUR ?? summary.price_eur ?? summary.total_eur ?? 0
+              );
+              const discount = Number(
+                d.discount_eur ?? d.discountEUR ?? discountEUR ?? (typeof summary.price_eur === 'number' ? (summary.price_eur - final) : 0)
+              );
+              const discount_percent = (d.discount_percent as number | undefined) ?? (typeof summary.price_eur === 'number' && summary.price_eur > 0 ? ((summary.price_eur - final) / summary.price_eur) * 100 : undefined);
+              const teo_required = d.teo_required ?? d.teoRequired ?? d.teo_spent ?? d.teo_spent ?? summary.teo_required;
+
               setSummary((s) => ({
                 ...s,
-                total_eur: finalPriceEUR,
-                discount_percent: (details && (details.discount_percent as number)) ?? s.discount_percent,
-                teo_required: (details && (details.teo_required as number)) ?? s.teo_required,
-              }))
-        setTeoDiscountApplied(true)
+                total_eur: final,
+                discount_percent: typeof discount_percent === 'number' ? discount_percent : s.discount_percent,
+                teo_required: teo_required ?? s.teo_required,
+              }));
+              setTeoDiscountApplied(true);
               // optional: you can store details in state or send analytics
-              console.debug("TEO discount applied", { finalPriceEUR, discountEUR, details })
+              console.debug("TEO discount applied", { finalPriceEUR, discountEUR, details, normalized: { final, discount, discount_percent, teo_required } });
             }}
           />
 

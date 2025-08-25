@@ -86,32 +86,53 @@ export async function getWallet(): Promise<Result<WalletInfo>> {
 
 /** GET movimenti wallet paginati */
 export async function getTransactions(page = 1, page_size = 20): Promise<Result<DrfPage<WalletTransaction>>> {
-  // Use canonical DB-based transactions endpoint
-  const endpoints = ["/v1/teocoin/transactions/"];
+  const endpoints = [
+    "/v1/wallet/transactions/",
+    "/v1/teocoin/transactions/",
+    "/v1/teocoin/transactions/history/",
+    "/v1/services/earnings/history/",
+    "/v1/users/me/wallet/transactions/",
+  ];
 
-  const res = await tryGet<{ success?: boolean; transactions?: unknown[]; count?: number }>(endpoints, { page, page_size });
+  const res = await tryGet<unknown>(endpoints, { page, page_size, limit: page_size });
   if (!res.ok) return res as Err;
+  const payload = res.data as unknown;
 
-  const payload = res.data as unknown as Record<string, unknown>;
-  const maybeTx = payload.transactions ?? payload["transactions"];
-  const txs = Array.isArray(maybeTx) ? (maybeTx as unknown[]) : [];
+  // Support multiple shapes: DRF { results: [] }, legacy { transactions: [] }, { data: [] } or raw array
+  const resultsField = (payload as Record<string, unknown>)?.results;
+  const transactionsField = (payload as Record<string, unknown>)?.transactions;
+  const dataField = (payload as Record<string, unknown>)?.data;
 
-  const results = txs.map((item) => {
-    const obj = item as Record<string, unknown>
+  const arr: unknown[] =
+    Array.isArray(resultsField) ? (resultsField as unknown[]) :
+    Array.isArray(transactionsField) ? (transactionsField as unknown[]) :
+    Array.isArray(dataField) ? (dataField as unknown[]) :
+    Array.isArray(payload) ? (payload as unknown[]) : [];
+
+  const count = typeof (payload as Record<string, unknown>)?.count === 'number'
+    ? (payload as Record<string, unknown>).count as number
+    : (Array.isArray(arr) ? arr.length : 0);
+
+  const results: WalletTransaction[] = arr.map((r, i) => {
+    const obj = r as Record<string, unknown>;
+    const amountRaw = obj.amount_teo ?? obj.amount ?? obj.value ?? 0;
     return {
-      id: (obj.id ?? obj.tx_id ?? Math.random().toString(36).slice(2)) as string,
-      type: (obj.type ?? obj.transaction_type ?? obj.kind ?? "unknown") as string,
-      amount_teo: Number(obj.amount ?? obj.amount_teo ?? obj.value ?? 0),
-      description: (obj.description ?? obj.note ?? obj.reason) as string | undefined,
+      id: obj.id ?? obj.tx_id ?? i,
+      type: (obj.type ?? obj.transaction_type ?? obj.kind ?? 'unknown') as string,
+      amount_teo: typeof amountRaw === 'number' ? amountRaw as number : Number(amountRaw ?? 0),
+      description: (obj.description ?? obj.note ?? obj.notes ?? obj.memo ?? null) as string | null,
       created_at: (obj.created_at ?? obj.timestamp ?? new Date().toISOString()) as string,
-      reference: (obj.reference ?? obj.tx_hash) as string | undefined,
-      raw: obj,
-    }
-  })
+      reference: (obj.reference ?? obj.tx_hash ?? obj.hash ?? null) as string | null,
+      ...obj,
+    } as WalletTransaction;
+  });
 
-  const countNum = Number((payload.count ?? results.length) as unknown) || results.length
-  const pageObj: DrfPage<WalletTransaction> = { count: countNum, next: null, previous: null, results }
-  return { ok: true, status: res.status, data: pageObj }
+  const nextRaw = (payload as Record<string, unknown>)?.next;
+  const prevRaw = (payload as Record<string, unknown>)?.previous;
+  const next = typeof nextRaw === 'string' ? nextRaw : null;
+  const previous = typeof prevRaw === 'string' ? prevRaw : null;
+
+  return { ok: true, status: res.status, data: { count, next, previous, results } };
 }
 
 /**
@@ -132,5 +153,47 @@ export async function checkDiscount(body: {
 }): Promise<Result<Record<string, unknown>>> {
   // Use DB-based calculate-discount endpoint
   const endpoints = ["/v1/teocoin/calculate-discount/"];
-  return tryPost<Record<string, unknown>>(endpoints, body as Record<string, unknown>);
+  // backend expects `course_price` field in some implementations; include it for compatibility
+  const payload: Record<string, unknown> = { ...body } as Record<string, unknown>;
+  if (payload.course_price === undefined && payload.price_eur !== undefined) {
+    payload.course_price = payload.price_eur;
+  }
+  return tryPost<Record<string, unknown>>(endpoints, payload);
+}
+
+/**
+ * POST applicazione sconto TEO / pagamento ibrido
+ * Se fornito course_id → preferisce l'endpoint course-scoped:
+ *   POST /v1/courses/{course_id}/hybrid-payment/
+ * Altrimenti fallback generico:
+ *   POST /v1/teocoin/apply-discount/
+ */
+export async function applyDiscount(body: {
+  course_id?: number;
+  price_eur?: number;
+  discount_percent?: number;
+  student_address?: string;
+  student_signature?: string;
+  idempotency_key?: string;
+  [k: string]: unknown;
+}): Promise<Result<Record<string, unknown>>> {
+  const { course_id, ...rest } = body || {};
+
+  // Try course-scoped hybrid payment when course_id present
+  if (typeof course_id === 'number' && Number.isFinite(course_id)) {
+    const courseEndpoint = `/v1/courses/${course_id}/hybrid-payment/`;
+    const coursePayload: Record<string, unknown> = { ...rest } as Record<string, unknown>;
+    if (coursePayload.course_price === undefined && coursePayload.price_eur !== undefined) {
+      coursePayload.course_price = coursePayload.price_eur;
+    }
+    const courseRes = await api.post<Record<string, unknown>>(courseEndpoint, coursePayload);
+    // If OK or error not 404/405, return it (don't fallback)
+    if (courseRes.ok || ![404, 405].includes(courseRes.status)) return courseRes as Result<Record<string, unknown>>;
+    // otherwise continue to fallbacks
+  }
+
+  const fallbacks = ["/v1/teocoin/apply-discount/", "/v1/payments/apply-discount/"];
+  const payload: Record<string, unknown> = { course_id, ...rest } as Record<string, unknown>;
+  if (payload.course_price === undefined && payload.price_eur !== undefined) payload.course_price = payload.price_eur;
+  return tryPost<Record<string, unknown>>(fallbacks, payload);
 }

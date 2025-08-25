@@ -1,5 +1,5 @@
 import React from "react";
-import { apiFetch } from "../lib/api";
+import { api } from "../lib/api";
 import { useNavigate, Link } from "react-router-dom";
 
 const ROLES = [
@@ -23,10 +23,7 @@ export default function Register() {
       setMsg("Controlla i campi: email valida, password ≥ 6 caratteri, username ≥ 3.");
       return;
     }
-    const res = await apiFetch("/v1/register/", {
-      method: "POST",
-      body: { username, email, password, role },
-    });
+  const res = await api.post("/v1/register/", { username, email, password, role });
     if (!res.ok) {
       const detail = (res.data as any)?.detail || JSON.stringify(res.data);
       setMsg(`Errore: ${detail || res.status}`);

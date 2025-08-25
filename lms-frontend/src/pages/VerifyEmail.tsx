@@ -1,6 +1,6 @@
 import React from "react";
 import { useParams, Link, Navigate } from "react-router-dom";
-import { apiFetch } from "../lib/api";
+import { api } from "../lib/api";
 
 export default function VerifyEmail() {
   const { uid, token } = useParams<{ uid: string; token: string }>();
@@ -10,9 +10,9 @@ export default function VerifyEmail() {
   React.useEffect(() => {
     (async () => {
       if (!uid || !token) { setStatus("error"); setDetail("Parametri mancanti"); return; }
-      const res = await apiFetch(`/v1/verify-email/${uid}/${token}/`, { method: "GET" });
-      if (res.ok) setStatus("ok");
-      else { setStatus("error"); setDetail((res.data as any)?.detail || `HTTP ${res.status}`); }
+  const res = await api.get(`/v1/verify-email/${uid}/${token}/`);
+  if (res.ok) setStatus("ok");
+  else { setStatus("error"); setDetail((res.data as any)?.detail || String(res.error) || `HTTP ${res.status}`); }
     })();
   }, [uid, token]);
 

@@ -1,15 +1,15 @@
 import React from "react";
-import { apiFetch } from "../lib/api";
+import { api } from "../lib/api";
 
 export default function ProtectedPing() {
   const [out, setOut] = React.useState("Premi per chiamare /v1/profile/ (protetto)");
 
   async function callProfile() {
     setOut("Chiamo /v1/profile/ ...");
-    const res = await apiFetch("/v1/profile/", { method: "GET" });
-    if (res.ok) setOut(`✅ ${res.status} /v1/profile/ → ${JSON.stringify(res.data)}`);
-    else if (res.status === 401) setOut("🔒 401: non autenticato (rifai login?)");
-    else setOut(`⚠️ ${res.status} /v1/profile/ → ${JSON.stringify(res.data)}`);
+  const res = await api.get("/v1/profile/");
+  if (res.ok) setOut(`✅ ${res.status} /v1/profile/ → ${JSON.stringify(res.data)}`);
+  else if (res.status === 401) setOut("🔒 401: non autenticato (rifai login?)");
+  else setOut(`⚠️ ${res.status} /v1/profile/ → ${JSON.stringify(res.error ?? res.data)}`);
   }
 
   return (

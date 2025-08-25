@@ -1,9 +1,9 @@
-import { apiFetch } from "./api";
+import { api } from "./api";
 
 /** Prova a dedurre il ruolo da /v1/dashboard/role/ con fallback. */
 export async function fetchServerRole():
   Promise<"student" | "teacher" | "admin" | null> {
-  const r = await apiFetch<any>("/v1/dashboard/role/", { method: "GET" });
+  const r = await api.get<any>("/v1/dashboard/role/");
   if (!r.ok || !r.data) return null;
 
   const d = r.data as any;

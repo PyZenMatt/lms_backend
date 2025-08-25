@@ -1,5 +1,5 @@
 import React from "react";
-import { apiFetch } from "@/lib/api";
+import { api } from "@/lib/api";
 import { API_PING_PATH } from "@/lib/config";
 
 export default function Ping() {
@@ -7,13 +7,13 @@ export default function Ping() {
 
   async function handlePing() {
     setOut("Pinging...");
-    const res = await apiFetch(API_PING_PATH, { method: "GET" });
+    const res = await api.get(API_PING_PATH);
     if (res.ok) {
       setOut(`✅ ${res.status} ${API_PING_PATH} → ${JSON.stringify(res.data)}`);
     } else if (res.status === 0) {
       setOut("❌ Network error (server spento? URL errato? CORS bloccato?)");
     } else {
-      setOut(`⚠️ ${res.status} ${API_PING_PATH} → ${JSON.stringify(res.data)}`);
+      setOut(`⚠️ ${res.status} ${API_PING_PATH} → ${JSON.stringify(res.error ?? res.data)}`);
     }
   }
 

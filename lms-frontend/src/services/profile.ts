@@ -1,4 +1,4 @@
-import { apiFetch } from "../lib/api";
+import { api, apiFetch } from "../lib/api";
 
 export type Profile = {
   username: string;
@@ -16,12 +16,13 @@ export type Profile = {
 };
 
 export async function getProfile(): Promise<Profile | null> {
-  const r = await apiFetch<Profile>("/v1/profile/", { method: "GET" });
+  const r = await api.get<Profile>("/v1/profile/");
   return r.ok ? (r.data as Profile) : null;
 }
 
 /** Usa FormData per upload avatar + altri campi */
 export async function updateProfile(fd: FormData): Promise<Profile | null> {
-  const r = await apiFetch<Profile>("/v1/profile/", { method: "PUT", body: fd });
+  // FormData must be passed through as-is; our client detects FormData and skips JSON content-type.
+  const r = await api.put<Profile>("/v1/profile/", fd, { headers: {} });
   return r.ok ? (r.data as Profile) : null;
 }

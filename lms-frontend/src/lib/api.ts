@@ -1,138 +1,290 @@
 // src/lib/api.ts
-import { API_BASE_URL, API_REFRESH_PATH, API } from "./config";
-import { getAccessToken, getRefreshToken, saveTokens, clearTokens } from "./auth";
+// Lightweight API client with SimpleJWT refresh and global loading events.
+// - Emits window CustomEvent("api:loading", { detail: { delta: +1|-1 } }) before/after each request.
+// - Returns a uniform shape: { ok, status, data?, error? }.
+// - Reads base URL from VITE_API_BASE_URL (default http://127.0.0.1:8000/api).
+// - Handles 401 → refresh token (once) via `${BASE}${API_REFRESH_PATH}`.
 
-type HttpMethod = "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
+type Json = Record<string, any>;
 
-type ApiResult<T = any> = {
+export type ApiResult<T = any> = {
   ok: boolean;
   status: number;
   data?: T;
-  error?: unknown;
-  response?: Response;
+  error?: any;
 };
 
-let refreshing: Promise<string | null> | null = null;
+type RequestOptions = {
+  params?: Record<string, any>;
+  headers?: Record<string, string>;
+  body?: any;
+  noAuth?: boolean;
+  signal?: AbortSignal;
+  // internal
+  _retried?: boolean;
+};
 
-async function doFetch(input: string, init: any): Promise<Response> {
-  return fetch(input, {
-    credentials: "include", // CORS dev coerente col BE
-    ...init,
-  });
-}
+const DEFAULT_BASE = "http://127.0.0.1:8000/api";
+const RAW_BASE = (import.meta as any)?.env?.VITE_API_BASE_URL || DEFAULT_BASE;
+const BASE = normalizeBase(RAW_BASE);
 
-function withAuthHeaders(init?: RequestInit): Headers {
-  const h = new Headers(init?.headers || {});
-  if (!h.has("Accept")) h.set("Accept", "application/json");
-  // NON forzare Content-Type se body è FormData
-  const hasFormData = init?.body && typeof FormData !== "undefined" && init?.body instanceof FormData;
-  if (!hasFormData && !h.has("Content-Type")) h.set("Content-Type", "application/json");
-  const access = getAccessToken();
-  if (access && !h.has("Authorization")) h.set("Authorization", `Bearer ${access}`);
-  return h;
-}
+// SimpleJWT refresh endpoint path (relative to BASE)
+export const API_REFRESH_PATH = "/auth/refresh/";
 
-async function refreshAccessToken(): Promise<string | null> {
-  if (!getRefreshToken()) return null;
-  if (!refreshing) {
-    refreshing = (async () => {
-      try {
-        const res = await doFetch(API_BASE_URL + API_REFRESH_PATH, {
-          method: "POST",
-          headers: { "Content-Type": "application/json", Accept: "application/json" },
-          body: JSON.stringify({ refresh: getRefreshToken() }),
-        });
-        // SimpleJWT di solito ritorna solo "access"
-        if (!res.ok) return null;
-        const json = await res.json().catch(() => ({}));
-        const nextAccess = json?.access as string | undefined;
-        const nextRefresh = json?.refresh as string | undefined; // in alcuni back ritorna anche refresh
-  if (!nextAccess) return null;
-  // saveTokens expects a Tokens object
-  saveTokens({ access: nextAccess, refresh: nextRefresh ?? "" });
-        return nextAccess;
-      } catch {
-        return null;
-      } finally {
-        refreshing = null;
-      }
-    })();
+// ---- Token storage (localStorage) ----
+const TOKENS_KEY = "auth_tokens"; // { access: string, refresh: string }
+const LEGACY_ACCESS_KEY = "access_token";
+const LEGACY_REFRESH_KEY = "refresh_token";
+
+type Tokens = { access?: string | null; refresh?: string | null };
+
+function loadTokens(): Tokens {
+  try {
+    const raw = localStorage.getItem(TOKENS_KEY);
+    if (raw) return JSON.parse(raw);
+    // Fallback to legacy keys used elsewhere in the app
+    const access = localStorage.getItem(LEGACY_ACCESS_KEY);
+    const refresh = localStorage.getItem(LEGACY_REFRESH_KEY);
+    if (access || refresh) return { access: access ?? null, refresh: refresh ?? null };
+    return {};
+  } catch {
+    return {};
   }
-  return refreshing;
 }
 
-async function apiFetch<T = any>(
+function saveTokens(t: Tokens) {
+  const next = JSON.stringify({ access: t.access ?? null, refresh: t.refresh ?? null });
+  localStorage.setItem(TOKENS_KEY, next);
+  // Also write legacy keys so older helpers (src/lib/auth.ts) keep working
+  try {
+    if (t.access) localStorage.setItem(LEGACY_ACCESS_KEY, t.access);
+    else localStorage.removeItem(LEGACY_ACCESS_KEY);
+    if (t.refresh) localStorage.setItem(LEGACY_REFRESH_KEY, t.refresh);
+    else localStorage.removeItem(LEGACY_REFRESH_KEY);
+  } catch {
+    // ignore
+  }
+}
+
+function clearTokens() {
+  localStorage.removeItem(TOKENS_KEY);
+  try {
+    localStorage.removeItem(LEGACY_ACCESS_KEY);
+    localStorage.removeItem(LEGACY_REFRESH_KEY);
+  } catch {}
+  window.dispatchEvent(new CustomEvent("auth:logout"));
+}
+
+// ---- Helpers ----
+function normalizeBase(u: string): string {
+  let s = String(u || "").trim();
+  if (!s) return DEFAULT_BASE;
+  // remove trailing slash
+  if (s.endsWith("/")) s = s.slice(0, -1);
+  return s;
+}
+
+function joinUrl(base: string, path: string): string {
+  const p = path.startsWith("/") ? path : `/${path}`;
+  return `${base}${p}`;
+}
+
+function buildQuery(params?: Record<string, any>): string {
+  if (!params) return "";
+  const q = new URLSearchParams();
+  Object.entries(params).forEach(([k, v]) => {
+    if (v === undefined || v === null) return;
+    if (Array.isArray(v)) v.forEach((item) => q.append(k, String(item)));
+    else q.append(k, String(v));
+  });
+  const s = q.toString();
+  return s ? `?${s}` : "";
+}
+
+function isJsonResponse(res: Response) {
+  const ct = res.headers.get("content-type") || "";
+  return ct.includes("application/json");
+}
+
+function dispatchLoading(delta: 1 | -1) {
+  try {
+    window.dispatchEvent(new CustomEvent("api:loading", { detail: { delta } }));
+  } catch {
+    // ignore
+  }
+}
+
+// ---- Refresh flow ----
+async function refreshAccessToken(): Promise<boolean> {
+  const { refresh } = loadTokens();
+  if (!refresh) return false;
+  dispatchLoading(1);
+  try {
+    const url = joinUrl(BASE, API_REFRESH_PATH);
+    const res = await fetch(url, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify({ refresh }),
+    });
+    if (!res.ok) return false;
+    const data = await res.json().catch(() => ({}));
+    const access = data?.access || data?.access_token;
+    if (typeof access === "string" && access.length > 10) {
+      saveTokens({ access, refresh });
+      return true;
+    }
+    return false;
+  } catch {
+    return false;
+  } finally {
+    dispatchLoading(-1);
+  }
+}
+
+// ---- Core request ----
+async function coreRequest<T>(
+  method: "GET" | "POST" | "PUT" | "PATCH" | "DELETE",
   path: string,
-  init: any = {},
-  retryOn401 = true
+  options: RequestOptions = {}
 ): Promise<ApiResult<T>> {
-  let url: string
-  if (path.startsWith("http")) {
-    url = path
-  } else {
-    // normalize leading slash
-    const p = path.replace(/^\/+/, "/")
-    // If caller passed /v1/... or /api/v1/..., use API.base (which is normalized to .../api/v1)
-    if (/^\/v1(\/|$)/.test(p)) {
-      url = API.base + p.replace(/^\/v1/, "")
-    } else if (/^\/api\/v1(\/|$)/.test(p)) {
-      url = API.base + p.replace(/^\/api\/v1/, "")
-    } else if (/^\/api(\/|$)/.test(p)) {
-      // caller passed /api/..., join with API_BASE_URL (which equals the configured /api base)
-      url = API_BASE_URL + p.replace(/^\/api/, "")
+  const controller = new AbortController();
+  const signals = options.signal
+    ? [options.signal, controller.signal]
+    : [controller.signal];
+
+  // Merge headers
+  const headers: Record<string, string> = {
+    "accept": "application/json",
+    ...options.headers,
+  };
+
+  // Auth header
+  const { access } = loadTokens();
+  if (!options.noAuth && access) {
+    headers["authorization"] = `Bearer ${access}`;
+  }
+
+  // Body
+  let body: BodyInit | undefined;
+  if (options.body !== undefined && options.body !== null && method !== "GET") {
+    if (options.body instanceof FormData) {
+      body = options.body; // let browser set multipart boundary
     } else {
-      // generic: join with API_BASE_URL
-      url = API_BASE_URL + p
+      headers["content-type"] = headers["content-type"] || "application/json";
+      body = headers["content-type"].includes("application/json")
+        ? JSON.stringify(options.body)
+        : (options.body as any);
     }
   }
-  const res = await doFetch(url, { ...init, headers: withAuthHeaders(init) });
 
-  // Fast path
-  if (res.status !== 401) {
-    return parseResponse<T>(res);
+  // URL
+  const url = joinUrl(BASE, path) + buildQuery(options.params);
+
+  // Fire request
+  dispatchLoading(1);
+  let res: Response | null = null;
+  try {
+    res = await fetch(url, {
+      method,
+      headers,
+      body,
+      credentials: "include",
+      signal: signals[signals.length - 1],
+    });
+
+    // 401 → try refresh once
+    if (res.status === 401 && !options._retried) {
+      const refreshed = await refreshAccessToken();
+      if (refreshed) {
+        return coreRequest<T>(method, path, { ...options, _retried: true });
+      }
+    }
+
+    // No content
+    if (res.status === 204) {
+      return { ok: true, status: res.status, data: undefined as any };
+    }
+
+    // Parse
+    let data: any = undefined;
+    if (isJsonResponse(res)) {
+      data = await res.json().catch(() => undefined);
+    } else {
+      const txt = await res.text().catch(() => "");
+      data = txt;
+    }
+
+    if (!res.ok) {
+      // 403/401 cleanup if needed
+      if (res.status === 401 || res.status === 403) {
+        // optionally clear tokens only on explicit instruction
+        // clearTokens();
+      }
+      return { ok: false, status: res.status, error: data ?? { message: "Request failed" } };
+    }
+
+    return { ok: true, status: res.status, data: data as T };
+  } catch (error: any) {
+    return { ok: false, status: 0, error: error?.message || String(error) };
+  } finally {
+    dispatchLoading(-1);
+    // abort controller cleanup (no op)
   }
-
-  // 401 → prova refresh una sola volta
-  if (!retryOn401) {
-    return parseResponse<T>(res);
-  }
-
-  const newAccess = await refreshAccessToken();
-  if (!newAccess) {
-    clearTokens();
-    return parseResponse<T>(res);
-  }
-
-  // Retry con nuovo token
-  const retryHeaders = new Headers(init.headers || {});
-  retryHeaders.set("Authorization", `Bearer ${newAccess}`);
-  const res2 = await doFetch(url, { ...init, headers: retryHeaders });
-  return parseResponse<T>(res2);
 }
 
-async function parseResponse<T>(res: Response): Promise<ApiResult<T>> {
-  const ct = res.headers.get("Content-Type") || "";
-  const isJson = ct.includes("application/json");
-  const data = isJson ? await res.json().catch(() => undefined) : undefined;
-  return { ok: res.ok, status: res.status, data, response: res, ...(res.ok ? {} : { error: data }) };
+// ---- Public API wrapper ----
+class ApiClient {
+  get<T>(path: string, opts: Omit<RequestOptions, "body"> = {}) {
+    return coreRequest<T>("GET", path, opts);
+  }
+  post<T>(path: string, body?: any, opts: Omit<RequestOptions, "body"> = {}) {
+    return coreRequest<T>("POST", path, { ...opts, body });
+  }
+  put<T>(path: string, body?: any, opts: Omit<RequestOptions, "body"> = {}) {
+    return coreRequest<T>("PUT", path, { ...opts, body });
+  }
+  patch<T>(path: string, body?: any, opts: Omit<RequestOptions, "body"> = {}) {
+    return coreRequest<T>("PATCH", path, { ...opts, body });
+  }
+  delete<T>(path: string, opts: Omit<RequestOptions, "body"> = {}) {
+    return coreRequest<T>("DELETE", path, opts);
+  }
 }
 
-// Helpers DX
-function bodyOf(data?: any): BodyInit | undefined {
-  if (data == null) return undefined;
-  if (typeof FormData !== "undefined" && data instanceof FormData) return data;
-  return JSON.stringify(data);
+export const api = new ApiClient();
+
+// Back-compat wrapper for older callers that use `apiFetch(path, init)`
+export async function apiFetch<T = any>(path: string, init: any = {}, retryOn401 = true): Promise<ApiResult<T>> {
+  const method = (String(init?.method || "GET").toUpperCase() as "GET" | "POST" | "PUT" | "PATCH" | "DELETE");
+  const options: RequestOptions = {
+    headers: init?.headers,
+    body: init?.body,
+    noAuth: init?.noAuth,
+    signal: init?.signal,
+    params: init?.params,
+    _retried: init?._retried,
+  };
+  // Note: coreRequest handles retry-on-401 internally via options._retried; we respect retryOn401 by
+  // skipping refresh if retryOn401 is false (pass _retried = true to avoid a retry).
+  if (!retryOn401) options._retried = true;
+  return coreRequest<T>(method, path, options);
 }
 
-export const api = {
-  get:  <T = any>(path: string, init?: any) => apiFetch<T>(path, { ...init, method: "GET" }),
-  delete:<T = any>(path: string, init?: any) => apiFetch<T>(path, { ...init, method: "DELETE" }),
-  post: <T = any>(path: string, data?: any, init?: any) =>
-    apiFetch<T>(path, { ...init, method: "POST", body: bodyOf(data) }),
-  put:  <T = any>(path: string, data?: any, init?: any) =>
-    apiFetch<T>(path, { ...init, method: "PUT", body: bodyOf(data) }),
-  patch:<T = any>(path: string, data?: any, init?: any) =>
-    apiFetch<T>(path, { ...init, method: "PATCH", body: bodyOf(data) }),
-};
+// ---- Auth helpers (optional) ----
+export function setTokens(tokens: Tokens) {
+  saveTokens(tokens);
+}
+export function getTokens(): Tokens {
+  return loadTokens();
+}
+export function logout() {
+  clearTokens();
+}
+export function getApiBase() {
+  return BASE;
+}
 
-export { apiFetch };
+// Convenience: attach to window for debugging (dev only)
+// @ts-ignore
+if (typeof window !== "undefined") (window as any).__api_base__ = BASE;

@@ -22,16 +22,18 @@ class HybridPaymentView(APIView):
         try:
             teocoin_to_spend = Decimal(request.data.get("teocoin_to_spend", "0"))
             wallet_address = request.data.get("wallet_address")
-            if not teocoin_to_spend or not wallet_address:
+            if not teocoin_to_spend:
                 return Response(
-                    {"error": "teocoin_to_spend and wallet_address required"},
+                    {"error": "teocoin_to_spend required"},
                     status=400,
                 )
+
+            # wallet_address is optional; if not provided we will use DB balance
             result = payment_service.create_hybrid_payment_intent(
                 user_id=request.user.id,
                 course_id=course_id,
                 teocoin_to_spend=teocoin_to_spend,
-                wallet_address=wallet_address,
+                wallet_address=wallet_address if wallet_address else None,
             )
             return Response(result, status=200)
         except (
