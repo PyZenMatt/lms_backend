@@ -19,11 +19,11 @@ class TransactionService:
         # Use BlockchainService for balance check
         try:
             balance = blockchain_service.get_user_balance(user)
-            if balance < course.price:
+            if balance < course.price_eur:
                 raise ValidationError("Saldo TeoCoin insufficiente")
         except Exception:
             # Fallback to user model balance if blockchain service fails
-            if user.teo_coins < course.price:
+            if user.teo_coins < course.price_eur:
                 raise ValidationError("Saldo TeoCoin insufficiente")
 
         # Lock ottimistico sull'utente
@@ -35,7 +35,7 @@ class TransactionService:
             result = blockchain_service.transfer_tokens_between_users(
                 from_user=user,
                 to_user=course.teacher,  # Assuming course has teacher
-                amount=course.price,
+                amount=course.price_eur,
                 reason=f"Course purchase: {course.title}",
             )
 
@@ -46,7 +46,7 @@ class TransactionService:
 
         except Exception:
             # Fallback to traditional model-based transaction
-            user.teo_coins -= course.price
+            user.teo_coins -= course.price_eur
             user.save(update_fields=["teo_coins"])
 
         course.students.add(user)
@@ -54,7 +54,7 @@ class TransactionService:
         # Registrazione transazione blockchain
         BlockchainTransaction.objects.create(
             user=user,
-            amount=course.price,
+            amount=course.price_eur,
             transaction_type="course_purchase",
             status="pending",
         )

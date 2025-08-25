@@ -141,8 +141,9 @@ def test_final_review_with_fix():
                 except AttributeError:
                     pass
 
-                if course and hasattr(course, "price"):
-                    print(f"Course: {course.title}, Price: {course.price}")
+                if course:
+                    price_val = int(getattr(course, "price_eur", 0))
+                    print(f"Course: {course.title}, Price: {price_val}")
 
                     from courses.views.exercises import create_reward_transaction
 
@@ -150,12 +151,12 @@ def test_final_review_with_fix():
 
                     # Exercise reward for student (if passed) - WITH FIX
                     if passed:
-                        reward_max = int(course.price * 0.15)
-                        reward_distributed = getattr(course, "reward_distributed", 0)
+                        reward_max = int(price_val * 0.15)
+                        reward_distributed = int(getattr(course, "reward_distributed", 0))
                         reward_remaining = reward_max - reward_distributed
 
                         if reward_remaining > 0:
-                            reward_cap = max(1, int(course.price * 0.05))  # 🔧 THE FIX
+                            reward_cap = max(1, int(price_val * 0.05))  # 🔧 THE FIX
                             print(
                                 f"Reward calculation: max={reward_max}, cap={reward_cap}, remaining={reward_remaining}"
                             )
@@ -183,7 +184,7 @@ def test_final_review_with_fix():
                             course.save(update_fields=["reward_distributed"])
 
                     # Review rewards for all reviewers
-                    reviewer_reward = max(1, int(course.price * 0.005))
+                    reviewer_reward = max(1, int(price_val * 0.005))
                     print(f"Reviewer reward: {reviewer_reward} TEO each")
 
                     for r in reviews_check:

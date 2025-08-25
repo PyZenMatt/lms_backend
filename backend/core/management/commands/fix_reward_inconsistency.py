@@ -33,9 +33,10 @@ def fix_reward_inconsistency():
         )
         course = submission.exercise.lesson.course
 
-        print(f"Course: {course.title}")
-        print(f"Course price: {course.price} TEO")
-        print(f"Current reward_distributed: {course.reward_distributed} TEO")
+    print(f"Course: {course.title}")
+    price_val = int(getattr(course, "price_eur", 0))
+    print(f"Course price: {price_val} TEO")
+    print(f"Current reward_distributed: {getattr(course, 'reward_distributed', 0)} TEO")
 
         # Trova tutti i reward reali per questo corso
         all_submissions = ExerciseSubmission.objects.filter(
@@ -68,7 +69,7 @@ def fix_reward_inconsistency():
                 print(f"✅ Reset course.reward_distributed to {total_distributed} TEO")
 
                 # Now there should be room for new rewards
-                reward_max = int(course.price * 0.15)
+                reward_max = int(price_val * 0.15)
                 reward_remaining = reward_max - total_distributed
                 print(f"Reward max: {reward_max} TEO")
                 print(f"New reward remaining: {reward_remaining} TEO")
@@ -80,7 +81,7 @@ def fix_reward_inconsistency():
 
                     # Check if student1's submission deserves a reward
                     if submission.passed and submission.is_approved:
-                        max(1, int(course.price * 0.05))
+                        max(1, int(price_val * 0.05))
                         # Give 1 TEO or what's left
                         reward_amount = min(1, reward_remaining)
 

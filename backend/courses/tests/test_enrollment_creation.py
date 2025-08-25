@@ -38,8 +38,8 @@ def test_enrollment_creation():
             print("❌ No courses found")
             return
 
-        course = courses.first()
-        print(f"📚 Course: {course.title} - Price: {course.price} TEO")
+    course = courses.first()
+    print(f"📚 Course: {course.title} - Price: {getattr(course, 'price_eur', 0)} TEO")
 
         # Check current enrollment
         existing_enrollment = CourseEnrollment.objects.filter(
@@ -55,8 +55,9 @@ def test_enrollment_creation():
         student_balance = teocoin_service.get_balance(student.wallet_address)
         print(f"💰 Student balance: {student_balance} TEO")
 
-        if student_balance < course.price:
-            print(f"❌ Insufficient balance. Need {course.price} TEO")
+        course_price = float(getattr(course, "price_eur", 0))
+        if student_balance < course_price:
+            print(f"❌ Insufficient balance. Need {course_price} TEO")
             return
 
         print("\n🎯 Ready to test enrollment creation!")

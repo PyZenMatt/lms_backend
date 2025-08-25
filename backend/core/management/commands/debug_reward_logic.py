@@ -70,14 +70,15 @@ def debug_submission_reward_logic():
     if course:
         print(f"\nCourse details:")
         print(f"  Title: {course.title}")
-        print(f"  Price: {course.price}")
-        print(f"  Reward distributed: {getattr(course, 'reward_distributed', 'N/A')}")
+    price_val = int(getattr(course, "price_eur", 0))
+    print(f"  Price: {price_val}")
+    print(f"  Reward distributed: {getattr(course, 'reward_distributed', 'N/A')}")
 
-        # Calculate expected rewards
-        reward_max = int(course.price * 0.15)
-        reward_distributed = getattr(course, "reward_distributed", 0)
-        reward_remaining = reward_max - reward_distributed
-        reward_cap = max(1, int(course.price * 0.05))
+    # Calculate expected rewards
+    reward_max = int(price_val * 0.15)
+    reward_distributed = int(getattr(course, "reward_distributed", 0))
+    reward_remaining = reward_max - reward_distributed
+    reward_cap = max(1, int(price_val * 0.05))
 
         print(f"  Reward max (15%): {reward_max}")
         print(f"  Reward distributed: {reward_distributed}")

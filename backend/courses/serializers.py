@@ -128,6 +128,9 @@ class TeacherCourseSerializer(serializers.ModelSerializer):
             "cover_image",
             "cover_image_url",
             "is_approved",
+            # Compatibility fields for frontend status
+            "published",
+            "status",
             "created_at",
             "updated_at",
             "total_earnings",
@@ -178,6 +181,13 @@ class TeacherCourseSerializer(serializers.ModelSerializer):
                 }
             )
         return lesson_data
+
+    # Provide compatibility fields expected by frontend
+    published = serializers.BooleanField(source="is_approved", read_only=True)
+    status = serializers.SerializerMethodField()
+
+    def get_status(self, obj):
+        return "published" if getattr(obj, "is_approved", False) else "draft"
 
 
 class LessonSerializer(serializers.ModelSerializer):

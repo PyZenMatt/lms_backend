@@ -221,8 +221,8 @@ class RewardService(TransactionalService):
                     "Course completion bonus already processed"
                 )
 
-            # Calculate bonus amount
-            bonus_amount = course.price * self.COURSE_COMPLETION_BONUS_RATE
+            # Calculate bonus amount using price_eur
+            bonus_amount = Decimal(getattr(course, "price_eur", 0)) * self.COURSE_COMPLETION_BONUS_RATE
 
             # Create bonus transaction
             bonus_tx = self._create_reward_transaction(
@@ -412,10 +412,11 @@ class RewardService(TransactionalService):
 
     def _calculate_lesson_reward(self, course: Course, lesson: Lesson) -> Decimal:
         """Calculate reward amount for lesson completion"""
-        if not course.price or course.price <= 0:
+        price_val = Decimal(getattr(course, "price_eur", 0))
+        if not price_val or price_val <= 0:
             return Decimal("0")
 
-        return course.price * self.LESSON_COMPLETION_REWARD_RATE
+        return price_val * self.LESSON_COMPLETION_REWARD_RATE
 
     def _check_course_completion(self, user: User, course: Course) -> bool:
         """Check if user has completed all lessons in a course"""

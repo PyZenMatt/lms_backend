@@ -37,16 +37,18 @@ reward_amount = models.PositiveIntegerField(default=0)
 
 ### 3. Logica lato backend (es. in ReviewExerciseView)
 ```python
-reward_max = int(course.price * 0.15)
-reward_remaining = reward_max - course.reward_distributed
+# Use price_eur (Decimal) on Course; fallback to 0 if not present
+price_val = int(getattr(course, "price_eur", 0))
+reward_max = int(price_val * 0.15)
+reward_remaining = reward_max - int(getattr(course, "reward_distributed", 0))
 
 if reward_remaining > 0:
-    random_reward = random.randint(1, min(int(course.price * 0.05), reward_remaining))
-    course.reward_distributed += random_reward
-    submission.reward_amount = random_reward
-    submission.student.add_teo_coins(random_reward)
-    submission.save()
-    course.save()
+  random_reward = random.randint(1, min(int(price_val * 0.05), reward_remaining))
+  course.reward_distributed = int(getattr(course, "reward_distributed", 0)) + random_reward
+  submission.reward_amount = random_reward
+  submission.student.add_teo_coins(random_reward)
+  submission.save()
+  course.save()
 ```
 
 ---

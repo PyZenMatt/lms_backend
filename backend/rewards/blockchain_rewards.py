@@ -70,12 +70,13 @@ class BlockchainRewardCalculator:
         """
         config = cls.get_course_reward_config(course)
 
-        # Percentuale casuale tra min e max
-        percentage = random.uniform(config["min_percentage"], config["max_percentage"])
+    # Percentuale casuale tra min e max
+    percentage = random.uniform(config["min_percentage"], config["max_percentage"])
 
-        total_pool = Decimal(course.price) * Decimal(str(percentage))
-        # Precisione a 3 decimali
-        return total_pool.quantize(Decimal("0.001"), rounding=ROUND_HALF_UP)
+    # Use price_eur (legacy `price` removed)
+    total_pool = Decimal(course.price_eur) * Decimal(str(percentage))
+    # Precisione a 3 decimali
+    return total_pool.quantize(Decimal("0.001"), rounding=ROUND_HALF_UP)
 
     @classmethod
     def distribute_exercise_rewards(cls, course, exercise_count):

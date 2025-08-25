@@ -4,6 +4,12 @@ Automated reward system for TeoArt educational platform
 Handles automated TeoCoin rewards for course and lesson completion
 """
 
+# rewards/automation.py
+"""
+Automated reward system for TeoArt educational platform
+Handles automated TeoCoin rewards for course and lesson completion
+"""
+
 import logging
 from decimal import Decimal
 
@@ -43,7 +49,9 @@ class AutomatedRewardSystem:
         """
         Calculate reward for completing a lesson
         """
-        base_reward = int(course.price * self.LESSON_COMPLETION_REWARD_BASE)
+        # Use price_eur (Decimal) if available, fallback to 0
+        price_val = int(getattr(course, "price_eur", Decimal(0)))
+        base_reward = int(price_val * self.LESSON_COMPLETION_REWARD_BASE)
 
         # Add difficulty multiplier based on lesson type
         multiplier = 1.0
@@ -54,23 +62,24 @@ class AutomatedRewardSystem:
                 multiplier = 1.5
 
         # Check if course has remaining reward budget
-        total_distributed = getattr(course, "reward_distributed", 0)
-        max_rewards = int(course.price * self.MAX_COURSE_REWARDS_PERCENTAGE)
+        total_distributed = int(getattr(course, "reward_distributed", 0))
+        max_rewards = int(price_val * self.MAX_COURSE_REWARDS_PERCENTAGE)
         remaining_budget = max_rewards - total_distributed
 
         calculated_reward = int(base_reward * multiplier)
         # Max 10% per lesson
-        return min(calculated_reward, remaining_budget, course.price // 10)
+        return min(calculated_reward, remaining_budget, price_val // 10)
 
     def calculate_course_completion_bonus(self, course: Course) -> int:
         """
         Calculate bonus reward for completing entire course
         """
-        bonus = int(course.price * self.COURSE_COMPLETION_BONUS)
+        price_val = int(getattr(course, "price_eur", Decimal(0)))
+        bonus = int(price_val * self.COURSE_COMPLETION_BONUS)
 
         # Check remaining budget
-        total_distributed = getattr(course, "reward_distributed", 0)
-        max_rewards = int(course.price * self.MAX_COURSE_REWARDS_PERCENTAGE)
+        total_distributed = int(getattr(course, "reward_distributed", 0))
+        max_rewards = int(price_val * self.MAX_COURSE_REWARDS_PERCENTAGE)
         remaining_budget = max_rewards - total_distributed
 
         return min(bonus, remaining_budget)
@@ -292,7 +301,8 @@ class AutomatedRewardSystem:
         base_amount = 50  # Base achievement reward
 
         if course:
-            base_amount = int(course.price * self.ACHIEVEMENT_BONUS)
+            price_val = int(getattr(course, "price_eur", Decimal(0)))
+            base_amount = int(price_val * self.ACHIEVEMENT_BONUS)
 
         # Achievement type multipliers
         multipliers = {

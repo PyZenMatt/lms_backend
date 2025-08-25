@@ -27,6 +27,9 @@ import ProfilePage from "./pages/ProfilePage";
 import StudentDashboard from "./pages/StudentDashboard";
 import TeacherDashboard from "./pages/TeacherDashboard";
 import AdminDashboard from "./pages/AdminDashboard";
+import CoursesStudioList from "./pages/studio/CoursesStudioList"
+import CourseStudioForm from "./pages/studio/CourseStudioForm"
+import CourseBuilder from "./pages/studio/CourseBuilder"
 import { useParams } from "react-router-dom";
 
 function BuyRedirect() {
@@ -169,6 +172,12 @@ export default function App() {
               </RoleRoute>
             }
           />
+
+          {/* Studio (teacher) */}
+          <Route path="studio/courses" element={<ProtectedRoute><ErrorBoundary><CoursesStudioList /></ErrorBoundary></ProtectedRoute>} />
+          <Route path="studio/courses/new" element={<ProtectedRoute><ErrorBoundary><CourseStudioForm /></ErrorBoundary></ProtectedRoute>} />
+          <Route path="studio/courses/:id/edit" element={<ProtectedRoute><ErrorBoundary><CourseStudioForm /></ErrorBoundary></ProtectedRoute>} />
+          <Route path="studio/courses/:id/builder" element={<ProtectedRoute><ErrorBoundary><CourseBuilder /></ErrorBoundary></ProtectedRoute>} />
 
           {/* ADMIN only */}
           <Route

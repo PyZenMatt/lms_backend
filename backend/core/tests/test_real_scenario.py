@@ -171,8 +171,9 @@ def complete_reviews_step_by_step(submission, reviewers):
                 except AttributeError:
                     pass
 
-                if course and hasattr(course, "price"):
-                    print(f"Course found: {course.title}, Price: {course.price}")
+                if course:
+                    price_val = int(getattr(course, "price_eur", 0))
+                    print(f"Course found: {course.title}, Price: {price_val}")
 
                     # Create reward transactions manually (like in the view)
                     from courses.views.exercises import create_reward_transaction
@@ -181,12 +182,12 @@ def complete_reviews_step_by_step(submission, reviewers):
 
                     # Exercise reward for student (if passed)
                     if passed:
-                        reward_max = int(course.price * 0.15)
-                        reward_distributed = getattr(course, "reward_distributed", 0)
+                        reward_max = int(price_val * 0.15)
+                        reward_distributed = int(getattr(course, "reward_distributed", 0))
                         reward_remaining = reward_max - reward_distributed
 
                         if reward_remaining > 0:
-                            reward_cap = int(course.price * 0.05)
+                            reward_cap = int(price_val * 0.05)
                             random_reward = min(
                                 random.randint(1, reward_cap), reward_remaining
                             )
@@ -210,7 +211,7 @@ def complete_reviews_step_by_step(submission, reviewers):
                             course.save(update_fields=["reward_distributed"])
 
                     # Review rewards for all reviewers
-                    reviewer_reward = max(1, int(course.price * 0.005))
+                    reviewer_reward = max(1, int(price_val * 0.005))
 
                     for r in reviews:
                         review_reward = create_reward_transaction(

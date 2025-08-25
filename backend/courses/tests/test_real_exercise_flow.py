@@ -47,7 +47,8 @@ def test_real_submission_flow():
         print(f"📝 Latest submission: ID {latest_submission.id}")
         print(f"📚 Exercise: {latest_submission.exercise.title}")
         print(f"🎓 Course: {latest_submission.exercise.lesson.course.title}")
-        print(f"💰 Course Price: {latest_submission.exercise.lesson.course.price} TEO")
+    course_price_val = float(getattr(latest_submission.exercise.lesson.course, 'price_eur', 0))
+    print(f"💰 Course Price: {course_price_val} TEO")
         print(f"📅 Submitted: {latest_submission.created_at}")
 
         # Check current status
@@ -129,7 +130,7 @@ def test_real_submission_flow():
 
         # Summary
         total_earned = student_earned + total_reviewer_earned
-        course_price = latest_submission.exercise.lesson.course.price
+        course_price = float(getattr(latest_submission.exercise.lesson.course, 'price_eur', 0))
         percentage_distributed = (
             (float(total_earned) / float(course_price)) * 100 if course_price > 0 else 0
         )

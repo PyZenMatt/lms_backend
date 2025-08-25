@@ -213,3 +213,40 @@ class CourseDetailAPIView(generics.RetrieveAPIView):
                 {"error": "An error occurred while retrieving course details"},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
+
+
+class TeacherCoursesView(generics.ListAPIView):
+    """
+    List courses owned by the authenticated teacher.
+    This endpoint is used by the Studio frontend to show the teacher's courses.
+    """
+    serializer_class = None  # set dynamically to avoid circular imports at module load
+    permission_classes = [IsAuthenticated, IsTeacher]
+
+    def get_serializer_class(self):
+        # Import here to avoid import cycles
+        from courses.serializers import TeacherCourseSerializer
+
+        return TeacherCourseSerializer
+
+    def get_queryset(self):
+        user = self.request.user
+        # Return all courses where the user is the teacher (include unapproved so teacher can edit drafts)
+        # Optimize: select_related teacher, prefetch only necessary lesson fields in order
+        from django.db.models import Prefetch
+        from courses.models import Lesson
+
+        lessons_qs = (
+            Lesson.objects.all()
+            .only("id", "title", "order", "duration", "lesson_type", "created_at")
+            .order_by("order", "created_at")
+        )
+
+        qs = (
+            Course.objects.filter(teacher=user)
+            .select_related("teacher")
+            .prefetch_related(Prefetch("lessons", queryset=lessons_qs))
+            .only("id", "title", "description", "price_eur", "cover_image", "is_approved", "created_at", "updated_at", "category", "teacher")
+            .order_by("-created_at")
+        )
+        return qs

@@ -94,17 +94,19 @@ def test_network_error_points():
             with transaction.atomic():
                 # Simulate the full process
                 course = submission.exercise.lesson.course
+                price_val = int(getattr(course, "price_eur", 0))
+                reward_distributed = int(getattr(course, "reward_distributed", 0))
                 print(f"   Course: {course.title}")
-                print(f"   Course price: {course.price}")
-                print(f"   Current reward_distributed: {course.reward_distributed}")
+                print(f"   Course price: {price_val}")
+                print(f"   Current reward_distributed: {reward_distributed}")
 
                 # Calculate what should happen
-                reward_max = int(course.price * 0.15)
-                reward_remaining = reward_max - course.reward_distributed
+                reward_max = int(price_val * 0.15)
+                reward_remaining = reward_max - reward_distributed
                 print(f"   Reward max: {reward_max}, remaining: {reward_remaining}")
 
                 if reward_remaining > 0:
-                    reward_cap = max(1, int(course.price * 0.05))
+                    reward_cap = max(1, int(price_val * 0.05))
                     print(f"   Reward cap: {reward_cap}")
                     print("   ✅ Would create exercise reward")
                 else:
@@ -154,14 +156,17 @@ def check_missing_exercise_reward():
 
         course = submission.exercise.lesson.course
         print(f"Course: {course.title}")
-        print(f"Course price: {course.price} TEO")
-        print(f"Reward distributed: {course.reward_distributed} TEO")
+    price_val = int(getattr(course, "price_eur", 0))
+    reward_distributed = int(getattr(course, "reward_distributed", 0))
 
-        reward_max = int(course.price * 0.15)  # 15% of course price
-        reward_remaining = reward_max - course.reward_distributed
+    print(f"Course price: {price_val} TEO")
+    print(f"Reward distributed: {reward_distributed} TEO")
 
-        print(f"Reward max (15%): {reward_max} TEO")
-        print(f"Reward remaining: {reward_remaining} TEO")
+    reward_max = int(price_val * 0.15)  # 15% of course price
+    reward_remaining = reward_max - reward_distributed
+
+    print(f"Reward max (15%): {reward_max} TEO")
+    print(f"Reward remaining: {reward_remaining} TEO")
 
         if reward_remaining <= 0:
             print("🎯 FOUND THE ISSUE: No reward remaining in the pool!")

@@ -1,5 +1,6 @@
 // src/pages/TeacherDashboard.tsx
 import React from "react";
+import { Link } from "react-router-dom";
 import { getTeacherDashboard, type Course, type TeacherStats } from "../services/teacher";
 import DrfPager from "../components/DrfPager";
 
@@ -44,9 +45,29 @@ export default function TeacherDashboard() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-semibold">Teacher Dashboard</h1>
-        <p className="text-sm text-muted-foreground">Panoramica corsi e metriche</p>
+      <div className="flex items-end justify-between gap-3">
+        <div>
+          <h1 className="text-2xl font-semibold">Teacher Dashboard</h1>
+          <p className="text-sm text-muted-foreground">Panoramica corsi e metriche</p>
+        </div>
+        <div className="flex gap-2">
+          <Link
+            to="/studio/courses"
+            title="Vai alla lista dei tuoi corsi"
+            aria-label="I miei corsi"
+            className="rounded-md border px-3 py-2 text-sm hover:bg-accent"
+          >
+            I miei corsi
+          </Link>
+          <Link
+            to="/studio/courses/new"
+            title="Crea un nuovo corso"
+            aria-label="Nuovo corso"
+            className="rounded-lg bg-primary px-4 py-2 text-primary-foreground hover:opacity-90"
+          >
+            + Nuovo corso
+          </Link>
+        </div>
       </div>
 
       {/* Metriche */}

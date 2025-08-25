@@ -13,6 +13,7 @@ from courses.views.courses import (
     CourseDetailView,
     CourseListAPIView,
     CourseListCreateView,
+    TeacherCoursesView,
 )
 from courses.views.enrollments import (
     CourseEnrollmentView,
@@ -113,6 +114,8 @@ urlpatterns = [
         TeacherCourseStudentsView.as_view(),
         name="teacher-course-students",
     ),
+    # Teacher's own courses list for Studio frontend
+    path("teacher/courses/", TeacherCoursesView.as_view(), name="teacher-courses"),
     # === LESSONS ===
     path(
         "courses/<int:course_id>/lessons/",

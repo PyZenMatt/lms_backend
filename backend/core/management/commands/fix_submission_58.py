@@ -49,9 +49,10 @@ def fix_submission_58():
             print(f"  {i}. {review.reviewer.username}: {review.score}")
 
         # Get course
-        course = submission.exercise.lesson.course
-        print(f"\n🎓 Course: {course.title}")
-        print(f"💰 Course price: {course.price} TEO")
+    course = submission.exercise.lesson.course
+    price_val = int(getattr(course, "price_eur", 0))
+    print(f"\n🎓 Course: {course.title}")
+    print(f"💰 Course price: {price_val} TEO")
 
         # Check existing rewards
         existing_rewards = BlockchainTransaction.objects.filter(
@@ -79,7 +80,7 @@ def fix_submission_58():
                 print(f"❌ Missing exercise_reward for {submission.student.username}")
 
                 # Calculate reward
-                reward_cap = int(course.price * 0.05)
+                reward_cap = int(price_val * 0.05)
                 reward_amount = max(1, reward_cap // 2)  # At least 1 TEO
 
                 print(f"💰 Creating exercise_reward: {reward_amount} TEO")
@@ -99,7 +100,7 @@ def fix_submission_58():
             )
 
         # 2. Review rewards for all reviewers
-        reviewer_reward = max(1, int(course.price * 0.005))
+    reviewer_reward = max(1, int(price_val * 0.005))
         print(f"\n👥 Review reward amount: {reviewer_reward} TEO")
 
         for review in reviews:

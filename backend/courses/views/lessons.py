@@ -1,4 +1,5 @@
 from courses.models import Course, CourseEnrollment, Lesson, LessonCompletion
+from django.db.models import Max
 from courses.serializers import LessonListSerializer, LessonSerializer
 from django.shortcuts import get_object_or_404
 from rest_framework import generics, status, viewsets
@@ -186,7 +187,20 @@ class LessonCreateAssignView(APIView):
 
         serializer = LessonSerializer(data=data, context={"request": request})
         if serializer.is_valid():
+            # Save lesson instance and assign a sequential order if not provided.
             lesson = serializer.save(teacher=request.user)
+            # If the client didn't provide an explicit order, set it to the next available
+            # integer for this course (1-based).
+            try:
+                existing_max = Lesson.objects.filter(course=course).aggregate(max_order=Max("order"))[
+                    "max_order"
+                ]
+            except Exception:
+                existing_max = None
+            next_order = (existing_max or 0) + 1
+            if not lesson.order or lesson.order == 1:
+                lesson.order = next_order
+                lesson.save(update_fields=["order"])
             course.lessons.add(lesson)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

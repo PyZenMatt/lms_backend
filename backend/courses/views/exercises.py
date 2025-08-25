@@ -96,14 +96,15 @@ class CreateExerciseView(APIView):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        course = get_object_or_404(Course, id=course_id, teacher=request.user)
-        if (
-            not (request.user.is_staff or request.user.is_superuser)
-            and not course.is_approved
-        ):
-            raise PermissionDenied(
-                "Non puoi aggiungere esercizi a un corso non approvato."
-            )
+        # Fetch course (do not restrict by teacher here) then apply permission rules.
+        course = get_object_or_404(Course, id=course_id)
+        # Owners (course.teacher) and staff/superusers can add exercises even if the
+        # course is not yet approved. Other users may only add exercises to approved courses.
+        if not (request.user.is_staff or request.user.is_superuser or course.teacher == request.user):
+            if not course.is_approved:
+                raise PermissionDenied(
+                    "Non puoi aggiungere esercizi a un corso non approvato."
+                )
         lesson = get_object_or_404(Lesson, id=lesson_id, course=course)
 
         data = request.data.copy()

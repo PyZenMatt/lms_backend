@@ -57,7 +57,7 @@ class CourseService(TransactionalService):
                     "id": course.id,
                     "title": course.title,
                     "description": course.description,
-                    "price": float(course.price),
+                    "price": float(course.price_eur),
                     "category": course.category,
                     "cover_image": (
                         course.cover_image.url if course.cover_image else None
@@ -138,7 +138,7 @@ class CourseService(TransactionalService):
                 "id": course.id,
                 "title": course.title,
                 "description": course.description,
-                "price": float(course.price),
+                "price": float(course.price_eur),
                 "category": course.category,
                 "cover_image": course.cover_image.url if course.cover_image else None,
                 "creator": {

@@ -46,7 +46,7 @@ if not course:
     print("❌ No course found - cannot test exercises")
     exit()
 
-print(f"   📖 Course: {course.title} (Price: €{course.price})")
+print(f"   📖 Course: {course.title} (Price: €{getattr(course, 'price_eur', '0')})")
 
 # Trova lezione
 lesson = course.lessons_in_course.first()
