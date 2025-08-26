@@ -23,6 +23,10 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from services.db_teocoin_service import DBTeoCoinService
 from services.hybrid_teocoin_service import hybrid_teocoin_service
+from decimal import Decimal as _Decimal
+from django.db import transaction, IntegrityError
+from services.discount_calc import compute_discount_breakdown
+from rewards.models import PaymentDiscountSnapshot, Tier
 
 # LEGACY IMPORTS REMOVED - using clean database services now
 # from services.gas_free_v2_service import GasFreeV2Service
@@ -62,6 +66,19 @@ class CreatePaymentIntentView(APIView):
             student_address = request.data.get("student_address", "")
             request.data.get("student_signature", "")
 
+            # Debug: log incoming discount-related request fields (non-sensitive)
+            try:
+                rd = request.data
+                dbg = {
+                    "use_teocoin_discount": bool(rd.get("use_teocoin_discount", False)),
+                    "discount_percent": rd.get("discount_percent"),
+                    "discount_eur": rd.get("discount_eur"),
+                    "has_breakdown": bool(rd.get("breakdown")),
+                }
+                logger.info(f"[CreatePaymentIntent] incoming discount payload: {dbg}")
+            except Exception:
+                pass
+
             logger.info(
                 f"💳 Payment data: use_discount={use_teocoin_discount}, discount={discount_percent}%"
             )
@@ -95,10 +112,23 @@ class CreatePaymentIntentView(APIView):
                     # Initialize DB TeoCoin service
                     db_teo_service = DBTeoCoinService()
 
-                    # Calculate TEO cost (1 EUR discount = 1 TEO, matching frontend)
-                    discount_value_eur = (
-                        original_price * Decimal(discount_percent) / Decimal("100")
-                    )
+                    # Accept explicit discount_eur from frontend if provided (robustness)
+                    discount_eur_input = request.data.get("discount_eur", None)
+                    if discount_eur_input is not None:
+                        try:
+                            discount_value_eur = Decimal(str(discount_eur_input))
+                            logger.info(f"🔎 Using frontend-provided discount_eur={discount_value_eur}")
+                        except Exception:
+                            # fallback to percent-based calculation
+                            discount_value_eur = (
+                                original_price * Decimal(discount_percent) / Decimal("100")
+                            )
+                    else:
+                        # Calculate TEO cost (1 EUR discount = 1 TEO, matching frontend)
+                        discount_value_eur = (
+                            original_price * Decimal(discount_percent) / Decimal("100")
+                        )
+
                     teo_cost = discount_value_eur  # 1 TEO = 1 EUR discount value
 
                     # Check student TEO balance using DB system (matches frontend)
@@ -195,7 +225,7 @@ class CreatePaymentIntentView(APIView):
                 )
 
             # Create Stripe payment intent for final price
-            logger.info(f"💳 Creating Stripe payment intent for €{final_price}")
+            logger.info(f"💳 Creating Stripe payment intent for €{final_price} (discount_amount={discount_amount})")
 
             stripe.api_key = stripe_secret
             logger.info(
@@ -471,24 +501,102 @@ class ConfirmPaymentView(APIView):
             except Exception as e:
                 logger.error(f"TEO purchase bonus error: {e}")
 
-            return Response(
-                {
-                    "success": True,
-                    "enrollment_id": enrollment.pk,
-                    "course_title": course.title,
-                    "amount_paid": str(final_price),
-                    "discount_applied": (
-                        str(discount_amount) if discount_amount > 0 else None
-                    ),
-                    "payment_method": payment_method,
-                    "teacher_notification_sent": teacher_notification_sent,
-                    "message": f"Successfully enrolled in {course.title}!",
-                },
-                status=status.HTTP_201_CREATED,
-            )
+            # Persist discount snapshot idempotently
+            try:
+                # Determine discount_percent and accept flags
+                discount_percent = int(metadata.get("discount_percent", 0))
+                accept_teo = bool(request.data.get("accept_teo", False))
+                accept_ratio = request.data.get("accept_ratio", None)
+                if accept_ratio is not None:
+                    try:
+                        accept_ratio = _Decimal(str(accept_ratio))
+                    except Exception:
+                        accept_ratio = None
+
+                # Resolve tier from teacher profile if available
+                tier = None
+                tp = getattr(course.teacher, "teacher_profile", None)
+                if tp:
+                    tier_obj = Tier.objects.filter(name=tp.staking_tier, is_active=True).first()
+                    if tier_obj:
+                        tier = {
+                            "teacher_split_percent": tier_obj.teacher_split_percent,
+                            "platform_split_percent": tier_obj.platform_split_percent,
+                            "max_accept_discount_ratio": tier_obj.max_accept_discount_ratio,
+                            "teo_bonus_multiplier": tier_obj.teo_bonus_multiplier,
+                            "name": tier_obj.name,
+                        }
+
+                breakdown = compute_discount_breakdown(
+                    price_eur=original_price,
+                    discount_percent=_Decimal(str(discount_percent)),
+                    tier=tier,
+                    accept_teo=accept_teo,
+                    accept_ratio=accept_ratio,
+                )
+
+                # Persist snapshot idempotently; handle race via IntegrityError
+                with transaction.atomic():
+                    try:
+                        snap, created = PaymentDiscountSnapshot.objects.get_or_create(
+                            order_id=str(payment_intent_id),
+                            defaults={
+                                "course": course,
+                                "student": user,
+                                "teacher": course.teacher if getattr(course, "teacher", None) else None,
+                                "price_eur": original_price,
+                                "discount_percent": discount_percent,
+                                "student_pay_eur": breakdown["student_pay_eur"],
+                                "teacher_eur": breakdown["teacher_eur"],
+                                "platform_eur": breakdown["platform_eur"],
+                                "teacher_teo": breakdown["teacher_teo"],
+                                "platform_teo": breakdown["platform_teo"],
+                                "absorption_policy": breakdown.get("absorption_policy", "none"),
+                                "teacher_accepted_teo": breakdown.get("teacher_teo", 0),
+                                "tier_name": (tier.get("name") if tier else None),
+                                "tier_teacher_split_percent": (tier.get("teacher_split_percent") if tier else None),
+                                "tier_platform_split_percent": (tier.get("platform_split_percent") if tier else None),
+                                "tier_max_accept_discount_ratio": (tier.get("max_accept_discount_ratio") if tier else None),
+                                "tier_teo_bonus_multiplier": (tier.get("teo_bonus_multiplier") if tier else None),
+                            },
+                        )
+                    except IntegrityError:
+                        snap = PaymentDiscountSnapshot.objects.get(order_id=str(payment_intent_id))
+                        created = False
+
+                # Structured logging for confirm snapshot
+                try:
+                    logger.info("discount_confirm", extra={
+                        "event": "discount_confirm",
+                        "order_id": str(payment_intent_id),
+                        "user_id": user.id,
+                        "course_id": course_id,
+                        "teacher_id": course.teacher.id if getattr(course, "teacher", None) else None,
+                        "student_id": user.id,
+                        "discount_percent": discount_percent,
+                        "accept_teo": accept_teo,
+                        "accept_ratio": str(accept_ratio) if accept_ratio is not None else None,
+                        "tier_name": (tier.get("name") if tier else None),
+                        "created": created,
+                        "snapshot_id": getattr(snap, "id", None),
+                    })
+                except Exception:
+                    logger.debug("discount_confirm logging failed")
+
+            except Exception as e:
+                logger.error(f"Payment confirmation error: {e}")
+                return Response(
+                    {
+                        "error": "Failed to confirm payment",
+                        "details": str(e),
+                        "code": "PAYMENT_CONFIRMATION_ERROR",
+                    },
+                    status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                )
 
         except Exception as e:
-            logger.error(f"Payment confirmation error: {e}")
+            # Outer catch-all for ConfirmPaymentView
+            logger.error(f"Payment confirmation outer error: {e}")
             return Response(
                 {
                     "error": "Failed to confirm payment",
@@ -564,30 +672,68 @@ class PaymentSummaryView(APIView):
                 and teacher_has_wallet
             ):
 
+                # Use compute_discount_breakdown to provide server-truth breakdown
                 discount_percent = int(course.teocoin_discount_percent)
-                discount_amount = (
-                    original_price * Decimal(discount_percent) / Decimal("100")
-                )
-                final_price = original_price - discount_amount
+                try:
+                    # Resolve tier from teacher profile if available
+                    tier = None
+                    tp = getattr(course.teacher, "teacher_profile", None)
+                    if tp:
+                        tier_obj = Tier.objects.filter(name=tp.staking_tier, is_active=True).first()
+                        if tier_obj:
+                            tier = {
+                                "teacher_split_percent": tier_obj.teacher_split_percent,
+                                "platform_split_percent": tier_obj.platform_split_percent,
+                                "max_accept_discount_ratio": tier_obj.max_accept_discount_ratio,
+                                "teo_bonus_multiplier": tier_obj.teo_bonus_multiplier,
+                                "name": tier_obj.name,
+                            }
 
-                # Simple TEO cost calculation (1 TEO = 0.10 EUR discount value)
-                teo_cost_eur = discount_amount  # EUR value of discount
-                # Simplified: 1 TEO = 0.10 EUR
-                teo_cost_tokens = int(teo_cost_eur * 10)
+                    breakdown = compute_discount_breakdown(
+                        price_eur=original_price,
+                        discount_percent=_Decimal(str(discount_percent)),
+                        tier=tier,
+                        accept_teo=False,
+                        accept_ratio=None,
+                    )
 
-                pricing_options.append(
-                    {
-                        "method": "teocoin",
-                        "price": str(teo_cost_tokens),
-                        "currency": "TEO",
-                        "description": f"Use TEO for {discount_percent}% discount",
-                        "discount": discount_percent,
-                        "discount_percent": discount_percent,
-                        "final_price_eur": str(final_price),
-                        "savings_eur": str(discount_amount),
-                        "disabled": False,
-                    }
-                )
+                    pricing_options.append(
+                        {
+                            "method": "teocoin",
+                            "price": str(breakdown["teacher_teo"]),
+                            "currency": "TEO",
+                            "description": f"Use TEO for {discount_percent}% discount",
+                            "discount": discount_percent,
+                            "discount_percent": discount_percent,
+                            "final_price_eur": str(breakdown["student_pay_eur"]),
+                            "savings_eur": str((original_price - breakdown["student_pay_eur"])),
+                            "disabled": False,
+                            "breakdown": breakdown,
+                        }
+                    )
+                except Exception as e:
+                    logger.exception(f"Error computing discount breakdown for course {course_id}: {e}")
+                    # Fallback to previous simple representation
+                    discount_amount = (
+                        original_price * _Decimal(discount_percent) / _Decimal("100")
+                    )
+                    final_price = original_price - discount_amount
+                    teo_cost_eur = discount_amount
+                    teo_cost_tokens = int(teo_cost_eur * 10)
+
+                    pricing_options.append(
+                        {
+                            "method": "teocoin",
+                            "price": str(teo_cost_tokens),
+                            "currency": "TEO",
+                            "description": f"Use TEO for {discount_percent}% discount",
+                            "discount": discount_percent,
+                            "discount_percent": discount_percent,
+                            "final_price_eur": str(final_price),
+                            "savings_eur": str(discount_amount),
+                            "disabled": False,
+                        }
+                    )
             elif (
                 hasattr(course, "teocoin_discount_percent")
                 and course.teocoin_discount_percent > 0

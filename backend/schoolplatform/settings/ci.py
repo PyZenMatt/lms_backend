@@ -1,5 +1,6 @@
 # config/settings/ci.py
 import os
+from .base import *
 
 # In CI vogliamo ambiente "prod-like"
 DEBUG = False

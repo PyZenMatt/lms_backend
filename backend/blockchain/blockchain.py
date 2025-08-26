@@ -85,15 +85,32 @@ class TeoCoinService:
         except ImportError:
             logger.warning("Could not load PoA middleware - using fallback")
 
-        # Verify blockchain connection
+        # Verify blockchain connection. If the RPC is unreachable we initialise
+        # the service in a degraded mode so the rest of the app can run.
         if not self.w3.is_connected():
-            logger.error("Unable to connect to Polygon Amoy network")
-            raise ConnectionError("Blockchain connection failed")
+            logger.warning(
+                "Unable to connect to Polygon Amoy network - starting TeoCoinService in degraded mode"
+            )
+            # mark as not connected and avoid raising here (caller may call get_teocoin_service())
+            self.connected = False
+            self.contract = None
+            logger.info("TeoCoinService initialized in degraded mode (no blockchain connection)")
+            return
+
+        # Connected to chain
+        self.connected = True
 
         # Initialize contract instance
-        self.contract = self.w3.eth.contract(
-            address=Web3.to_checksum_address(self.contract_address), abi=TEOCOIN_ABI
-        )
+        try:
+            self.contract = self.w3.eth.contract(
+                address=Web3.to_checksum_address(self.contract_address), abi=TEOCOIN_ABI
+            )
+        except Exception as e:
+            logger.error(f"Failed to initialize contract instance: {e}")
+            self.contract = None
+            self.connected = False
+            logger.info("TeoCoinService initialized in degraded mode (contract init failed)")
+            return
 
         logger.info(f"TeoCoinService initialized - Contract: {self.contract_address}")
 
@@ -141,6 +158,10 @@ class TeoCoinService:
         Returns:
             Optional[str]: Transaction hash if successful, None if failed
         """
+        if not getattr(self, "connected", False):
+            logger.error("TeoCoinService not connected to blockchain - cannot mint tokens")
+            return None
+
         if not self.admin_private_key:
             logger.error("Admin private key not configured")
             return None
@@ -261,6 +282,13 @@ class TeoCoinService:
         Returns:
             int: Gas price in wei
         """
+        # If not connected, return a sensible default gas price (wei)
+        if not getattr(self, "connected", False):
+            try:
+                return int(30 * 10**9)  # 30 gwei in wei
+            except Exception:
+                return 30 * 10**9
+
         try:
             gas_price = self.w3.eth.gas_price
             # Add 10% for reliability
@@ -276,8 +304,8 @@ class TeoCoinService:
                 gas_price = max_gas_price
 
             return gas_price
-        except:
-            return self.w3.to_wei("30", "gwei")
+        except Exception:
+            return int(30 * 10**9)
 
 
 # Global service instance for backward compatibility
@@ -288,7 +316,11 @@ def get_teocoin_service():
     """Get or create the global TeoCoin service instance."""
     global teocoin_service
     if teocoin_service is None:
-        teocoin_service = TeoCoinService()
+        try:
+            teocoin_service = TeoCoinService()
+        except Exception as e:
+            logger.error(f"Failed to create TeoCoinService instance: {e}")
+            teocoin_service = None
     return teocoin_service
 
 

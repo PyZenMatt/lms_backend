@@ -18,6 +18,8 @@ type AuthCtx = {
   isAuthenticated: boolean;
   role: Role;
   isTeacher: boolean;
+  pendingTeoCount: number;
+  setPendingTeoCount: (n: number) => void;
   login: (usernameOrEmail: string, password: string) => Promise<boolean>;
   logout: () => void;
   refreshRole: () => Promise<void>;
@@ -132,6 +134,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       isAuthenticated,
       role,
       isTeacher: role === "teacher" || role === "admin",
+      pendingTeoCount: 0,
+      setPendingTeoCount: (_n: number) => {},
       login,
       logout,
       refreshRole,
@@ -139,5 +143,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     [booting, isAuthenticated, role]
   );
 
-  return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
+  // Maintain pendingTeoCount state so pages can update the navbar badge.
+  const [pendingTeoCount, setPendingTeoCount] = useState<number>(0);
+
+  const fullValue = useMemo<AuthCtx>(
+    () => ({
+      ...value,
+      pendingTeoCount,
+      setPendingTeoCount,
+    }),
+    [value, pendingTeoCount]
+  );
+
+  return <Ctx.Provider value={fullValue}>{children}</Ctx.Provider>;
 }

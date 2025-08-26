@@ -1,6 +1,6 @@
 from decimal import Decimal
 
-from django.contrib.auth.models import User
+from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.db import models
 
@@ -18,10 +18,10 @@ class TeacherDiscountDecision(models.Model):
     ]
 
     teacher = models.ForeignKey(
-        User, on_delete=models.CASCADE, related_name="discount_decisions"
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="discount_decisions"
     )
     student = models.ForeignKey(
-        User, on_delete=models.CASCADE, related_name="discount_requests"
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="discount_requests"
     )
     course_title = models.CharField(max_length=255)
 
@@ -139,7 +139,7 @@ class TeacherChoicePreference(models.Model):
     ]
 
     teacher = models.OneToOneField(
-        User, on_delete=models.CASCADE, related_name="choice_preference"
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="choice_preference"
     )
     preference = models.CharField(
         max_length=20, choices=PREFERENCE_CHOICES, default="manual"

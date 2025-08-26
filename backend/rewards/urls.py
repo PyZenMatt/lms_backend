@@ -15,6 +15,13 @@ from .views.reward_views import (
     trigger_course_completion_check,
     trigger_lesson_completion_reward,
 )
+from .views.discount_views import preview_discount, confirm_discount
+from .views.teocoin_views import (
+    staking_overview,
+    get_staking_tiers_rewards,
+    stake_from_rewards,
+    unstake_from_rewards,
+)
 
 app_name = "rewards"
 
@@ -60,4 +67,13 @@ urlpatterns = [
     path("rewards/achievement/", trigger_achievement_reward, name="achievement-reward"),
     path("rewards/summary/", get_reward_summary, name="reward-summary"),
     path("rewards/bulk/", bulk_process_rewards, name="bulk-reward"),
+    # Discount preview/confirm endpoints
+    path("rewards/discounts/preview/", preview_discount, name="discount-preview"),
+    path("rewards/discounts/confirm/", confirm_discount, name="discount-confirm"),
+    # Compatibility staking endpoints used by frontend wrappers
+    # Backwards-compatible staking overview used by frontend
+    path("rewards/staking/overview/", staking_overview, name="staking-overview"),
+    path("rewards/staking/tiers/", get_staking_tiers_rewards, name="staking-tiers"),
+    path("rewards/staking/stake/", stake_from_rewards, name="staking-stake"),
+    path("rewards/staking/unstake/", unstake_from_rewards, name="staking-unstake"),
 ]

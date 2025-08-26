@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import { getWallet, checkDiscount, applyDiscount, type WalletInfo } from "../../services/wallet";
-import { makeIdempotencyKey, clearIdempotencyKey } from "../../lib/idempotency";
+import { getWallet, type WalletInfo } from "../../services/wallet";
+import { previewDiscount, confirmDiscount } from "../../services/payments";
 
 type Props = {
   priceEUR: number;
@@ -18,12 +18,12 @@ type Props = {
   onRefreshAfterSuccess?: () => Promise<void> | void;
 };
 
-export default function TeoDiscountWidget({ priceEUR, courseId, onApply, onReceipt, onRefreshAfterSuccess }: Props) {
+export default function TeoDiscountWidget({ priceEUR, courseId, onApply }: Props) {
   const [wallet, setWallet] = useState<WalletInfo | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<Record<string, unknown> | null>(null);
-  const [stripeClientSecret, setStripeClientSecret] = useState<string | null>(null);
+  // result will contain server-side breakdown from previewDiscount
   const [checking, setChecking] = useState(false);
   const options = [5, 10, 15];
   const [selectedPct, setSelectedPct] = useState<number | null>(null);
@@ -34,7 +34,6 @@ export default function TeoDiscountWidget({ priceEUR, courseId, onApply, onRecei
     // If price, course or selected percent change, clear previous check/apply result to avoid stale teo_required
     setResult(null);
     setApplied(false);
-    setStripeClientSecret(null);
   }, [priceEUR, selectedPct, courseId]);
 
   useEffect(() => {
@@ -55,116 +54,135 @@ export default function TeoDiscountWidget({ priceEUR, courseId, onApply, onRecei
   async function handleCheck() {
     setChecking(true);
     setError(null);
-  const payload: { price_eur: number; course_id?: number; discount_percent?: number; [k: string]: unknown } = { price_eur: priceEUR };
+    const payload: { price_eur: number; course_id?: number; discount_percent?: number; [k: string]: unknown } = { price_eur: priceEUR };
     if (courseId) payload.course_id = courseId;
     if (selectedPct) payload.discount_percent = selectedPct;
-  console.debug('[TeoDiscountWidget] check payload:', payload);
-  const res = await checkDiscount(payload);
-  console.debug('[TeoDiscountWidget] check response:', res);
+    console.debug('[TeoDiscountWidget] preview payload:', payload);
+    const res = await previewDiscount(payload);
+    console.debug('[TeoDiscountWidget] preview response:', res);
     setChecking(false);
     if (!res.ok) {
       setError(`Verifica sconto fallita (${res.status})`);
       return;
     }
-  setResult(res.data);
+    // res.data is our DiscountBreakdown shape from the server
+    setResult(res.data as Record<string, unknown>);
   }
-
   async function handleApply() {
     if (!result) return;
     setError(null);
-    setStripeClientSecret(null);
     setApplying(true);
-    const idemp = makeIdempotencyKey("apply-discount");
-    const body: Record<string, unknown> = { price_eur: priceEUR, idempotency_key: idemp };
-    if (courseId) body.course_id = courseId;
-    if (selectedPct) body.discount_percent = selectedPct;
-    // When calling course-scoped hybrid-payment, backend expects teocoin_to_spend and wallet_address
-    // If the user explicitly selected a percent, prefer that value (avoid using stale result.teo_required)
-    // result might be nested under `discount` (CalculateDiscountView) or flat (hybrid response)
-  const discountObj = result ? ((result as Record<string, unknown>).discount ?? result) as Record<string, unknown> : undefined;
-    const teoFromResultRaw = discountObj && (discountObj['teo_spent'] ?? discountObj['teo_required'] ?? discountObj['teo_used'] ?? discountObj['teo']);
-    const teoFromResult = teoFromResultRaw !== undefined && teoFromResultRaw !== null ? Number(teoFromResultRaw) : undefined;
-    let teoToSpend: number | undefined = undefined;
-    if (selectedPct) {
-      // user explicitly picked a percent — compute from price
-      const discountEUR = Math.round((priceEUR * selectedPct) / 100);
-      teoToSpend = discountEUR;
-    } else if (typeof teoFromResult === 'number' && Number.isFinite(teoFromResult)) {
-      teoToSpend = Math.round(teoFromResult as number);
+    // propagate server-provided breakdown via onApply. Parent will call createPaymentIntent with discount flags.
+    const finalPrice = Number(result['student_pay_eur'] ?? result['student_pay'] ?? priceEUR) as number;
+    const discountEUR = Number.isFinite(Number(priceEUR - finalPrice)) ? Number(priceEUR - finalPrice) : Number(result['discount_eur'] ?? 0);
+      try {
+      // First, try to persist the preview as a discount snapshot on the server so the flow is idempotent
+      // and teachers can be notified. We call confirmDiscount which is safe to call multiple times.
+      try {
+        // backend requires an order_id on confirm; frontend generates a lightweight id so the snapshot
+        // can be created before the Stripe PaymentIntent exists. The PaymentReturn flow will call
+        // confirmDiscount again with the real order_id (payment intent) and be idempotent.
+        const payload: Record<string, unknown> = {
+          order_id: `local_${Date.now()}`,
+          course_id: courseId,
+          price_eur: priceEUR,
+          discount_percent: selectedPct ?? undefined,
+          breakdown: result,
+        };
+        console.debug('[TeoDiscountWidget] confirming discount snapshot with payload:', payload)
+        const conf = await confirmDiscount(payload)
+        console.debug('[TeoDiscountWidget] confirmDiscount response:', conf)
+        if (!conf.ok) {
+          // keep going but surface an error to user
+          setError(`Impossibile registrare lo sconto: HTTP ${conf.status}`)
+        } else {
+          // Prefer server-side breakdown values when available (they are the source of truth).
+          // The server may return breakdown in several shapes; attempt to parse common variants.
+          const serverBreakdown: unknown = (conf.data && (conf.data.breakdown ?? conf.data.snapshot ?? conf.data)) || null;
+
+          // helper to read nested numeric fields safely
+          const readNumber = (obj: unknown, ...keys: string[]) => {
+            const map = (obj && typeof obj === 'object') ? (obj as Record<string, unknown>) : undefined
+            for (const k of keys) {
+              if (!map) continue
+              const v = map[k]
+              if (v === undefined || v === null) continue
+              // if value is an object that wraps the real value (like { source, parsedValue }) dig deeper
+              if (typeof v === 'object') {
+                const vmap = v as Record<string, unknown>
+                if ('parsedValue' in vmap) return Number(vmap['parsedValue'])
+                if ('source' in vmap) {
+                  const n = Number(vmap['source'])
+                  if (!Number.isNaN(n)) return n
+                }
+                // try common nested locations
+                if ('data' in vmap) {
+                  const n = Number((vmap['data'] as unknown) as number)
+                  if (!Number.isNaN(n)) return n
+                }
+                continue
+              }
+              const n = Number(v)
+              if (!Number.isNaN(n)) return n
+            }
+            return undefined
+          }
+
+          let finalFromServer = readNumber(serverBreakdown, 'student_pay_eur', 'student_pay', 'final_price_eur')
+          // sometimes serverBreakdown.raw.data.student_pay_eur
+          if (finalFromServer === undefined && serverBreakdown && typeof serverBreakdown === 'object') {
+            const sb = serverBreakdown as Record<string, unknown>
+            if (sb['raw'] && typeof sb['raw'] === 'object') {
+              const raw = sb['raw'] as Record<string, unknown>
+              if (raw['data'] && typeof raw['data'] === 'object') {
+                finalFromServer = readNumber(raw['data'], 'student_pay_eur', 'student_pay')
+              }
+            }
+          }
+
+          let final = Number(result['student_pay_eur'] ?? result['student_pay'] ?? priceEUR)
+          if (finalFromServer !== undefined && Number.isFinite(finalFromServer)) final = finalFromServer
+
+          // compute discount eur from server value if available
+          let discountComputed = Number(priceEUR) - final
+          if (!Number.isFinite(discountComputed) || discountComputed === 0) {
+            // try server-provided discount if present
+            const serverDiscount = readNumber(serverBreakdown, 'discount_eur', 'discount_amount')
+            if (serverDiscount !== undefined && Number.isFinite(serverDiscount)) discountComputed = serverDiscount
+          }
+
+          const detailsWithSnapshot = {
+            breakdown: serverBreakdown ?? result,
+            snapshot: conf.data.snapshot ?? null,
+            // normalized helpers expected by CourseCheckout
+            final_price_eur: final,
+            discount_eur: discountComputed,
+          } as Record<string, unknown>
+
+          onApply(final, discountComputed, detailsWithSnapshot)
+          setApplied(true)
+          setError(null)
+          // persist a normalized breakdown in local state so it won't be the full wrapper later
+          try {
+            setResult((r) => ({ ...(r ?? {}), _snapshot: conf.data.snapshot ?? null, ...((serverBreakdown && typeof serverBreakdown === 'object') ? serverBreakdown : {}) }))
+          } catch {
+            // ignore
+          }
+          return
+        }
+      } catch (e) {
+        console.debug('confirmDiscount failed:', e)
+        setError(String(e))
+      }
+
+  // Fallback: still call onApply even if confirmDiscount failed, to preserve UX
+  onApply(finalPrice, discountEUR, { breakdown: result, final_price_eur: finalPrice, discount_eur: discountEUR })
+      setApplied(true)
+    } catch (e) {
+      setError(String(e));
+    } finally {
+      setApplying(false);
     }
-    if (teoToSpend !== undefined && Number.isFinite(teoToSpend) && teoToSpend > 0) {
-      body.teocoin_to_spend = teoToSpend;
-    } else {
-      // fallback: try to read teo_required from previous check result
-  const prev = result ? ((result as Record<string, unknown>).discount ?? result) as Record<string, unknown> : undefined;
-      const prevTeo = prev && (prev['teo_required'] ?? prev['teo_spent'] ?? prev['teo_used']);
-      const prevTeoNum = prevTeo !== undefined && prevTeo !== null ? Number(prevTeo) : NaN;
-      if (Number.isFinite(prevTeoNum) && prevTeoNum > 0) body.teocoin_to_spend = Math.round(prevTeoNum);
-    }
-
-    // Debug computed values to diagnose incorrect teocoin_to_spend
-    const debugInfo = {
-      priceEUR,
-      selectedPct,
-      computedFromSelected: selectedPct ? Number(((priceEUR * selectedPct) / 100).toFixed(4)) : null,
-      computedTeoToSpend: teoToSpend,
-      teoFromResultRaw,
-      body
-    };
-    console.debug("[TeoDiscountWidget] apply computed:", debugInfo);
-    console.debug("[TeoDiscountWidget] apply payload:", body);
-
-    const res = await applyDiscount(body);
-    setApplying(false);
-    console.debug("[TeoDiscountWidget] apply response:", res);
-    if (!res.ok) {
-      setError(`Applicazione sconto fallita (${res.status})`);
-      // allow retry with same idempotency key — keep it pending
-      return;
-    }
-    const data = (res.data || {}) as Record<string, unknown>;
-
-    // Normalize various backend response shapes:
-    // - { final_price_eur, discount_eur }
-    // - { discounted_amount, discount_applied }
-    // - { success: true, discount: { final_price, discount_amount, teo_required } }
-    const nestedDiscount = (data.discount ?? null) as Record<string, unknown> | null;
-    const finalFromData = Number(
-      data.final_price_eur ?? data.discounted_amount ?? data.final_price ?? nestedDiscount?.final_price ?? nestedDiscount?.final_price_eur ?? priceEUR
-    );
-    const discountFromData = Number(
-      data.discount_eur ?? data.discount_applied ?? data.discount_amount ?? nestedDiscount?.discount_amount ?? nestedDiscount?.discount_eur ?? (priceEUR - finalFromData)
-    );
-
-    // Ensure the UI sees normalized fields
-    const normalized = {
-      ...data,
-      final_price_eur: finalFromData,
-      discount_eur: discountFromData,
-      teo_required: data.teo_required ?? data.teo_spent ?? nestedDiscount?.teo_required ?? teoToSpend,
-      stripe_client_secret: (data.stripe_client_secret ?? data.client_secret ?? data.clientSecret) as string | undefined,
-    } as Record<string, unknown>;
-
-    setResult(normalized);
-    setApplied(true);
-    if (typeof normalized.stripe_client_secret === 'string') setStripeClientSecret(normalized.stripe_client_secret as string);
-    onApply(normalized.final_price_eur as number, normalized.discount_eur as number, { ...normalized, idempotency_key: idemp });
-
-    if (typeof onReceipt === "function") {
-      onReceipt({
-        final_price_eur: Number(normalized.final_price_eur ?? priceEUR),
-  discount_eur: Number(normalized.discount_eur ?? (priceEUR - Number(normalized.final_price_eur ?? priceEUR))),
-        teo_spent: typeof normalized.teo_required === 'number' ? Number(normalized.teo_required) : typeof normalized.teo_spent === 'number' ? Number(normalized.teo_spent) : undefined,
-        stripe_client_secret: typeof normalized.stripe_client_secret === 'string' ? normalized.stripe_client_secret : undefined,
-        order_id: (normalized.order_id ?? normalized.payment_intent_id) as string | number | undefined,
-      });
-    }
-
-    // Chiave idempotente consumata
-    clearIdempotencyKey(idemp);
-
-    // Aggiorna saldo/movimenti dopo esito OK
-    if (onRefreshAfterSuccess) await onRefreshAfterSuccess();
   }
 
   return (
@@ -174,12 +192,12 @@ export default function TeoDiscountWidget({ priceEUR, courseId, onApply, onRecei
           <div className="text-sm text-muted-foreground">Sconto con TEO</div>
           <div className="text-base">Prezzo corrente: <span className="font-semibold text-foreground">{priceEUR.toFixed(2)} EUR</span></div>
         </div>
-        {loading ? (
+    {loading ? (
           <div className="h-6 w-24 animate-pulse rounded bg-muted/20" />
         ) : (
           <div className="text-right">
             <div className="text-xs text-muted-foreground">Saldo TEO</div>
-            <div className="font-semibold text-foreground">{wallet && typeof wallet.balance_teo === 'number' ? wallet.balance_teo.toFixed(2) : "--"} TEO</div>
+      <div className="font-semibold text-foreground">{wallet && typeof wallet.balance_teo === 'number' ? wallet.balance_teo.toFixed(8) : "--"} TEO</div>
           </div>
         )}
       </div>
@@ -189,7 +207,7 @@ export default function TeoDiscountWidget({ priceEUR, courseId, onApply, onRecei
       <div className="mt-4">
         <div className="text-sm mb-2 text-foreground">Scegli sconto TEO</div>
         <div className="flex gap-2">
-          {options.map((pct) => {
+            {options.map((pct) => {
             const discountEUR = Number((priceEUR * pct) / 100)
             const teoNeeded = discountEUR
             const availableTEO = (typeof wallet?.balance_teo === 'number') ? wallet!.balance_teo : 0
@@ -201,7 +219,7 @@ export default function TeoDiscountWidget({ priceEUR, courseId, onApply, onRecei
                 disabled={loading || disabled}
                 className={`rounded-lg px-3 py-2 text-sm border disabled:opacity-50 ${selectedPct === pct ? 'bg-primary text-primary-foreground border-primary' : 'bg-card text-foreground border-border'}`}
               >
-                {pct}% {disabled ? '(non disponibile)' : `-€${discountEUR.toFixed(2)} / ${teoNeeded.toFixed(2)} TEO`}
+                {pct}% {disabled ? '(non disponibile)' : `-€${discountEUR.toFixed(2)} / ${teoNeeded.toFixed(8)} TEO`}
               </button>
             )
           })}
@@ -230,12 +248,18 @@ export default function TeoDiscountWidget({ priceEUR, courseId, onApply, onRecei
 
       {applied && result && (
         <div className="mt-4 rounded-lg border border-border bg-popover p-3 text-sm text-foreground">
-          <div className="flex justify-between"><span>Sconto:</span><span>-{Number(result['discount_eur'] ?? 0).toFixed(2)} EUR</span></div>
-          <div className="flex justify-between"><span>TEO richiesti:</span><span>{Number(result['teo_required'] ?? 0).toFixed(2)} TEO</span></div>
-          <div className="flex justify-between font-semibold"><span>Totale finale:</span><span>{(priceEUR - Number(result['discount_eur'] ?? 0)).toFixed(2)} EUR</span></div>
-          {stripeClientSecret && (
-            <div className="mt-2 text-sm text-muted-foreground">Pagamento Stripe richiesto — client_secret presente</div>
-          )}
+              {(() => {
+                const studentPay = Number(result['student_pay_eur'] ?? result['student_pay'] ?? priceEUR);
+                const discount = Number.isFinite(Number(priceEUR - studentPay)) ? Number(priceEUR - studentPay) : Number(result['discount_eur'] ?? 0);
+                const teoReq = Number(result['teacher_teo'] ?? result['teacher_teocoin'] ?? result['teo_required'] ?? 0);
+                return (
+                  <>
+                    <div className="flex justify-between"><span>Sconto:</span><span>-{discount.toFixed(2)} EUR</span></div>
+                    <div className="flex justify-between"><span>TEO richiesti:</span><span>{teoReq.toFixed(8)} TEO</span></div>
+                    <div className="flex justify-between font-semibold"><span>Totale finale:</span><span>{studentPay.toFixed(2)} EUR</span></div>
+                  </>
+                )
+              })()}
         </div>
       )}
     </div>

@@ -26,6 +26,8 @@ import Forbidden from "./pages/Forbidden";
 import ProfilePage from "./pages/ProfilePage";
 import StudentDashboard from "./pages/StudentDashboard";
 import TeacherDashboard from "./pages/TeacherDashboard";
+import TeoDecisionsPage from "./pages/teacher/TeoDecisions";
+import StakingPage from "./pages/teacher/Staking";
 import AdminDashboard from "./pages/AdminDashboard";
 import CoursesStudioList from "./pages/studio/CoursesStudioList"
 import CourseStudioForm from "./pages/studio/CourseStudioForm"
@@ -169,6 +171,22 @@ export default function App() {
             element={
               <RoleRoute allow="teacher">
                 <ErrorBoundary><TeacherDashboard /></ErrorBoundary>
+              </RoleRoute>
+            }
+          />
+          <Route
+            path="/teacher/teo-decisions"
+            element={
+              <RoleRoute allow="teacher">
+                <ErrorBoundary><TeoDecisionsPage /></ErrorBoundary>
+              </RoleRoute>
+            }
+          />
+          <Route
+            path="/teacher/staking"
+            element={
+              <RoleRoute allow="teacher">
+                <ErrorBoundary><StakingPage /></ErrorBoundary>
               </RoleRoute>
             }
           />

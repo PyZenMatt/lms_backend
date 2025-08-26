@@ -15,7 +15,7 @@ export default function AppLayout({
   children?: React.ReactNode;
 }) {
   const [collapsed, setCollapsed] = React.useState(false);
-  const { isAuthenticated, role, logout } = useAuth();
+  const { isAuthenticated, role, logout, pendingTeoCount } = useAuth();
 
   // Default items if none provided — includes icons and role-based links
   const defaultItems: SidebarItem[] = [];
@@ -27,6 +27,30 @@ export default function AppLayout({
     defaultItems.push({ to: "/studio/courses/new", label: "🏫 Studio Docente" });
     defaultItems.push({ to: "/courses", label: "📚 Corsi" });
     defaultItems.push({ to: "/wallet", label: "👛 Wallet" });
+    // Restore TEO Inbox and Staking in the sidebar for teachers
+    defaultItems.push({
+      to: "/teacher/teo-decisions",
+      label: (
+        <>
+          📥 TEO Inbox
+          {pendingTeoCount > 0 && (
+            <span className="ml-2 inline-flex items-center rounded-full bg-red-600 px-2 py-0.5 text-xs font-medium text-white">
+              {pendingTeoCount}
+            </span>
+          )}
+        </>
+      ),
+    });
+
+    defaultItems.push({
+      to: "/teacher/staking",
+      label: (
+        <>
+          💎 Staking
+        </>
+      ),
+    });
+  // TEO Inbox and Staking are surfaced on the Teacher Dashboard only.
     // teachers don't need 'I miei esercizi' in the sidebar; they manage exercises via Studio
   } else {
     // student / anonymous sidebar — learning-focused

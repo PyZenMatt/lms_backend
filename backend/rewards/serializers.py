@@ -87,3 +87,93 @@ class BlockchainTransactionSerializer(serializers.ModelSerializer):
                 "last_name": obj.user.last_name,
             }
         return None
+
+
+# --- Discount preview/confirm serializers ---
+
+
+class DiscountPreviewInputSerializer(serializers.Serializer):
+    price_eur = serializers.DecimalField(max_digits=10, decimal_places=2, min_value=0)
+    discount_percent = serializers.DecimalField(max_digits=5, decimal_places=2, min_value=0, max_value=100, required=False, default=0)
+    accept_teo = serializers.BooleanField(required=False, default=False)
+    accept_ratio = serializers.DecimalField(max_digits=5, decimal_places=4, min_value=0, max_value=1, required=False, allow_null=True)
+    course_id = serializers.IntegerField(required=False, allow_null=True)
+    teacher_id = serializers.IntegerField(required=False, allow_null=True)
+    student_id = serializers.IntegerField(required=False, allow_null=True)
+
+    def validate_course_id(self, value):
+        if value is None:
+            return value
+        from courses.models import Course
+
+        try:
+            Course.objects.get(id=value)
+        except Exception:
+            raise serializers.ValidationError("course_id does not exist")
+        return value
+
+    def validate_teacher_id(self, value):
+        if value is None:
+            return value
+        from users.models import User
+
+        try:
+            User.objects.get(id=value)
+        except Exception:
+            raise serializers.ValidationError("teacher_id does not exist")
+        return value
+
+    def validate_student_id(self, value):
+        if value is None:
+            return value
+        from users.models import User
+
+        try:
+            User.objects.get(id=value)
+        except Exception:
+            raise serializers.ValidationError("student_id does not exist")
+        return value
+
+
+class DiscountConfirmInputSerializer(DiscountPreviewInputSerializer):
+    order_id = serializers.CharField(max_length=200)
+
+
+class DiscountBreakdownSerializer(serializers.Serializer):
+    student_pay_eur = serializers.DecimalField(max_digits=10, decimal_places=2)
+    teacher_eur = serializers.DecimalField(max_digits=10, decimal_places=2)
+    platform_eur = serializers.DecimalField(max_digits=10, decimal_places=2)
+    teacher_teo = serializers.DecimalField(max_digits=18, decimal_places=8)
+    platform_teo = serializers.DecimalField(max_digits=18, decimal_places=8)
+    absorption_policy = serializers.CharField()
+    tier = serializers.DictField(child=serializers.CharField(), required=False, allow_null=True)
+
+
+class PaymentDiscountSnapshotSerializer(serializers.ModelSerializer):
+    class Meta:
+        from .models import PaymentDiscountSnapshot
+
+        model = PaymentDiscountSnapshot
+        fields = [
+            "id",
+            "order_id",
+            "course",
+            "student",
+            "teacher",
+            "price_eur",
+            "discount_percent",
+            "student_pay_eur",
+            "teacher_eur",
+            "platform_eur",
+            "teacher_teo",
+            "platform_teo",
+            "absorption_policy",
+            "teacher_accepted_teo",
+            "tier_name",
+            "tier_teacher_split_percent",
+            "tier_platform_split_percent",
+            "tier_max_accept_discount_ratio",
+            "tier_teo_bonus_multiplier",
+            "created_at",
+        ]
+        read_only_fields = fields

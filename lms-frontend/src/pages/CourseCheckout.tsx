@@ -1,7 +1,7 @@
 // src/pages/CourseCheckout.tsx
 import React from "react"
 import { useParams, Link } from "react-router-dom"
-import { getPaymentSummary, createPaymentIntent } from "../services/payments"
+import { getPaymentSummary, createPaymentIntent, previewDiscount } from "../services/payments"
 import { getCourse } from "../services/courses"
 import { loadStripe } from "@stripe/stripe-js"
 import type { Stripe } from "@stripe/stripe-js"
@@ -49,6 +49,7 @@ export default function CourseCheckout() {
 
   // (discount override stored directly on summary via setSummary in onApply)
   const [teoDiscountApplied, setTeoDiscountApplied] = React.useState<boolean>(false)
+  const [discountBreakdown, setDiscountBreakdown] = React.useState<Record<string, unknown> | null>(null)
 
   // wallet address not needed during checkout
 
@@ -67,6 +68,23 @@ export default function CourseCheckout() {
           teo_required: s.data.teo_required,
           currency: s.data.currency || "EUR",
         })
+        // If backend didn't provide a full breakdown, request a preview (server-truth)
+        try {
+          const needsPreview = !(s.data.raw && (s.data.raw.breakdown || s.data.raw.discount))
+          if (needsPreview) {
+            const pv = await previewDiscount({ price_eur: s.data.price_eur, course_id: courseId, discount_percent: 0 })
+            if (pv.ok) {
+              // prefer server's student_pay_eur/teo values
+              setSummary((old) => ({
+                ...old,
+                total_eur: pv.data.student_pay_eur ?? old.total_eur,
+                teo_required: pv.data.teacher_teo ?? old.teo_required,
+              }))
+            }
+          }
+        } catch (e) {
+          console.debug("previewDiscount failed:", e)
+        }
       }
   setTitle(c.ok ? (c.data?.title ?? `Corso #${courseId}`) : `Corso #${courseId}`)
       setLoading(false)
@@ -110,6 +128,11 @@ export default function CourseCheckout() {
       intentPayload.discount_percent = summary.discount_percent
       intentPayload.discount_eur = summary.price_eur && summary.discount_percent ? (summary.price_eur * (summary.discount_percent / 100)) : undefined
     }
+    // attach server-provided breakdown when available (backend will prefer explicit values)
+    if (discountBreakdown) intentPayload.breakdown = discountBreakdown
+
+    // debug: log payload so we can verify the frontend sends use_teocoin_discount or breakdown
+    console.debug("[Checkout] createPaymentIntent payload:", intentPayload)
     const res = await createPaymentIntent(courseId, intentPayload)
     setSubmitting(null)
 
@@ -209,7 +232,16 @@ export default function CourseCheckout() {
               const discount = Number(
                 (d as Record<string, unknown>)['discount_eur'] ?? (d as Record<string, unknown>)['discountEUR'] ?? discountEUR ?? (typeof summary.price_eur === 'number' ? (summary.price_eur - final) : 0)
               );
-              const discount_percent = ((d as Record<string, unknown>)['discount_percent'] as number | undefined) ?? (typeof summary.price_eur === 'number' && summary.price_eur > 0 ? ((summary.price_eur - final) / summary.price_eur) * 100 : undefined);
+              // robustly parse discount_percent from server breakdown (may be string)
+              let discount_percent_val: number | undefined = undefined;
+              const rawDiscountPercent = (d as Record<string, unknown>)['discount_percent'] ?? (d as Record<string, unknown>)['discountPct'] ?? (d as Record<string, unknown>)['discount'] ?? undefined;
+              if (rawDiscountPercent !== undefined) {
+                const n = Number(rawDiscountPercent);
+                if (Number.isFinite(n)) discount_percent_val = n;
+              }
+              if (discount_percent_val === undefined && typeof summary.price_eur === 'number' && summary.price_eur > 0) {
+                discount_percent_val = ((summary.price_eur - final) / summary.price_eur) * 100;
+              }
               // Normalize teo_required into number | undefined
               const rawTeo = (d as Record<string, unknown>)['teo_required'] ?? (d as Record<string, unknown>)['teoRequired'] ?? (d as Record<string, unknown>)['teo_spent'] ?? summary.teo_required;
               let teo_required_parsed: number | undefined = undefined;
@@ -222,12 +254,19 @@ export default function CourseCheckout() {
               setSummary((s) => ({
                 ...s,
                 total_eur: final,
-                discount_percent: typeof discount_percent === 'number' ? discount_percent : s.discount_percent,
+                discount_percent: typeof discount_percent_val === 'number' ? discount_percent_val : s.discount_percent,
                 teo_required: teo_required_parsed ?? s.teo_required,
               }));
-              setTeoDiscountApplied(true);
+              // persist optional server-provided breakdown so it can be forwarded to createPaymentIntent
+              try {
+                const bd = (details || {})['breakdown'] ?? details ?? null
+                if (bd) setDiscountBreakdown(bd as Record<string, unknown>)
+              } catch {
+                // ignore
+              }
+               setTeoDiscountApplied(true);
               // optional: you can store details in state or send analytics
-              console.debug("TEO discount applied", { finalPriceEUR, discountEUR, details, normalized: { final, discount, discount_percent, teo_required: teo_required_parsed } });
+              console.debug("TEO discount applied", { finalPriceEUR, discountEUR, details, normalized: { final, discount, discount_percent: discount_percent_val, teo_required: teo_required_parsed } });
             }}
           />
 

@@ -1,5 +1,6 @@
 // src/services/payments.ts
 import { api } from "../lib/api"
+import { showToast } from "../components/ToastHost"
 
 /** =========================
  *  Tipi e helper comuni
@@ -222,6 +223,226 @@ export async function confirmStripePaymentSmart(
   }
 
   return { ok: false, status: 400, error: last400 ?? "Bad Request" }
+}
+
+/** =========================
+ *  API: Rewards / Discounts (preview & confirm)
+ *  These wrap the backend endpoints that return the server-side breakdown
+ *  for teocoin-based discounts and confirm the persisted snapshot after
+ *  a successful payment (idempotent).
+ *  ========================= */
+
+export type DiscountBreakdown = {
+  student_pay_eur?: number
+  teacher_eur?: number
+  platform_eur?: number
+  teacher_teo?: number
+  platform_teo?: number
+  absorption_policy?: string
+  // full raw payload from backend
+  raw?: any
+}
+
+export async function previewDiscount(payload?: Record<string, any>): Promise<Result<DiscountBreakdown>> {
+  const body = payload ?? {}
+  const res = await api.post<any>(`/v1/rewards/discounts/preview/`, body)
+  if (!res.ok) return { ok: false, status: res.status, error: (res as any).error }
+
+  const data = res.data ?? {}
+  const breakdown: DiscountBreakdown = {
+    student_pay_eur: asNumber(data.student_pay_eur ?? data.student_pay ?? data.student_amount) ?? undefined,
+    teacher_eur: asNumber(data.teacher_eur ?? data.teacher_amount) ?? undefined,
+    platform_eur: asNumber(data.platform_eur ?? data.platform_amount) ?? undefined,
+    teacher_teo: asNumber(data.teacher_teo ?? data.teacher_teocoin) ?? undefined,
+    platform_teo: asNumber(data.platform_teo ?? data.platform_teocoin) ?? undefined,
+    absorption_policy: data.absorption_policy ?? data.policy ?? undefined,
+    raw: data,
+  }
+
+  return { ok: true, status: res.status, data: breakdown }
+}
+
+export async function confirmDiscount(payload?: Record<string, any>): Promise<Result<{ snapshot?: any; breakdown?: DiscountBreakdown }>> {
+  const body = payload ?? {}
+  const res = await api.post<any>(`/v1/rewards/discounts/confirm/`, body)
+  if (!res.ok) return { ok: false, status: res.status, error: (res as any).error }
+
+  const data = res.data ?? {}
+  const breakdownData = data.breakdown ?? data ?? {}
+  const breakdown: DiscountBreakdown = {
+    student_pay_eur: asNumber(breakdownData.student_pay_eur ?? breakdownData.student_pay ?? breakdownData.student_amount) ?? undefined,
+    teacher_eur: asNumber(breakdownData.teacher_eur ?? breakdownData.teacher_amount) ?? undefined,
+    platform_eur: asNumber(breakdownData.platform_eur ?? breakdownData.platform_amount) ?? undefined,
+    teacher_teo: asNumber(breakdownData.teacher_teo ?? breakdownData.teacher_teocoin) ?? undefined,
+    platform_teo: asNumber(breakdownData.platform_teo ?? breakdownData.platform_teocoin) ?? undefined,
+    absorption_policy: breakdownData.absorption_policy ?? breakdownData.policy ?? undefined,
+    raw: data,
+  }
+
+  return { ok: true, status: res.status, data: { snapshot: data.snapshot ?? data, breakdown } }
+}
+
+/**
+ * GET discount snapshot by order_id.
+ * Fallback callers should call confirmDiscount(...) when GET is not available (404).
+ */
+export async function getDiscountSnapshot(orderId: string): Promise<Result<{ snapshot?: any; breakdown?: DiscountBreakdown; status?: string; deadline_at?: string }>> {
+  if (!orderId) return { ok: false, status: 400, error: "order_id required" }
+  const path = `/v1/rewards/discounts/${orderId}/`
+  const res = await api.get<any>(path)
+  if (!res.ok) return { ok: false, status: res.status, error: (res as any).error }
+
+  const data = (res.data ?? {}) as any
+  const snapshot = data.snapshot ?? data
+  const breakdownData = snapshot.breakdown ?? snapshot ?? {}
+  const breakdown: DiscountBreakdown = {
+    student_pay_eur: asNumber(breakdownData.student_pay_eur ?? breakdownData.student_pay ?? breakdownData.student_amount) ?? undefined,
+    teacher_eur: asNumber(breakdownData.teacher_eur ?? breakdownData.teacher_amount) ?? undefined,
+    platform_eur: asNumber(breakdownData.platform_eur ?? breakdownData.platform_amount) ?? undefined,
+    teacher_teo: asNumber(breakdownData.teacher_teo ?? breakdownData.teacher_teocoin) ?? undefined,
+    platform_teo: asNumber(breakdownData.platform_teo ?? breakdownData.platform_teocoin) ?? undefined,
+    absorption_policy: breakdownData.absorption_policy ?? breakdownData.policy ?? undefined,
+    raw: snapshot,
+  }
+
+  const status = (snapshot.status ?? snapshot.state) as string | undefined
+  const deadline_at = snapshot.deadline_at ?? snapshot.expires_at
+
+  return { ok: true, status: res.status, data: { snapshot, breakdown, status, deadline_at } }
+}
+
+/** =========================
+ *  API: Teacher Inbox & Staking wrappers
+ *  These are small FE wrappers around rewards endpoints used by
+ *  the teacher inbox (pending teo decisions) and staking pages.
+ *  They follow the project's Result<T> style and surface 404 as a
+ *  friendly toast "funzionalità in arrivo".
+ *  ========================= */
+
+export type PendingTeoDecision = {
+  id: number
+  order_id?: string
+  course_title?: string
+  student_name?: string
+  teacher_eur?: number
+  platform_eur?: number
+  teacher_teo?: number
+  expected_bonus_teo?: number
+  deadline_at?: string
+  status?: string
+  raw?: any
+}
+
+export async function listPendingTeoDecisions(): Promise<Result<PendingTeoDecision[]>> {
+  const path = `/v1/rewards/discounts/pending/`
+  const res = await api.get<any>(path)
+  if (!res.ok) {
+    if ((res as any).status === 404) {
+      showToast({ variant: "info", message: "Funzionalità in arrivo: Inbox decisioni TEO" })
+    }
+    return { ok: false, status: res.status, error: (res as any).error }
+  }
+
+  const raw = res.data ?? []
+  const items: PendingTeoDecision[] = Array.isArray(raw)
+    ? raw.map((r: any) => ({
+        id: Number(r.id ?? r.snapshot_id ?? r.pk),
+        order_id: r.order_id ?? r.order ?? undefined,
+        course_title: r.course_title ?? r.title ?? r.course_title_preview ?? undefined,
+        student_name: r.student_name ?? r.student ?? undefined,
+        teacher_eur: asNumber(r.teacher_eur ?? r.teacher_amount ?? r.teacher_amount_eur) ?? undefined,
+        platform_eur: asNumber(r.platform_eur ?? r.platform_amount) ?? undefined,
+        teacher_teo: asNumber(r.teacher_teo ?? r.teacher_teocoin) ?? undefined,
+        expected_bonus_teo: asNumber(r.expected_bonus_teo ?? r.bonus_teo) ?? undefined,
+        deadline_at: r.deadline_at ?? r.expires_at ?? undefined,
+        status: r.status ?? r.state ?? undefined,
+        raw: r,
+      }))
+    : []
+
+  return { ok: true, status: res.status, data: items }
+}
+
+export async function acceptTeo(snapshotId: number): Promise<Result<any>> {
+  if (!snapshotId) return { ok: false, status: 400, error: "snapshot id required" }
+  const path = `/v1/rewards/discounts/${snapshotId}/accept/`
+  const res = await api.post<any>(path, {})
+  if (!res.ok) {
+    if ((res as any).status === 404) showToast({ variant: "info", message: "Funzionalità in arrivo: accetta TEO" })
+    return { ok: false, status: res.status, error: (res as any).error }
+  }
+  return { ok: true, status: res.status, data: res.data ?? {} }
+}
+
+export async function rejectTeo(snapshotId: number): Promise<Result<any>> {
+  if (!snapshotId) return { ok: false, status: 400, error: "snapshot id required" }
+  const path = `/v1/rewards/discounts/${snapshotId}/reject/`
+  const res = await api.post<any>(path, {})
+  if (!res.ok) {
+    if ((res as any).status === 404) showToast({ variant: "info", message: "Funzionalità in arrivo: rifiuta TEO" })
+    return { ok: false, status: res.status, error: (res as any).error }
+  }
+  return { ok: true, status: res.status, data: res.data ?? {} }
+}
+
+export type StakingOverview = {
+  balance_teo?: number
+  staked_teo?: number
+  tier_name?: string
+  bonus_multiplier?: number
+  next_tier?: string
+  next_tier_threshold_teo?: number
+  raw?: any
+}
+
+export async function getStakingOverview(): Promise<Result<StakingOverview>> {
+  const path = `/v1/rewards/staking/overview/`
+  const res = await api.get<any>(path)
+  if (!res.ok) {
+    if ((res as any).status === 404) showToast({ variant: "info", message: "Funzionalità in arrivo: staking" })
+    return { ok: false, status: res.status, error: (res as any).error }
+  }
+
+  const data = res.data ?? {}
+  const out: StakingOverview = {
+    balance_teo: asNumber(data.balance_teo ?? data.balance ?? data.balance_teocoin) ?? undefined,
+    staked_teo: asNumber(data.staked_teo ?? data.staked ?? undefined) ?? undefined,
+    tier_name: data.tier_name ?? data.tier ?? undefined,
+    bonus_multiplier: asNumber(data.bonus_multiplier ?? data.bonus ?? undefined) ?? undefined,
+    next_tier: data.next_tier ?? undefined,
+    next_tier_threshold_teo: asNumber(data.next_tier_threshold_teo ?? data.next_threshold ?? data.next_tier_threshold) ?? undefined,
+    raw: data,
+  }
+
+  return { ok: true, status: res.status, data: out }
+}
+
+export async function stakeTeo(amount: string): Promise<Result<StakingOverview>> {
+  if (!amount) return { ok: false, status: 400, error: "amount required" }
+  const path = `/v1/rewards/staking/stake/`
+  const body = { amount }
+  const res = await api.post<any>(path, body)
+  if (!res.ok) {
+    if ((res as any).status === 404) showToast({ variant: "info", message: "Funzionalità in arrivo: stake TEO" })
+    return { ok: false, status: res.status, error: (res as any).error }
+  }
+
+  const data = res.data ?? {}
+  // assume backend returns overview
+  return getStakingOverview().then((r) => (r.ok ? r : { ok: true, status: res.status, data: { raw: data } }))
+}
+
+export async function unstakeTeo(amount: string): Promise<Result<StakingOverview>> {
+  if (!amount) return { ok: false, status: 400, error: "amount required" }
+  const path = `/v1/rewards/staking/unstake/`
+  const body = { amount }
+  const res = await api.post<any>(path, body)
+  if (!res.ok) {
+    if ((res as any).status === 404) showToast({ variant: "info", message: "Funzionalità in arrivo: unstake TEO" })
+    return { ok: false, status: res.status, error: (res as any).error }
+  }
+
+  return getStakingOverview().then((r) => (r.ok ? r : { ok: true, status: res.status, data: { raw: res.data ?? {} } }))
 }
 
 /** =========================

@@ -291,3 +291,77 @@ class TeacherPayoutSummary(models.Model):
 
     def __str__(self):
         return f"{self.teacher.username} - {self.period_type} {self.period_start} to {self.period_end}"
+
+
+class Tier(models.Model):
+    """
+    Staking tier configuration used for discount calculations and teacher splits.
+    Stored here to allow auditing of snapshot tier values per transaction.
+    """
+
+    name = models.CharField(max_length=50, unique=True)
+    min_stake_teo = models.DecimalField(max_digits=12, decimal_places=2, default=Decimal("0"))
+    # Percent values (0..100). Teacher gets teacher_split_percent% of gross price.
+    teacher_split_percent = models.DecimalField(
+        max_digits=5, decimal_places=2, default=Decimal("50.00")
+    )
+    platform_split_percent = models.DecimalField(
+        max_digits=5, decimal_places=2, default=Decimal("50.00")
+    )
+    max_accept_discount_ratio = models.DecimalField(max_digits=4, decimal_places=2, default=Decimal("1.00"))
+    teo_bonus_multiplier = models.DecimalField(max_digits=6, decimal_places=2, default=Decimal("1.25"))
+    is_active = models.BooleanField(default=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = "rewards_tier"
+        ordering = ["-min_stake_teo"]
+
+    def __str__(self):
+        return f"{self.name} (min {self.min_stake_teo} TEO)"
+
+
+class PaymentDiscountSnapshot(models.Model):
+    """
+    Snapshot of discount breakdown for a single payment/order.
+    This is an immutable audit record created at Confirm time.
+    """
+
+    order_id = models.CharField(max_length=120, db_index=True, unique=True)
+    course = models.ForeignKey("courses.Course", on_delete=models.SET_NULL, null=True)
+    student = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name="payment_snapshots")
+    teacher = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name="teacher_payment_snapshots")
+
+    # Inputs
+    price_eur = models.DecimalField(max_digits=10, decimal_places=2)
+    discount_percent = models.IntegerField()
+
+    # Outputs (EUR)
+    student_pay_eur = models.DecimalField(max_digits=10, decimal_places=2)
+    teacher_eur = models.DecimalField(max_digits=10, decimal_places=2)
+    platform_eur = models.DecimalField(max_digits=10, decimal_places=2)
+
+    # Outputs (TEO)
+    teacher_teo = models.DecimalField(max_digits=18, decimal_places=8, default=Decimal("0"))
+    platform_teo = models.DecimalField(max_digits=18, decimal_places=8, default=Decimal("0"))
+
+    absorption_policy = models.CharField(max_length=32, default="none")
+    teacher_accepted_teo = models.DecimalField(max_digits=18, decimal_places=8, default=Decimal("0"))
+
+    # Snapshot of tier at time of transaction
+    tier_name = models.CharField(max_length=50, null=True, blank=True)
+    tier_teacher_split_percent = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+    tier_platform_split_percent = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+    tier_max_accept_discount_ratio = models.DecimalField(max_digits=4, decimal_places=2, null=True, blank=True)
+    tier_teo_bonus_multiplier = models.DecimalField(max_digits=6, decimal_places=2, null=True, blank=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = "rewards_payment_discount_snapshot"
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return f"Snapshot {self.order_id} - {self.price_eur}€ ({self.discount_percent}%)"
