@@ -2,6 +2,9 @@
 import React from "react";
 import { getUserFromToken, getAccessToken } from "../lib/auth";
 import { getEnrolledCourses, type Course } from "../services/student";
+import { Alert } from "../components/ui/alert";
+import { Spinner } from "../components/ui/spinner";
+import EmptyState from "../components/ui/empty-state";
 import DrfPager from "../components/DrfPager";
 
 const fmtEUR = (v?: number | null) =>
@@ -11,12 +14,14 @@ const fmtEUR = (v?: number | null) =>
 
 export default function StudentDashboard() {
   const [loading, setLoading] = React.useState(false);
+  const [error, setError] = React.useState<string | null>(null);
   const [page, setPage] = React.useState(1);
   const [count, setCount] = React.useState(0);
   const [items, setItems] = React.useState<Course[]>([]);
 
   async function load(p = page) {
     setLoading(true);
+    setError(null);
     const res = await getEnrolledCourses(p);
     if (res.ok) {
       setItems(res.data.items);
@@ -24,7 +29,8 @@ export default function StudentDashboard() {
     } else {
       setItems([]);
       setCount(0);
-      console.warn("getEnrolledCourses failed", res.status, (res as any).error);
+  setError(`Impossibile caricare i corsi (HTTP ${res.status})`);
+  console.warn("getEnrolledCourses failed", res.status, res);
     }
     setLoading(false);
   }
@@ -64,8 +70,16 @@ export default function StudentDashboard() {
         })()}
       </div>
 
-      {loading && <div>Caricamento…</div>}
-      {!loading && items.length === 0 && <div>Nessuna iscrizione trovata.</div>}
+      {loading && (
+        <div className="flex items-center gap-3">
+          <Spinner />
+          <span className="text-sm text-muted-foreground">Caricamento…</span>
+        </div>
+      )}
+      {error && <Alert variant="error" title="Errore">{error}</Alert>}
+      {!loading && !error && items.length === 0 && (
+        <EmptyState title="Nessuna iscrizione trovata" description="Non sei iscritto a nessun corso." />
+      )}
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         {items.map((c) => {

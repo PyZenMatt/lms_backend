@@ -2,6 +2,8 @@
 import React from "react"
 import { useParams, Link, useNavigate } from "react-router-dom"
 import { getSubmission, sendReview } from "../services/reviews"
+import { Alert } from "../components/ui/alert"
+import { Spinner } from "../components/ui/spinner"
 
 export default function ReviewSubmission() {
   const { id } = useParams<{ id: string }>()
@@ -38,10 +40,23 @@ export default function ReviewSubmission() {
         setText(res.data.text || "")
         setFiles(res.data.files || [])
         setStatus(res.data.status || "")
-  setCourseId(res.data.course_id)
-  setLessonId(res.data.lesson_id)
-  setExerciseId((res.data as any).exercise_id ?? (res.data as any).exerciseId ?? undefined)
-        setStudentName(res.data.student?.name)
+        // normalize potentially-heterogeneous backend fields safely
+        const raw = res.data as unknown as Record<string, unknown> | undefined;
+        setCourseId(typeof raw?.course_id === "number" ? (raw.course_id as number) : undefined);
+        setLessonId(typeof raw?.lesson_id === "number" ? (raw.lesson_id as number) : undefined);
+        // exercise id might be provided as exercise_id or exerciseId and as string or number
+        let exerciseParsed: number | undefined = undefined;
+        if (raw) {
+          const v1 = raw["exercise_id"];
+          const v2 = raw["exerciseId"];
+          if (typeof v1 === "number") exerciseParsed = v1;
+          else if (typeof v1 === "string" && /^\d+$/.test(v1)) exerciseParsed = Number(v1);
+          else if (typeof v2 === "number") exerciseParsed = v2;
+          else if (typeof v2 === "string" && /^\d+$/.test(v2)) exerciseParsed = Number(v2);
+        }
+        setExerciseId(exerciseParsed);
+  const studentObj = raw?.student as Record<string, unknown> | undefined;
+  setStudentName(studentObj && typeof studentObj === "object" && typeof studentObj.name === "string" ? (studentObj.name as string) : undefined)
           // If the submission was synthesized from exercise detail, we can still post using exerciseId.
           // We'll render a non-blocking note instead of hard error.
       }
@@ -90,15 +105,18 @@ export default function ReviewSubmission() {
         {studentName ? `Studente: ${studentName} • ` : ""} Stato: <b>{status || "—"}</b>
       </div>
 
-      {loading && <div className="text-sm text-muted-foreground">Caricamento…</div>}
-      {error && <div className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700">{error}</div>}
-      {/* Non-blocking note when we only have exercise detail */}
-      {!loading && !error && !files.length && !text && exerciseId && (
-        <div className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800">
-          Nota: dettagli submission non disponibili; stai revisionando via esercizio #{exerciseId}. L'invio userà l'endpoint per esercizio.
+      {loading && (
+        <div className="flex items-center justify-center py-8">
+          <Spinner />
+          <span className="ml-3 text-sm text-muted-foreground">Caricamento in corso…</span>
         </div>
       )}
-      {submittedMsg && <div className="rounded-lg border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-700">{submittedMsg}</div>}
+      {error && <Alert variant="error" title="Errore">{error}</Alert>}
+      {/* Non-blocking note when we only have exercise detail */}
+      {!loading && !error && !files.length && !text && exerciseId && (
+        <Alert variant="warning" title="Nota">Dettagli submission non disponibili; stai revisionando via esercizio #{exerciseId}. L'invio userà l'endpoint per esercizio.</Alert>
+      )}
+      {submittedMsg && <Alert variant="success">{submittedMsg}</Alert>}
 
       {!loading && !error && (
         <>
@@ -153,9 +171,16 @@ export default function ReviewSubmission() {
               <button
                 type="submit"
                 disabled={submitting}
-                className="rounded-lg bg-primary px-4 py-2 text-primary-foreground disabled:opacity-50"
+                className="rounded-lg bg-primary px-4 py-2 text-primary-foreground disabled:opacity-50 inline-flex items-center"
               >
-                {submitting ? "Invio review…" : "Invia review"}
+                {submitting ? (
+                  <>
+                    <Spinner className="mr-2" size={16} />
+                    Invio in corso…
+                  </>
+                ) : (
+                  "Invia review"
+                )}
               </button>
             </div>
           </form>

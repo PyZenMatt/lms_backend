@@ -1,7 +1,17 @@
 // src/pages/Notifications.tsx
 import React from "react";
 import NotificationItem from "../components/NotificationItem";
-import type { NotificationItem as N } from "../types/notification";
+import { Alert } from "../components/ui/alert";
+import { Spinner } from "../components/ui/spinner";
+import EmptyState from "../components/ui/empty-state";
+// Local notification shape used in the UI
+type N = {
+  id: number | string;
+  title?: string | null;
+  message?: string | null;
+  is_read?: boolean;
+  created_at?: string | null;
+};
 import {
   getNotifications,
   markNotificationRead,
@@ -86,15 +96,16 @@ export default function Notifications() {
         </div>
       </header>
 
-      {error && <div className="text-sm text-red-600">{error}</div>}
+      {error && <Alert variant="error" title="Errore">{error}</Alert>}
       {loading && !items.length && (
-        <div className="text-sm text-muted-foreground">Caricamento in corso…</div>
+        <div className="flex items-center justify-center py-8">
+          <Spinner />
+          <span className="ml-3 text-sm text-muted-foreground">Caricamento in corso…</span>
+        </div>
       )}
 
       {!loading && items.length === 0 && !error && (
-        <div className="rounded-lg border p-8 text-center">
-          <p className="text-sm text-muted-foreground">Nessuna notifica</p>
-        </div>
+        <EmptyState title="Nessuna notifica" description="Non hai ancora ricevuto notifiche." />
       )}
 
       <div className="space-y-3">

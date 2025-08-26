@@ -3,6 +3,8 @@ import React from "react";
 import { Link, useParams } from "react-router-dom";
 import { api } from "../lib/api";
 import BuyCourseButton from "../components/BuyCourseButton";
+import { Spinner } from "../components/ui/spinner";
+import EmptyState from "../components/EmptyState";
 
 type Course = {
   id: number;
@@ -21,7 +23,8 @@ const fmtEUR = (v?: number | null) =>
     : "—";
 
 function isEnrolledFlag(v: Course["is_enrolled"]): boolean {
-  return v === true || v === "true" || v === 1 || v === "1";
+  const s = String(v);
+  return s === "true" || s === "1";
 }
 
 export default function CourseDetail() {
@@ -37,7 +40,7 @@ export default function CourseDetail() {
       setLoading(true);
       const res = await api.get<Course>(`/v1/courses/${courseId}/`);
       if (!mounted) return;
-      if (res.ok) setCourse(res.data);
+  if (res.ok) setCourse(res.data ?? null);
       setLoading(false);
     }
     load();
@@ -51,7 +54,12 @@ export default function CourseDetail() {
 
   return (
     <div className="space-y-4">
-      {loading && <div>Caricamento…</div>}
+      {loading && (
+        <div className="flex items-center gap-3">
+          <Spinner />
+          <span className="text-sm text-muted-foreground">Caricamento…</span>
+        </div>
+      )}
       {!loading && course && (
         <>
           <div className="flex flex-col gap-4 md:flex-row">
@@ -91,7 +99,7 @@ export default function CourseDetail() {
           </div>
         </>
       )}
-      {!loading && !course && <div>Corso non trovato.</div>}
+  {!loading && !course && <EmptyState title="Corso non trovato" description="Il corso richiesto non esiste o è stato rimosso." />}
     </div>
   );
 }

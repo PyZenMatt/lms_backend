@@ -3,14 +3,16 @@ import React from "react"
 import { useLocation, useNavigate, Link } from "react-router-dom"
 import { confirmStripePaymentSmart, purchaseCourse } from "../services/payments"
 import { getCourse } from "../services/courses"
+import { Spinner } from "../components/ui/spinner"
+import { Alert } from "../components/ui/alert"
 
 function useQS() {
   const { search } = useLocation()
   return React.useMemo(() => new URLSearchParams(search), [search])
 }
 
-function isEnrolledFlag(course: any): boolean {
-  const v = course?.is_enrolled
+function isEnrolledFlag(course?: Record<string, unknown>): boolean {
+  const v = course && Object.prototype.hasOwnProperty.call(course, "is_enrolled") ? (course["is_enrolled"] as unknown) : undefined
   return v === true || v === "true" || v === 1
 }
 
@@ -87,8 +89,9 @@ export default function PaymentReturn() {
         method: "stripe",
         payment_intent: paymentIntent,
       })
-      if (!purchaseRes.ok && ![404, 405, 501].includes((purchaseRes as any).status ?? 0)) {
-        setError(`Errore nella conferma alternativa (HTTP ${purchaseRes.status}).`)
+      const purchaseStatus = ((purchaseRes as unknown) as { status?: number }).status ?? 0
+      if (!purchaseRes.ok && ![404, 405, 501].includes(purchaseStatus)) {
+        setError(`Errore nella conferma alternativa (HTTP ${purchaseStatus}).`)
         setBusy(false)
         return
       }
@@ -111,8 +114,9 @@ export default function PaymentReturn() {
         : "Verifica non disponibile lato server. Il pagamento è riuscito, l'iscrizione potrebbe richiedere qualche istante."
       setError(msg)
       setBusy(false)
-    } catch (e: any) {
-      setError(e?.message || "Errore imprevisto nella verifica.")
+    } catch (e: unknown) {
+      const msg = e instanceof Error ? e.message : String(e)
+      setError(msg || "Errore imprevisto nella verifica.")
       setBusy(false)
     }
   }
@@ -135,13 +139,18 @@ export default function PaymentReturn() {
       </div>
 
       {busy && (
-        <div className="rounded-xl border p-4 text-sm">{statusText}</div>
+        <div className="rounded-xl border p-4 text-sm">
+          <div className="flex items-center gap-3">
+            <Spinner />
+            <div>{statusText}</div>
+          </div>
+        </div>
       )}
 
       {!busy && error && (
-        <div className="rounded-xl border border-yellow-300/50 bg-yellow-50 text-yellow-900 p-4 text-sm space-y-2">
+        <Alert variant="warning" title="Attenzione">
           <div>{error}</div>
-          <div className="flex gap-3">
+          <div className="flex gap-3 mt-2">
             {courseId ? (
               <Link className="underline" to={`/courses/${courseId}`}>Vai al corso</Link>
             ) : (
@@ -151,7 +160,7 @@ export default function PaymentReturn() {
               Riprova verifica
             </button>
           </div>
-        </div>
+        </Alert>
       )}
 
       {!busy && !error && (

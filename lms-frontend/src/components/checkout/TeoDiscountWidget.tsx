@@ -168,26 +168,26 @@ export default function TeoDiscountWidget({ priceEUR, courseId, onApply, onRecei
   }
 
   return (
-    <div className="rounded-xl border bg-white p-4 shadow-sm">
+    <div className="rounded-xl border border-border bg-card p-4 shadow-sm">
       <div className="flex items-center justify-between">
         <div>
-          <div className="text-sm text-gray-500">Sconto con TEO</div>
-          <div className="text-base">Prezzo corrente: <span className="font-semibold">{priceEUR.toFixed(2)} EUR</span></div>
+          <div className="text-sm text-muted-foreground">Sconto con TEO</div>
+          <div className="text-base">Prezzo corrente: <span className="font-semibold text-foreground">{priceEUR.toFixed(2)} EUR</span></div>
         </div>
         {loading ? (
-          <div className="h-6 w-24 animate-pulse rounded bg-gray-200" />
+          <div className="h-6 w-24 animate-pulse rounded bg-muted/20" />
         ) : (
           <div className="text-right">
-            <div className="text-xs text-gray-500">Saldo TEO</div>
-            <div className="font-semibold">{wallet && typeof wallet.balance_teo === 'number' ? wallet.balance_teo.toFixed(2) : "--"} TEO</div>
+            <div className="text-xs text-muted-foreground">Saldo TEO</div>
+            <div className="font-semibold text-foreground">{wallet && typeof wallet.balance_teo === 'number' ? wallet.balance_teo.toFixed(2) : "--"} TEO</div>
           </div>
         )}
       </div>
 
-      {error && <div className="mt-3 rounded border border-red-200 bg-red-50 p-2 text-sm text-red-700">{error}</div>}
+      {error && <div className="mt-3 rounded border border-destructive/40 bg-destructive/10 p-2 text-sm text-destructive-foreground">{error}</div>}
 
       <div className="mt-4">
-        <div className="text-sm mb-2">Scegli sconto TEO</div>
+        <div className="text-sm mb-2 text-foreground">Scegli sconto TEO</div>
         <div className="flex gap-2">
           {options.map((pct) => {
             const discountEUR = Number((priceEUR * pct) / 100)
@@ -199,7 +199,7 @@ export default function TeoDiscountWidget({ priceEUR, courseId, onApply, onRecei
                 key={pct}
                 onClick={() => setSelectedPct(pct)}
                 disabled={loading || disabled}
-                className={`rounded-lg px-3 py-2 text-sm ${selectedPct === pct ? 'border bg-black text-white' : 'border bg-white'} disabled:opacity-50`}
+                className={`rounded-lg px-3 py-2 text-sm border disabled:opacity-50 ${selectedPct === pct ? 'bg-primary text-primary-foreground border-primary' : 'bg-card text-foreground border-border'}`}
               >
                 {pct}% {disabled ? '(non disponibile)' : `-€${discountEUR.toFixed(2)} / ${teoNeeded.toFixed(2)} TEO`}
               </button>
@@ -207,12 +207,12 @@ export default function TeoDiscountWidget({ priceEUR, courseId, onApply, onRecei
           })}
         </div>
 
-  
+
         <div className="mt-3 flex items-center gap-2">
           <button
             onClick={handleCheck}
             disabled={loading || checking}
-            className="rounded-lg bg-black px-3 py-2 text-sm text-white disabled:opacity-60"
+            className="rounded-lg bg-primary px-3 py-2 text-sm text-primary-foreground disabled:opacity-60"
           >
             {checking ? 'Verifico...' : 'Verifica sconto TEO'}
           </button>
@@ -220,7 +220,7 @@ export default function TeoDiscountWidget({ priceEUR, courseId, onApply, onRecei
             <button
               onClick={handleApply}
               disabled={applying}
-              className="rounded-lg border px-3 py-2 text-sm disabled:opacity-60"
+              className="rounded-lg border border-border bg-card px-3 py-2 text-sm text-foreground disabled:opacity-60"
             >
               {applying ? 'Applico...' : applied ? 'Applicato' : 'Applica sconto'}
             </button>
@@ -229,12 +229,12 @@ export default function TeoDiscountWidget({ priceEUR, courseId, onApply, onRecei
       </div>
 
       {applied && result && (
-        <div className="mt-4 rounded-lg border bg-gray-50 p-3 text-sm">
+        <div className="mt-4 rounded-lg border border-border bg-popover p-3 text-sm text-foreground">
           <div className="flex justify-between"><span>Sconto:</span><span>-{Number(result['discount_eur'] ?? 0).toFixed(2)} EUR</span></div>
           <div className="flex justify-between"><span>TEO richiesti:</span><span>{Number(result['teo_required'] ?? 0).toFixed(2)} TEO</span></div>
           <div className="flex justify-between font-semibold"><span>Totale finale:</span><span>{(priceEUR - Number(result['discount_eur'] ?? 0)).toFixed(2)} EUR</span></div>
           {stripeClientSecret && (
-            <div className="mt-2 text-sm text-gray-700">Pagamento Stripe richiesto — client_secret presente</div>
+            <div className="mt-2 text-sm text-muted-foreground">Pagamento Stripe richiesto — client_secret presente</div>
           )}
         </div>
       )}

@@ -4,6 +4,8 @@ import { getEnrolledCourses } from "../services/student";
 import type { Course } from "../types/course";
 import CourseCard from "../components/CourseCard";
 import EmptyState from "../components/EmptyState";
+import { Spinner } from "../components/ui/spinner";
+import { Alert } from "../components/ui/alert";
 
 export default function Dashboard() {
   const [courses, setCourses] = React.useState<Course[]>([]);
@@ -18,7 +20,8 @@ export default function Dashboard() {
       setError(`Impossibile caricare i corsi (status ${res.status}).`);
       setCourses([]);
     } else {
-      setCourses(res.data);
+      // service returns { items, count }
+      setCourses(res.data.items);
     }
     setLoading(false);
   }
@@ -36,8 +39,13 @@ export default function Dashboard() {
         </button>
       </header>
 
-      {loading && <div className="text-sm text-muted-foreground">Caricamento in corso…</div>}
-      {error && <div className="text-sm text-red-600">{error}</div>}
+      {loading && (
+        <div className="flex items-center gap-3">
+          <Spinner />
+          <span className="text-sm text-muted-foreground">Caricamento in corso…</span>
+        </div>
+      )}
+      {error && <Alert variant="error" title="Errore">{error}</Alert>}
 
       {!loading && !error && courses.length === 0 && (
         <EmptyState

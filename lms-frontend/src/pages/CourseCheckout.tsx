@@ -7,6 +7,8 @@ import { loadStripe } from "@stripe/stripe-js"
 import type { Stripe } from "@stripe/stripe-js"
 import { Elements, PaymentElement, useElements, useStripe } from "@stripe/react-stripe-js"
 import TeoDiscountWidget from "../components/checkout/TeoDiscountWidget"
+import { Alert } from "@/components/ui/alert";
+import { Spinner } from "@/components/ui/spinner";
 
 type SummaryState = {
   price_eur?: number
@@ -136,7 +138,13 @@ export default function CourseCheckout() {
 
   // Full TeoCoin payment removed: platform uses TEO only for discounts.
 
-  if (loading) return <div className="p-6">Caricamento…</div>
+  if (loading)
+    return (
+      <div className="p-6 flex items-center justify-center">
+        <Spinner size={28} className="mr-3 text-neutral-600 dark:text-neutral-300" />
+        <div className="text-sm">Caricamento…</div>
+      </div>
+    )
 
   const showSummary =
     summary.price_eur !== undefined ||
@@ -155,9 +163,9 @@ export default function CourseCheckout() {
       </div>
 
       {error && (
-        <div className="rounded-xl border border-red-300/40 bg-red-50 text-red-800 p-4">
+        <Alert variant="error" title="Errore">
           {error}
-        </div>
+        </Alert>
       )}
 
       <div className="rounded-2xl border p-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -194,25 +202,32 @@ export default function CourseCheckout() {
             courseId={courseId}
             onApply={(finalPriceEUR, discountEUR, details) => {
               // Normalize returned fields: prefer backend-provided final_price_eur/discount_eur
-              const d = (details || {}) as Record<string, any>;
+              const d = (details || {}) as Record<string, unknown>;
               const final = Number(
-                d.final_price_eur ?? d.finalPriceEUR ?? finalPriceEUR ?? summary.price_eur ?? summary.total_eur ?? 0
+                (d as Record<string, unknown>)['final_price_eur'] ?? (d as Record<string, unknown>)['finalPriceEUR'] ?? finalPriceEUR ?? summary.price_eur ?? summary.total_eur ?? 0
               );
               const discount = Number(
-                d.discount_eur ?? d.discountEUR ?? discountEUR ?? (typeof summary.price_eur === 'number' ? (summary.price_eur - final) : 0)
+                (d as Record<string, unknown>)['discount_eur'] ?? (d as Record<string, unknown>)['discountEUR'] ?? discountEUR ?? (typeof summary.price_eur === 'number' ? (summary.price_eur - final) : 0)
               );
-              const discount_percent = (d.discount_percent as number | undefined) ?? (typeof summary.price_eur === 'number' && summary.price_eur > 0 ? ((summary.price_eur - final) / summary.price_eur) * 100 : undefined);
-              const teo_required = d.teo_required ?? d.teoRequired ?? d.teo_spent ?? d.teo_spent ?? summary.teo_required;
+              const discount_percent = ((d as Record<string, unknown>)['discount_percent'] as number | undefined) ?? (typeof summary.price_eur === 'number' && summary.price_eur > 0 ? ((summary.price_eur - final) / summary.price_eur) * 100 : undefined);
+              // Normalize teo_required into number | undefined
+              const rawTeo = (d as Record<string, unknown>)['teo_required'] ?? (d as Record<string, unknown>)['teoRequired'] ?? (d as Record<string, unknown>)['teo_spent'] ?? summary.teo_required;
+              let teo_required_parsed: number | undefined = undefined;
+              if (typeof rawTeo === 'number' && Number.isFinite(rawTeo)) {
+                teo_required_parsed = rawTeo;
+              } else if (typeof rawTeo === 'string' && rawTeo.trim() !== '' && !Number.isNaN(Number(rawTeo))) {
+                teo_required_parsed = Number(rawTeo);
+              }
 
               setSummary((s) => ({
                 ...s,
                 total_eur: final,
                 discount_percent: typeof discount_percent === 'number' ? discount_percent : s.discount_percent,
-                teo_required: teo_required ?? s.teo_required,
+                teo_required: teo_required_parsed ?? s.teo_required,
               }));
               setTeoDiscountApplied(true);
               // optional: you can store details in state or send analytics
-              console.debug("TEO discount applied", { finalPriceEUR, discountEUR, details, normalized: { final, discount, discount_percent, teo_required } });
+              console.debug("TEO discount applied", { finalPriceEUR, discountEUR, details, normalized: { final, discount, discount_percent, teo_required: teo_required_parsed } });
             }}
           />
 
@@ -295,13 +310,20 @@ function StripeCheckoutForm({ returnTo }: { returnTo: string }) {
   return (
     <form onSubmit={onConfirm} className="space-y-3">
       <PaymentElement onReady={() => console.debug("[Stripe] PaymentElement ready")} />
-      {err && <div className="text-sm text-red-700">{err}</div>}
+      {err && <Alert variant="error">{err}</Alert>}
       <button
         type="submit"
         disabled={!stripe || !elements || busy}
         className="w-full rounded-xl px-4 py-2 border bg-black text-white disabled:opacity-50"
       >
-        {busy ? "Elaboro…" : "Conferma pagamento"}
+        {busy ? (
+          <>
+            <Spinner size={16} className="inline mr-2 text-current" />
+            Elaboro…
+          </>
+        ) : (
+          "Conferma pagamento"
+        )}
       </button>
     </form>
   )

@@ -2,6 +2,9 @@
 import React from "react"
 import { listMyExercises, type Exercise } from "../services/exercises"
 import { Link } from "react-router-dom"
+import { Spinner } from "../components/ui/spinner"
+import { Alert } from "../components/ui/alert"
+import EmptyState from "../components/ui/empty-state"
 
 export default function MyExercises() {
   const [items, setItems] = React.useState<Exercise[]>([])
@@ -42,11 +45,16 @@ export default function MyExercises() {
         </select>
       </div>
 
-      {loading && <div className="text-sm text-muted-foreground">Caricamento…</div>}
-      {error && <div className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700">{error}</div>}
+      {loading && (
+        <div className="flex items-center gap-3">
+          <Spinner />
+          <span className="text-sm text-muted-foreground">Caricamento…</span>
+        </div>
+      )}
+      {error && <Alert variant="error" title="Errore">{error}</Alert>}
 
       {!loading && !error && items.length === 0 && (
-        <div className="rounded-lg border p-6 text-sm text-muted-foreground">Nessun esercizio trovato.</div>
+        <EmptyState title="Nessun esercizio trovato" description="Non ci sono esercizi corrispondenti al filtro selezionato." />
       )}
 
       {!loading && !error && items.length > 0 && (

@@ -2,6 +2,9 @@
 import React from "react"
 import { listAssignedReviews, type AssignedReview } from "../services/reviews"
 import { Link } from "react-router-dom"
+import { Alert } from "../components/ui/alert"
+import { Spinner } from "../components/ui/spinner"
+import EmptyState from "../components/ui/empty-state"
 
 export default function ReviewsAssigned() {
   const [items, setItems] = React.useState<AssignedReview[]>([])
@@ -15,9 +18,9 @@ export default function ReviewsAssigned() {
       setError(null)
       const res = await listAssignedReviews()
       if (!mounted) return
-      if (res.ok) setItems(res.data)
-      else setError(`Impossibile caricare le revisioni assegnate (HTTP ${res.status})`)
-  try { console.debug("[ReviewsAssigned] loaded items:", res) } catch(e) {}
+  if (res.ok) setItems(res.data)
+  else setError(`Impossibile caricare le revisioni assegnate (HTTP ${res.status})`)
+  console.debug("[ReviewsAssigned] loaded items:", res)
       setLoading(false)
     }
     load()
@@ -28,11 +31,16 @@ export default function ReviewsAssigned() {
     <div className="mx-auto max-w-4xl p-6 space-y-4">
       <h1 className="text-2xl font-semibold">Revisioni assegnate</h1>
 
-      {loading && <div className="text-sm text-muted-foreground">Caricamento…</div>}
-      {error && <div className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700">{error}</div>}
+      {loading && (
+        <div className="flex items-center gap-3">
+          <Spinner />
+          <span className="text-sm text-muted-foreground">Caricamento…</span>
+        </div>
+      )}
+      {error && <Alert variant="error" title="Errore">{error}</Alert>}
 
       {!loading && !error && items.length === 0 && (
-        <div className="rounded-lg border p-6 text-sm text-muted-foreground">Nessuna revisione assegnata al momento.</div>
+        <EmptyState title="Nessuna revisione assegnata" description="Non ci sono revisioni assegnate al momento." />
       )}
 
       {!loading && !error && items.length > 0 && (
@@ -56,10 +64,10 @@ export default function ReviewsAssigned() {
                 </Link>
               ) : it.exercise_id ? (
                 <Link
-          to={`/reviews/${it.exercise_id}/review`}
-          className="rounded-lg bg-secondary px-3 py-1 text-sm text-secondary-foreground hover:opacity-90"
+                  to={`/reviews/${it.exercise_id}/review`}
+                  className="rounded-lg bg-secondary px-3 py-1 text-sm text-secondary-foreground hover:opacity-90"
                 >
-          Apri review (da esercizio)
+                  Apri review (da esercizio)
                 </Link>
               ) : (
                 <div className="rounded-lg bg-gray-100 px-3 py-1 text-sm text-muted-foreground">N/D</div>

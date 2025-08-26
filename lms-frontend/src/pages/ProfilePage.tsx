@@ -1,5 +1,8 @@
 import React from "react";
 import { getProfile, updateProfile, type Profile } from "../services/profile";
+import { Spinner } from "../components/ui/spinner";
+import { Alert } from "../components/ui/alert";
+// EmptyState not used here
 
 export default function ProfilePage() {
   const [loading, setLoading] = React.useState(true);
@@ -61,8 +64,15 @@ export default function ProfilePage() {
     setSaving(false);
   }
 
-  if (loading) return <div className="p-6 text-sm text-muted-foreground">Caricamento profilo…</div>;
-  if (!data) return <div className="p-6 text-sm text-destructive">Impossibile caricare il profilo.</div>;
+  if (loading) return (
+    <div className="p-6 flex items-center gap-3">
+      <Spinner />
+      <div className="text-sm text-muted-foreground">Caricamento profilo…</div>
+    </div>
+  );
+  if (!data) return (
+    <Alert variant="error" title="Errore">Impossibile caricare il profilo.</Alert>
+  );
 
   return (
     <div className="space-y-4">

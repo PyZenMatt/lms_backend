@@ -2,6 +2,9 @@
 import React from "react"
 import { useNavigate, useParams } from "react-router-dom"
 import { createCourse, getCourseAdmin, updateCourse, type CourseInput, CATEGORY_OPTIONS } from "../../services/studio"
+import { Spinner } from "../../components/ui/spinner"
+import { Alert } from "../../components/ui/alert"
+// EmptyState not required here
 
 export default function CourseStudioForm() {
   const { id } = useParams<{ id: string }>()
@@ -36,7 +39,9 @@ export default function CourseStudioForm() {
         setDescription(res.data.description || "")
         setPrice(typeof res.data.price === "number" ? String(res.data.price) : "")
         setCurrency(res.data.currency || "EUR")
-        setStatus((res.data.status as any) === "published" ? "published" : "draft")
+        // coerce status safely
+        const s = typeof res.data.status === "string" ? res.data.status : String(res.data.status ?? "draft")
+        setStatus(s === "published" ? "published" : "draft")
         setCategory(res.data.category ? String(res.data.category) : "")
         setCoverUrl(res.data.cover_url || "")
       }
@@ -74,8 +79,13 @@ export default function CourseStudioForm() {
   return (
     <div className="mx-auto max-w-3xl p-6 space-y-4">
       <h1 className="text-2xl font-semibold">{editing ? "Modifica corso" : "Nuovo corso"}</h1>
-      {loading && <div className="text-sm text-muted-foreground">Caricamento…</div>}
-      {error && <div className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700">{error}</div>}
+      {loading && (
+        <div className="flex items-center gap-3">
+          <Spinner />
+          <div className="text-sm text-muted-foreground">Caricamento…</div>
+        </div>
+      )}
+      {error && <Alert variant="error" title="Errore">{error}</Alert>}
       {!loading && (
         <form onSubmit={onSubmit} className="space-y-4">
           <div>
@@ -101,7 +111,7 @@ export default function CourseStudioForm() {
             </div>
             <div>
               <label className="mb-1 block text-sm font-medium">Stato</label>
-              <select value={status} onChange={(e) => setStatus(e.target.value as any)} className="h-9 w-full rounded-md border px-2">
+              <select value={status} onChange={(e) => setStatus(e.target.value as "draft" | "published")} className="h-9 w-full rounded-md border px-2">
                 <option value="draft">Bozza</option>
                 <option value="published">Pubblicato</option>
               </select>

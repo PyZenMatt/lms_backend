@@ -1,6 +1,15 @@
 // src/components/NotificationItem.tsx
 // React import not required with new JSX transform
-import type { NotificationItem as N } from "../types/notification";
+import { Badge } from "./ui/badge";
+
+// Local notification type (types/notification does not export NotificationItem)
+type N = {
+  id: number | string;
+  title?: string | null;
+  message?: string | null;
+  is_read?: boolean;
+  created_at?: string | null;
+};
 
 type Props = {
   item: N;
@@ -13,7 +22,9 @@ export default function NotificationItem({ item, onMarkRead }: Props) {
 
   return (
     <div className="flex items-start gap-3 rounded-md border p-4">
-      <div className={`mt-1 h-2 w-2 rounded-full ${isRead ? "bg-muted" : "bg-primary"}`} />
+      <div className="mt-1">
+        <Badge variant={isRead ? "muted" : "default"} className="h-2 w-2 p-0" />
+      </div>
       <div className="flex-1">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <h3 className="font-medium">{item.title}</h3>

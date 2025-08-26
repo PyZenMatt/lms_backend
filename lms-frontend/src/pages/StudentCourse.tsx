@@ -3,6 +3,9 @@ import React from "react"
 import { Link, useParams } from "react-router-dom"
 import { api } from "../lib/api"
 import { getCourseBatchData, listCourseLessons } from "../services/exercises"
+import { Spinner } from "../components/ui/spinner"
+import { Alert } from "../components/ui/alert"
+import EmptyState from "../components/ui/empty-state"
 
 type Course = {
   id: number
@@ -223,11 +226,14 @@ export default function StudentCourse() {
       {/* Moduli & Lezioni */}
       <section className="space-y-3">
         <h2 className="text-lg font-medium">Contenuti del corso</h2>
-        {loading && <div className="text-sm text-muted-foreground">Caricamento contenuti…</div>}
-        {!loading && modules.length === 0 && (
-          <div className="rounded-lg border p-4 text-sm text-muted-foreground">
-            Nessun contenuto disponibile per questo corso.
+        {loading && (
+          <div className="flex items-center gap-3">
+            <Spinner />
+            <span className="text-sm text-muted-foreground">Caricamento contenuti…</span>
           </div>
+        )}
+        {!loading && modules.length === 0 && (
+          <EmptyState title="Nessun contenuto" description="Non ci sono moduli o lezioni disponibili per questo corso." />
         )}
         {!loading && modules.length > 0 && (
           <div className="space-y-3">
@@ -264,11 +270,7 @@ export default function StudentCourse() {
 
   {/* Esercizi rimossi dalla vista corso */}
 
-      {error && (
-        <div className="rounded-lg border border-yellow-300/50 bg-yellow-50 p-3 text-sm text-yellow-900">
-          {error}
-        </div>
-      )}
+  {error && <Alert variant="warning" title="Attenzione">{error}</Alert>}
     </div>
   )
 }

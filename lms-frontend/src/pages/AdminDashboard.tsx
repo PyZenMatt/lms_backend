@@ -6,6 +6,9 @@ import {
   rejectTeacher,
   type PendingTeacher,
 } from "../services/admin";
+import { Spinner } from "../components/ui/spinner";
+import { Alert } from "../components/ui/alert";
+import EmptyState from "../components/ui/empty-state";
 
 function prettyName(u: PendingTeacher) {
   const full = [u.first_name, u.last_name].filter(Boolean).join(" ").trim();
@@ -40,13 +43,15 @@ export default function AdminDashboard() {
       });
       setItems(items);
       setCount(count ?? items.length);
-    } catch (e: any) {
-      setError(e?.message ?? "Errore inatteso");
+    } catch (e: unknown) {
+      const msg = e instanceof Error ? e.message : String(e)
+      setError(msg || "Errore inatteso");
     } finally {
       setLoading(false);
     }
   }
-
+  // load is stable in this component; intentionally exclude it from deps
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   React.useEffect(() => { load(); }, [page, pageSize, appliedSearch]);
 
   function applySearch() {
@@ -55,31 +60,33 @@ export default function AdminDashboard() {
   }
 
   async function onApprove(id: number | string) {
-    setBusy((b) => ({ ...b, [id]: "approve" }));
+  setBusy((b) => ({ ...b, [id]: "approve" as const }));
     try {
       await approveTeacher(id);
       // ricarica la pagina corrente (se svuotata e non prima, scala pagina)
       const after = Math.max(1, Math.min(page, Math.ceil((count - 1) / pageSize) || 1));
       if (after !== page) setPage(after);
       else await load();
-    } catch (e: any) {
-      setError(e?.message ?? "Errore approvazione");
+    } catch (e: unknown) {
+      const msg = e instanceof Error ? e.message : String(e)
+      setError(msg || "Errore approvazione");
     } finally {
-      setBusy((b) => ({ ...b, [id]: "" }));
+      setBusy((b) => ({ ...b, [id]: "" as const }));
     }
   }
 
   async function onReject(id: number | string) {
-    setBusy((b) => ({ ...b, [id]: "reject" }));
+  setBusy((b) => ({ ...b, [id]: "reject" as const }));
     try {
       await rejectTeacher(id);
       const after = Math.max(1, Math.min(page, Math.ceil((count - 1) / pageSize) || 1));
       if (after !== page) setPage(after);
       else await load();
-    } catch (e: any) {
-      setError(e?.message ?? "Errore rifiuto");
+    } catch (e: unknown) {
+      const msg = e instanceof Error ? e.message : String(e)
+      setError(msg || "Errore rifiuto");
     } finally {
-      setBusy((b) => ({ ...b, [id]: "" }));
+      setBusy((b) => ({ ...b, [id]: "" as const }));
     }
   }
 
@@ -134,18 +141,18 @@ export default function AdminDashboard() {
         <div className="flex items-center justify-between border-b border-border p-4">
           <h2 className="text-base font-semibold">Docenti in attesa</h2>
           <span className="text-sm text-muted-foreground">
-            {loading ? "Caricamento…" : `${items.length} visibili / ${count} totali`}
+            {loading ? (
+              <span className="inline-flex items-center gap-3"><Spinner /> Caricamento…</span>
+            ) : `${items.length} visibili / ${count} totali`}
           </span>
         </div>
 
-        {error && <div className="p-4 text-sm text-destructive">{error}</div>}
+  {error && <Alert variant="error">{error}</Alert>}
 
         {loading ? (
-          <div className="p-4 text-sm text-muted-foreground">Caricamento…</div>
+          <div className="p-4 text-sm text-muted-foreground"><Spinner /> Caricamento…</div>
         ) : items.length === 0 ? (
-          <div className="p-4 text-sm text-muted-foreground">
-            Nessun docente in attesa{appliedSearch ? ` per “${appliedSearch}”` : ""}.
-          </div>
+          <EmptyState title="Nessun docente in attesa" description={appliedSearch ? `Nessun docente in attesa per “${appliedSearch}”` : "Nessun docente in attesa."} />
         ) : (
           <>
             <div className="overflow-x-auto">

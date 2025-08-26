@@ -8,15 +8,18 @@ import CourseCard from "../components/CourseCard";
 import CategoryFilter from "../components/CategoryFilter";
 import BuyCourseButton from "../components/BuyCourseButton";
 import { Link } from "react-router-dom";
+import { Spinner } from "../components/ui/spinner";
+import { Alert } from "../components/ui/alert";
+import EmptyState from "../components/EmptyState";
 
 const PAGE_SIZE = 9;
 
 // --- helpers prezzo (robusto) ---
 function priceValue(c: Course): number | null {
-  const raw: any =
-    (c as any).price ??
-    (c as any).price_amount ??
-    (typeof (c as any).price === "object" ? (c as any).price?.value : null);
+  const raw: unknown =
+    (c as unknown as Record<string, unknown>).price ??
+    (c as unknown as Record<string, unknown>).price_amount ??
+  (typeof (c as unknown as Record<string, unknown>).price === "object" ? ((c as unknown as Record<string, unknown>).price as Record<string, unknown>).value : null);
 
   if (typeof raw === "number") return raw;
   if (typeof raw === "string") {
@@ -28,7 +31,7 @@ function priceValue(c: Course): number | null {
 
 // --- enrolled helper (robusto) ---
 function isEnrolled(c: Course): boolean {
-  const v: any = (c as any).is_enrolled;
+  const v = (c as unknown as Record<string, unknown>).is_enrolled;
   return v === true || v === "true" || v === 1 || v === "1";
 }
 
@@ -37,12 +40,13 @@ function slugify(x: string) {
   return x.trim().toLowerCase().replace(/\s+/g, "-");
 }
 function courseCategorySlug(c: Course): string | null {
-  const cat: any = (c as any).category;
+  const cat = (c as unknown as Record<string, unknown>).category;
   if (!cat) return null;
   if (typeof cat === "string") return slugify(cat);
   if (typeof cat === "object") {
-    if (typeof cat.slug === "string") return slugify(cat.slug);
-    if (typeof cat.name === "string") return slugify(cat.name);
+    const catRec = cat as Record<string, unknown>;
+    if (typeof catRec.slug === "string") return slugify(catRec.slug);
+    if (typeof catRec.name === "string") return slugify(catRec.name);
   }
   return null;
 }
@@ -76,12 +80,12 @@ const byDate = (sel: (c: Course) => string | undefined, dir: 1 | -1 = 1): Compar
   };
 
 const LOCAL_ORDERING: Record<string, Comparator> = {
-  "title": byString((c) => (c as any).title, +1),
-  "-title": byString((c) => (c as any).title, -1),
+  "title": byString((c) => (c as unknown as Record<string, unknown>).title as string | undefined, +1),
+  "-title": byString((c) => (c as unknown as Record<string, unknown>).title as string | undefined, -1),
   "price": byNumber((c) => priceValue(c), +1),
   "-price": byNumber((c) => priceValue(c), -1),
-  "created_at": byDate((c) => (c as any).created_at, +1),
-  "-created_at": byDate((c) => (c as any).created_at, -1),
+  "created_at": byDate((c) => (c as unknown as Record<string, unknown>).created_at as string | undefined, +1),
+  "-created_at": byDate((c) => (c as unknown as Record<string, unknown>).created_at as string | undefined, -1),
 };
 
 const ORDERING_OPTIONS = [
@@ -144,8 +148,8 @@ export default function CoursesList() {
     const cmp = LOCAL_ORDERING[o];
     if (cmp) list.sort(cmp);
 
-    setItems(list);
-    setCount((res as any).count);
+  setItems(list);
+  setCount(res.count);
     setLoading(false);
   }
 
@@ -206,13 +210,16 @@ export default function CoursesList() {
         </div>
       </header>
 
-      {loading && !items.length && <div className="text-sm text-muted-foreground">Caricamento in corso…</div>}
-      {error && <div className="text-sm text-red-600">{error}</div>}
+      {loading && !items.length && (
+        <div className="flex items-center gap-3">
+          <Spinner />
+          <span className="text-sm text-muted-foreground">Caricamento in corso…</span>
+        </div>
+      )}
+      {error && <Alert variant="error" title="Errore">{error}</Alert>}
 
       {!loading && !error && items.length === 0 && (
-        <div className="rounded-lg border p-8 text-center">
-          <p className="text-sm text-muted-foreground">Nessun corso trovato.</p>
-        </div>
+        <EmptyState title="Nessun corso trovato" description="Prova a modificare i filtri o riprova più tardi." />
       )}
 
       {!error && items.length > 0 && (

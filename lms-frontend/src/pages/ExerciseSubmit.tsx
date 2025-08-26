@@ -2,6 +2,8 @@
 import React from "react"
 import { useParams } from "react-router-dom"
 import { getExercise, submitExercise, getMySubmission } from "../services/exercises"
+import { Alert } from "../components/ui/alert"
+import { Spinner } from "../components/ui/spinner"
 
 export default function ExerciseSubmit() {
   const { id } = useParams<{ id: string }>()
@@ -72,9 +74,14 @@ export default function ExerciseSubmit() {
     <div className="mx-auto max-w-3xl p-6 space-y-4">
       <h1 className="text-2xl font-semibold">{title}</h1>
 
-      {loading && <div className="text-sm text-muted-foreground">Caricamento…</div>}
-      {error && <div className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700">{error}</div>}
-      {submittedMsg && <div className="rounded-lg border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-700">{submittedMsg}</div>}
+      {loading && (
+        <div className="flex items-center justify-center py-8">
+          <Spinner />
+          <span className="ml-3 text-sm text-muted-foreground">Caricamento in corso…</span>
+        </div>
+      )}
+      {error && <Alert variant="error" title="Errore">{error}</Alert>}
+      {submittedMsg && <Alert variant="success">{submittedMsg}</Alert>}
 
       {!loading && !error && (
         <>
@@ -112,15 +119,22 @@ export default function ExerciseSubmit() {
                 <button
                   type="submit"
                   disabled={submitting || (status === "submitted" && (reviewsCount === null || reviewsCount < 3))}
-                  className="rounded-lg bg-primary px-4 py-2 text-primary-foreground disabled:opacity-50"
+                  className="rounded-lg bg-primary px-4 py-2 text-primary-foreground disabled:opacity-50 inline-flex items-center"
                   title={status === "submitted" && (reviewsCount === null || reviewsCount < 3) ? "La tua consegna è in attesa di valutazioni: non puoi reinviare finché non riceve 3 valutazioni." : undefined}
                 >
-                  {submitting ? "Invio in corso…" : "Invia esercizio"}
+                  {submitting ? (
+                    <>
+                      <Spinner size={16} className="mr-2" />
+                      Invio in corso…
+                    </>
+                  ) : (
+                    "Invia esercizio"
+                  )}
                 </button>
               </div>
             </form>
           ) : (
-            <div className="rounded-lg border border-yellow-200 bg-yellow-50 p-3 text-sm text-yellow-800">Hai già inviato questo esercizio. Non puoi inviare nuovamente.</div>
+            <Alert variant="warning">Hai già inviato questo esercizio. Non puoi inviare nuovamente.</Alert>
           )}
         </>
       )}

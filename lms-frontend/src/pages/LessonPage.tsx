@@ -2,6 +2,9 @@
 import React from "react"
 import { Link, useParams } from "react-router-dom"
 import { getLessonData, markLessonComplete, type Exercise } from "../services/lessons"
+import { Spinner } from "../components/ui/spinner"
+import { Alert } from "../components/ui/alert"
+import EmptyState from "../components/ui/empty-state"
 
 export default function LessonPage() {
   const { id } = useParams<{ id: string }>()
@@ -93,19 +96,30 @@ export default function LessonPage() {
             disabled={isCompleted || toggling}
             className="rounded-lg bg-primary px-3 py-1 text-primary-foreground disabled:opacity-50"
           >
-            {isCompleted ? "Lezione completata" : toggling ? "Segno come completata…" : "Segna come completata"}
+            {isCompleted ? (
+              "Lezione completata"
+            ) : toggling ? (
+              <span className="inline-flex items-center">
+                <Spinner size={16} className="mr-2" /> Segno come completata…
+              </span>
+            ) : (
+              "Segna come completata"
+            )}
           </button>
         </div>
       </header>
 
       <section className="space-y-3">
         <h2 className="text-lg font-medium">Esercizi</h2>
-        {loading && <div className="text-sm text-muted-foreground">Caricamento…</div>}
+        {loading && (
+          <div className="flex items-center gap-3">
+            <Spinner />
+            <span className="text-sm text-muted-foreground">Caricamento…</span>
+          </div>
+        )}
 
         {!loading && exercises.length === 0 && (
-          <div className="rounded-lg border p-4 text-sm text-muted-foreground">
-            Nessun esercizio per questa lezione.
-          </div>
+          <EmptyState title="Nessun esercizio" description="Non ci sono esercizi per questa lezione." />
         )}
 
         {!loading && exercises.length > 0 && (
@@ -148,11 +162,7 @@ export default function LessonPage() {
         )}
       </section>
 
-      {error && (
-        <div className="rounded-lg border border-yellow-300/50 bg-yellow-50 p-3 text-sm text-yellow-900">
-          {error}
-        </div>
-      )}
+  {error && <Alert variant="warning" title="Attenzione">{error}</Alert>}
     </div>
   )
 }

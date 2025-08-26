@@ -1,8 +1,10 @@
 import { useEffect, useState } from "react";
 import { getWallet, getTransactions, type WalletInfo, type WalletTransaction } from "@/services/wallet";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Table, THead, TBody, TR, TH, TD, TableEmpty } from "@/components/ui/table";
+import { Table, THead, TBody, TR, TH, TD } from "@/components/ui/table";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Alert } from "@/components/ui/alert";
+import EmptyState from "@/components/ui/empty-state";
 
 type Page<T> = { count: number; next?: string | null; previous?: string | null; results: T[] };
 
@@ -45,9 +47,9 @@ export default function WalletPage() {
       {/* Card saldo */}
       {loading && <Skeleton className="h-24 rounded-2xl" />}
       {error && (
-        <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-red-700">
+        <Alert variant="error" title="Errore">
           {error} — Assicurati di essere loggato.
-        </div>
+        </Alert>
       )}
       {wallet && (
         <Card>
@@ -85,8 +87,8 @@ export default function WalletPage() {
           <div className="text-sm text-muted-foreground">Totale: {count}</div>
         </CardHeader>
         <CardContent>
-          {tx.length === 0 && !loading ? (
-            <TableEmpty>Nessun movimento</TableEmpty>
+          {count === 0 && !loading ? (
+            <EmptyState title="Nessun movimento" description="Non ci sono movimenti da mostrare." />
           ) : (
             <div className="overflow-x-auto">
               <Table>

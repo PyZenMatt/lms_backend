@@ -2,6 +2,9 @@
 import React from "react"
 import { Link, useNavigate } from "react-router-dom"
 import { listTeachingCourses, type CourseAdmin } from "../../services/studio"
+import { Spinner } from "../../components/ui/spinner"
+import { Alert } from "../../components/ui/alert"
+import EmptyState from "../../components/ui/empty-state"
 
 export default function CoursesStudioList() {
   const nav = useNavigate()
@@ -59,11 +62,16 @@ export default function CoursesStudioList() {
         <button className="h-9 rounded-md border px-3" disabled={loading}>Cerca</button>
       </form>
 
-      {loading && <div className="text-sm text-muted-foreground">Caricamento…</div>}
-      {error && <div className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700">{error}</div>}
+      {loading && (
+        <div className="flex items-center gap-3">
+          <Spinner />
+          <span className="text-sm text-muted-foreground">Caricamento…</span>
+        </div>
+      )}
+      {error && <Alert variant="error" title="Errore">{error}</Alert>}
 
       {!loading && !error && items.length === 0 && (
-        <div className="rounded-lg border p-8 text-center text-sm text-muted-foreground">Ancora nessun corso.</div>
+        <EmptyState title="Ancora nessun corso" description="Crea o importa un corso per cominciare." />
       )}
 
       {!loading && !error && items.length > 0 && (

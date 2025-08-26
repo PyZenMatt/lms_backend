@@ -4,6 +4,8 @@ import { getUserFromToken, getAccessToken } from "../lib/auth";
 import { Link } from "react-router-dom";
 import { getTeacherDashboard, type Course, type TeacherStats } from "../services/teacher";
 import DrfPager from "../components/DrfPager";
+import { Spinner } from "../components/ui/spinner";
+import EmptyState from "../components/ui/empty-state";
 
 const fmtEUR = (v?: number | null) =>
   typeof v === "number"
@@ -111,8 +113,15 @@ export default function TeacherDashboard() {
       {/* Lista corsi */}
       <div className="space-y-3">
         <h2 className="text-lg font-semibold">I miei corsi</h2>
-        {loading && <div>Caricamento…</div>}
-        {!loading && items.length === 0 && <div>Nessun corso trovato.</div>}
+        {loading && (
+          <div className="flex items-center gap-3">
+            <Spinner />
+            <span className="text-sm text-muted-foreground">Caricamento…</span>
+          </div>
+        )}
+        {!loading && items.length === 0 && (
+          <EmptyState title="Nessun corso" description="Non sono stati trovati corsi." />
+        )}
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {items.map((c) => {
             const cover = c.cover_image ?? c.cover_url;
