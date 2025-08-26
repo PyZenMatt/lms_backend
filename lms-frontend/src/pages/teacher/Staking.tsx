@@ -16,7 +16,8 @@ export default function StakingPage() {
     const res = await getStakingOverview();
     setLoading(false);
     if (!res.ok) return;
-    setOverview(res.data ?? null);
+  console.debug("fetchOverview: response", res);
+  setOverview(res.data ?? null);
   }, []);
 
   React.useEffect(() => {
@@ -28,18 +29,53 @@ export default function StakingPage() {
     return v.toFixed(8);
   }
 
+  // try to coerce numbers coming as { source, parsedValue } or plain strings/numbers
+  function extractNumber(v: any): number | undefined {
+    if (v === null || v === undefined) return undefined;
+    if (typeof v === "object") {
+      if (typeof v.parsedValue === "number" && Number.isFinite(v.parsedValue)) return v.parsedValue;
+      if (typeof v.source === "string") {
+        const n = Number(v.source);
+        if (Number.isFinite(n)) return n;
+      }
+      if (typeof v.value === "number" && Number.isFinite(v.value)) return v.value;
+      if (typeof v.value === "string") {
+        const n = Number(v.value);
+        if (Number.isFinite(n)) return n;
+      }
+      return undefined;
+    }
+    const n = Number(v);
+    return Number.isFinite(n) ? n : undefined;
+  }
+
   async function doStake() {
     if (!amount) return showToast({ variant: "info", message: "Inserisci un importo" });
     const n = Number(amount);
     if (!Number.isFinite(n) || n <= 0) return showToast({ variant: "error", message: "Importo non valido" });
-    // validate against balance
-    if (overview?.balance_teo !== undefined && n > overview.balance_teo) return showToast({ variant: "error", message: "Importo maggiore del saldo" });
-    setActionLoading(true);
-    const res = await stakeTeo(amount);
-    setActionLoading(false);
-    if (!res.ok) return;
-    showToast({ variant: "success", message: "Stake completato" });
+  // validate against available balance (not total)
+  if (overview?.available_teo !== undefined && n > overview.available_teo) return showToast({ variant: "error", message: "Importo maggiore del saldo disponibile" });
+  console.log("doStake called", { amount: n });
+  setActionLoading(true);
+  const res = await stakeTeo(amount);
+  setActionLoading(false);
+  console.debug("doStake: api response", res);
+  if (!res.ok) return showToast({ variant: "error", message: `Errore durante lo stake (status ${res.status})` });
+  // prefer backend message when present in raw payload
+  showToast({ variant: "success", message: res.data?.raw?.message ?? "Stake completato" });
+  // optimistic update: prefer explicit new balances from backend if present
+  try {
+    const raw = res.data?.raw ?? res.data ?? {};
+    const newStaked = extractNumber(raw.new_staked_balance ?? raw.newStakedBalance ?? raw.new_staked ?? raw.staked_teo ?? res.data?.staked_teo);
+    const newAvailable = extractNumber(raw.new_available_balance ?? raw.newAvailableBalance ?? raw.new_available ?? raw.available_teo ?? res.data?.available_teo);
+    if (newStaked !== undefined || newAvailable !== undefined) {
+      setOverview((prev) => ({ ...(prev ?? {}), staked_teo: newStaked ?? prev?.staked_teo, available_teo: newAvailable ?? prev?.available_teo }));
+      return;
+    }
+  } finally {
+    // fallback to full refresh
     fetchOverview();
+  }
   }
 
   async function doUnstake() {
@@ -47,16 +83,29 @@ export default function StakingPage() {
     const n = Number(amount);
     if (!Number.isFinite(n) || n <= 0) return showToast({ variant: "error", message: "Importo non valido" });
     if (overview?.staked_teo !== undefined && n > overview.staked_teo) return showToast({ variant: "error", message: "Importo maggiore dello staked" });
-    setActionLoading(true);
-    const res = await unstakeTeo(amount);
-    setActionLoading(false);
-    if (!res.ok) return;
-    showToast({ variant: "success", message: "Unstake completato" });
+  console.log("doUnstake called", { amount: n });
+  setActionLoading(true);
+  const res = await unstakeTeo(amount);
+  setActionLoading(false);
+  console.debug("doUnstake: api response", res);
+  if (!res.ok) return showToast({ variant: "error", message: `Errore durante l'unstake (status ${res.status})` });
+  showToast({ variant: "success", message: res.data?.raw?.message ?? "Unstake completato" });
+  try {
+    const raw = res.data?.raw ?? res.data ?? {};
+    const newStaked = extractNumber(raw.new_staked_balance ?? raw.newStakedBalance ?? raw.new_staked ?? raw.staked_teo ?? res.data?.staked_teo);
+    const newAvailable = extractNumber(raw.new_available_balance ?? raw.newAvailableBalance ?? raw.new_available ?? raw.available_teo ?? res.data?.available_teo);
+    if (newStaked !== undefined || newAvailable !== undefined) {
+      setOverview((prev) => ({ ...(prev ?? {}), staked_teo: newStaked ?? prev?.staked_teo, available_teo: newAvailable ?? prev?.available_teo }));
+      return;
+    }
+  } finally {
     fetchOverview();
+  }
   }
 
   const progressPct = (() => {
-    const cur = overview?.staked_teo ?? 0;
+    // prefer explicit staked_teo, otherwise derive from total - available
+    const cur = overview?.staked_teo ?? ((overview?.balance_teo !== undefined && overview?.available_teo !== undefined) ? (overview.balance_teo - overview.available_teo) : 0);
     const next = overview?.next_tier_threshold_teo ?? 0;
     if (!next || next <= 0) return 100;
     return Math.min(100, Math.round((cur / next) * 100));
@@ -75,10 +124,21 @@ export default function StakingPage() {
                 <div className="text-lg font-semibold">{overview.tier_name ?? "-"} ({overview.bonus_multiplier ? `+${(overview.bonus_multiplier * 100).toFixed(0)}%` : "-"})</div>
               </div>
               <div className="text-right">
-                <div className="text-sm text-muted">Saldo TEO</div>
-                <div className="text-lg font-semibold">{fmtTeo(overview.balance_teo)}</div>
+                <div className="text-sm text-muted">Saldo disponibile (TEO)</div>
+                <div className="text-lg font-semibold">{fmtTeo(overview.available_teo)}</div>
               </div>
             </div>
+
+            <div className="mt-3">
+              <div className="text-sm text-muted">Staked (TEO)</div>
+              <div className="text-lg font-semibold">
+                {(() => {
+                  const staked = overview.staked_teo ?? ((overview.balance_teo !== undefined && overview.available_teo !== undefined) ? (overview.balance_teo - overview.available_teo) : 0);
+                  return fmtTeo(staked);
+                })()}
+              </div>
+            </div>
+
             <div className="mt-4">
               <div className="w-full bg-gray-200 h-3 rounded overflow-hidden">
                 <div style={{ width: `${progressPct}%` }} className="h-3 bg-emerald-600" />
@@ -97,8 +157,8 @@ export default function StakingPage() {
               className="border px-2 py-1 rounded mr-2"
               placeholder="0.00000000"
             />
-            <button onClick={doStake} disabled={actionLoading} className="px-3 py-1 rounded bg-emerald-600 text-white mr-2">Stake</button>
-            <button onClick={doUnstake} disabled={actionLoading} className="px-3 py-1 rounded bg-red-600 text-white">Unstake</button>
+            <button onClick={doStake} disabled={actionLoading} className="px-3 py-1 rounded bg-emerald-600 text-white mr-2">Aggiungi allo stake (STAKE)</button>
+            <button onClick={doUnstake} disabled={actionLoading} className="px-3 py-1 rounded bg-red-600 text-white">Rimuovi dallo stake (UNSTAKE)</button>
           </div>
 
           <div className="text-xs text-muted">1 TEO = 1 EUR (contabile). I bonus dipendono dal tier.</div>

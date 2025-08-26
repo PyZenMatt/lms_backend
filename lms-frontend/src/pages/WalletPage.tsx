@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { getWallet, getTransactions, type WalletInfo, type WalletTransaction } from "@/services/wallet";
+import { getWallet, getTransactions, type WalletInfo, type WalletTransaction, coerceNumber } from "@/services/wallet";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, THead, TBody, TR, TH, TD } from "@/components/ui/table";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -40,6 +40,36 @@ export default function WalletPage() {
     return () => { alive = false; };
   }, [page]);
 
+  // Helper: try to read available balance from raw payload or derive from total - staked
+  function parseAvailableFromRaw(w: WalletInfo | null): number | null {
+    if (!w) return null;
+    const raw: any = (w as any).raw ?? null;
+    if (raw) {
+      const b = raw.balance ?? raw;
+      if (b) {
+        const availableRaw = b.available_balance ?? b.available ?? b.available_teo ?? b.available_teocoin;
+        if (availableRaw !== undefined && availableRaw !== null) {
+          const n = coerceNumber(availableRaw);
+          if (Number.isFinite(n)) return n;
+        }
+        // try derive from total - staked
+        const totalRaw = b.total_balance ?? b.total ?? w.balance_teo;
+        const stakedRaw = b.staked_balance ?? b.staked ?? raw.staked_teo ?? raw.staked;
+        const t = coerceNumber(totalRaw);
+        const s = coerceNumber(stakedRaw);
+        if (Number.isFinite(t) && Number.isFinite(s)) return Math.max(0, t - s);
+      }
+      // fallback if top-level raw has staked and balance_teo
+      const topStaked = raw.staked_teo ?? raw.staked;
+      if (topStaked !== undefined && topStaked !== null && typeof w.balance_teo === 'number') {
+        const s = coerceNumber(topStaked);
+        if (Number.isFinite(s)) return Math.max(0, w.balance_teo - s);
+      }
+    }
+    // default to balance_teo
+    return typeof w.balance_teo === 'number' ? w.balance_teo : null;
+  }
+
   return (
     <div className="space-y-6">
       <h1 className="text-2xl font-semibold">Wallet TEO</h1>
@@ -59,7 +89,10 @@ export default function WalletPage() {
           <CardContent>
             <div className="flex items-start justify-between">
               <div>
-                <div className="mt-1 text-3xl font-bold">{wallet.balance_teo.toFixed(2)} TEO</div>
+                {(() => {
+                  const displayed = parseAvailableFromRaw(wallet);
+                  return <div className="mt-1 text-3xl font-bold">{(displayed !== null ? displayed : wallet.balance_teo).toFixed(2)} TEO</div>;
+                })()}
                 {typeof wallet.balance_eur === "number" && (
                   <div className="text-sm text-muted-foreground">≈ {wallet.balance_eur.toFixed(2)} EUR</div>
                 )}

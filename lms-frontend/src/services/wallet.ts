@@ -48,6 +48,30 @@ async function tryPost<T>(paths: string[], body?: Record<string, unknown>): Prom
   return { ok: false, status: 404, error: "All endpoints not found", tried };
 }
 
+export function coerceNumber(v: unknown): number {
+  if (v === null || v === undefined) return NaN;
+  if (typeof v === 'number') return Number.isFinite(v) ? (v as number) : NaN;
+  if (typeof v === 'string') {
+    const n = Number(v as string);
+    return Number.isFinite(n) ? n : NaN;
+  }
+  if (typeof v === 'object') {
+    const obj = v as Record<string, unknown>;
+    if (typeof obj.parsedValue === 'number' && Number.isFinite(obj.parsedValue as number)) return obj.parsedValue as number;
+    if (typeof obj.source === 'string') {
+      const n = Number(obj.source);
+      if (Number.isFinite(n)) return n;
+    }
+    if (typeof obj.value === 'number' && Number.isFinite(obj.value as number)) return obj.value as number;
+    if (typeof obj.value === 'string') {
+      const n = Number(obj.value);
+      if (Number.isFinite(n)) return n;
+    }
+    return NaN;
+  }
+  return NaN;
+}
+
 /** GET wallet dell’utente */
 export async function getWallet(): Promise<Result<WalletInfo>> {
   // Canonical DB-based TeoCoin endpoints (no speculative fallbacks)
@@ -59,23 +83,31 @@ export async function getWallet(): Promise<Result<WalletInfo>> {
   if (!res.ok) return res as Err;
 
   const data = res.data as Record<string, unknown>;
+  console.debug("getWallet: raw response", data);
 
   // db_teocoin_views.TeocoinBalanceView returns { success: true, balance: {...} }
   if (data && data.balance && typeof data.balance === "object") {
     const b = data.balance as Record<string, unknown>
     // various backends return numbers as strings; coerce safely
-    const available = Number(b.available_balance ?? b.available ?? b["available"] ?? 0)
-    const total = Number(b.total_balance ?? b.total ?? 0)
+    const available = coerceNumber(b.available_balance ?? b.available ?? b["available"] ?? NaN)
+    const total = coerceNumber(b.total_balance ?? b.total ?? NaN)
     const address = (b.wallet_address ?? data.wallet_address ?? null) as string | null
     const updated_at = (b.updated_at ?? data.updated_at ?? undefined) as string | undefined
 
+    // If backend provides both total and staked, derive available = total - staked
+    const staked = coerceNumber(b.staked_balance ?? b.staked ?? NaN);
+    const availableFromTotal = (Number.isFinite(total) && Number.isFinite(staked)) ? Math.max(0, total - staked) : NaN;
+
     const walletInfo: WalletInfo = {
       address,
-      balance_teo: Number.isFinite(available) ? available : Number.isFinite(total) ? total : 0,
+      // Prefer explicit available when present. Otherwise prefer computed available (total - staked) when possible.
+      // Fallback to total if neither available nor computable available exist.
+      balance_teo: Number.isFinite(available) ? available : Number.isFinite(availableFromTotal) ? availableFromTotal : Number.isFinite(total) ? total : 0,
       balance_eur: undefined,
       updated_at,
       raw: data,
     }
+  console.debug("getWallet: normalized walletInfo", walletInfo);
 
     return { ok: true, status: res.status, data: walletInfo };
   }

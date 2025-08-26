@@ -11,6 +11,24 @@ export type Result<T> = Ok<T> | Err
 
 const asNumber = (v: any): number | undefined => {
   if (v === null || v === undefined) return undefined
+
+  // Accept objects produced by some backend serializers like
+  // { source: "5.0", parsedValue: 5 }
+  if (typeof v === "object") {
+    if (v === null) return undefined
+    if (typeof v.parsedValue === "number" && Number.isFinite(v.parsedValue)) return v.parsedValue
+    if (typeof v.source === "string") {
+      const n = Number(v.source)
+      if (Number.isFinite(n)) return n
+    }
+    if (typeof v.value === "number" && Number.isFinite(v.value)) return v.value
+    if (typeof v.value === "string") {
+      const n = Number(v.value)
+      if (Number.isFinite(n)) return n
+    }
+    return undefined
+  }
+
   const n = Number(v)
   return Number.isFinite(n) ? n : undefined
 }
@@ -387,6 +405,7 @@ export async function rejectTeo(snapshotId: number): Promise<Result<any>> {
 
 export type StakingOverview = {
   balance_teo?: number
+  available_teo?: number
   staked_teo?: number
   tier_name?: string
   bonus_multiplier?: number
@@ -404,15 +423,45 @@ export async function getStakingOverview(): Promise<Result<StakingOverview>> {
   }
 
   const data = res.data ?? {}
+  console.debug("getStakingOverview: raw response", data);
+  // Extract raw numbers (may come in several shapes, including nested `data.balance` used by wallet endpoints)
+  const b = (data && typeof data.balance === 'object') ? (data.balance as Record<string, any>) : undefined;
+
+  const rawBalance = asNumber(
+    data.balance_teo ?? data.balance ?? data.balance_teocoin ??
+    (b ? (b.total_balance ?? b.total ?? b.balance ?? undefined) : undefined)
+  );
+  const rawAvailable = asNumber(
+    data.available_teo ?? data.available ?? data.available_balance ?? data.available_teocoin ??
+    (b ? (b.available_balance ?? b.available ?? b.available_teo ?? undefined) : undefined)
+  );
+  const rawStaked = asNumber(
+    data.staked_teo ?? data.staked ?? data.staked_balance ??
+    (b ? (b.staked_balance ?? b.staked ?? undefined) : undefined)
+  );
+
+  // Compute derived values when explicit ones are missing
+  const computedAvailable = (Number.isFinite(rawBalance as number) && Number.isFinite(rawStaked as number))
+    ? Math.max(0, (rawBalance as number) - (rawStaked as number))
+    : undefined;
+  const computedStaked = (Number.isFinite(rawBalance as number) && Number.isFinite(rawAvailable as number))
+    ? Math.max(0, (rawBalance as number) - (rawAvailable as number))
+    : undefined;
+
   const out: StakingOverview = {
-    balance_teo: asNumber(data.balance_teo ?? data.balance ?? data.balance_teocoin) ?? undefined,
-    staked_teo: asNumber(data.staked_teo ?? data.staked ?? undefined) ?? undefined,
+    // keep balance as reported when available
+    balance_teo: rawBalance ?? undefined,
+    // prefer explicit available, otherwise computed from total - staked
+    available_teo: rawAvailable ?? computedAvailable ?? undefined,
+    // prefer explicit staked, otherwise compute from total - available
+    staked_teo: rawStaked ?? computedStaked ?? undefined,
     tier_name: data.tier_name ?? data.tier ?? undefined,
     bonus_multiplier: asNumber(data.bonus_multiplier ?? data.bonus ?? undefined) ?? undefined,
     next_tier: data.next_tier ?? undefined,
     next_tier_threshold_teo: asNumber(data.next_tier_threshold_teo ?? data.next_threshold ?? data.next_tier_threshold) ?? undefined,
     raw: data,
   }
+  console.debug("getStakingOverview: normalized", out);
 
   return { ok: true, status: res.status, data: out }
 }
