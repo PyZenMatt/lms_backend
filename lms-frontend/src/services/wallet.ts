@@ -75,8 +75,8 @@ export function coerceNumber(v: unknown): number {
 /** GET wallet dell’utente */
 export async function getWallet(): Promise<Result<WalletInfo>> {
   // Canonical DB-based TeoCoin endpoints (no speculative fallbacks)
-  // -> backend api: /api/v1/teocoin/balance/ (returns { success: true, balance: { available_balance, staked_balance, pending_withdrawal, total_balance } })
-  const endpoints = ["/v1/teocoin/balance/"];
+  // Backend variants we support: /v1/... and /api/v1/... and /api/... (client will normalize)
+  const endpoints = ["/v1/teocoin/balance/", "/api/v1/teocoin/balance/", "/api/teocoin/balance/"];
 
   // If profile endpoint returns user profile, normalize it to WalletInfo
   const res = await tryGet<Record<string, unknown>>(endpoints);
@@ -124,6 +124,12 @@ export async function getTransactions(page = 1, page_size = 20): Promise<Result<
     "/v1/teocoin/transactions/history/",
     "/v1/services/earnings/history/",
     "/v1/users/me/wallet/transactions/",
+    // API-prefixed variants
+    "/api/v1/wallet/transactions/",
+    "/api/v1/teocoin/transactions/",
+    "/api/v1/teocoin/transactions/history/",
+    "/api/v1/services/earnings/history/",
+    "/api/v1/users/me/wallet/transactions/",
   ];
 
   const res = await tryGet<unknown>(endpoints, { page, page_size, limit: page_size });

@@ -38,33 +38,35 @@ export default function WalletPage() {
     }
     load();
 
-    // Listen for external signals to refresh wallet (e.g. after discount accept)
+  // Listen for external signals to refresh wallet (e.g. after discount accept)
   const onUpdated = () => { void load(); };
+  const onNotifUpdated = () => { void load(); };
   window.addEventListener("wallet:updated", onUpdated as EventListener);
-  return () => { alive = false; window.removeEventListener("wallet:updated", onUpdated as EventListener); };
+  window.addEventListener("notifications:updated", onNotifUpdated as EventListener);
+  return () => { alive = false; window.removeEventListener("wallet:updated", onUpdated as EventListener); window.removeEventListener("notifications:updated", onNotifUpdated as EventListener); };
   }, [page]);
 
   // Helper: try to read available balance from raw payload or derive from total - staked
   function parseAvailableFromRaw(w: WalletInfo | null): number | null {
     if (!w) return null;
-    const raw: any = (w as any).raw ?? null;
+    const raw: unknown = (w as unknown as { raw?: unknown }).raw ?? null;
     if (raw) {
-      const b = raw.balance ?? raw;
+      const b = (raw as Record<string, unknown>).balance ?? raw as Record<string, unknown>;
       if (b) {
-        const availableRaw = b.available_balance ?? b.available ?? b.available_teo ?? b.available_teocoin;
+        const availableRaw = (b as Record<string, unknown>).available_balance ?? (b as Record<string, unknown>).available ?? (b as Record<string, unknown>).available_teo ?? (b as Record<string, unknown>).available_teocoin;
         if (availableRaw !== undefined && availableRaw !== null) {
           const n = coerceNumber(availableRaw);
           if (Number.isFinite(n)) return n;
         }
         // try derive from total - staked
-        const totalRaw = b.total_balance ?? b.total ?? w.balance_teo;
-        const stakedRaw = b.staked_balance ?? b.staked ?? raw.staked_teo ?? raw.staked;
+        const totalRaw = (b as Record<string, unknown>).total_balance ?? (b as Record<string, unknown>).total ?? w.balance_teo;
+        const stakedRaw = (b as Record<string, unknown>).staked_balance ?? (b as Record<string, unknown>).staked ?? (raw as Record<string, unknown>).staked_teo ?? (raw as Record<string, unknown>).staked;
         const t = coerceNumber(totalRaw);
         const s = coerceNumber(stakedRaw);
         if (Number.isFinite(t) && Number.isFinite(s)) return Math.max(0, t - s);
       }
       // fallback if top-level raw has staked and balance_teo
-      const topStaked = raw.staked_teo ?? raw.staked;
+      const topStaked = (raw as Record<string, unknown>).staked_teo ?? (raw as Record<string, unknown>).staked;
       if (topStaked !== undefined && topStaked !== null && typeof w.balance_teo === 'number') {
         const s = coerceNumber(topStaked);
         if (Number.isFinite(s)) return Math.max(0, w.balance_teo - s);
