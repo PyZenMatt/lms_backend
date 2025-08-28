@@ -58,6 +58,27 @@ export default function TeacherDecisionNav() {
         try {
           const c = await getTeacherChoicesPendingCount();
           if (!mounted) return;
+          // If the count didn't change, try a best-effort fetch of pending snapshots
+          if (typeof c === "number" && c === count) {
+            try {
+              const snaps = await getPendingDiscountSnapshots();
+              if (!mounted) return;
+              if (snaps && snaps.ok && Array.isArray(snaps.data)) {
+                // dedupe by pending_decision_id
+                const uniq = new Set<number>();
+                for (const s of snaps.data as unknown as Record<string, unknown>[]) {
+                  const pd = s["pending_decision_id"] as unknown;
+                  if (typeof pd === "number" && pd > 0) uniq.add(pd);
+                }
+                // fallback: if no pending_decision_id present, count snapshots
+                const fallbackCount = uniq.size > 0 ? uniq.size : (Array.isArray(snaps.data) ? (snaps.data as unknown[]).length : 0);
+                setCount(fallbackCount);
+                return;
+              }
+            } catch {
+              // ignore snapshot errors
+            }
+          }
           setCount(c);
         } catch {
           // ignore
@@ -71,7 +92,7 @@ export default function TeacherDecisionNav() {
       mounted = false;
       window.removeEventListener("notifications:updated", onUpdated as EventListener);
     };
-  }, [isAuthenticated, isTeacher]);
+  }, [isAuthenticated, isTeacher, count]);
 
   async function openList() {
     if (!isAuthenticated || !isTeacher) return;
