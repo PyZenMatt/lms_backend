@@ -40,8 +40,9 @@ export default function TeacherDecisionNav() {
       setPending([]);
       return;
     }
+
+    // Initial fetch of pending count
     void (async () => {
-      // Try count endpoint first (fallback to choices count)
       try {
         const c = await getTeacherChoicesPendingCount();
         if (!mounted) return;
@@ -51,7 +52,25 @@ export default function TeacherDecisionNav() {
       }
     })();
 
-    return () => { mounted = false; };
+    // Update count when notifications elsewhere change (e.g. accept/decline, marking read)
+    const onUpdated = () => {
+      void (async () => {
+        try {
+          const c = await getTeacherChoicesPendingCount();
+          if (!mounted) return;
+          setCount(c);
+        } catch {
+          // ignore
+        }
+      })();
+    };
+
+    window.addEventListener("notifications:updated", onUpdated as EventListener);
+
+    return () => {
+      mounted = false;
+      window.removeEventListener("notifications:updated", onUpdated as EventListener);
+    };
   }, [isAuthenticated, isTeacher]);
 
   async function openList() {
