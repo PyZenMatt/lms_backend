@@ -5,6 +5,7 @@ API Views for Teacher Discount Absorption System
 import logging
 
 from django.shortcuts import get_object_or_404
+from django.http import Http404
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -137,6 +138,12 @@ class TeacherMakeAbsorptionChoiceView(APIView):
                     status=status.HTTP_403_FORBIDDEN,
                 )
 
+            # Debug: log incoming payload to aid debugging missing/invalid ids
+            try:
+                logger.debug("TeacherMakeAbsorptionChoice payload: %s", request.data)
+            except Exception:
+                pass
+
             # Parse input
             raw_choice = str(request.data.get("choice", "")).lower().strip()
             if raw_choice not in ("teo", "eur", "absorb", "refuse"):
@@ -154,9 +161,52 @@ class TeacherMakeAbsorptionChoiceView(APIView):
                 )
 
             # Validate absorption belongs to teacher and is pending
-            absorption = get_object_or_404(
-                TeacherDiscountAbsorption, pk=absorption_id, teacher=request.user
-            )
+            try:
+                absorption = get_object_or_404(
+                    TeacherDiscountAbsorption, pk=absorption_id, teacher=request.user
+                )
+            except Http404:
+                # Fallback: maybe frontend sent a PaymentDiscountSnapshot id/order_id
+                try:
+                    from rewards.models import PaymentDiscountSnapshot
+
+                    snap = None
+                    try:
+                        snap = PaymentDiscountSnapshot.objects.filter(pk=absorption_id).first()
+                    except Exception:
+                        snap = None
+                    if not snap:
+                        try:
+                            snap = PaymentDiscountSnapshot.objects.filter(order_id=str(absorption_id)).first()
+                        except Exception:
+                            snap = None
+
+                    if snap:
+                        # Try to find a matching pending absorption for this teacher based on snapshot links
+                        possible = TeacherDiscountAbsorption.objects.filter(
+                            teacher=request.user,
+                            student=snap.student,
+                            course=snap.course,
+                            status="pending",
+                        ).order_by("-created_at").first()
+                        if possible:
+                            absorption = possible
+                        else:
+                            return Response(
+                                {"success": False, "error": "Absorption not found (snapshot found but no pending absorption for this teacher)"},
+                                status=status.HTTP_404_NOT_FOUND,
+                            )
+                    else:
+                        return Response(
+                            {"success": False, "error": "Absorption not found or not owned by this teacher"},
+                            status=status.HTTP_404_NOT_FOUND,
+                        )
+                except Exception:
+                    return Response(
+                        {"success": False, "error": "Absorption not found or not owned by this teacher"},
+                        status=status.HTTP_404_NOT_FOUND,
+                    )
+
             if getattr(absorption, "is_expired", False):
                 absorption.auto_expire()
                 return Response(
@@ -176,9 +226,12 @@ class TeacherMakeAbsorptionChoiceView(APIView):
             svc_choice = "absorb" if raw_choice in ("teo", "absorb") else "refuse"
 
             # Use service to process business logic and credit TEO when needed
-            processed = TeacherDiscountAbsorptionService.process_teacher_choice(
-                absorption_id, svc_choice, request.user
-            )
+            try:
+                processed = TeacherDiscountAbsorptionService.process_teacher_choice(
+                    absorption_id, svc_choice, request.user
+                )
+            except ValueError as ve:
+                return Response({"success": False, "error": str(ve)}, status=status.HTTP_400_BAD_REQUEST)
 
             # Build response
             data = {

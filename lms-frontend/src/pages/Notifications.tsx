@@ -11,6 +11,10 @@ type N = {
   message?: string | null;
   is_read?: boolean;
   created_at?: string | null;
+  notification_type?: string;
+  decision_id?: number | null;
+  related_object_id?: number | null;
+  offered_teacher_teo?: string | null;
 };
 import {
   getNotifications,
@@ -27,6 +31,9 @@ export default function Notifications() {
   const [page, setPage] = React.useState(1);
   const [pageSize] = React.useState(10);
   const [count, setCount] = React.useState<number | undefined>(undefined);
+  const pageRef = React.useRef(page);
+  React.useEffect(() => { pageRef.current = page; }, [page]);
+  // Backfill via rewards missing-for-teacher is deprecated; rely solely on notifications feed
 
   async function load(p = page) {
     setLoading(true);
@@ -37,7 +44,20 @@ export default function Notifications() {
       setItems([]);
       setCount(undefined);
     } else {
-      setItems(res.data);
+      // Map decision_id fallback if backend sent only related_object_id
+      const mapped = (res.data as any[]).map((it) => {
+        if (
+          it &&
+          it.notification_type === "teocoin_discount_pending" &&
+          (it.decision_id === undefined || it.decision_id === null) &&
+          (typeof it.related_object_id === "number")
+        ) {
+          return { ...it, decision_id: it.related_object_id };
+        }
+        return it;
+      });
+      console.debug("[Notifications] loaded", { count: mapped.length, sample: mapped[0] });
+      setItems(mapped as N[]);
       setCount(res.count);
     }
     setLoading(false);
@@ -45,6 +65,12 @@ export default function Notifications() {
 
   React.useEffect(() => {
     load(1);
+    // Stable listener across mounts; uses pageRef to get latest page
+    const onUpdated = () => load(pageRef.current);
+    window.addEventListener("notifications:updated", onUpdated as EventListener);
+    return () => {
+      window.removeEventListener("notifications:updated", onUpdated as EventListener);
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

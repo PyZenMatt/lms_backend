@@ -23,12 +23,11 @@ export default function BuyCourseButton({
   const target = to || `/courses/${courseId}/checkout`
 
   const stop = (e: React.SyntheticEvent) => {
-    if (stopPropagation) {
-      e.stopPropagation()
-      // @ts-expect-error: prevent default se l'evento viene da anchor wrapper
-      if (typeof e.preventDefault === "function") e.preventDefault()
-    }
-  }
+    if (!stopPropagation) return;
+    e.stopPropagation();
+    const anyE = e as unknown as { preventDefault?: () => void };
+    if (typeof anyE.preventDefault === "function") anyE.preventDefault();
+  };
 
   const onClick = (e: React.MouseEvent) => {
     stop(e)

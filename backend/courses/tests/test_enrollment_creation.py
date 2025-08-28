@@ -30,7 +30,7 @@ def test_enrollment_creation():
     # Get student and course
     try:
         student = User.objects.get(username="student1")
-        print(f"👤 Student: {student.username} ({student.wallet_address})")
+        print(f"👤 Student: {student.username} ({getattr(student, 'wallet_address', 'N/A')})")
 
         # Check available courses
         courses = Course.objects.all()
@@ -38,8 +38,8 @@ def test_enrollment_creation():
             print("❌ No courses found")
             return
 
-    course = courses.first()
-    print(f"📚 Course: {course.title} - Price: {getattr(course, 'price_eur', 0)} TEO")
+        course = courses.first()
+        print(f"📚 Course: {course.title} - Price: {getattr(course, 'price_eur', 0)} TEO")
 
         # Check current enrollment
         existing_enrollment = CourseEnrollment.objects.filter(

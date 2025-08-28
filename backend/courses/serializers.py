@@ -401,6 +401,9 @@ class TeacherDiscountDecisionSerializer(serializers.ModelSerializer):
     )
     teacher_earnings_if_accepted = serializers.SerializerMethodField()
     teacher_earnings_if_declined = serializers.SerializerMethodField()
+    # Compatibility fields for frontend: offer and final accepted teo values
+    offered_teacher_teo = serializers.SerializerMethodField()
+    final_teacher_teo = serializers.SerializerMethodField()
     is_expired = serializers.BooleanField(read_only=True)
     time_remaining = serializers.SerializerMethodField()
 
@@ -425,6 +428,8 @@ class TeacherDiscountDecisionSerializer(serializers.ModelSerializer):
             "time_remaining",
             "teacher_earnings_if_accepted",
             "teacher_earnings_if_declined",
+            "offered_teacher_teo",
+            "final_teacher_teo",
         ]
         read_only_fields = [
             "id",
@@ -435,6 +440,8 @@ class TeacherDiscountDecisionSerializer(serializers.ModelSerializer):
             "teacher_bonus_display",
             "discounted_price",
             "is_expired",
+            "offered_teacher_teo",
+            "final_teacher_teo",
         ]
 
     def get_teacher_earnings_if_accepted(self, obj):
@@ -442,6 +449,135 @@ class TeacherDiscountDecisionSerializer(serializers.ModelSerializer):
 
     def get_teacher_earnings_if_declined(self, obj):
         return obj.teacher_earnings_if_declined
+
+    def get_offered_teacher_teo(self, obj):
+        """Return the offered TEO for the teacher as a string with 8 d.p.
+
+        Preference: use the decision calculation; this mirrors the snapshot
+        offered_teacher_teo value and guarantees the frontend always has a
+        consistent string formatted amount.
+        """
+        try:
+            # Only expose when pending
+            if getattr(obj, "decision", None) != "pending":
+                return None
+
+            from decimal import Decimal
+
+            # Primary source: try snapshot confirm-time value (authoritative)
+            try:
+                from rewards.models import PaymentDiscountSnapshot
+                from rewards.serializers import PaymentDiscountSnapshotSerializer
+
+                snap = (
+                    PaymentDiscountSnapshot.objects.filter(
+                        teacher=obj.teacher, student=obj.student, course=obj.course
+                    )
+                    .order_by("-created_at")
+                    .first()
+                )
+                # Prefer the serializer's computed offered_teacher_teo when present
+                if snap:
+                    try:
+                        snap_ser = PaymentDiscountSnapshotSerializer(snap).data
+                        offered = snap_ser.get("offered_teacher_teo")
+                        if offered is not None:
+                            return str(Decimal(str(offered)).quantize(Decimal("0.00000001")))
+                    except Exception:
+                        # ignore and fallback
+                        pass
+                    # Fallback: if snapshot.teacher_teo numeric field is non-zero, use it
+                    if getattr(snap, "teacher_teo", None) is not None:
+                        snap_val = Decimal(str(getattr(snap, "teacher_teo")))
+                        if snap_val and snap_val != Decimal("0"):
+                            return str(snap_val.quantize(Decimal("0.00000001")))
+            except Exception:
+                # ignore snapshot lookup errors and fall back to decision calculation
+                pass
+            # If snapshot missing or zero, recompute the offered TEO from
+            # the original inputs (course_price, discount_percentage and
+            # tier-related fields) using the discount calculator. This
+            # avoids relying on `teo_cost`/wei stored on the decision which
+            # may have been capped to MAX_INT64 and thus display ~9.22337204.
+            try:
+                from services.discount_calc import compute_discount_breakdown
+
+                # Build a lightweight tier dict when possible
+                tier = None
+                try:
+                    if getattr(obj, "teacher_staking_tier", None):
+                        tier = {
+                            "teacher_split_percent": getattr(obj, "teacher_commission_rate", None),
+                            "platform_split_percent": None,
+                            "max_accept_discount_ratio": None,
+                            "teo_bonus_multiplier": None,
+                            "name": getattr(obj, "teacher_staking_tier", None),
+                        }
+                except Exception:
+                    tier = None
+
+                recomputed = compute_discount_breakdown(
+                    price_eur=getattr(obj, "course_price", None),
+                    discount_percent=getattr(obj, "discount_percentage", 0),
+                    tier=tier,
+                    accept_teo=True,
+                    accept_ratio=None,
+                )
+                if recomputed and recomputed.get("teacher_teo") is not None:
+                    return str(Decimal(str(recomputed.get("teacher_teo"))).quantize(Decimal("0.00000001")))
+            except Exception:
+                # Final fallback: try to use the decision-calculated value
+                try:
+                    teo = obj.teacher_earnings_if_accepted.get("teo")
+                    teo_d = Decimal(str(teo)) if teo is not None else None
+                    if teo_d is None:
+                        return None
+                    return str(teo_d.quantize(Decimal("0.00000001")))
+                except Exception:
+                    return None
+        except Exception:
+            from decimal import Decimal
+            # On unexpected errors, prefer returning None so FE can log and
+            # avoid rendering a spurious zero value.
+            return None
+
+    def get_final_teacher_teo(self, obj):
+        """Return final teacher TEO after accept.
+
+        If decision is accepted, prefer the immutable PaymentDiscountSnapshot
+        teacher_accepted_teo when available; fallback to the decision
+        calculation.
+        """
+        try:
+            from decimal import Decimal
+            from rewards.models import PaymentDiscountSnapshot
+
+            # Only expose when accepted; use None for pending/declined
+            if obj.decision == "accepted":
+                snap = (
+                    PaymentDiscountSnapshot.objects.filter(
+                        teacher=obj.teacher, student=obj.student, course=obj.course
+                    )
+                    .order_by("-created_at")
+                    .first()
+                )
+                if snap and getattr(snap, "teacher_accepted_teo", None) is not None:
+                    return str(Decimal(str(snap.teacher_accepted_teo)).quantize(Decimal("0.00000001")))
+
+            # Fallback to decision calculation
+            if obj.decision == "accepted":
+                teo = obj.teacher_earnings_if_accepted.get("teo")
+                if teo is None:
+                    return str(Decimal("0").quantize(Decimal("0.00000001")))
+                return str(Decimal(str(teo)).quantize(Decimal("0.00000001")))
+
+            # For declined or pending, return None so FE shows placeholder
+            return None
+        except Exception:
+            from decimal import Decimal
+
+            # On unexpected errors, return None to avoid misleading 0 values
+            return None
 
     def get_time_remaining(self, obj):
         if obj.is_expired:

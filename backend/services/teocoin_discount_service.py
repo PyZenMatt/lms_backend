@@ -536,6 +536,22 @@ class TeoCoinDiscountService:
                         # Don't fail the whole request
 
                     # Send teacher notification
+                    # Compute offered teacher TEO (tokens) and pass to notification
+                    try:
+                        from services.discount_calc import compute_discount_breakdown
+                        offered_breakdown = compute_discount_breakdown(
+                            price_eur=Decimal(str(course_price)),
+                            discount_percent=Decimal(str(discount_percent)),
+                            tier=None,
+                            accept_teo=True,
+                            accept_ratio=Decimal("1"),
+                        )
+                        offered_teacher_tokens = float(offered_breakdown.get("teacher_teo") or 0)
+                        offered_platform_tokens = float(offered_breakdown.get("platform_teo") or 0)
+                    except Exception:
+                        offered_teacher_tokens = teo_cost / 10**18
+                        offered_platform_tokens = teacher_bonus / 10**18
+
                     notification_sent = (
                         teocoin_notification_service.notify_teacher_discount_pending(
                             teacher=teacher_user,
@@ -543,10 +559,11 @@ class TeoCoinDiscountService:
                             course_title=course_title,
                             discount_percent=discount_percent,
                             teo_cost=teo_cost / 10**18,  # Convert wei to tokens
-                            teacher_bonus=teacher_bonus
-                            / 10**18,  # Convert wei to tokens
+                            teacher_bonus=teacher_bonus / 10**18,  # Convert wei to tokens
                             request_id=request_id,
                             expires_at=result["deadline"],
+                            offered_teacher_teo=offered_teacher_tokens,
+                            offered_platform_teo=offered_platform_tokens,
                         )
                     )
 

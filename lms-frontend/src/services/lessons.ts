@@ -61,7 +61,7 @@ export async function getLessonData(
   // 1) Tentativo: batch-data (include lesson + exercises)
   // Se l'opzione forceDetail è true, skippo il batch-data per forzare il dettaglio
   if (!opts?.forceDetail) {
-    const bd = await api.get<any>(`/v1/api/lesson/${lessonId}/batch-data/`)
+  const bd = await api.get<any>(`/api/v1/lesson/${lessonId}/batch-data/`)
     if (bd.ok) {
       const lraw = bd.data?.lesson ?? bd.data
       const eraw = Array.isArray(bd.data?.exercises)

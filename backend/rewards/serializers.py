@@ -167,6 +167,9 @@ class PaymentDiscountSnapshotSerializer(serializers.ModelSerializer):
             "platform_eur",
             "teacher_teo",
             "platform_teo",
+            # Offered values (computed on-the-fly for pending records)
+            "offered_teacher_teo",
+            "offered_platform_teo",
             "absorption_policy",
             "teacher_accepted_teo",
             "tier_name",
@@ -177,3 +180,105 @@ class PaymentDiscountSnapshotSerializer(serializers.ModelSerializer):
             "created_at",
         ]
         read_only_fields = fields
+
+    offered_teacher_teo = serializers.SerializerMethodField()
+    offered_platform_teo = serializers.SerializerMethodField()
+
+    def _build_tier_from_snapshot(self, obj):
+        """Recreate tier dict from snapshot fields with safe fallbacks"""
+        try:
+            tier = {
+                "teacher_split_percent": getattr(obj, "tier_teacher_split_percent", None) or None,
+                "platform_split_percent": getattr(obj, "tier_platform_split_percent", None) or None,
+                "max_accept_discount_ratio": getattr(obj, "tier_max_accept_discount_ratio", None) or None,
+                "teo_bonus_multiplier": getattr(obj, "tier_teo_bonus_multiplier", None) or None,
+                "name": getattr(obj, "tier_name", None) or None,
+            }
+
+            # If all tier-specific fields are missing/None, return None so the
+            # discount calculator will use its default tier resolution (tier=None).
+            tier_values = [
+                tier.get("teacher_split_percent"),
+                tier.get("platform_split_percent"),
+                tier.get("max_accept_discount_ratio"),
+                tier.get("teo_bonus_multiplier"),
+            ]
+            if all(v is None for v in tier_values):
+                return None
+
+            return tier
+        except Exception:
+            return None
+
+    def get_offered_teacher_teo(self, obj):
+        """Compute offered teacher TEO (as string with 8 d.p.) based on snapshot"""
+        try:
+            from services.discount_calc import compute_discount_breakdown
+            from decimal import Decimal
+
+            tier = self._build_tier_from_snapshot(obj)
+            # Determine accept_ratio default: use tier max if present, otherwise 1
+            max_ratio = None
+            try:
+                max_ratio = Decimal(str(tier.get("max_accept_discount_ratio"))) if tier and tier.get("max_accept_discount_ratio") is not None else None
+            except Exception:
+                max_ratio = None
+
+            accept_ratio = max_ratio if max_ratio is not None else Decimal("1")
+
+            breakdown = compute_discount_breakdown(
+                price_eur=obj.price_eur,
+                discount_percent=obj.discount_percent,
+                tier=tier,
+                accept_teo=True,
+                accept_ratio=accept_ratio,
+            )
+
+            teacher_teo = breakdown.get("teacher_teo")
+            if teacher_teo is None:
+                return str(Decimal("0").quantize(Decimal("0.00000001")))
+            # ensure string with 8 d.p.
+            try:
+                return str(Decimal(teacher_teo).quantize(Decimal("0.00000001")))
+            except Exception:
+                return str(Decimal("0").quantize(Decimal("0.00000001")))
+        except Exception:
+            # fallback zero as string with 8 decimals
+            from decimal import Decimal
+
+            return str(Decimal("0").quantize(Decimal("0.00000001")))
+
+    def get_offered_platform_teo(self, obj):
+        """Compute offered platform TEO (as string with 8 d.p.) based on snapshot"""
+        try:
+            from services.discount_calc import compute_discount_breakdown
+            from decimal import Decimal
+
+            tier = self._build_tier_from_snapshot(obj)
+            max_ratio = None
+            try:
+                max_ratio = Decimal(str(tier.get("max_accept_discount_ratio"))) if tier and tier.get("max_accept_discount_ratio") is not None else None
+            except Exception:
+                max_ratio = None
+
+            accept_ratio = max_ratio if max_ratio is not None else Decimal("1")
+
+            breakdown = compute_discount_breakdown(
+                price_eur=obj.price_eur,
+                discount_percent=obj.discount_percent,
+                tier=tier,
+                accept_teo=True,
+                accept_ratio=accept_ratio,
+            )
+
+            platform_teo = breakdown.get("platform_teo")
+            if platform_teo is None:
+                return str(Decimal("0").quantize(Decimal("0.00000001")))
+            try:
+                return str(Decimal(platform_teo).quantize(Decimal("0.00000001")))
+            except Exception:
+                return str(Decimal("0").quantize(Decimal("0.00000001")))
+        except Exception:
+            from decimal import Decimal
+
+            return str(Decimal("0").quantize(Decimal("0.00000001")))

@@ -315,7 +315,8 @@ class DBTeoCoinTransaction(models.Model):
         ("withdrawn", "Withdrawn to MetaMask"),
         ("deposit", "Deposited from MetaMask"),
         ("bonus", "Platform Bonus"),
-        ("migration", "Migrated from Blockchain"),
+    ("migration", "Migrated from Blockchain"),
+    ("discount_accept", "Discount Accept - Teacher accepted TEO"),
     ]
 
     user = models.ForeignKey(

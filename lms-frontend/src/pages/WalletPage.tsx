@@ -37,7 +37,11 @@ export default function WalletPage() {
       setLoading(false);
     }
     load();
-    return () => { alive = false; };
+
+    // Listen for external signals to refresh wallet (e.g. after discount accept)
+  const onUpdated = () => { void load(); };
+  window.addEventListener("wallet:updated", onUpdated as EventListener);
+  return () => { alive = false; window.removeEventListener("wallet:updated", onUpdated as EventListener); };
   }, [page]);
 
   // Helper: try to read available balance from raw payload or derive from total - staked

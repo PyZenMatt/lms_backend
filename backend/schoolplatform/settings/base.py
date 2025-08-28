@@ -56,6 +56,8 @@ MIDDLEWARE = [
 SESSION_COOKIE_DOMAIN = None
 CSRF_COOKIE_DOMAIN = None
 
+# Use the project package name (when running from the `backend` folder
+# the package is importable as `schoolplatform`, not `backend.schoolplatform`)
 ROOT_URLCONF = "schoolplatform.urls"
 
 TEMPLATES = [

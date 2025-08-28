@@ -96,7 +96,7 @@ def check_course_data():
         print(f"📚 Course: {course.title}")
         print(f"   - ID: {course.id}")
         print(f"   - Teacher: {course.teacher.username}")
-    print(f"   - Price: {getattr(course, 'price_eur', 0)}")
+        print(f"   - Price: {getattr(course, 'price_eur', 0)}")
         print(f"   - Approved: {course.is_approved}")
         print(f"   - Created: {course.created_at}")
 

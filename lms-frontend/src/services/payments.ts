@@ -110,13 +110,10 @@ export async function getPaymentSummary(
     const optPriceNum = asNumber(teocoinOption.price)
     if (optPriceNum !== undefined) {
       teo_required = optPriceNum
-    } else if (teocoinOption.discount_percent && price_eur !== undefined) {
-      const pct = Number(teocoinOption.discount_percent)
-      if (Number.isFinite(pct) && price_eur !== undefined) {
-        // assume 1 TEO = 1 EUR for DB-based system
-        teo_required = Math.round((price_eur * pct) / 100)
-      }
-    }
+  }
+  // Do NOT derive teo_required from fiat prices or discount percentages.
+  // teo_required must come explicitly from backend fields (raw.teo_required / pricing_options.price)
+  // This avoids showing a TEO amount computed with an implicit 1:1 EUR->TEO assumption.
   }
 
   const currency = String(raw.currency ?? pricing?.currency ?? firstOption?.currency ?? "EUR")
@@ -352,55 +349,84 @@ export type PendingTeoDecision = {
 }
 
 export async function listPendingTeoDecisions(): Promise<Result<PendingTeoDecision[]>> {
-  const path = `/v1/rewards/discounts/pending/`
+  // Align with existing backend: /api/v1/teacher-choices/pending/
+  const path = `/api/v1/teacher-choices/pending/`
   const res = await api.get<any>(path)
-  if (!res.ok) {
-    if ((res as any).status === 404) {
-      showToast({ variant: "info", message: "Funzionalità in arrivo: Inbox decisioni TEO" })
-    }
-    return { ok: false, status: res.status, error: (res as any).error }
-  }
+  if (!res.ok) return { ok: false, status: res.status, error: (res as any).error }
 
-  const raw = res.data ?? []
-  const items: PendingTeoDecision[] = Array.isArray(raw)
-    ? raw.map((r: any) => ({
-        id: Number(r.id ?? r.snapshot_id ?? r.pk),
-        order_id: r.order_id ?? r.order ?? undefined,
-        course_title: r.course_title ?? r.title ?? r.course_title_preview ?? undefined,
-        student_name: r.student_name ?? r.student ?? undefined,
-        teacher_eur: asNumber(r.teacher_eur ?? r.teacher_amount ?? r.teacher_amount_eur) ?? undefined,
-        platform_eur: asNumber(r.platform_eur ?? r.platform_amount) ?? undefined,
-        teacher_teo: asNumber(r.teacher_teo ?? r.teacher_teocoin) ?? undefined,
-        expected_bonus_teo: asNumber(r.expected_bonus_teo ?? r.bonus_teo) ?? undefined,
-        deadline_at: r.deadline_at ?? r.expires_at ?? undefined,
-        status: r.status ?? r.state ?? undefined,
-        raw: r,
-      }))
-    : []
+  const payload = res.data ?? {}
+  // Expected shape: { success: true, pending_requests: [...], count: N }
+  const rawList = Array.isArray(payload) ? payload : (Array.isArray(payload.pending_requests) ? payload.pending_requests : [])
+
+  const items: PendingTeoDecision[] = rawList.map((r: any) => ({
+    id: Number(r.id),
+    order_id: r.order_id ?? r.request_id ?? undefined,
+    course_title: r.course_title ?? undefined,
+    student_name: r.student_email ?? r.student ?? undefined,
+    // Not all fields are present; map what we can
+    teacher_eur: asNumber(r.teacher_earnings_if_declined?.fiat) ?? undefined,
+    platform_eur: undefined,
+    teacher_teo: asNumber(r.teacher_earnings_if_accepted?.total_teo ?? r.teacher_earnings_if_accepted?.teo) ?? undefined,
+    expected_bonus_teo: undefined,
+    deadline_at: r.expires_at ?? undefined,
+    status: r.decision ?? "pending",
+    raw: r,
+  }))
 
   return { ok: true, status: res.status, data: items }
 }
 
-export async function acceptTeo(snapshotId: number): Promise<Result<any>> {
-  if (!snapshotId) return { ok: false, status: 400, error: "snapshot id required" }
-  const path = `/v1/rewards/discounts/${snapshotId}/accept/`
-  const res = await api.post<any>(path, {})
-  if (!res.ok) {
-    if ((res as any).status === 404) showToast({ variant: "info", message: "Funzionalità in arrivo: accetta TEO" })
-    return { ok: false, status: res.status, error: (res as any).error }
-  }
+export async function acceptTeo(decisionId: number): Promise<Result<any>> {
+  if (!decisionId) return { ok: false, status: 400, error: "decision id required" }
+  const path = `/api/v1/teacher-choices/${decisionId}/accept/`
+  const res = await api.post<unknown>(path, {})
+  if (!res.ok) return { ok: false, status: res.status, error: (res as any).error }
   return { ok: true, status: res.status, data: res.data ?? {} }
 }
 
-export async function rejectTeo(snapshotId: number): Promise<Result<any>> {
-  if (!snapshotId) return { ok: false, status: 400, error: "snapshot id required" }
-  const path = `/v1/rewards/discounts/${snapshotId}/reject/`
-  const res = await api.post<any>(path, {})
-  if (!res.ok) {
-    if ((res as any).status === 404) showToast({ variant: "info", message: "Funzionalità in arrivo: rifiuta TEO" })
-    return { ok: false, status: res.status, error: (res as any).error }
-  }
+export async function rejectTeo(decisionId: number): Promise<Result<any>> {
+  if (!decisionId) return { ok: false, status: 400, error: "decision id required" }
+  const path = `/api/v1/teacher-choices/${decisionId}/decline/`
+  const res = await api.post<unknown>(path, {})
+  if (!res.ok) return { ok: false, status: res.status, error: (res as any).error }
   return { ok: true, status: res.status, data: res.data ?? {} }
+}
+
+/** =========================
+ *  Web3 prepared transactions (optional)
+ *  These endpoints may not be present on all backends; callers should
+ *  gracefully fallback to the server-side-only confirm endpoints.
+ *  ========================= */
+
+export type PreparedTx = { to: string; data?: string | null; value?: string | null; chainId?: string | number }
+
+export async function getMintTx(orderId: string): Promise<Result<PreparedTx>> {
+  if (!orderId) return { ok: false, status: 400, error: "order_id required" }
+  const path = `/v1/web3/tx/mint?order_id=${encodeURIComponent(orderId)}`
+  const res = await api.get<any>(path)
+  if (!res.ok) return { ok: false, status: res.status, error: (res as any).error }
+  const data = res.data ?? {}
+  const tx: PreparedTx = { to: data.to, data: data.data ?? data.input ?? data.calldata ?? null, value: data.value ?? null, chainId: data.chainId ?? data.chain_id ?? undefined }
+  return { ok: true, status: res.status, data: tx }
+}
+
+export async function getBurnTx(orderId: string): Promise<Result<PreparedTx>> {
+  if (!orderId) return { ok: false, status: 400, error: "order_id required" }
+  const path = `/v1/web3/tx/burn?order_id=${encodeURIComponent(orderId)}`
+  const res = await api.get<any>(path)
+  if (!res.ok) return { ok: false, status: res.status, error: (res as any).error }
+  const data = res.data ?? {}
+  const tx: PreparedTx = { to: data.to, data: data.data ?? data.input ?? data.calldata ?? null, value: data.value ?? null, chainId: data.chainId ?? data.chain_id ?? undefined }
+  return { ok: true, status: res.status, data: tx }
+}
+
+export async function postTxReceipt(orderId: string, payload: { hash: string; status: string }): Promise<Result<void>> {
+  if (!orderId) return { ok: false, status: 400, error: "order_id required" }
+  const body = { order_id: orderId, ...payload }
+  const path = `/v1/web3/tx/receipt/`
+  const res = await api.post<any>(path, body)
+  if (!res.ok) return { ok: false, status: res.status, error: (res as any).error }
+  return { ok: true, status: res.status, data: undefined }
 }
 
 export type StakingOverview = {

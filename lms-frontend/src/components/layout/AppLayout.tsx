@@ -3,6 +3,8 @@ import { Sidebar, type SidebarItem } from "@/components/ui/sidebar";
 import { cn } from "@/lib/utils";
 import ThemeToggle from "@/components/ThemeToggle";
 import NotificationsBell from "@/components/NotificationsBell";
+import TeacherDecisionNav from "@/components/teo/TeacherDecisionNav";
+import ConnectWalletButton from "@/components/ConnectWalletButton";
 import { useAuth } from "@/context/AuthContext";
 
 export default function AppLayout({
@@ -15,7 +17,7 @@ export default function AppLayout({
   children?: React.ReactNode;
 }) {
   const [collapsed, setCollapsed] = React.useState(false);
-  const { isAuthenticated, role, logout, pendingTeoCount } = useAuth();
+  const { isAuthenticated, role, logout } = useAuth();
 
   // Default items if none provided — includes icons and role-based links
   const defaultItems: SidebarItem[] = [];
@@ -28,28 +30,11 @@ export default function AppLayout({
     defaultItems.push({ to: "/courses", label: "📚 Corsi" });
     defaultItems.push({ to: "/wallet", label: "👛 Wallet" });
     // Restore TEO Inbox and Staking in the sidebar for teachers
-    defaultItems.push({
-      to: "/teacher/teo-decisions",
-      label: (
-        <>
-          📥 TEO Inbox
-          {pendingTeoCount > 0 && (
-            <span className="ml-2 inline-flex items-center rounded-full bg-red-600 px-2 py-0.5 text-xs font-medium text-white">
-              {pendingTeoCount}
-            </span>
-          )}
-        </>
-      ),
-    });
+  // TEO Inbox page removed; decisions are handled via notifications
 
-    defaultItems.push({
-      to: "/teacher/staking",
-      label: (
-        <>
-          💎 Staking
-        </>
-      ),
-    });
+  defaultItems.push({ to: "/teacher/staking", label: <>💎 Staking</> });
+  defaultItems.push({ to: "/teacher/pending-discounts", label: "Pending Discounts" });
+  // Teacher choices page removed; use the topbar inbox (TeacherDecisionNav) instead
   // TEO Inbox and Staking are surfaced on the Teacher Dashboard only.
     // teachers don't need 'I miei esercizi' in the sidebar; they manage exercises via Studio
   } else {
@@ -117,7 +102,13 @@ export default function AppLayout({
           </div>
           <div className="flex items-center gap-2">
             <NotificationsBell />
+            <TeacherDecisionNav />
             <ThemeToggle />
+            {/* Connect wallet button (shows install/connect/disconnect) */}
+            {/* web3 provider mounted at main.tsx when available */}
+            {/* eslint-disable-next-line @typescript-eslint/ban-ts-comment */}
+            {/* @ts-ignore */}
+            <ConnectWalletButton />
           </div>
         </header>
 

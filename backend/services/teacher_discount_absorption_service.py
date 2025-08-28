@@ -9,6 +9,7 @@ from decimal import Decimal
 from django.utils import timezone
 from rewards.models import TeacherDiscountAbsorption
 from services.db_teocoin_service import DBTeoCoinService
+from users.models import TeacherProfile
 
 
 class TeacherDiscountAbsorptionService:
@@ -33,24 +34,23 @@ class TeacherDiscountAbsorptionService:
         """
         teo_service = DBTeoCoinService()
 
-        # Get teacher's current tier and commission rate
-        teacher_balance = teo_service.get_user_balance(teacher)
-        teacher_tier = teacher_balance.get("tier", 0)
+        # Derive teacher tier and commission from TeacherProfile (source of truth)
+        # Fallback to defaults if profile is missing
+        try:
+            teacher_profile = TeacherProfile.objects.get(user=teacher)
+            # Ensure profile values reflect current staking state
+            try:
+                teacher_profile.update_tier_and_commission()
+                teacher_profile.save()
+            except Exception:
+                pass
 
-        # Commission rates by tier (platform commission, so teacher gets 100 - this)
-        tier_commission_rates = {
-            0: 50,  # Bronze: Teacher gets 50%, Platform gets 50%
-            1: 55,  # Silver: Teacher gets 55%, Platform gets 45%
-            2: 60,  # Gold: Teacher gets 60%, Platform gets 40%
-            3: 65,  # Platinum: Teacher gets 65%, Platform gets 35%
-            4: 75,  # Diamond: Teacher gets 75%, Platform gets 25%
-        }
-
-        teacher_commission_rate = tier_commission_rates.get(int(teacher_tier), 50)
-
-        from datetime import timedelta
-
-        from django.utils import timezone
+            tier_map = {"Bronze": 0, "Silver": 1, "Gold": 2, "Platinum": 3, "Diamond": 4}
+            teacher_tier = tier_map.get(teacher_profile.staking_tier, 0)
+            teacher_commission_rate = teacher_profile.commission_rate
+        except TeacherProfile.DoesNotExist:
+            teacher_tier = 0
+            teacher_commission_rate = Decimal("50")
 
         # Calculate both options before creating the object
         course_price_eur = Decimal(str(discount_data["course_price_eur"]))
@@ -59,7 +59,7 @@ class TeacherDiscountAbsorptionService:
         teacher_commission_rate_decimal = Decimal(str(teacher_commission_rate))
 
         # Option A: Standard commission, platform absorbs discount
-        option_a_teacher_eur = course_price_eur * teacher_commission_rate_decimal / 100
+        option_a_teacher_eur = course_price_eur * teacher_commission_rate_decimal / Decimal("100")
         option_a_platform_eur = course_price_eur - option_a_teacher_eur
 
         # Option B: Teacher absorbs discount, gets TEO + 25% bonus
@@ -92,24 +92,52 @@ class TeacherDiscountAbsorptionService:
         try:
             from notifications.services import teocoin_notification_service
 
+            try:
+                from services.discount_calc import compute_discount_breakdown
+                offered = compute_discount_breakdown(
+                    price_eur=course_price_eur,
+                    discount_percent=Decimal(str(discount_data["discount_percentage"])),
+                    tier=None,
+                    accept_teo=True,
+                    accept_ratio=Decimal("1"),
+                )
+                offered_teacher = float(offered.get("teacher_teo") or 0)
+                offered_platform = float(offered.get("platform_teo") or 0)
+            except Exception:
+                offered_teacher = float(option_b_teacher_teo)
+                offered_platform = 0.0
+
             teocoin_notification_service.notify_teacher_discount_pending(
                 teacher=teacher,
                 student=student,
                 course_title=course.title,
                 discount_percent=discount_data["discount_percentage"],
                 teo_cost=float(teo_used_by_student),
-                teacher_bonus=float(
-                    option_b_teacher_teo - teo_used_by_student
-                ),  # 25% bonus part
+                teacher_bonus=float(option_b_teacher_teo - teo_used_by_student),
                 request_id=absorption.pk,
                 expires_at=absorption.expires_at,
+                offered_teacher_teo=offered_teacher,
+                offered_platform_teo=offered_platform,
             )
-        except Exception as e:
-            # Log error but don't fail the whole process
+        except Exception:
             import logging
 
             logger = logging.getLogger(__name__)
-            logger.error(f"Failed to send teacher notification: {e}")
+            logger.exception("Failed to send teacher notification for absorption %s", absorption.pk)
+
+        # Debug log creation
+        try:
+            import logging
+
+            logger = logging.getLogger(__name__)
+            logger.info(
+                "Created TeacherDiscountAbsorption id=%s for teacher=%s course=%s",
+                absorption.pk,
+                getattr(teacher, "email", str(getattr(teacher, "id", "unknown"))),
+                getattr(course, "id", "unknown"),
+            )
+        except Exception:
+            pass
 
         return absorption
 

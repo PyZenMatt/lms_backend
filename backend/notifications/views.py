@@ -85,7 +85,7 @@ class NotificationListView(APIView):
                     pass
 
             # Serialize and return
-            serializer = NotificationSerializer(notifications, many=True)
+            serializer = NotificationSerializer(notifications, many=True, context={"request": request})
             return Response(serializer.data, status=status.HTTP_200_OK)
 
         except Exception as e:
@@ -115,7 +115,7 @@ class NotificationListView(APIView):
                 except ValueError:
                     pass
 
-            serializer = NotificationSerializer(queryset, many=True)
+            serializer = NotificationSerializer(queryset, many=True, context={"request": request})
             return Response(serializer.data, status=status.HTTP_200_OK)
 
 

@@ -139,13 +139,13 @@ export async function submitExercise(exerciseId: number, payload: ExerciseSubmis
 // --- Course / Lesson batch helpers ---
 
 export async function getCourseBatchData(courseId: number): Promise<Result<unknown>> {
-  const res = await api.get<unknown>(`/v1/api/course/${courseId}/batch-data/`)
+  const res = await api.get<unknown>(`/api/v1/course/${courseId}/batch-data/`)
   if (!res.ok) return { ok: false, status: res.status, error: res.error }
   return { ok: true, status: res.status, data: res.data }
 }
 
 export async function getLessonBatchData(lessonId: number): Promise<Result<unknown>> {
-  const res = await api.get<unknown>(`/v1/api/lesson/${lessonId}/batch-data/`)
+  const res = await api.get<unknown>(`/api/v1/lesson/${lessonId}/batch-data/`)
   if (!res.ok) return { ok: false, status: res.status, error: res.error }
   return { ok: true, status: res.status, data: res.data }
 }

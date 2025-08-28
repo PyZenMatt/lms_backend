@@ -2,7 +2,7 @@
 import * as React from "react";
 import { cn } from "@/lib/utils";
 
-type Ctx = { open: boolean; setOpen: (v: boolean) => void };
+type Ctx = { open: boolean; setOpen: React.Dispatch<React.SetStateAction<boolean>> };
 const DropdownCtx = React.createContext<Ctx | null>(null);
 function useD() {
   const c = React.useContext(DropdownCtx);
@@ -27,11 +27,17 @@ export function Dropdown({ children }:{ children: React.ReactNode }) {
   );
 }
 
-export function DropdownTrigger({ children }:{ children: React.ReactElement }) {
+export function DropdownTrigger({ children }:{ children: React.ReactNode }) {
   const { setOpen } = useD();
-  return React.cloneElement(children, {
-    onClick: (e: any) => { e.stopPropagation(); setOpen((v) => !v); },
-  });
+  // Ensure child is a valid React element before cloning
+  if (!React.isValidElement(children)) return null;
+  const el = children as React.ReactElement;
+  return React.cloneElement(el as React.ReactElement<any>, ({
+    onClick: (e: React.MouseEvent) => {
+      e.stopPropagation();
+      setOpen((v: boolean) => !v);
+    },
+  } as any));
 }
 
 export function DropdownContent({ className, children }:{ className?: string; children: React.ReactNode }) {

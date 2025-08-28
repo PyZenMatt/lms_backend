@@ -33,10 +33,10 @@ def fix_reward_inconsistency():
         )
         course = submission.exercise.lesson.course
 
-    print(f"Course: {course.title}")
-    price_val = int(getattr(course, "price_eur", 0))
-    print(f"Course price: {price_val} TEO")
-    print(f"Current reward_distributed: {getattr(course, 'reward_distributed', 0)} TEO")
+        print(f"Course: {course.title}")
+        price_val = int(getattr(course, "price_eur", 0))
+        print(f"Course price: {price_val} TEO")
+        print(f"Current reward_distributed: {getattr(course, 'reward_distributed', 0)} TEO")
 
         # Trova tutti i reward reali per questo corso
         all_submissions = ExerciseSubmission.objects.filter(

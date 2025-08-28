@@ -64,8 +64,8 @@ def verify_course_purchase():
 
     for enrollment in recent_enrollments:
         print(f"👤 Student: {enrollment.student.username}")
-    print(f"📖 Course: {enrollment.course.title}")
-    print(f"💰 Price: {getattr(enrollment.course, 'price_eur', '0')} TEO")
+        print(f"📖 Course: {enrollment.course.title}")
+        print(f"💰 Price: {getattr(enrollment.course, 'price_eur', '0')} TEO")
         print(f"👨‍🏫 Teacher: {enrollment.course.teacher.username}")
         print(f"🕐 Time: {enrollment.enrolled_at.strftime('%H:%M:%S')}")
         print()

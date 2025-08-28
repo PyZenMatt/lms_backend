@@ -126,7 +126,12 @@ export default function CourseCheckout() {
       }
       intentPayload.use_teocoin_discount = true
       intentPayload.discount_percent = summary.discount_percent
-      intentPayload.discount_eur = summary.price_eur && summary.discount_percent ? (summary.price_eur * (summary.discount_percent / 100)) : undefined
+      // Source of truth for euro discount: prefer explicit fields (price_eur - total_eur) when available
+      if (typeof summary.price_eur === 'number' && typeof summary.total_eur === 'number') {
+        intentPayload.discount_eur = summary.price_eur - summary.total_eur
+      } else if (typeof summary.price_eur === 'number' && typeof summary.discount_percent === 'number') {
+        intentPayload.discount_eur = summary.price_eur * (summary.discount_percent / 100)
+      }
     }
     // attach server-provided breakdown when available (backend will prefer explicit values)
     if (discountBreakdown) intentPayload.breakdown = discountBreakdown
@@ -174,6 +179,8 @@ export default function CourseCheckout() {
     summary.total_eur !== undefined ||
     summary.teo_required !== undefined
 
+  const discountEUR = (typeof summary.price_eur === 'number' && typeof summary.total_eur === 'number') ? (summary.price_eur - summary.total_eur) : undefined
+
   return (
     <div className="max-w-3xl mx-auto p-6 space-y-6">
       <div>
@@ -202,7 +209,9 @@ export default function CourseCheckout() {
                 </div>
               )}
               {(summary.discount_percent ?? 0) > 0 && (
-                <div className="text-sm text-emerald-700">Sconto {summary.discount_percent}%</div>
+                <div className="text-sm text-emerald-700">
+                  Sconto {typeof discountEUR === 'number' ? (<><b>-{discountEUR.toFixed(2)} EUR</b> {summary.discount_percent ? `(${summary.discount_percent}% )` : null}</>) : (`${summary.discount_percent}%`)}
+                </div>
               )}
               {summary.total_eur !== undefined && (
                 <div className="text-sm">

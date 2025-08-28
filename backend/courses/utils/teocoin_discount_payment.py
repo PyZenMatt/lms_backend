@@ -4,7 +4,7 @@ Implements the correct business logic without old escrow complexity
 """
 
 import logging
-from decimal import Decimal
+from decimal import Decimal, InvalidOperation
 
 from courses.models import Course, CourseEnrollment
 from rest_framework import status
@@ -50,6 +50,16 @@ def process_teocoin_discount_payment(
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
+        # Helper to normalise wei -> TEO tokens
+        def _to_teo_amount(value):
+            try:
+                v = Decimal(value)
+            except (TypeError, InvalidOperation):
+                return Decimal("0")
+            if v >= Decimal("1e6"):
+                return v / (Decimal(10) ** 18)
+            return v
+
         # Calculate discount amounts
         try:
             teo_cost, teacher_bonus = teocoin_discount_service.calculate_teo_cost(
@@ -58,8 +68,12 @@ def process_teocoin_discount_payment(
             discount_value_eur = amount_eur * teocoin_discount / 100
             final_price = amount_eur - discount_value_eur
 
+            # Normalize token amounts for downstream logic and notifications
+            required_teo = _to_teo_amount(teo_cost)
+            required_bonus = _to_teo_amount(teacher_bonus)
+
             logger.info(
-                f"TeoCoin discount calculation - Cost: {teo_cost}, Bonus: {teacher_bonus}, Discount: €{discount_value_eur}"
+                f"TeoCoin discount calculation - Cost: {required_teo} TEO, Bonus: {required_bonus} TEO, Discount: €{discount_value_eur}"
             )
         except Exception as calc_error:
             logger.error(f"TEO calculation error: {calc_error}")
@@ -230,6 +244,9 @@ def process_teocoin_discount_payment(
                         "discount_request_id": discount_request["request_id"],
                         "original_price": str(amount_eur),
                         "final_price": str(final_price),
+                        # normalized token amounts for consumers (TEO tokens, not wei)
+                        "teo_cost": str(required_teo),
+                        "teacher_bonus": str(required_bonus),
                     },
                 )
 
@@ -245,8 +262,8 @@ def process_teocoin_discount_payment(
                         "original_amount": amount_eur,
                         "discount_applied": discount_value_eur,
                         "discount_percent": teocoin_discount,
-                        "teo_cost": required_teo,
-                        "teacher_bonus": required_bonus,
+                        "teo_cost": float(required_teo),
+                        "teacher_bonus": float(required_bonus),
                         "discount_request_id": discount_request["request_id"],
                         "enrollment_id": enrollment.id,
                         "message": f"Student enrolled with {teocoin_discount}% discount! Teacher will choose EUR vs TEO.",
@@ -274,8 +291,8 @@ def process_teocoin_discount_payment(
                     "original_amount": amount_eur,
                     "discount_applied": discount_value_eur,
                     "discount_percent": teocoin_discount,
-                    "teo_cost": required_teo,
-                    "teacher_bonus": required_bonus,
+                    "teo_cost": float(required_teo),
+                    "teacher_bonus": float(required_bonus),
                     "discount_request_id": discount_request["request_id"],
                     "enrollment_id": enrollment.id,
                     "message": f"Course free with {teocoin_discount}% TeoCoin discount! Teacher will choose EUR vs TEO.",

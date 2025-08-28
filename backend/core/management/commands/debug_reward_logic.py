@@ -70,26 +70,26 @@ def debug_submission_reward_logic():
     if course:
         print(f"\nCourse details:")
         print(f"  Title: {course.title}")
-    price_val = int(getattr(course, "price_eur", 0))
-    print(f"  Price: {price_val}")
-    print(f"  Reward distributed: {getattr(course, 'reward_distributed', 'N/A')}")
+        price_val = int(getattr(course, "price_eur", 0))
+        print(f"  Price: {price_val}")
+        print(f"  Reward distributed: {getattr(course, 'reward_distributed', 'N/A')}")
 
-    # Calculate expected rewards
-    reward_max = int(price_val * 0.15)
-    reward_distributed = int(getattr(course, "reward_distributed", 0))
-    reward_remaining = reward_max - reward_distributed
-    reward_cap = max(1, int(price_val * 0.05))
+        # Calculate expected rewards
+        reward_max = int(price_val * 0.15)
+        reward_distributed = int(getattr(course, "reward_distributed", 0))
+        reward_remaining = reward_max - reward_distributed
+        reward_cap = max(1, int(price_val * 0.05))
 
         print(f"  Reward max (15%): {reward_max}")
         print(f"  Reward distributed: {reward_distributed}")
         print(f"  Reward remaining: {reward_remaining}")
         print(f"  Reward cap (5%): {reward_cap}")
 
-        if passed_calculated and reward_remaining > 0:
+        if 'passed_calculated' in locals() and passed_calculated and reward_remaining > 0:
             print(f"  ✅ Should create exercise reward")
         else:
             print(
-                f"  ❌ Should NOT create exercise reward (passed={passed_calculated}, remaining={reward_remaining})"
+                f"  ❌ Should NOT create exercise reward (passed={locals().get('passed_calculated', False)}, remaining={reward_remaining})"
             )
     else:
         print(f"\n❌ No course found for submission")

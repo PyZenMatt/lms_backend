@@ -7,11 +7,24 @@ const fmtEUR = (v?: number) =>
     ? new Intl.NumberFormat("it-IT", { style: "currency", currency: "EUR" }).format(v)
     : "—";
 
+const fmtTEO = (v?: number) => {
+  if (typeof v !== 'number') return '\u2014'
+  return new Intl.NumberFormat('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 2 }).format(v)
+}
+
 export default function PriceBreakdown({ summary }: { summary: PaymentSummary }) {
   const price = summary.price_eur;
   const total = summary.total_eur ?? price;
-  const discount = typeof summary.discount_percent === "number" ? summary.discount_percent : undefined;
-  const hasDiscount = typeof discount === "number" && discount > 0;
+  const discountPercent = typeof summary.discount_percent === "number" ? summary.discount_percent : undefined;
+  // Prefer explicit euro discount: price - total. Fall back to discount_percent*price if needed.
+  const discountEUR = (() => {
+    const priceNum = typeof price === 'number' ? price : undefined
+    const totalNum = typeof total === 'number' ? total : undefined
+    if (priceNum !== undefined && totalNum !== undefined) return priceNum - totalNum
+    if (priceNum !== undefined && typeof discountPercent === 'number') return priceNum * (discountPercent / 100)
+    return undefined
+  })()
+  const hasDiscount = typeof discountEUR === 'number' && discountEUR > 0
 
   return (
     <div className="rounded-2xl border p-4">
@@ -25,14 +38,14 @@ export default function PriceBreakdown({ summary }: { summary: PaymentSummary })
         {hasDiscount && (
           <div className="flex items-center justify-between text-emerald-700 dark:text-emerald-400">
             <span>Sconto</span>
-            <span>-{discount}%</span>
+            <span>-{fmtEUR(discountEUR)}</span>
           </div>
         )}
 
         {typeof summary.teo_required === "number" && (
           <div className="flex items-center justify-between">
             <span>TEO richiesti</span>
-            <span>{summary.teo_required}</span>
+            <span>{fmtTEO(summary.teo_required)} TEO</span>
           </div>
         )}
 

@@ -46,6 +46,7 @@ def staking_overview(request):
 	"""
 	try:
 		user = request.user
+		logger.info("staking_overview requested by user_id=%s email=%s", getattr(user, "id", None), getattr(user, "email", None))
 
 		# Only teachers have staking
 		if getattr(user, "role", None) != "teacher":
@@ -95,6 +96,14 @@ def staking_overview(request):
 		bonus_percent = (bronze_commission - teacher_profile.commission_rate)
 		# Convert percent to multiplier (e.g. 25% -> 0.25)
 		bonus_multiplier = float(bonus_percent / Decimal("100.00"))
+
+		# Debug: log balances returned
+		logger.info(
+			"staking_overview response for user_id=%s: available=%s staked=%s",
+			getattr(user, "id", None),
+			teo_balance.available_balance,
+			teo_balance.staked_balance,
+		)
 
 		return Response(
 			{
@@ -207,6 +216,8 @@ def stake_from_rewards(request):
 				description=f"Staked {amount} TEO. Tier: {old_tier} → {tier_info['tier']}",
 			)
 
+			logger.info("stake_from_rewards: user_id=%s available=%s staked=%s", user.id, teo_balance.available_balance, teo_balance.staked_balance)
+
 			return Response({
 				"ok": True,
 				"message": f"Staked {amount} TEO",
@@ -259,6 +270,8 @@ def unstake_from_rewards(request):
 				amount=amount,
 				description=f"Unstaked {amount} TEO. Tier: {old_tier} → {tier_info['tier']}",
 			)
+
+			logger.info("unstake_from_rewards: user_id=%s available=%s staked=%s", user.id, teo_balance.available_balance, teo_balance.staked_balance)
 
 			return Response({
 				"ok": True,

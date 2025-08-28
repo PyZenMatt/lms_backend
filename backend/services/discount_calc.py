@@ -1,4 +1,5 @@
 from decimal import Decimal, ROUND_DOWN, ROUND_HALF_UP, getcontext
+from django.conf import settings
 from typing import Dict, Optional
 
 # Set a high precision for intermediate calculations
@@ -84,11 +85,13 @@ def compute_discount_breakdown(
     # Default: platform absorbs discount (teacher EUR unchanged => teacher gets full teacher_gross_eur)
     teacher_eur = teacher_gross_eur
     platform_eur = platform_gross_eur - discount_amount
-    # When platform absorbs, record platform TEO liability equal to discount (accounting 1TEO=1EUR)
-    platform_teo = Decimal("0")
 
-    if not accept_teo:
-        platform_teo = discount_amount
+    # TEO conversion rate (TEO per 1 EUR). Default 1 if not configured.
+    teo_rate = Decimal(str(getattr(settings, "TEOCOIN_EUR_RATE", 1)))
+
+    # When platform absorbs entirely, platform owes equivalent TEO of the discount
+    teacher_teo = Decimal("0")
+    platform_teo = Decimal("0")
 
     if accept_teo:
         # determine actual accept_ratio
@@ -106,9 +109,14 @@ def compute_discount_breakdown(
         # platform gets rest of discount (discount_amount * (1 - r)) added to platform_eur
         platform_eur = platform_gross_eur - (discount_amount * (Decimal("1") - r))
 
-        # Teacher receives TEO equal to r * discount_amount * teo_bonus
-        teacher_teo = discount_amount * r * teo_bonus
+        # Teacher receives TEO equal to r * discount_amount * teo_bonus (convert EUR->TEO)
+        teacher_teo = discount_amount * r * teo_bonus * teo_rate
+        # Platform TEO liability is remaining discount portion converted to TEO
+        platform_teo = discount_amount * (Decimal("1") - r) * teo_rate
         absorption_policy = "teacher"
+    else:
+        # Platform absorbs full discount; platform owes TEO equal to discount_amount
+        platform_teo = discount_amount * teo_rate
 
     # Prevent negative EUR outcomes (no negative payouts)
     if teacher_eur < Decimal("0"):

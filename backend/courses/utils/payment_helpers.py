@@ -4,7 +4,8 @@ Phase 3: Business Logic Integration
 """
 
 import logging
-from decimal import Decimal
+from decimal import Decimal, InvalidOperation
+from datetime import timedelta
 
 from rest_framework import status
 from rest_framework.response import Response
@@ -62,14 +63,25 @@ def process_teocoin_discount_payment(
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
+        # Small helper to normalise wei -> TEO tokens (handles already-token values too)
+        def _to_teo_amount(value):
+            try:
+                v = Decimal(value)
+            except (TypeError, InvalidOperation):
+                return Decimal("0")
+            # Heuristic: large integers likely represent wei
+            if v >= Decimal("1e6"):
+                return v / (Decimal(10) ** 18)
+            return v
+
         # Calculate discount amounts using our service
         try:
             teo_cost, teacher_bonus = teocoin_discount_service.calculate_teo_cost(
                 Decimal(str(amount_eur)), teocoin_discount
             )
             discount_value_eur = amount_eur * teocoin_discount / 100
-            required_teo = teo_cost / 10**18
-            required_bonus = teacher_bonus / 10**18
+            required_teo = _to_teo_amount(teo_cost)
+            required_bonus = _to_teo_amount(teacher_bonus)
 
             logger.info(
                 f"TeoCoin calculation - Cost: {required_teo:.4f} TEO, Bonus: {required_bonus:.4f} TEO, Discount: €{discount_value_eur}"
@@ -168,6 +180,9 @@ def process_teocoin_discount_payment(
                     "student_wallet_address": wallet_address,
                     "teacher_wallet_address": teacher_address,
                     "discount_amount_eur": str(discount_value_eur),
+                    # Include normalized token values so notifications/readers can use them directly
+                    "teo_cost": str(required_teo),
+                    "teacher_bonus": str(required_bonus),
                     "original_price_eur": str(amount_eur),
                     "course_title": course.title,
                     "student_email": request.user.email,
@@ -183,8 +198,8 @@ def process_teocoin_discount_payment(
                     "payment_intent_id": intent.id,
                     "final_amount": float(final_price),
                     "discount_applied": float(discount_value_eur),
-                    "teo_cost": float(required_teo),
-                    "teacher_bonus": float(required_bonus),
+                        "teo_cost": float(required_teo),
+                        "teacher_bonus": float(required_bonus),
                     "discount_request_id": discount_request["request_id"],
                     "message": f"✅ Discount applied! Student pays €{final_price:.2f}. Teacher will choose EUR vs TEO.",
                 },
@@ -235,7 +250,7 @@ def handle_teocoin_discount_completion(payment_intent_metadata):
 
         # ✅ Student gets enrolled immediately (guaranteed discount)
         from courses.models import Course, CourseEnrollment
-        from django.contrib.auth.models import User
+        from users.models import User
 
         course = Course.objects.get(id=course_id)
         user = User.objects.get(id=user_id)
@@ -261,18 +276,75 @@ def handle_teocoin_discount_completion(payment_intent_metadata):
 
         # ✅ Send notification to teacher about EUR vs TEO choice
         try:
-            from notifications.services import send_teacher_discount_notification
+            from notifications.services import teocoin_notification_service
+            from django.utils import timezone
 
-            send_teacher_discount_notification(
+            # Try to get canonical request details (includes wei values and deadline)
+            try:
+                request_data = teocoin_discount_service.get_discount_request(
+                    int(discount_request_id)
+                )
+            except Exception:
+                request_data = None
+
+            if request_data:
+                teo_tokens = request_data.get("teo_cost", 0) / 10**18
+                bonus_tokens = request_data.get("teacher_bonus", 0) / 10**18
+                discount_percent = request_data.get("discount_percent")
+                expires_at = request_data.get("deadline") or (
+                    timezone.now() + timedelta(hours=24)
+                )
+            else:
+                # Fallback to metadata values (strings) and assume 24h expiry
+                teo_tokens = Decimal(str(payment_intent_metadata.get("teo_cost", 0)))
+                bonus_tokens = Decimal(str(payment_intent_metadata.get("teacher_bonus", 0)))
+                try:
+                    discount_percent = int(payment_intent_metadata.get("teocoin_discount_percent", 0))
+                except Exception:
+                    discount_percent = 0
+                expires_at = timezone.now() + timedelta(hours=24)
+
+            # Compute offered values server-side (8 d.p.) using compute_discount_breakdown where possible
+            try:
+                from services.discount_calc import compute_discount_breakdown
+                offered = compute_discount_breakdown(
+                    price_eur=Decimal(str(payment_intent_metadata.get("final_amount", course.price_eur))),
+                    discount_percent=Decimal(str(discount_percent or 0)),
+                    tier=None,
+                    accept_teo=True,
+                    accept_ratio=Decimal("1"),
+                )
+                offered_teacher = float(offered.get("teacher_teo") or 0)
+                offered_platform = float(offered.get("platform_teo") or 0)
+            except Exception:
+                offered_teacher = float(teo_tokens)
+                offered_platform = float(bonus_tokens)
+
+            # Structured log before notifying teacher - helps trace offered values
+            try:
+                logger.info("discount_notify_call", extra={
+                    "event": "discount_notify_call",
+                    "order_id": discount_request_id,
+                    "teacher_id": getattr(course.teacher, "id", None),
+                    "offered_teacher_teo": str(offered_teacher),
+                    "offered_platform_teo": str(offered_platform),
+                })
+            except Exception:
+                pass
+
+            teocoin_notification_service.notify_teacher_discount_pending(
                 teacher=course.teacher,
                 student=user,
-                course=course,
-                discount_request_id=discount_request_id,
-                teo_amount=payment_intent_metadata.get("teo_cost"),
-                discount_percent=payment_intent_metadata.get(
-                    "teocoin_discount_percent"
-                ),
+                course_title=course.title,
+                discount_percent=discount_percent,
+                teo_cost=float(teo_tokens),
+                teacher_bonus=float(bonus_tokens),
+                request_id=discount_request_id,
+                expires_at=expires_at,
+                offered_teacher_teo=offered_teacher,
+                offered_platform_teo=offered_platform,
             )
+
             logger.info(
                 f"✅ Teacher notification sent for discount request {discount_request_id}"
             )

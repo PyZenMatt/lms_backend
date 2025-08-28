@@ -16,6 +16,7 @@ import ReviewsAssigned from "./pages/ReviewsAssigned"
 import ReviewSubmission from "./pages/ReviewSubmission"
 import ReviewsHistory from "./pages/ReviewsHistory"
 import { ProtectedRoute, RoleRoute } from "./routes/ProtectedRoute";
+// TeacherChoicesPage removed - use sidebar inbox (TeacherDecisionNav) instead
 import CoursesList from "./pages/CoursesList";
 import Notifications from "./pages/Notifications";
 import Login from "./pages/Login";
@@ -26,7 +27,6 @@ import Forbidden from "./pages/Forbidden";
 import ProfilePage from "./pages/ProfilePage";
 import StudentDashboard from "./pages/StudentDashboard";
 import TeacherDashboard from "./pages/TeacherDashboard";
-import TeoDecisionsPage from "./pages/teacher/TeoDecisions";
 import StakingPage from "./pages/teacher/Staking";
 import AdminDashboard from "./pages/AdminDashboard";
 import CoursesStudioList from "./pages/studio/CoursesStudioList"
@@ -34,6 +34,7 @@ import CourseStudioForm from "./pages/studio/CourseStudioForm"
 import CourseBuilder from "./pages/studio/CourseBuilder"
 import { useParams } from "react-router-dom";
 import WalletPage from "./pages/WalletPage";
+import PendingDiscountsPage from "./features/discounts/pages/PendingDiscountsPage";
 
 function BuyRedirect() {
   const { id } = useParams();
@@ -175,14 +176,6 @@ export default function App() {
             }
           />
           <Route
-            path="/teacher/teo-decisions"
-            element={
-              <RoleRoute allow="teacher">
-                <ErrorBoundary><TeoDecisionsPage /></ErrorBoundary>
-              </RoleRoute>
-            }
-          />
-          <Route
             path="/teacher/staking"
             element={
               <RoleRoute allow="teacher">
@@ -190,6 +183,17 @@ export default function App() {
               </RoleRoute>
             }
           />
+
+          <Route
+            path="/teacher/pending-discounts"
+            element={
+              <RoleRoute allow="teacher">
+                <ErrorBoundary><PendingDiscountsPage /></ErrorBoundary>
+              </RoleRoute>
+            }
+          />
+
+          {/* /teacher/choices removed - use sidebar decision panel instead */}
 
           {/* Studio (teacher) */}
           <Route path="studio/courses" element={<ProtectedRoute><ErrorBoundary><CoursesStudioList /></ErrorBoundary></ProtectedRoute>} />

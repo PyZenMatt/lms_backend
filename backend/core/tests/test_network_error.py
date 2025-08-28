@@ -156,17 +156,17 @@ def check_missing_exercise_reward():
 
         course = submission.exercise.lesson.course
         print(f"Course: {course.title}")
-    price_val = int(getattr(course, "price_eur", 0))
-    reward_distributed = int(getattr(course, "reward_distributed", 0))
+        price_val = int(getattr(course, "price_eur", 0))
+        reward_distributed = int(getattr(course, "reward_distributed", 0))
 
-    print(f"Course price: {price_val} TEO")
-    print(f"Reward distributed: {reward_distributed} TEO")
+        print(f"Course price: {price_val} TEO")
+        print(f"Reward distributed: {reward_distributed} TEO")
 
-    reward_max = int(price_val * 0.15)  # 15% of course price
-    reward_remaining = reward_max - reward_distributed
+        reward_max = int(price_val * 0.15)  # 15% of course price
+        reward_remaining = reward_max - reward_distributed
 
-    print(f"Reward max (15%): {reward_max} TEO")
-    print(f"Reward remaining: {reward_remaining} TEO")
+        print(f"Reward max (15%): {reward_max} TEO")
+        print(f"Reward remaining: {reward_remaining} TEO")
 
         if reward_remaining <= 0:
             print("🎯 FOUND THE ISSUE: No reward remaining in the pool!")

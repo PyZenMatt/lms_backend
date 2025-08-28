@@ -333,6 +333,8 @@ class NotificationServiceTests(TestCase):
             teacher_bonus=25.0,
             request_id=1,
             expires_at=expires_at,
+            offered_teacher_teo=None,
+            offered_platform_teo=None,
         )
 
         self.assertTrue(success)

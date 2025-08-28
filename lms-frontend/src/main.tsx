@@ -3,6 +3,7 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 import App from "./App";
 import { AuthProvider } from "./context/AuthContext";
+import { Web3Provider } from "./context/Web3Context";
 import { BrowserRouter } from "react-router-dom";
 import "./index.css";
 
@@ -10,7 +11,9 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
     <BrowserRouter>
       <AuthProvider>
-        <App />
+        <Web3Provider>
+          <App />
+        </Web3Provider>
       </AuthProvider>
     </BrowserRouter>
   </React.StrictMode>

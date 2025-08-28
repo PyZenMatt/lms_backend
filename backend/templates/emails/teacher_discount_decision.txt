@@ -1,0 +1,14 @@
+{{ teacher_name }} - scelta TeoCoin necessaria
+
+Ciao {{ teacher_name }},
+
+Lo studente {{ student_name }} ha ricevuto uno sconto del {{ discount_percent }}% su "{{ course_title }}".
+
+Opzioni:
+- Accetta TEO: {{ teo_cost }} TEO + bonus {{ teacher_bonus }} TEO (totale {{ total_teo }} TEO)
+- Mantieni EUR: ricevi la normale commissione in EUR (la piattaforma assorbe lo sconto)
+
+Decidi entro {{ hours_remaining }} ore qui: {{ dashboard_url }}
+
+Grazie,
+Il team

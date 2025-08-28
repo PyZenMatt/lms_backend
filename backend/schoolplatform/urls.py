@@ -3,6 +3,11 @@ from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import include, path
+from rewards.views.discount_views import (
+    pending_discount_snapshots,
+    accept_teacher_choice,
+    decline_teacher_choice,
+)
 
 from drf_spectacular.views import (
      SpectacularAPIView,
@@ -57,6 +62,13 @@ urlpatterns = [
     path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
     path('redoc/', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
     path("healthz/", healthz),
+]
+
+# Compatibility aliases for older frontend paths (no /v1/rewards/ prefix)
+urlpatterns += [
+    path("api/discounts/pending/", pending_discount_snapshots),
+    path("api/discounts/<int:decision_id>/accept/", accept_teacher_choice),
+    path("api/discounts/<int:decision_id>/decline/", decline_teacher_choice),
 ]
 
 # Serve media files in development

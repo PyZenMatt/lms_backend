@@ -35,9 +35,23 @@ class PurchaseCourseView(APIView):
             wallet_address = request.data.get("wallet_address")
             transaction_hash = request.data.get("transaction_hash")
             payment_confirmed = request.data.get("payment_confirmed", False)
+            payment_intent = request.data.get("payment_intent")
+            method = (request.data.get("method") or "").lower()
 
-            # Validate required data
-            if not wallet_address:
+            # Validate required data for blockchain flows; allow missing wallet for
+            # pure Stripe flows (fallback from frontend uses method: "stripe").
+            if transaction_hash and not wallet_address:
+                return Response(
+                    {
+                        "error": "Wallet address is required when providing transaction_hash",
+                        "action_required": "provide_wallet",
+                    },
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
+            # If this is not a Stripe-based request (no payment_intent and not explicit stripe method),
+            # require wallet_address as before.
+            if not wallet_address and not payment_intent and method != "stripe":
                 return Response(
                     {
                         "error": "Wallet address is required for purchase",

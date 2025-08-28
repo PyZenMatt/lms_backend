@@ -24,9 +24,13 @@ from rest_framework.views import APIView
 from services.db_teocoin_service import DBTeoCoinService
 from services.hybrid_teocoin_service import hybrid_teocoin_service
 from decimal import Decimal as _Decimal
+from django.utils import timezone
+from datetime import timedelta
+from notifications.services import teocoin_notification_service
 from django.db import transaction, IntegrityError
 from services.discount_calc import compute_discount_breakdown
 from rewards.models import PaymentDiscountSnapshot, Tier
+from rewards.services.transaction_services import get_or_create_payment_snapshot
 
 # LEGACY IMPORTS REMOVED - using clean database services now
 # from services.gas_free_v2_service import GasFreeV2Service
@@ -265,6 +269,91 @@ class CreatePaymentIntentView(APIView):
             try:
                 payment_intent = stripe.PaymentIntent.create(**intent_data)
                 logger.info(f"✅ Stripe payment intent created: {payment_intent.id}")
+                # Persist a PaymentDiscountSnapshot now (idempotent). This ensures
+                # a snapshot exists as soon as the payment intent is created so
+                # teacher notifications and frontend can rely on it.
+                try:
+                    if use_teocoin_discount and discount_amount > 0:
+                        # Resolve tier from teacher profile if available
+                        tier = None
+                        tp = getattr(course.teacher, "teacher_profile", None)
+                        if tp:
+                            tier_obj = Tier.objects.filter(name=tp.staking_tier, is_active=True).first()
+                            if tier_obj:
+                                tier = {
+                                    "teacher_split_percent": tier_obj.teacher_split_percent,
+                                    "platform_split_percent": tier_obj.platform_split_percent,
+                                    "max_accept_discount_ratio": tier_obj.max_accept_discount_ratio,
+                                    "teo_bonus_multiplier": tier_obj.teo_bonus_multiplier,
+                                    "name": tier_obj.name,
+                                }
+
+                        breakdown = compute_discount_breakdown(
+                            price_eur=original_price,
+                            discount_percent=_Decimal(str(discount_percent if 'discount_percent' in locals() else 0)),
+                            tier=tier,
+                            accept_teo=False,
+                            accept_ratio=None,
+                        )
+
+                        from django.db import IntegrityError
+
+                        defaults_payload = {
+                            "course": course,
+                            "student": user,
+                            "teacher": course.teacher if getattr(course, "teacher", None) else None,
+                            "price_eur": original_price,
+                            "discount_percent": int(discount_percent) if 'discount_percent' in locals() else 0,
+                            "student_pay_eur": breakdown.get("student_pay_eur"),
+                            "teacher_eur": breakdown.get("teacher_eur"),
+                            "platform_eur": breakdown.get("platform_eur"),
+                            "teacher_teo": breakdown.get("teacher_teo"),
+                            "platform_teo": breakdown.get("platform_teo"),
+                            "absorption_policy": breakdown.get("absorption_policy", "none"),
+                            "teacher_accepted_teo": breakdown.get("teacher_teo", 0),
+                            "tier_name": (tier.get("name") if tier else None),
+                            "tier_teacher_split_percent": (tier.get("teacher_split_percent") if tier else None),
+                            "tier_platform_split_percent": (tier.get("platform_split_percent") if tier else None),
+                            "tier_max_accept_discount_ratio": (tier.get("max_accept_discount_ratio") if tier else None),
+                            "tier_teo_bonus_multiplier": (tier.get("teo_bonus_multiplier") if tier else None),
+                        }
+                        try:
+                            # Try to find an existing local snapshot created by the frontend
+                            # (order_id like 'local_...' or synthetic) for same student/course
+                            # and attach the external payment id to avoid duplicates.
+                            from django.db import transaction as dj_transaction
+                            from django.db.models import Q
+
+                            attached = None
+                            with dj_transaction.atomic():
+                                # First try: match snapshots for same course where student is the current user
+                                # or student is missing, and with common local prefixes.
+                                attached = (
+                                    PaymentDiscountSnapshot.objects.select_for_update()
+                                    .filter(course=course, external_txn_id__isnull=True)
+                                    .filter(Q(student=user) | Q(student__isnull=True))
+                                    .filter(
+                                        Q(order_id__startswith='local_') |
+                                        Q(order_id__startswith='discount_synthetic_') |
+                                        Q(order_id__startswith='discount_')
+                                    )
+                                    .order_by('-created_at')
+                                    .first()
+                                )
+                                # If found, attach stripe id
+                                if attached:
+                                    attached.external_txn_id = str(payment_intent.id)
+                                    attached.source = 'stripe'
+                                    attached.save(update_fields=['external_txn_id', 'source'])
+                            if attached:
+                                snap = attached
+                                created = False
+                            else:
+                                snap, created = get_or_create_payment_snapshot(order_id=str(payment_intent.id), defaults=defaults_payload, source="stripe")
+                        except Exception:
+                            snap, created = PaymentDiscountSnapshot.objects.get_or_create(order_id=str(payment_intent.id), defaults=defaults_payload)
+                except Exception:
+                    logger.exception("Failed to persist PaymentDiscountSnapshot at intent creation")
             except Exception as stripe_err:
                 logger.error(f"❌ Stripe API error: {stripe_err}")
                 return Response(
@@ -536,33 +625,57 @@ class ConfirmPaymentView(APIView):
                 )
 
                 # Persist snapshot idempotently; handle race via IntegrityError
-                with transaction.atomic():
-                    try:
-                        snap, created = PaymentDiscountSnapshot.objects.get_or_create(
-                            order_id=str(payment_intent_id),
-                            defaults={
-                                "course": course,
-                                "student": user,
-                                "teacher": course.teacher if getattr(course, "teacher", None) else None,
-                                "price_eur": original_price,
-                                "discount_percent": discount_percent,
-                                "student_pay_eur": breakdown["student_pay_eur"],
-                                "teacher_eur": breakdown["teacher_eur"],
-                                "platform_eur": breakdown["platform_eur"],
-                                "teacher_teo": breakdown["teacher_teo"],
-                                "platform_teo": breakdown["platform_teo"],
-                                "absorption_policy": breakdown.get("absorption_policy", "none"),
-                                "teacher_accepted_teo": breakdown.get("teacher_teo", 0),
-                                "tier_name": (tier.get("name") if tier else None),
-                                "tier_teacher_split_percent": (tier.get("teacher_split_percent") if tier else None),
-                                "tier_platform_split_percent": (tier.get("platform_split_percent") if tier else None),
-                                "tier_max_accept_discount_ratio": (tier.get("max_accept_discount_ratio") if tier else None),
-                                "tier_teo_bonus_multiplier": (tier.get("teo_bonus_multiplier") if tier else None),
-                            },
+                defaults_payload = {
+                    "course": course,
+                    "student": user,
+                    "teacher": course.teacher if getattr(course, "teacher", None) else None,
+                    "price_eur": original_price,
+                    "discount_percent": discount_percent,
+                    "student_pay_eur": breakdown["student_pay_eur"],
+                    "teacher_eur": breakdown["teacher_eur"],
+                    "platform_eur": breakdown["platform_eur"],
+                    "teacher_teo": breakdown["teacher_teo"],
+                    "platform_teo": breakdown["platform_teo"],
+                    "absorption_policy": breakdown.get("absorption_policy", "none"),
+                    "teacher_accepted_teo": breakdown.get("teacher_teo", 0),
+                    "tier_name": (tier.get("name") if tier else None),
+                    "tier_teacher_split_percent": (tier.get("teacher_split_percent") if tier else None),
+                    "tier_platform_split_percent": (tier.get("platform_split_percent") if tier else None),
+                    "tier_max_accept_discount_ratio": (tier.get("max_accept_discount_ratio") if tier else None),
+                    "tier_teo_bonus_multiplier": (tier.get("teo_bonus_multiplier") if tier else None),
+                }
+                try:
+                    # If a local snapshot exists for this student/course, attach the
+                    # external payment_intent id to that snapshot instead of creating
+                    # a new one with the stripe id.
+                    from django.db import transaction as dj_transaction
+                    from django.db.models import Q
+
+                    attached = None
+                    with dj_transaction.atomic():
+                        attached = (
+                            PaymentDiscountSnapshot.objects.select_for_update()
+                            .filter(course=course, external_txn_id__isnull=True)
+                            .filter(Q(student=user) | Q(student__isnull=True))
+                            .filter(
+                                Q(order_id__startswith='local_') |
+                                Q(order_id__startswith='discount_synthetic_') |
+                                Q(order_id__startswith='discount_')
+                            )
+                            .order_by('-created_at')
+                            .first()
                         )
-                    except IntegrityError:
-                        snap = PaymentDiscountSnapshot.objects.get(order_id=str(payment_intent_id))
+                        if attached:
+                            attached.external_txn_id = str(payment_intent_id)
+                            attached.source = 'stripe'
+                            attached.save(update_fields=['external_txn_id', 'source'])
+                    if attached:
+                        snap = attached
                         created = False
+                    else:
+                        snap, created = get_or_create_payment_snapshot(order_id=str(payment_intent_id), defaults=defaults_payload, source="stripe")
+                except Exception:
+                    snap, created = PaymentDiscountSnapshot.objects.get_or_create(order_id=str(payment_intent_id), defaults=defaults_payload)
 
                 # Structured logging for confirm snapshot
                 try:
@@ -582,6 +695,60 @@ class ConfirmPaymentView(APIView):
                     })
                 except Exception:
                     logger.debug("discount_confirm logging failed")
+
+                # Ensure teacher receives an in-app notification for this snapshot
+                try:
+                    # Compute teacher_bonus from tier multiplier if available
+                    teacher_teo_decimal = breakdown.get("teacher_teo", 0)
+                    teacher_bonus = 0
+                    try:
+                        mult = tier.get("teo_bonus_multiplier") if tier else None
+                        if mult:
+                            # if teacher_teo includes bonus, extract bonus portion
+                            teacher_bonus = float(Decimal(str(teacher_teo_decimal)) - (Decimal(str(teacher_teo_decimal)) / Decimal(str(mult))))
+                    except Exception:
+                        teacher_bonus = 0
+
+                    # expiration: 24 hours from snapshot creation
+                    expires_at = (snap.created_at + timedelta(hours=24)) if getattr(snap, 'created_at', None) else (timezone.now() + timedelta(hours=24))
+
+                    # Log the notify call with offered preview when possible
+                    try:
+                        from services.discount_calc import compute_discount_breakdown
+                        offered_preview = compute_discount_breakdown(
+                            price_eur=snap.price_eur,
+                            discount_percent=snap.discount_percent,
+                            tier=None,
+                            accept_teo=True,
+                            accept_ratio=1,
+                        )
+                        offered_teacher_preview = offered_preview.get("teacher_teo")
+                    except Exception:
+                        offered_teacher_preview = breakdown.get("teacher_teo", 0)
+
+                    try:
+                        logger.info("discount_notify_call", extra={
+                            "event": "discount_notify_call",
+                            "order_id": getattr(snap, "order_id", None),
+                            "snapshot_id": getattr(snap, "id", None),
+                            "offered_teacher_teo": str(offered_teacher_preview),
+                        })
+                    except Exception:
+                        pass
+
+                    teocoin_notification_service.notify_teacher_discount_pending(
+                        teacher=snap.teacher,
+                        student=snap.student,
+                        course_title=snap.course.title if snap.course else "",
+                        discount_percent=int(snap.discount_percent or 0),
+                        teo_cost=float(breakdown.get("teacher_teo", 0)),
+                        teacher_bonus=teacher_bonus,
+                        request_id=snap.id,
+                        expires_at=expires_at,
+                        offered_teacher_teo=float(offered_teacher_preview) if offered_teacher_preview is not None else None,
+                    )
+                except Exception as e:
+                    logger.error(f"Failed to send teocoin teacher notification for snapshot {getattr(snap,'id',None)}: {e}")
 
             except Exception as e:
                 logger.error(f"Payment confirmation error: {e}")

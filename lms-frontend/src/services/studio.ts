@@ -169,7 +169,7 @@ export async function listTeachingCourses(params?: {
         { url: `/v1/courses-service/`, q: params },
       ]
   for (const c of candidates) {
-    const res = await api.get<any>(c.url, { params: c.q, query: c.q })
+  const res = await api.get<any>(c.url, { params: c.q })
     if (res.ok) {
       const items = Array.isArray(res.data) ? res.data : (res.data?.results ?? [])
       const count = res.data?.count

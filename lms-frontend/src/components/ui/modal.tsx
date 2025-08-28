@@ -3,7 +3,7 @@ import * as React from "react";
 import { createPortal } from "react-dom";
 import { cn } from "@/lib/utils";
 
-type ModalCtx = { open: boolean; setOpen: (v: boolean) => void };
+type ModalCtx = { open: boolean; setOpen: React.Dispatch<React.SetStateAction<boolean>> };
 const Ctx = React.createContext<ModalCtx | null>(null);
 function useModal() {
   const ctx = React.useContext(Ctx);
@@ -17,14 +17,20 @@ export function Modal({ open: cOpen, defaultOpen, onOpenChange, children }:{
   const [open, setOpen] = React.useState(!!defaultOpen);
   React.useEffect(() => { if (cOpen !== undefined) setOpen(!!cOpen); }, [cOpen]);
   const api = React.useMemo<ModalCtx>(() => ({
-    open, setOpen: (v) => { if (cOpen === undefined) setOpen(v); onOpenChange?.(v); }
+    open,
+    setOpen: (v) => {
+      if (cOpen === undefined) setOpen(typeof v === "function" ? (v as any)(open) : v);
+      onOpenChange?.(typeof v === "function" ? (v as any)(open) : v);
+    },
   }), [open, cOpen, onOpenChange]);
   return <Ctx.Provider value={api}>{children}</Ctx.Provider>;
 }
 
-export function ModalTrigger({ children }: { children: React.ReactElement }) {
+export function ModalTrigger({ children }: { children: React.ReactNode }) {
   const { setOpen } = useModal();
-  return React.cloneElement(children, { onClick: () => setOpen(true) });
+  if (!React.isValidElement(children)) return null;
+  const el = children as React.ReactElement;
+  return React.cloneElement(el, ({ onClick: () => setOpen(true) } as any));
 }
 
 export function ModalContent({

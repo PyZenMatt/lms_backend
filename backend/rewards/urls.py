@@ -15,17 +15,28 @@ from .views.reward_views import (
     trigger_course_completion_check,
     trigger_lesson_completion_reward,
 )
-from .views.discount_views import preview_discount, confirm_discount
+from .views.discount_views import (
+    preview_discount,
+    confirm_discount,
+    missing_snapshots_for_teachers,
+    backfill_snapshots_to_decisions,
+    pending_discount_snapshots,
+    accept_teacher_choice,
+    decline_teacher_choice,
+)
 from .views.teocoin_views import (
     staking_overview,
     get_staking_tiers_rewards,
     stake_from_rewards,
     unstake_from_rewards,
 )
+from .views.simple_transaction_views import ApplyDiscountView, TeacherDecisionView
 
 app_name = "rewards"
 
 urlpatterns = [
+    # Alias chiamato dal FE per la cronologia del wallet
+    path("wallet/transactions/", TransactionHistoryView.as_view(), name="wallet-transactions"),
     # Blockchain transaction endpoints
     path("transactions/", TransactionHistoryView.as_view(), name="transaction-history"),
     # Admin endpoints
@@ -70,6 +81,18 @@ urlpatterns = [
     # Discount preview/confirm endpoints
     path("rewards/discounts/preview/", preview_discount, name="discount-preview"),
     path("rewards/discounts/confirm/", confirm_discount, name="discount-confirm"),
+    path("rewards/discounts/pending/", pending_discount_snapshots, name="discount-pending"),
+    # Backfill: list snapshots that probably missed teacher notifications
+    path("rewards/discounts/missing-for-teacher/", missing_snapshots_for_teachers, name="discount-missing-for-teacher"),
+    path("rewards/discounts/backfill/", backfill_snapshots_to_decisions, name="discount-backfill"),
+    # Minimal KISS transaction endpoints
+    path("rewards/discounts/apply/", ApplyDiscountView.as_view(), name="apply-discount"),
+    path("rewards/teacher-decisions/<int:decision_id>/<str:action>/", TeacherDecisionView.as_view(), name="teacher-decision"),
+    # Compat: endpoints chiamati dal FE per accettare/declinare i TEO (KISS)
+    path("rewards/discounts/<int:decision_id>/accept/", accept_teacher_choice, name="discount-accept"),
+    path("rewards/discounts/<int:decision_id>/decline/", decline_teacher_choice, name="discount-decline"),
+    # Backwards compat for older FE (also kept)
+    path("teacher-choices/<int:decision_id>/accept/", accept_teacher_choice, name="teacher-choice-accept"),
     # Compatibility staking endpoints used by frontend wrappers
     # Backwards-compatible staking overview used by frontend
     path("rewards/staking/overview/", staking_overview, name="staking-overview"),

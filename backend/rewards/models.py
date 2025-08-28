@@ -20,7 +20,8 @@ class BlockchainTransaction(models.Model):
         ("reward", "Reward - Premio per attività"),
         ("exercise_reward", "Exercise Reward - Premio per esercizio completato"),
         ("review_reward", "Review Reward - Premio per review completata"),
-        ("discount_applied", "Discount Applied - Sconto TeoCoin applicato"),
+    ("discount_applied", "Discount Applied - Sconto TeoCoin applicato"),
+    ("discount_accept", "Discount Accept - Teacher accepted TEO"),
     )
 
     STATUS_CHOICES = (
@@ -329,7 +330,14 @@ class PaymentDiscountSnapshot(models.Model):
     This is an immutable audit record created at Confirm time.
     """
 
-    order_id = models.CharField(max_length=120, db_index=True, unique=True)
+    # Stable identifiers for idempotency: external payment provider id (eg. Stripe PI)
+    # and an optional platform order id. At least one should be present for stable
+    # deduplication. Keep order_id for backwards compatibility but not strictly
+    # unique at DB level here to allow older rows; uniqueness is enforced via
+    # conditional UniqueConstraint below.
+    external_txn_id = models.CharField(max_length=120, db_index=True, null=True, blank=True)
+    order_id = models.CharField(max_length=120, db_index=True, null=True, blank=True)
+    source = models.CharField(max_length=16, default="local")  # 'local' | 'stripe'
     course = models.ForeignKey("courses.Course", on_delete=models.SET_NULL, null=True)
     student = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name="payment_snapshots")
     teacher = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name="teacher_payment_snapshots")
@@ -350,6 +358,16 @@ class PaymentDiscountSnapshot(models.Model):
     absorption_policy = models.CharField(max_length=32, default="none")
     teacher_accepted_teo = models.DecimalField(max_digits=18, decimal_places=8, default=Decimal("0"))
 
+    # Finalization fields updated when teacher makes a decision
+    STATUS_CHOICES = [
+        ("pending", "Pending"),
+        ("closed", "Closed"),
+    ]
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="pending", db_index=True)
+    closed_at = models.DateTimeField(null=True, blank=True)
+    # Final teacher teo recorded at decision time (quantized to 8 decimals)
+    final_teacher_teo = models.DecimalField(max_digits=18, decimal_places=8, null=True, blank=True, default=Decimal("0"))
+
     # Snapshot of tier at time of transaction
     tier_name = models.CharField(max_length=50, null=True, blank=True)
     tier_teacher_split_percent = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
@@ -362,6 +380,20 @@ class PaymentDiscountSnapshot(models.Model):
     class Meta:
         db_table = "rewards_payment_discount_snapshot"
         ordering = ["-created_at"]
+        constraints = [
+            # If external_txn_id is present, it must be unique
+            models.UniqueConstraint(
+                fields=["external_txn_id"],
+                name="uniq_snapshot_by_external_txn",
+                condition=~models.Q(external_txn_id=None),
+            ),
+            # If order_id is present, it must be unique
+            models.UniqueConstraint(
+                fields=["order_id"],
+                name="uniq_snapshot_by_order_id",
+                condition=~models.Q(order_id=None),
+            ),
+        ]
 
     def __str__(self):
         return f"Snapshot {self.order_id} - {self.price_eur}€ ({self.discount_percent}%)"

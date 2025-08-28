@@ -26,19 +26,19 @@ export default function TeoDiscountWidget({ priceEUR, courseId, onApply }: Props
   // result will contain server-side breakdown from previewDiscount
   const [checking, setChecking] = useState(false);
   const options = [5, 10, 15];
-  // TEO per 1 EUR (frontend config via Vite). Default fallback 10 (1 EUR = 10 TEO)
-  // Read Vite env value for TEO rate. Try window.__ENV (injected), then import.meta.env.
-  let TEO_PER_EUR = 10
+  // TEO per 1 EUR (frontend config via Vite). Only use if explicitly provided by env/window.
+  // Do NOT assume a default conversion rate here; showing TEO without a known rate
+  // may confuse users (and previously caused 1:1 or 1:10 mixups).
+  let TEO_PER_EUR: number | undefined = undefined
   try {
     const win = window as unknown as Record<string, unknown>
     const wenv = (win['__ENV'] as Record<string, unknown> | undefined)
-    if (wenv && typeof wenv.VITE_TEO_EUR_RATE === 'string') {
-      TEO_PER_EUR = Number(wenv.VITE_TEO_EUR_RATE)
-    } else if (typeof (import.meta as { env?: Record<string, string> }).env?.VITE_TEO_EUR_RATE === 'string') {
-      TEO_PER_EUR = Number((import.meta as { env?: Record<string, string> }).env!.VITE_TEO_EUR_RATE)
-    }
+    const fromWin = wenv && typeof wenv.VITE_TEO_EUR_RATE === 'string' ? Number(wenv.VITE_TEO_EUR_RATE) : undefined
+    const fromMeta = typeof (import.meta as { env?: Record<string, string> }).env?.VITE_TEO_EUR_RATE === 'string' ? Number((import.meta as { env?: Record<string, string> }).env!.VITE_TEO_EUR_RATE) : undefined
+    if (Number.isFinite(fromWin as number)) TEO_PER_EUR = fromWin
+    else if (Number.isFinite(fromMeta as number)) TEO_PER_EUR = fromMeta
   } catch {
-    // ignore and keep fallback
+    // ignore and leave undefined
   }
   const [selectedPct, setSelectedPct] = useState<number | null>(null);
   const [applied, setApplied] = useState(false);
@@ -223,18 +223,23 @@ export default function TeoDiscountWidget({ priceEUR, courseId, onApply }: Props
         <div className="flex gap-2">
       {options.map((pct) => {
       const discountEUR = Number((priceEUR * pct) / 100)
-      // convert EUR discount to TEO required using configured rate
-      const teoNeeded = discountEUR * TEO_PER_EUR
-            const availableTEO = (typeof wallet?.balance_teo === 'number') ? wallet!.balance_teo : 0
-            const disabled = availableTEO < teoNeeded
-            return (
+      // convert EUR discount to TEO required only when an explicit rate is configured
+      const teoNeeded = (typeof TEO_PER_EUR === 'number' && Number.isFinite(TEO_PER_EUR)) ? (discountEUR * TEO_PER_EUR) : undefined
+      const availableTEO = (typeof wallet?.balance_teo === 'number') ? wallet!.balance_teo : 0
+      // If we don't have a reliable TEO rate, don't disable options based on TEO balance
+      const disabled = typeof teoNeeded === 'number' ? (availableTEO < teoNeeded) : false
+      const fmtTEO = (v?: number) => {
+        if (v === undefined) return '\u2014'
+        return Number(v).toFixed(v % 1 === 0 ? 0 : 2)
+      }
+      return (
               <button
                 key={pct}
                 onClick={() => setSelectedPct(pct)}
                 disabled={loading || disabled}
                 className={`rounded-lg px-3 py-2 text-sm border disabled:opacity-50 ${selectedPct === pct ? 'bg-primary text-primary-foreground border-primary' : 'bg-card text-foreground border-border'}`}
               >
-        {pct}% {disabled ? '(non disponibile)' : `-€${discountEUR.toFixed(2)} / ${teoNeeded.toFixed(8)} TEO`}
+        {pct}% {disabled ? '(non disponibile)' : (typeof teoNeeded === 'number' ? `-${discountEUR.toFixed(2)} / ${fmtTEO(teoNeeded)} TEO` : `-${discountEUR.toFixed(2)}`)}
               </button>
             )
           })}

@@ -30,7 +30,7 @@ export default function ReceiptCard({ r }: { r: Receipt }) {
       </div>
       <div className="mt-3 space-y-1 text-sm">
         <div className="flex justify-between"><span>Prezzo finale</span><span className="font-medium">{formatEUR(r.final_price_eur)}</span></div>
-        <div className="flex justify-between"><span>Sconto TEO</span><span className="text-emerald-700">-{formatEUR(r.discount_eur)}</span></div>
+  <div className="flex justify-between"><span>Sconto</span><span className="text-emerald-700">-{formatEUR(r.discount_eur)}</span></div>
         {typeof r.teo_spent === "number" && (
           <div className="flex justify-between"><span>TEO spesi</span><span>{formatTEO(r.teo_spent)} TEO</span></div>
         )}

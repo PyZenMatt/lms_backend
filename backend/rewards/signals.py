@@ -96,6 +96,16 @@ def create_blockchain_notification(sender, instance, created, **kwargs):
                 # Se la conversione fallisce, lascia None
                 related_id = None
 
+        try:
+            logger.info("creating_reward_notification", extra={
+                "event": "creating_reward_notification",
+                "user_id": getattr(instance.user, "id", None),
+                "notification_type": notification_type,
+                "related_object_id": related_id,
+            })
+        except Exception:
+            pass
+
         Notification.objects.create(
             user=instance.user,
             message=message,

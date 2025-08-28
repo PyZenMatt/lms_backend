@@ -3,7 +3,6 @@ import React from "react";
 import { getUserFromToken, getAccessToken } from "../lib/auth";
 import { Link } from "react-router-dom";
 import { getTeacherDashboard, type Course, type TeacherStats } from "../services/teacher";
-import { listPendingTeoDecisions } from "../services/payments";
 import DrfPager from "../components/DrfPager";
 import { Spinner } from "../components/ui/spinner";
 import EmptyState from "../components/ui/empty-state";
@@ -20,7 +19,6 @@ export default function TeacherDashboard() {
   const [count, setCount] = React.useState(0);
   const [items, setItems] = React.useState<Course[]>([]);
   const [stats, setStats] = React.useState<TeacherStats | undefined>(undefined);
-  const [pendingTeo, setPendingTeo] = React.useState<number>(0);
 
   async function load(p = page) {
     setLoading(true);
@@ -39,15 +37,6 @@ export default function TeacherDashboard() {
 
   React.useEffect(() => {
     load(1);
-    // fetch pending teo count for the dashboard card
-    (async () => {
-      try {
-        const r = await listPendingTeoDecisions();
-        if (r.ok) setPendingTeo((r.data ?? []).length);
-      } catch {
-        // ignore
-      }
-    })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -98,9 +87,7 @@ export default function TeacherDashboard() {
           >
             + Nuovo corso
           </Link>
-          <Link to="/teacher/teo-decisions" className="rounded-md border px-3 py-2 text-sm hover:bg-accent">
-            📥 TEO Inbox {pendingTeo > 0 && <span className="ml-2 inline-flex items-center justify-center rounded-full bg-primary text-primary-foreground px-2 text-xs">{pendingTeo}</span>}
-          </Link>
+          {/* TEO Inbox page removed; decisions handled via notifications */}
           <Link to="/teacher/staking" className="rounded-md border px-3 py-2 text-sm hover:bg-accent">⚓ Staking</Link>
         </div>
       </div>

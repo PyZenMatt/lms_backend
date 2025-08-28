@@ -76,7 +76,10 @@ router.register(
 
 urlpatterns = [
     # === TEACHER CHOICE API ===
-    path("api/", include(router.urls)),
+    # Expose router directly at module root so that when this file is
+    # included under `path("api/v1/", include("courses.urls"))` the
+    # resulting endpoints are `/api/v1/teacher-choices/...` (no double `api/`).
+    path("", include(router.urls)),
     # === COURSES ===
     path("courses/", CourseListCreateView.as_view(), name="course-list-create"),
     path("courses/<int:pk>/", CourseDetailView.as_view(), name="course-detail"),

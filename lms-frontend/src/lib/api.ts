@@ -22,6 +22,8 @@ type RequestOptions = {
   signal?: AbortSignal;
   // internal
   _retried?: boolean;
+  // allow legacy keys used across the codebase (eg. `query`) without type errors
+  [k: string]: unknown;
 };
 
 const DEFAULT_BASE = "http://127.0.0.1:8000/api";
@@ -85,8 +87,17 @@ function normalizeBase(u: string): string {
 }
 
 function joinUrl(base: string, path: string): string {
-  const p = path.startsWith("/") ? path : `/${path}`;
-  return `${base}${p}`;
+  let p = path.startsWith("/") ? path : `/${path}`;
+  // If base already ends with '/api' and path starts with '/api', avoid duplication
+  try {
+    if (base.endsWith("/api") && p.startsWith("/api")) {
+      p = p.replace(/^\/api/, "");
+    }
+  } catch {
+    // fallback to naive join on any error
+  }
+  // Join and collapse accidental double slashes (except after protocol)
+  return `${base}${p}`.replace(/([^:]\/)\/+/, "$1");
 }
 
 function buildQuery(params?: Record<string, any>): string {
@@ -323,15 +334,27 @@ export function getApiBase() {
 // @ts-ignore
 if (typeof window !== "undefined") (window as any).__api_base__ = BASE;
 
-// Back-compat: re-export showToast from the ToastHost so existing imports keep working
-try {
-  // dynamic import to avoid cyclic issues at module init time
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
-  const th = require("@/components/ToastHost");
-  if (th && typeof th.showToast === "function") {
-    // @ts-ignore
-    exports.showToast = th.showToast;
+// Back-compat: if ToastHost exists at runtime, pick its showToast function via dynamic import.
+// Use a module-scoped variable so browser ESM environments don't rely on CommonJS `exports`.
+export type ToastOptions = { variant: "success" | "error" | "info"; message: string; title?: string };
+
+let runtimeShowToast: ((opts: ToastOptions) => void) | undefined;
+if (typeof window !== "undefined") {
+  // Dynamic import avoids circular deps at module evaluation time and works in ESM.
+  import("@/components/ToastHost")
+    .then((m: any) => {
+      const candidate = m?.showToast;
+      if (typeof candidate === "function") runtimeShowToast = candidate;
+    })
+    .catch(() => {
+      // ignore missing ToastHost
+    });
+}
+
+export function showToast(opts: ToastOptions) {
+  try {
+    if (typeof runtimeShowToast === "function") runtimeShowToast(opts);
+  } catch {
+    // swallow errors in environments without a ToastHost
   }
-} catch {
-  // ignore if not available
 }
