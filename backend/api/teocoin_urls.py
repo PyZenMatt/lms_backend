@@ -34,6 +34,7 @@ from .teocoin_views import (
     TeoCoinTransactionHistoryView,
     UserWithdrawalHistoryView,
 )
+from blockchain.views_simplified import verify_deposit
 
 app_name = "teocoin_api"
 
@@ -54,6 +55,8 @@ urlpatterns = [
     path("withdrawals/", include("api.withdrawal_urls", namespace="withdrawals")),
     # Burn Deposit System - Phase 2 (MetaMask → Platform)
     path("", include("api.burn_deposit_urls", namespace="burn_deposit")),
+    # Alias: expose deposit verify under teocoin prefix for backward compatibility
+    path("deposit/verify/", verify_deposit, name="deposit_verify"),
     # Legacy Withdrawal Management (DB-based)
     path("withdraw/", WithdrawTokensView.as_view(), name="withdraw"),
     path(

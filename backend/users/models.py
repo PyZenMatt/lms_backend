@@ -89,6 +89,15 @@ class User(AbstractUser):
         help_text="Indirizzo wallet Ethereum/Polygon per TeoCoins",
     )
 
+    # Persistent nonce for SIWE-lite wallet linking
+    # Stored here so the challenge nonce survives between HTTP requests/processes.
+    wallet_nonce = models.CharField(
+        max_length=128,
+        blank=True,
+        null=True,
+        help_text="Nonce used for wallet linking SIWE-lite challenge",
+    )
+
     # Campi specifici per la scuola d'arte
     profession = models.CharField(
         max_length=100,

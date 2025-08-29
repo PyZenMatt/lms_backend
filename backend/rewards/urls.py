@@ -30,6 +30,7 @@ from .views.teocoin_views import (
     stake_from_rewards,
     unstake_from_rewards,
 )
+from .views import wallet_views
 from .views.simple_transaction_views import ApplyDiscountView, TeacherDecisionView
 
 app_name = "rewards"
@@ -99,4 +100,8 @@ urlpatterns = [
     path("rewards/staking/tiers/", get_staking_tiers_rewards, name="staking-tiers"),
     path("rewards/staking/stake/", stake_from_rewards, name="staking-stake"),
     path("rewards/staking/unstake/", unstake_from_rewards, name="staking-unstake"),
+    # New wallet endpoints (mint/burn)
+    path("wallet/mint/", wallet_views.mint, name="wallet-mint"),
+    path("wallet/burn/", wallet_views.burn, name="wallet-burn"),
+    path("wallet/health/", wallet_views.health, name="wallet-health"),
 ]

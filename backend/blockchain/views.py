@@ -23,6 +23,8 @@ from rest_framework.response import Response
 from rewards.models import BlockchainTransaction, TokenBalance
 from services.blockchain_service import blockchain_service
 from services.consolidated_teocoin_service import teocoin_service
+from .services.tx_utils import create_transaction_idempotent
+from django.db import transaction
 
 logger = logging.getLogger(__name__)
 
@@ -229,3 +231,96 @@ def check_transaction_status(request):
             {"error": "Error checking transaction status"},
             status=status.HTTP_500_INTERNAL_SERVER_ERROR,
         )
+
+
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
+def withdraw_to_wallet(request):
+    """Create + send a withdrawal transaction from platform -> user wallet.
+
+    Expected body: { amount: decimal (optional) , related_id: str (optional for idempotency) }
+    """
+    user = request.user
+    if not getattr(user, "wallet_address", None):
+        return Response({"status": "error", "error_code": "WALLET_NOT_LINKED", "message": "User has no linked wallet"}, status=400)
+
+    amount = request.data.get("amount")
+    related_id = request.data.get("related_id")
+    try:
+        # basic validation
+        if amount is None:
+            # default small amount for dev
+            amount = "1"
+
+        # create idempotent tx record
+        defaults = {"amount": amount, "from_address": None, "to_address": user.wallet_address}
+        tx, created = create_transaction_idempotent(user, "withdraw", related_object_id=related_id, defaults=defaults)
+
+        # If it already exists and has tx_hash, return it
+        if not created and tx.tx_hash:
+            return Response({"status": "ok", "tx_id": tx.id, "tx_hash": tx.tx_hash})
+
+        # For MVP, send transaction synchronously via blockchain_service
+        try:
+            # mark processing
+            tx.status = "pending"
+            tx.save()
+
+            tx_hash = blockchain_service.send_withdrawal(to_address=user.wallet_address, amount=amount)
+            tx.tx_hash = tx_hash
+            tx.status = "pending"
+            tx.save()
+
+            logger.info("withdraw_request_ok user=%s tx_id=%s tx_hash=%s", user.pk, tx.id, tx_hash)
+            return Response({"status": "ok", "tx_id": tx.id, "tx_hash": tx_hash})
+
+        except Exception as e:
+            logger.error("withdraw_rpc_error user=%s err=%s", user.pk, str(e))
+            tx.error_message = str(e)
+            tx.status = "failed"
+            tx.save()
+            return Response({"status": "error", "error_code": "RPC_UNAVAILABLE", "message": str(e)}, status=500)
+
+    except Exception as e:
+        logger.exception("withdraw_internal_error user=%s err=%s", getattr(request.user, "pk", "?"), str(e))
+        return Response({"status": "error", "error_code": "SERVER_ERROR", "message": str(e)}, status=500)
+
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def tx_status(request, tx_identifier):
+    """Return status of tx by id (int) or tx_hash (hex)."""
+    # try by id
+    tx = None
+    try:
+        if tx_identifier.isdigit():
+            tx = BlockchainTransaction.objects.filter(id=int(tx_identifier)).first()
+        if not tx:
+            tx = BlockchainTransaction.objects.filter(tx_hash__iexact=tx_identifier).first()
+
+        if not tx:
+            return Response({"status": "error", "error_code": "TX_NOT_FOUND"}, status=404)
+
+        if tx.status == "pending":
+            # check chain
+            try:
+                receipt = teocoin_service.get_transaction_receipt(tx.tx_hash) if tx.tx_hash else None
+                if receipt:
+                    if receipt.get("status") == 1:
+                        tx.status = "confirmed"
+                        tx.block_number = receipt.get("block_number")
+                        tx.gas_used = receipt.get("gas_used")
+                        tx.confirmed_at = timezone.now()
+                        tx.save(update_fields=["status", "block_number", "gas_used", "confirmed_at"])
+                    else:
+                        tx.status = "failed"
+                        tx.error_message = "onchain_failure"
+                        tx.save(update_fields=["status", "error_message"])
+            except Exception as e:
+                logger.warning("tx_status_check_rpc_failed tx=%s err=%s", tx.id, e)
+
+        return Response({"status": "ok", "tx_status": tx.status, "tx_hash": tx.tx_hash, "block_number": tx.block_number})
+
+    except Exception as e:
+        logger.exception("tx_status_internal_error %s", e)
+        return Response({"status": "error", "error_code": "SERVER_ERROR", "message": str(e)}, status=500)

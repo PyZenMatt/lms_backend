@@ -14,6 +14,14 @@ from .views import (  # Registration; User profile; Teacher approval; Settings a
     user_profile,
 )
 
+# Re-export wallet_link views (modular views live in users/views/*.py)
+try:
+    from .views.wallet_link import WalletChallengeView, WalletLinkView
+except Exception:
+    # best-effort import; in some environments the package layout may differ
+    WalletChallengeView = None  # type: ignore
+    WalletLinkView = None  # type: ignore
+
 # Re-export for backward compatibility
 __all__ = [
     "RegisterView",
@@ -24,4 +32,7 @@ __all__ = [
     "RejectTeacherView",
     "UserSettingsView",
     "UserProgressView",
+    # Wallet linking (re-exported)
+    "WalletChallengeView",
+    "WalletLinkView",
 ]

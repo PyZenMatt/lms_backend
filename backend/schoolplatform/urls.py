@@ -19,6 +19,8 @@ from drf_spectacular.views import (
 from rest_framework import permissions
 from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
+from blockchain.views_simplified import wallet_withdraw
+from blockchain.views_simplified import onchain_mint
 
 
 schema_view = get_schema_view(
@@ -47,6 +49,10 @@ urlpatterns = [
     path("api/v1/", include("rewards.urls")),
     path("api/v1/", include("notifications.urls")),
     path("api/v1/blockchain/", include("blockchain.urls")),
+    # Compatibility alias for on-chain mint endpoint used by frontend
+    path("api/v1/onchain/mint/", onchain_mint, name="onchain_mint_alias"),
+    # Compatibility alias for wallet withdraw (DB->chain)
+    path("api/v1/wallet/withdraw/", wallet_withdraw, name="wallet_withdraw_alias"),
     path("api/v1/services/", include("services.urls")),
     path("api/v1/teocoin/", include("api.teocoin_urls")),
     # Gas-Free V2 System URLs - TODO: Implement proper V2 endpoints

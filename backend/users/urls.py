@@ -9,7 +9,7 @@ from .views import (
     UserSettingsView,
 )
 from .views.self_verify import SelfVerifyView
-from .views.wallet_views import ConnectWalletView, DisconnectWalletView
+from .views import ConnectWalletView, DisconnectWalletView, WalletChallengeView, WalletLinkView
 
 urlpatterns = [
     path("pending-teachers/", PendingTeachersView.as_view(), name="pending-teachers"),
@@ -31,5 +31,7 @@ urlpatterns = [
     path(
         "wallet/disconnect/", DisconnectWalletView.as_view(), name="disconnect-wallet"
     ),
+    path("wallet/challenge/", WalletChallengeView.as_view(), name="wallet-challenge"),
+    path("wallet/link/", WalletLinkView.as_view(), name="wallet-link"),
     path("self-verify/", SelfVerifyView.as_view(), name="self-verify"),
 ]

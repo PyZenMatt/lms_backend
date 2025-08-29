@@ -17,6 +17,7 @@ from .user_settings_views import UserProgressView, UserSettingsView
 
 # Wallet management views
 from .wallet_views import ConnectWalletView, DisconnectWalletView
+from .wallet_link import WalletChallengeView, WalletLinkView
 
 __all__ = [
     # Registration
@@ -34,4 +35,7 @@ __all__ = [
     # Wallet management
     "ConnectWalletView",
     "DisconnectWalletView",
+    # Wallet linking
+    "WalletChallengeView",
+    "WalletLinkView",
 ]
