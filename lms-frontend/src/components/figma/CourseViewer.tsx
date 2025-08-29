@@ -22,7 +22,7 @@ import {
 } from "lucide-react"
 import { useAuth } from "./AuthContext"
 import { ImageWithFallback } from "./figma/ImageWithFallback"
-import { toast } from "sonner@2.0.3"
+import { toast } from "sonner"
 
 interface Lesson {
   id: string

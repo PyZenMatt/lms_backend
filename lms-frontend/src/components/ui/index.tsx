@@ -14,3 +14,4 @@ export * from "./dropdown";
 export * from "./pagination";
 export * from "./empty-state";
 export * from "./button";
+export * from "./label";

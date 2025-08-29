@@ -98,7 +98,7 @@ export function Community() {
             </CardHeader>
             <CardContent className="space-y-3">
               <p>New tutorial: "Understanding Light and Shadow in Digital Art" 💡 This covers the fundamentals that will elevate your work instantly!</p>
-              <div className="bg-white p-4 rounded-lg border">
+              <div className="bg-card p-4 rounded-lg border border-border">
                 <h4>Light & Shadow Masterclass</h4>
                 <p className="text-sm text-muted-foreground mt-1">45 min video tutorial + practice exercises</p>
                 <Button className="mt-3" size="sm">

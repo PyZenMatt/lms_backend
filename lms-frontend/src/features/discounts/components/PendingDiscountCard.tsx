@@ -13,7 +13,7 @@ export default function PendingDiscountCard({
   snap, decisionId, onAccept, onDecline, disabled,
 }: Props) {
   return (
-    <div className="rounded-2xl shadow p-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700">
+  <div className="rounded-lg shadow-card p-4 bg-card border border-border">
       <div className="flex items-start justify-between mb-3">
         <div>
           <h3 className="text-lg font-semibold">{snap.course_title ?? "Course"}</h3>

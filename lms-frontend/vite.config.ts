@@ -7,6 +7,8 @@ export default defineConfig({
   resolve: {
     alias: {
   "@": path.resolve(__dirname, "./src"),
+  "@onchain": path.resolve(__dirname, "./src/web3"),
+  "onchain": path.resolve(__dirname, "./src/web3"),
   // Force single React copy to avoid invalid hook call / dispatcher is null errors
   // Sometimes dependencies or symlinks can cause multiple React instances to be bundled.
   // These aliases ensure all imports resolve to the workspace root node_modules.

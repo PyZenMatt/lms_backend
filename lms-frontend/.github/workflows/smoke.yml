@@ -1,0 +1,54 @@
+name: Smoke Tests
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Use Node.js 18
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: Install frontend dependencies
+        working-directory: ./lms-frontend
+        run: npm ci
+
+      - name: Install Playwright browsers
+        working-directory: ./lms-frontend
+        run: npx playwright install --with-deps
+
+      - name: Build frontend
+        working-directory: ./lms-frontend
+        run: npm run build
+
+      - name: Start vite preview
+        working-directory: ./lms-frontend
+        run: |
+          # start preview in background and save PID
+          npx vite preview --port 5173 &>/dev/null & echo $! > .preview.pid
+
+      - name: Wait for preview to be available
+        run: |
+          for i in $(seq 1 30); do
+            if curl -sSf http://localhost:5173 >/dev/null; then
+              echo "preview up"; break
+            fi
+            sleep 1
+          done
+
+      - name: Run Playwright smoke tests
+        working-directory: ./lms-frontend
+        run: npx playwright test tests/smoke/theme-smoke.spec.ts --project=chromium
+
+      - name: Upload Playwright results
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-results
+          path: lms-frontend/playwright-results

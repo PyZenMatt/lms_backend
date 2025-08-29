@@ -357,10 +357,10 @@ export function Profile() {
                     <div className="flex items-center gap-3">
                       <div className="text-2xl">{achievement.icon}</div>
                       <div>
-                        <h4 className={`font-medium ${achievement.earned ? 'text-green-800' : 'text-gray-600'}`}>
+                        <h4 className={`font-medium ${achievement.earned ? 'text-green-800' : 'text-muted-foreground'}`}>
                           {achievement.name}
                         </h4>
-                        <p className={`text-sm ${achievement.earned ? 'text-green-600' : 'text-gray-500'}`}>
+                        <p className={`text-sm ${achievement.earned ? 'text-green-600' : 'text-muted-foreground'}`}>
                           {achievement.description}
                         </p>
                       </div>

@@ -2,7 +2,7 @@
 import React, { useState } from "react"
 import { onchainMint } from "./walletApi"
 import { useWeb3 } from "@/web3/context"
-import { burnTokens } from "@onchain/ethersWeb3"
+import { burnTokens } from "onchain/ethersWeb3"
 import { verifyDeposit } from "@/services/wallet"
 import { showToast } from "@/lib/api"
 import useTxStatus from "./hooks/useTxStatus"

@@ -1,8 +1,9 @@
 "use client";
 
 import * as React from "react";
-import { ChevronLeft, ChevronRight } from "lucide-react@0.487.0";
-import { DayPicker } from "react-day-picker@8.10.1";
+import type { CustomComponents } from "react-day-picker";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import { DayPicker } from "react-day-picker";
 
 import { cn } from "./utils";
 import { buttonVariants } from "./button";
@@ -13,6 +14,19 @@ function Calendar({
   showOutsideDays = true,
   ...props
 }: React.ComponentProps<typeof DayPicker>) {
+  // react-day-picker's CustomComponents type describes the optional
+  // icon renderer props. We cast to Partial<CustomComponents> so the
+  // component object is accepted by the DayPicker prop.
+  const _components = {
+    IconLeft: (p: { className?: string } & Record<string, unknown>) => (
+      <ChevronLeft className={cn("size-4", p.className)} {...(p as unknown as Record<string, unknown>)} />
+    ),
+    IconRight: (p: { className?: string } & Record<string, unknown>) => (
+      <ChevronRight className={cn("size-4", p.className)} {...(p as unknown as Record<string, unknown>)} />
+    ),
+  };
+
+  const components = _components as Partial<CustomComponents>;
   return (
     <DayPicker
       showOutsideDays={showOutsideDays}
@@ -59,14 +73,7 @@ function Calendar({
         day_hidden: "invisible",
         ...classNames,
       }}
-      components={{
-        IconLeft: ({ className, ...props }) => (
-          <ChevronLeft className={cn("size-4", className)} {...props} />
-        ),
-        IconRight: ({ className, ...props }) => (
-          <ChevronRight className={cn("size-4", className)} {...props} />
-        ),
-      }}
+  components={components}
       {...props}
     />
   );

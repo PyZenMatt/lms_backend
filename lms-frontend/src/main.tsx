@@ -6,7 +6,7 @@ import { AuthProvider } from "./context/AuthContext";
 import { Web3Provider } from "./context/Web3Context";
 import AppQueryProvider from "./lib/queryClient";
 import { BrowserRouter } from "react-router-dom";
-import "./index.css";
+import "./styles/app.css";
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>

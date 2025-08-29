@@ -19,7 +19,8 @@
     "baseUrl": "./",
     "paths": {
   "@/*": ["src/*"],
-  "@onchain/*": ["src/web3/*"]
+  "@onchain/*": ["src/web3/*"],
+  "onchain/*": ["src/web3/*"]
     },
 
     /* Linting */

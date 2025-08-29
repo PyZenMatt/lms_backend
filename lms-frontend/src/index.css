@@ -1,5 +1,5 @@
 /* Entry unico: tokens + Tailwind + rete di sicurezza bottoni */
-@import "./styles/theme/globals.css";
+@import "./styles/globals.css";
 @import "tailwindcss";
 
 /* Base minime (opzionali) */

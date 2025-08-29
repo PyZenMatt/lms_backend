@@ -15,7 +15,7 @@ import {
   Target
 } from "lucide-react"
 import { useAuth } from "./AuthContext"
-import { toast } from "sonner@2.0.3"
+import { toast } from "sonner"
 
 export function Wallet() {
   const { user, connectWallet } = useAuth()

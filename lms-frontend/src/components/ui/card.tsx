@@ -1,36 +1,27 @@
+import {
+  Card as FigmaCard,
+  CardHeader as FigmaCardHeader,
+  CardContent as FigmaCardContent,
+  CardFooter as FigmaCardFooter,
+  CardTitle as FigmaCardTitle,
+  CardDescription as FigmaCardDescription,
+} from "@/components/figma/ui/card";
+
 import * as React from "react";
-import { cn } from "@/lib/utils";
+import { cn } from "@/components/figma/ui/utils";
 
-export function Card({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
+export const CardHeader = FigmaCardHeader;
+export const CardContent = FigmaCardContent;
+export const CardFooter = FigmaCardFooter;
+export const CardTitle = FigmaCardTitle;
+export const CardDescription = FigmaCardDescription;
+
+export const Card = React.forwardRef<HTMLDivElement, React.ComponentProps<typeof FigmaCard>>(function Card({ className, ...props }, ref) {
   return (
-    <div
-      className={cn(
-  "rounded-lg border border-border bg-card shadow-card dark:border-border dark:bg-card",
-        className
-      )}
-      {...props}
-    />
+    <FigmaCard ref={ref} className={cn("bg-card text-card-foreground rounded-lg border border-border shadow-card", className)} {...props} />
   );
-}
+});
 
-export function CardHeader({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
-  return <div className={cn("p-5", className)} {...props} />;
-}
-
-export function CardTitle({ className, ...props }: React.HTMLAttributes<HTMLHeadingElement>) {
-  return <h3 className={cn("text-lg font-semibold tracking-tight", className)} {...props} />;
-}
-
-export function CardDescription({ className, ...props }: React.HTMLAttributes<HTMLParagraphElement>) {
-  return <p className={cn("text-sm text-muted-foreground", className)} {...props} />;
-}
-
-export function CardContent({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
-  return <div className={cn("px-5 pb-5", className)} {...props} />;
-}
-
-export function CardFooter({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
-  return <div className={cn("px-5 pb-5 pt-3", className)} {...props} />;
-}
+Card.displayName = "Card";
 
 export default Card;

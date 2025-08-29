@@ -3,7 +3,7 @@ import { ensureProvider, connectWallet, ensureChain } from "@onchain/web3";
 import { linkWallet } from "@/features/wallet/walletApi";
 
 const AMOY_HEX = "0x13882"; // 80002
-const RPC_AMOY = import.meta.env.VITE_RPC_URL_AMOY as string | undefined;
+const RPC_AMOY = import.meta.env?.VITE_RPC_URL_AMOY as string | undefined;
 
 export function ConnectWallet({ onConnected }: { onConnected?: (addr: string) => void }) {
   const [loading, setLoading] = useState(false);
@@ -17,8 +17,9 @@ export function ConnectWallet({ onConnected }: { onConnected?: (addr: string) =>
       const r = await connectWallet();
       if (!r.ok) throw r.error ?? new Error("connect failed");
       const addr = r.address as string;
-      // POST to backend
-      const save = await linkWallet(addr);
+  // POST to backend
+  // TODO: obtain a real signature from the provider and pass it here
+  const save = await linkWallet(addr, "");
       if (!save.ok) throw save.error ?? new Error("link failed");
       if (onConnected) onConnected(addr);
     } catch (err) {

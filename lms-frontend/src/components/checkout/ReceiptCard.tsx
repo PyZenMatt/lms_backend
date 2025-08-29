@@ -21,7 +21,7 @@ function formatTEO(v: number) {
 
 export default function ReceiptCard({ r }: { r: Receipt }) {
   return (
-    <div className="rounded-2xl border bg-white p-5 shadow-sm">
+  <div className="rounded-lg border bg-card p-5 shadow-card">
       <div className="flex items-center justify-between">
         <div className="text-lg font-semibold">Ricevuta</div>
         {r.status === 'pending' && <div className="text-sm bg-yellow-100 text-yellow-800 px-2 py-1 rounded">In attesa di accettazione (24h)</div>}
@@ -38,8 +38,8 @@ export default function ReceiptCard({ r }: { r: Receipt }) {
           <div className="flex justify-between"><span>Bonus docente</span><span>{formatTEO(r.teacher_bonus_teo)} TEO</span></div>
         )}
         {r.order_id && <div className="flex justify-between"><span>Ordine</span><span className="font-mono">{String(r.order_id)}</span></div>}
-        {r.deadline_at && <div className="text-xs text-gray-500">Scadenza decisione: {new Date(r.deadline_at).toLocaleString()}</div>}
-        {r.created_at && <div className="text-xs text-gray-500">Data: {new Date(r.created_at).toLocaleString()}</div>}
+  {r.deadline_at && <div className="text-xs text-muted-foreground">Scadenza decisione: {new Date(r.deadline_at).toLocaleString()}</div>}
+  {r.created_at && <div className="text-xs text-muted-foreground">Data: {new Date(r.created_at).toLocaleString()}</div>}
       </div>
     </div>
   );
