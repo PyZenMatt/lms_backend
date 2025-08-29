@@ -11,10 +11,10 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Use Node.js 18
+      - name: Use Node.js 20
         uses: actions/setup-node@v3
         with:
-          node-version: '18'
+          node-version: '20'
 
       - name: Install frontend dependencies
         working-directory: ./lms-frontend
@@ -52,3 +52,15 @@ jobs:
         with:
           name: playwright-results
           path: lms-frontend/playwright-results
+
+      - name: Cleanup preview
+        if: always()
+        run: |
+          if [ -f lms-frontend/.preview.pid ]; then
+            PID=$(cat lms-frontend/.preview.pid) || true
+            echo "Killing preview PID: $PID"
+            kill "$PID" || true
+            rm -f lms-frontend/.preview.pid || true
+          else
+            echo "No preview PID file found"
+          fi
