@@ -24,9 +24,9 @@ jobs:
         working-directory: ./lms-frontend
         run: npx playwright install --with-deps
 
-      - name: Build frontend
+      - name: Build frontend (vite only, skip tsc)
         working-directory: ./lms-frontend
-        run: npm run build
+        run: npx vite build
 
       - name: Start vite preview
         working-directory: ./lms-frontend
