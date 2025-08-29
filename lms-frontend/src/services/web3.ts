@@ -1,97 +1,95 @@
-// src/services/web3.ts
-/* Minimal EIP-1193 wiring used by the Teacher Inbox MVP.
- * - ensureProvider: verifies window.ethereum exists
- * - connectWallet: requests accounts
- * - ensureChain: switches/adds chain using VITE_* env vars
- * - sendTx: eth_sendTransaction + polling for receipt
- */
-type SendTxInput = { to: string; data?: string | null; value?: string | null; chainId?: string | number }
-
-function shortHex(h?: string) { if (!h) return ""; return h.slice(0,6)+"..."+h.slice(-4) }
-
+// WARNING: EIP-1193 helpers only — do NOT import HTTP/DB services (e.g. '@/services/wallet')
+// or perform fetch/axios calls here. Keep this file strictly for provider-level helpers
+// (connect, ensureChain, sendTx) and lightweight formatters. Server REST belongs in
+// `features/wallet/walletApi.ts` and low-level contract helpers in `services/ethersWeb3.ts`.
+//
+// This guard helps enforce the DB vs on-chain separation.
+// Minimal, single implementation for EIP-1193 provider helpers.
 export function ensureProvider(): boolean {
-  if (typeof window === "undefined") return false
-  // @ts-ignore
-  return !!(window.ethereum && typeof window.ethereum.request === "function")
+  if (typeof window === "undefined") return false;
+  const w = window as unknown as { ethereum?: { request?: (opts: unknown) => Promise<unknown> } };
+  return !!(w.ethereum && typeof w.ethereum.request === "function");
 }
 
-export async function connectWallet(): Promise<{ ok: boolean; address?: string; error?: any }> {
+export function shortAddress(a?: string | null) {
+  if (!a) return "";
+  return `${a.slice(0, 6)}…${a.slice(-4)}`;
+}
+
+export async function connectWallet(): Promise<{ ok: boolean; address?: string; error?: unknown }> {
+  if (!ensureProvider()) return { ok: false, error: "no provider" };
   try {
-    // @ts-ignore
-    const accounts: string[] = await window.ethereum.request({ method: "eth_requestAccounts" })
-    const a = Array.isArray(accounts) && accounts.length ? accounts[0] : undefined
-    return { ok: true, address: a }
+  const w = window as unknown as { ethereum: { request: (opts: unknown) => Promise<unknown> } };
+    const accs = await w.ethereum.request({ method: "eth_requestAccounts" });
+    if (Array.isArray(accs) && accs.length) return { ok: true, address: String(accs[0]) };
+    if (typeof accs === "string") return { ok: true, address: accs };
+    return { ok: false, error: "no accounts returned" };
   } catch (err) {
-    return { ok: false, error: err }
+    return { ok: false, error: err };
   }
 }
 
-export async function ensureChain(chainIdHex: string): Promise<{ ok: boolean; switched?: boolean; error?: any }> {
-  if (!chainIdHex) return { ok: false, error: "chainId required" }
+export async function ensureChain(chainIdHex: string, rpcUrl?: string): Promise<{ ok: boolean; switched?: boolean; error?: unknown }> {
+  if (!ensureProvider()) return { ok: false, error: "no provider" };
   try {
-    // @ts-ignore
-    const current = await window.ethereum.request({ method: "eth_chainId" })
-    if (current === chainIdHex) return { ok: true, switched: false }
+  const w = window as unknown as { ethereum: { request: (opts: unknown) => Promise<unknown> } };
+    const current = await w.ethereum.request({ method: "eth_chainId" });
+    if (String(current) === String(chainIdHex)) return { ok: true, switched: false };
     try {
-      // try switch
-      // @ts-ignore
-      await window.ethereum.request({ method: "wallet_switchEthereumChain", params: [{ chainId: chainIdHex }] })
-      return { ok: true, switched: true }
-    } catch (switchErr: any) {
-      // user rejected or chain not added (4902)
-      // try add using VITE vars
-      const rpc = import.meta.env.VITE_CHAIN_RPC_URL
-      const name = import.meta.env.VITE_CHAIN_NAME
-      const symbol = import.meta.env.VITE_CHAIN_SYMBOL
-      if (!rpc || !name) return { ok: false, error: switchErr }
-      try {
-        // @ts-ignore
-        await window.ethereum.request({
-          method: "wallet_addEthereumChain",
-          params: [
-            {
-              chainId: chainIdHex,
-              chainName: name,
-              nativeCurrency: { name: symbol || name, symbol: symbol || "ETH", decimals: 18 },
-              rpcUrls: [rpc],
-              blockExplorerUrls: [import.meta.env.VITE_EXPLORER_URL || ""].filter(Boolean),
-            },
-          ],
-        })
-        return { ok: true, switched: true }
-      } catch (addErr) {
-        return { ok: false, error: addErr }
+      await w.ethereum.request({ method: "wallet_switchEthereumChain", params: [{ chainId: chainIdHex }] });
+      return { ok: true, switched: true };
+    } catch (switchErr) {
+      // 4902 — chain not added
+  const maybeCode = (switchErr as unknown as Record<string, unknown>)?.code;
+      if (maybeCode === 4902 && rpcUrl) {
+        try {
+          await w.ethereum.request({
+            method: "wallet_addEthereumChain",
+            params: [
+              {
+                chainId: chainIdHex,
+                chainName: "Polygon Amoy",
+                nativeCurrency: { name: "MATIC", symbol: "MATIC", decimals: 18 },
+                rpcUrls: [rpcUrl],
+                blockExplorerUrls: [],
+              },
+            ],
+          });
+          return { ok: true, switched: true };
+        } catch (addErr) {
+          return { ok: false, error: addErr };
+        }
       }
+      return { ok: false, error: switchErr };
     }
   } catch (err) {
-    return { ok: false, error: err }
+    return { ok: false, error: err };
   }
 }
 
-export async function sendTx(input: SendTxInput): Promise<{ ok: boolean; hash?: string; status?: "success"|"failed"; error?: any }> {
+type SendTxInput = { to: string; data?: string | null; value?: string | null };
+export async function sendTx(input: SendTxInput): Promise<{ ok: boolean; hash?: string; status?: "success" | "failed"; error?: unknown }> {
+  if (!ensureProvider()) return { ok: false, error: "no provider" };
   try {
-    const params: any = { to: input.to }
-    if (input.data) params.data = input.data
-    if (input.value) params.value = input.value
-    // Ensure chain is correct is caller responsibility
-    // @ts-ignore
-    const txHash: string = await window.ethereum.request({ method: "eth_sendTransaction", params: [params] })
-    // poll for receipt
-    const start = Date.now()
-    const timeout = 2 * 60 * 1000 // 2 minutes
+  const w = window as unknown as { ethereum: { request: (opts: unknown) => Promise<unknown> } };
+    const params: Record<string, unknown> = { to: input.to };
+    if (input.data) params.data = input.data;
+    if (input.value) params.value = input.value;
+    const txHash = (await w.ethereum.request({ method: "eth_sendTransaction", params: [params] })) as string;
+    // simple polling for receipt
+    const start = Date.now();
+    const timeout = 2 * 60 * 1000;
     while (Date.now() - start < timeout) {
-      // @ts-ignore
-      const receipt = await window.ethereum.request({ method: "eth_getTransactionReceipt", params: [txHash] })
+      const receipt = await w.ethereum.request({ method: "eth_getTransactionReceipt", params: [txHash] });
       if (receipt) {
-        const ok = receipt.status === "0x1" || receipt.status === 1
-        return { ok: ok, hash: txHash, status: ok ? "success" : "failed" }
+  const status = (((receipt as unknown) as Record<string, unknown>).status === "0x1" || ((receipt as unknown) as Record<string, unknown>).status === 1) ? "success" : "failed";
+        return { ok: status === "success", hash: txHash, status };
       }
-      await new Promise((r) => setTimeout(r, 3500))
+      await new Promise((r) => setTimeout(r, 3500));
     }
-    return { ok: false, hash: txHash, status: "failed", error: "timeout" }
+    return { ok: false, hash: txHash, status: "failed", error: "timeout" };
   } catch (err) {
-    return { ok: false, error: err }
+    return { ok: false, error: err };
   }
 }
 
-export function shortAddress(addr?: string) { if (!addr) return ""; return addr.slice(0,6)+"..."+addr.slice(-4) }

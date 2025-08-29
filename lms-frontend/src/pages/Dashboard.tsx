@@ -31,10 +31,10 @@ export default function Dashboard() {
   }, []);
 
   return (
-    <section className="space-y-6">
+    <section className="space-y-6 rounded-lg border border-border bg-card p-6 shadow-card">
       <header className="flex items-center justify-between">
         <h1 className="text-xl font-semibold">La tua dashboard</h1>
-        <button onClick={load} className="inline-flex h-9 items-center rounded-md border px-3 hover:bg-accent">
+        <button onClick={load} className="inline-flex h-9 items-center rounded-md border border-border px-3 hover:bg-muted/70 focus-visible:outline-none focus-visible:shadow-focus">
           Ricarica
         </button>
       </header>

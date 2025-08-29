@@ -237,5 +237,89 @@ export async function applyDiscount(body: {
 }
 
 // Backwards-compatible aliases requested by integration:
-export const getBalance = getWallet;
+// rename ambiguous alias to emphasize this is DB wallet
+export const getDbWallet = getWallet;
 export const calculateDiscount = checkDiscount;
+
+/**
+ * POST request to mint TEO on-chain (server will bridge to DB ledger).
+ * body: { amount: string|number, idem_key?: string }
+ */
+
+/**
+ * POST request to burn TEO on-chain (server will bridge to DB ledger).
+ * body: { amount: string|number, idem_key?: string }
+ */
+
+/**
+ * Request a withdrawal (DB -> MetaMask chain mint)
+ * body: { amount: string|number, metamask_address?: string }
+ */
+
+/**
+ * POST request to withdraw (DB -> MetaMask) using server-side mint
+ * Preferred endpoints (compat): /api/v1/wallet/withdraw/ -> /api/v1/blockchain/wallet/withdraw/ -> /api/v1/teocoin/withdraw/
+ */
+// Legacy DB-backed client functions removed: mint, burn, requestWithdraw, withdraw
+
+// --- On-chain client-side wrappers (use MetaMask / user wallet)
+// Note: client-side mint/burn wrappers that directly call MetaMask have been
+// removed to enforce the architecture where the DB is the single source of
+// truth for balances and mint operations must go through the server-side
+// bridge (server signs and mints). Burn (user-side) still uses the
+// on-chain helpers live under `src/web3/*` (importable via `@onchain/*`).
+// Example: `WalletActions` imports burn helpers from `@onchain/ethersWeb3`.
+
+// Note: legacy DB-backed mint/burn/withdraw functions removed from client-side.
+
+/**
+ * Verify a deposit transaction on-chain and credit DB (chain -> DB)
+ * body: { tx_hash: string }
+ */
+export async function verifyDeposit(tx_hash: string): Promise<Result<Record<string, unknown>>> {
+  if (!tx_hash || typeof tx_hash !== 'string') return { ok: false, status: 400, error: 'tx_hash required' };
+  const payload = { tx_hash } as Record<string, unknown>;
+  const endpoints = [
+  // try blockchain app verify route first
+  "/api/v1/blockchain/deposit/verify/",
+  "/v1/teocoin/burn-deposit/",
+  "/api/v1/teocoin/burn-deposit/",
+  "/api/teocoin/burn-deposit/",
+  "/v1/teocoin/deposit/verify/",
+  "/api/v1/teocoin/deposit/verify/",
+  ];
+  return tryPost<Record<string, unknown>>(endpoints, payload);
+}
+
+/**
+ * POST /api/blockchain/tx-status/ or equivalent endpoints to inquire transaction status
+ */
+// checkTxStatus has been migrated to `features/wallet/walletApi.getTxStatus`.
+// Callers should import directly from there to use the canonical GET-based API.
+
+/**
+ * Convenience wrapper to refresh balance via existing getWallet() call and return normalized WalletInfo
+ */
+export async function refreshBalance(): Promise<Result<WalletInfo>> {
+  return getWallet();
+}
+
+// Delegates for wallet connect / SIWE-lite helpers — keep facade-only functions
+
+/**
+ * getChallenge(): POST /api/v1/users/me/wallet/challenge/
+ * Returns normalized { status: 'ok'|'error', nonce?, message?, error_code? }
+ */
+// getChallenge migrated to `features/wallet/walletApi.getChallenge`.
+
+/**
+ * linkWallet(address, signature): POST /api/v1/users/me/wallet/link/
+ * Returns { status: 'ok'|'error', wallet_address?, message?, error_code? }
+ */
+// linkWallet migrated to `features/wallet/walletApi.linkWallet`.
+
+/**
+ * unlinkWallet(): DELETE /api/v1/users/me/wallet/
+ * Returns { status: 'ok'|'error', message?, error_code? }
+ */
+// unlinkWallet migrated to `features/wallet/walletApi.unlinkWallet`.

@@ -36,6 +36,7 @@ export const API_REFRESH_PATH = "/auth/refresh/";
 // ---- Token storage (localStorage) ----
 const TOKENS_KEY = "auth_tokens"; // { access: string, refresh: string }
 const LEGACY_ACCESS_KEY = "access_token";
+const SIMPLE_ACCESS_KEY = "access"; // some codepaths store raw access token here
 const LEGACY_REFRESH_KEY = "refresh_token";
 
 type Tokens = { access?: string | null; refresh?: string | null };
@@ -47,7 +48,9 @@ function loadTokens(): Tokens {
     // Fallback to legacy keys used elsewhere in the app
     const access = localStorage.getItem(LEGACY_ACCESS_KEY);
     const refresh = localStorage.getItem(LEGACY_REFRESH_KEY);
-    if (access || refresh) return { access: access ?? null, refresh: refresh ?? null };
+  // also support simple access key
+  const simple = localStorage.getItem(SIMPLE_ACCESS_KEY);
+  if (access || refresh || simple) return { access: access ?? simple ?? null, refresh: refresh ?? null };
     return {};
   } catch {
     return {};
@@ -237,7 +240,7 @@ async function coreRequest<T>(
       data = txt;
     }
 
-    if (!res.ok) {
+  if (!res.ok) {
       // 403/401 cleanup if needed
       if (res.status === 401 || res.status === 403) {
         // optionally clear tokens only on explicit instruction
@@ -254,7 +257,9 @@ async function coreRequest<T>(
       } catch {
         // ignore
       }
-      return { ok: false, status: res.status, error: data ?? { message: "Request failed" } };
+  const err = data ?? { message: "Request failed" };
+  const normalizedError = err instanceof Error ? err : new Error(typeof err === 'string' ? err : JSON.stringify(err));
+  return { ok: false, status: res.status, error: normalizedError };
     }
 
     return { ok: true, status: res.status, data: data as T };
@@ -271,7 +276,7 @@ async function coreRequest<T>(
     } catch {
       // ignore
     }
-    return { ok: false, status: 0, error: message };
+  return { ok: false, status: 0, error: new Error(message) };
   } finally {
     dispatchLoading(-1);
     // abort controller cleanup (no op)

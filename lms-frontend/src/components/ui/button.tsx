@@ -10,7 +10,7 @@ function cx(...classes: Array<string | undefined | false | null>) {
 const variantClass: Record<Variant, string> = {
   primary:    "bg-primary text-primary-foreground hover:bg-primary/90",
   secondary:  "bg-secondary text-secondary-foreground hover:bg-secondary/80",
-  outline:    "border border-input bg-background text-foreground hover:bg-accent",
+  outline:    "border border-border bg-card text-foreground hover:bg-accent",
   ghost:      "bg-transparent hover:bg-accent",
   destructive:"bg-destructive text-destructive-foreground hover:bg-destructive/90",
   link:       "bg-transparent underline-offset-4 text-primary hover:underline"

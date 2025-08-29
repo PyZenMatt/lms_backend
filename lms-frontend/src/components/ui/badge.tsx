@@ -4,12 +4,12 @@ import { cn } from "@/lib/utils";
 
 type Variant = "default" | "success" | "warning" | "destructive" | "muted" | "outline";
 const map: Record<Variant, string> = {
-  default: "bg-neutral-900 text-white dark:bg-neutral-100 dark:text-neutral-900",
-  success: "bg-emerald-600 text-white",
-  warning: "bg-amber-500 text-black",
-  destructive: "bg-red-600 text-white",
-  muted: "bg-neutral-200 text-neutral-800 dark:bg-neutral-800 dark:text-neutral-200",
-  outline: "border border-neutral-300 text-neutral-700 dark:border-neutral-700 dark:text-neutral-200",
+  default: "bg-card text-foreground dark:bg-card dark:text-foreground",
+  success: "bg-success text-success-foreground",
+  warning: "bg-warning text-warning-foreground",
+  destructive: "bg-destructive text-destructive-foreground",
+  muted: "bg-muted text-muted-foreground dark:bg-muted dark:text-muted-foreground",
+  outline: "border border-border text-foreground dark:border-border dark:text-foreground",
 };
 
 export function Badge({

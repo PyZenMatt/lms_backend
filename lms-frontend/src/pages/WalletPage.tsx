@@ -1,10 +1,22 @@
 import { useEffect, useState } from "react";
-import { getWallet, getTransactions, type WalletInfo, type WalletTransaction, coerceNumber } from "@/services/wallet";
+
+// typed helper for the ad-hoc refresh hook exposed on window
+type WalletRefreshFn = (() => Promise<void>) | undefined;
+declare global {
+  interface Window { __wallet_refresh__?: WalletRefreshFn }
+}
+import { getWallet, getTransactions, type WalletInfo, type WalletTransaction, coerceNumber, verifyDeposit, refreshBalance } from "@/services/wallet";
+import { getTxStatus } from "@/features/wallet/walletApi";
+import { useWeb3 } from "@/web3/context";
+import { queryClient } from "@/lib/queryClientInstance";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, THead, TBody, TR, TH, TD } from "@/components/ui/table";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Alert } from "@/components/ui/alert";
 import EmptyState from "@/components/ui/empty-state";
+import WalletConnectButton from "@/features/wallet/WalletConnectButton";
+import WalletActions from "@/features/wallet/WalletActions";
+import TxStatusPanel from "@/features/wallet/components/TxStatusPanel";
 
 type Page<T> = { count: number; next?: string | null; previous?: string | null; results: T[] };
 
@@ -15,7 +27,9 @@ export default function WalletPage() {
   const [error, setError] = useState<string | null>(null);
   const [page, setPage] = useState(1);
   const [count, setCount] = useState(0);
+  // no direct on-chain context here: WalletPage uses server-side mint/burn endpoints
 
+  // extract load/refresh so it can be called after mint/burn
   useEffect(() => {
     let alive = true;
     async function load() {
@@ -36,11 +50,13 @@ export default function WalletPage() {
       }
       setLoading(false);
     }
+  // expose for children's usage via a bound function
+  window.__wallet_refresh__ = load as WalletRefreshFn;
     load();
 
   // Listen for external signals to refresh wallet (e.g. after discount accept)
-  const onUpdated = () => { void load(); };
-  const onNotifUpdated = () => { void load(); };
+  const onUpdated = () => { void window.__wallet_refresh__?.(); };
+  const onNotifUpdated = () => { void window.__wallet_refresh__?.(); };
   window.addEventListener("wallet:updated", onUpdated as EventListener);
   window.addEventListener("notifications:updated", onNotifUpdated as EventListener);
   return () => { alive = false; window.removeEventListener("wallet:updated", onUpdated as EventListener); window.removeEventListener("notifications:updated", onNotifUpdated as EventListener); };
@@ -79,6 +95,10 @@ export default function WalletPage() {
   return (
     <div className="space-y-6">
       <h1 className="text-2xl font-semibold">Wallet TEO</h1>
+      {/* Wallet connect */}
+      <div>
+        <WalletConnectButton />
+      </div>
 
       {/* Card saldo */}
       {loading && <Skeleton className="h-24 rounded-2xl" />}
@@ -118,6 +138,42 @@ export default function WalletPage() {
           </CardContent>
         </Card>
       )}
+
+  {/* Legacy DB Mint/Burn controls removed for on-chain-only MVP */}
+
+      {/* MetaMask on-chain bridge: Withdraw (DB→chain) and Deposit verify (chain→DB) */}
+      <Card>
+        <CardHeader>
+          <CardTitle>MetaMask bridge (chain)</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <h3 className="font-medium">Preleva (DB → MetaMask)</h3>
+              <WalletActions />
+            </div>
+
+            <div>
+              <h3 className="font-medium">Deposita (chain → DB)</h3>
+              <DepositForm onVerify={async (tx: string) => {
+                // call service directly and forward result data so form can show amount/tx
+                const res = await verifyDeposit(tx);
+                if (res.ok) {
+                  // backend may return { success: true, amount, tx_hash, ... } even on HTTP 200
+                  const data = res.data as Record<string, unknown>;
+                  // invalidate cache and refresh
+                  queryClient.invalidateQueries({ queryKey: ["wallet","balance"] });
+                  queryClient.invalidateQueries({ queryKey: ["wallet","txs"] });
+                  void window.__wallet_refresh__?.();
+                  return { ok: true, data } as { ok: true; data?: Record<string, unknown> };
+                }
+                // include more info for error UI when available
+                return { ok: false, error: res.error ?? (res as unknown as Record<string, unknown>)?.data ?? 'verify failed' };
+              }} />
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Movimenti */}
       <Card>
@@ -179,3 +235,89 @@ export default function WalletPage() {
     </div>
   );
 }
+
+// Legacy MintBurnForm removed: on-chain flows handled via WalletActions
+
+function DepositForm({ onVerify }: { onVerify: (tx_hash: string) => Promise<{ ok: boolean; data?: Record<string, unknown>; error?: unknown }> }) {
+  // no inline tx input anymore
+  const [loading, setLoading] = useState(false);
+  const [status, setStatus] = useState<'idle'|'pending'|'success'|'error'>('idle');
+  const [error, setError] = useState<string | null>(null);
+  const [resultData, setResultData] = useState<Record<string, unknown> | null>(null);
+
+
+  // explorer base is provided by TxStatusPanel via VITE_EXPLORER_TX
+
+  return (
+    <div className="flex flex-col gap-2">
+      <div className="text-sm">Verifica deposito on-chain</div>
+      <div className="flex gap-2">
+        <button
+          type="button"
+          className="rounded bg-primary px-3 py-1 text-white disabled:opacity-50"
+          onClick={async () => {
+            const input = window.prompt("Incolla qui il transaction hash (0x...):") ?? "";
+            if (!input) return;
+            const txhash = input.trim();
+            setLoading(true);
+            setStatus('pending');
+            setError(null);
+            try {
+              const res = await onVerify(txhash);
+              if (res.ok) {
+                setStatus('success');
+                setResultData(res.data ?? null);
+              } else {
+                const err = res.error ?? 'Verification failed';
+                if (typeof err === 'object' && err !== null) {
+                  const eobj = err as Record<string, unknown>;
+                  if (eobj.status === 'pending') {
+                    setStatus('pending');
+                    setError((eobj.message as string) ?? 'Transazione non ancora confermata. Riprova più tardi.');
+                  } else {
+                    setStatus('error');
+                    setError(String(eobj.message ?? eobj.error ?? JSON.stringify(eobj)));
+                  }
+                } else {
+                  setStatus('error');
+                  setError(String(err));
+                }
+              }
+            } catch (e) {
+              setStatus('error');
+              setError(String(e));
+            } finally {
+              setLoading(false);
+            }
+          }}
+        >
+          {loading ? '...' : 'Verifica transazione'}
+        </button>
+      </div>
+
+      {status === 'success' && resultData && (
+        <div className="text-sm text-green-700">
+          ✅ Deposito verificato
+          {resultData.amount !== undefined && resultData.amount !== null && (
+            <div>Importo accreditato: {String(resultData.amount)} TEO</div>
+          )}
+          {resultData.tx_hash !== undefined && resultData.tx_hash !== null && (
+            <div className="mt-2">
+              <TxStatusPanel identifier={String(resultData.tx_hash)} />
+            </div>
+          )}
+        </div>
+      )}
+
+      {status === 'pending' && (
+        <div className="text-sm text-amber-700">⏳ Transazione in attesa di conferma. Ritenta tra qualche istante.</div>
+      )}
+
+      {status === 'error' && error && (
+        <div className="text-xs text-red-600">{error}</div>
+      )}
+    </div>
+  );
+}
+
+// Legacy WithdrawPanel removed: use WalletActions for on-chain interactions

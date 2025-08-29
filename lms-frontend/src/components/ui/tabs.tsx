@@ -24,7 +24,7 @@ export function Tabs({ value: v, defaultValue, onValueChange, className, childre
 }
 
 export function TabsList({ className, children }:{ className?: string; children: React.ReactNode }) {
-  return <div role="tablist" className={cn("inline-flex rounded-xl border p-1 gap-1", className)}>{children}</div>;
+  return <div role="tablist" className={cn("inline-flex rounded-md bg-muted p-1 gap-1", className)}>{children}</div>;
 }
 
 export function TabsTrigger({ value, className, children }:{
@@ -37,9 +37,9 @@ export function TabsTrigger({ value, className, children }:{
       role="tab"
       aria-selected={active}
       className={cn(
-        "px-3 py-1.5 rounded-lg text-sm transition",
-        active ? "bg-black text-white" : "bg-transparent hover:bg-neutral-100 dark:hover:bg-neutral-900"
-      , className)}
+        "px-3 py-1.5 rounded-md text-sm transition",
+        active ? "bg-primary text-primary-foreground" : "bg-transparent hover:bg-muted/60",
+      className)}
       onClick={() => setValue(value)}
     >
       {children}

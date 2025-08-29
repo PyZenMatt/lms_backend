@@ -2,6 +2,8 @@ import React from "react";
 import { useAuth } from "../context/AuthContext";
 import { useNavigate, useLocation, Link } from "react-router-dom";
 import { getAccessToken, getRoleFromToken } from "@/lib/auth";
+import { Button, Input, Label, Card, CardHeader, CardContent } from "@/components/ds";
+import PageHeader from "@/components/layout/PageHeader";
 
 export default function LoginPage() {
   const { login } = useAuth();
@@ -33,32 +35,35 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background text-foreground flex items-center justify-center p-6">
-      <form onSubmit={onSubmit} className="w-full max-w-sm space-y-3 p-6 rounded-lg border border-border bg-card text-card-foreground">
-        <h1 className="text-xl font-bold">Accedi</h1>
-        <input
-          className="w-full px-3 py-2 rounded-md border border-border bg-background"
-          placeholder="Email o Username"
-          value={ident}
-          onChange={e=>setIdent(e.target.value)}
-          autoComplete="username"
-        />
-        <input
-          type="password"
-          className="w-full px-3 py-2 rounded-md border border-border bg-background"
-          placeholder="Password"
-          value={password}
-          onChange={e=>setPassword(e.target.value)}
-          autoComplete="current-password"
-        />
-        <button type="submit" className="w-full px-3 py-2 rounded-md bg-primary text-primary-foreground hover:opacity-90">
-          Entra
-        </button>
-        <div className="text-sm text-muted-foreground">{msg}</div>
-        <div className="text-sm">
-          Non hai un account? <Link to="/register" className="underline">Registrati</Link>
+    <>
+      <PageHeader title="Login" subtitle="Bentornato su TeoArt" />
+      <div className="min-h-[calc(100vh-8rem)] flex items-center">
+        <div className="container">
+          <Card className="mx-auto max-w-md">
+            <CardHeader>
+              <h1 className="text-xl font-semibold">Accedi</h1>
+              <p className="text-sm text-muted-foreground mt-1">Usa le tue credenziali per proseguire</p>
+            </CardHeader>
+            <CardContent>
+              <form onSubmit={onSubmit} className="mt-2 grid gap-4">
+                <div className="grid gap-2">
+                  <Label htmlFor="ident">Email o Username</Label>
+                  <Input id="ident" type="text" autoComplete="username" value={ident} onChange={e=>setIdent(e.target.value)} />
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="password">Password</Label>
+                  <Input id="password" type="password" autoComplete="current-password" value={password} onChange={e=>setPassword(e.target.value)} />
+                </div>
+                <Button type="submit" className="mt-2 w-full">Entra</Button>
+                <div className="text-sm text-muted-foreground">{msg}</div>
+                <div className="text-sm">
+                  Non hai un account? <Link to="/register" className="underline">Registrati</Link>
+                </div>
+              </form>
+            </CardContent>
+          </Card>
         </div>
-      </form>
-    </div>
+      </div>
+    </>
   );
 }

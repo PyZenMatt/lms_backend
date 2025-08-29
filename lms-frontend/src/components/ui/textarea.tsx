@@ -14,10 +14,10 @@ export const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
         <textarea
           ref={ref}
           className={cn(
-            "w-full min-h-[90px] rounded-xl border bg-white px-3 py-2 text-sm outline-none transition",
-            "border-neutral-200 text-neutral-900 placeholder:text-neutral-400",
-            "focus:ring-2 focus:ring-neutral-200 focus:border-neutral-300",
-            "dark:bg-neutral-900 dark:text-neutral-100 dark:border-neutral-800 dark:focus:ring-neutral-800",
+            "w-full min-h-[90px] rounded-md border bg-input-background px-3 py-2 text-sm outline-none transition",
+            "border-border text-foreground placeholder:text-muted-foreground",
+            "focus:ring-2 focus:ring-ring focus:border-ring",
+            "dark:bg-input/30 dark:text-foreground dark:border-border dark:focus:ring-ring",
             invalid &&
               "border-red-300 focus:border-red-300 focus:ring-red-200 dark:border-red-600 dark:focus:ring-red-900",
             className
@@ -28,7 +28,7 @@ export const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
           <p
             className={cn(
               "text-xs",
-              invalid ? "text-red-600 dark:text-red-400" : "text-neutral-500 dark:text-neutral-400"
+              invalid ? "text-red-600 dark:text-red-400" : "text-muted-foreground"
             )}
           >
             {hint}

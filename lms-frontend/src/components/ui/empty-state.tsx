@@ -16,13 +16,13 @@ export function EmptyState({
   return (
     <div
       className={cn(
-        "flex flex-col items-center justify-center gap-2 rounded-2xl border p-8 text-center",
-        "border-dashed border-neutral-200 dark:border-neutral-800",
+        "flex flex-col items-center justify-center gap-2 rounded-lg border p-8 text-center",
+        "border-dashed border-border dark:border-border",
         className
       )}
     >
       <div className="text-base font-medium">{title}</div>
-      <div className="text-sm text-neutral-500 dark:text-neutral-400">{description}</div>
+  <div className="text-sm text-muted-foreground dark:text-muted-foreground">{description}</div>
       {action ? <div className="mt-2">{action}</div> : null}
     </div>
   );

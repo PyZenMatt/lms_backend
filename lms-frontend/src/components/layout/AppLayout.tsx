@@ -4,7 +4,8 @@ import { cn } from "@/lib/utils";
 import ThemeToggle from "@/components/ThemeToggle";
 import NotificationsBell from "@/components/NotificationsBell";
 import TeacherDecisionNav from "@/components/teo/TeacherDecisionNav";
-import ConnectWalletButton from "@/components/ConnectWalletButton";
+// Navbar wallet button removed to avoid duplicate connect controls.
+// ConnectWalletButton is still used on Profile and Wallet pages.
 import { useAuth } from "@/context/AuthContext";
 
 export default function AppLayout({
@@ -73,49 +74,57 @@ export default function AppLayout({
   const finalItems = [...sidebarItems, ...trailingItems];
 
   return (
-    <div className="flex min-h-screen bg-background text-foreground">
-      <Sidebar
-        items={finalItems}
-        footer={
-          footer ?? (
-            <div className="flex items-center justify-between gap-2">
-              <ThemeToggle />
-              <div className="text-xs text-muted-foreground">v1.0 • beta</div>
+    <div className="min-h-screen bg-background text-foreground">
+      <header className="border-b border-border bg-card/50 backdrop-blur">
+        <div className="container flex h-14 items-center gap-4">{/* nav */}</div>
+      </header>
+      <div className="flex">
+        <aside className="w-64 border-r border-border bg-card/40">
+          <Sidebar
+            items={finalItems}
+            footer={
+              footer ?? (
+                <div className="flex items-center justify-between gap-2">
+                  <ThemeToggle />
+                  <div className="text-xs text-muted-foreground">v1.0 • beta</div>
+                </div>
+              )
+            }
+            collapsed={collapsed}
+            onToggle={setCollapsed}
+          />
+        </aside>
+        <main className="flex-1 py-6">
+          <div className="container">
+            {/* Topbar with toggles */}
+            <div className="h-14 flex items-center px-4 border-b border-border shadow-sm bg-card/60 backdrop-blur">
+              <div className="flex items-center gap-2">
+                <button
+                  className="inline-flex items-center justify-center rounded-md border border-border px-2 py-1 text-sm md:hidden focus-visible:outline-none focus-visible:shadow-focus"
+                  onClick={() => setCollapsed((v) => !v)}
+                >
+                  Menu
+                </button>
+                <span className="text-sm text-muted-foreground">SchoolPlatform</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <NotificationsBell />
+                <TeacherDecisionNav />
+                <ThemeToggle />
+                {/* Wallet connect button removed from navbar to avoid duplicates; use Wallet page button */}
+              </div>
             </div>
-          )
-        }
-        collapsed={collapsed}
-        onToggle={setCollapsed}
-      />
-
-      <div className="flex w-full flex-col">
-        {/* Topbar with toggles */}
-        <header className="sticky top-0 z-10 flex h-14 items-center justify-between border-b bg-background/90 px-3 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-          <div className="flex items-center gap-2">
-            <button
-              className="inline-flex items-center justify-center rounded-md border px-2 py-1 text-sm md:hidden"
-              onClick={() => setCollapsed((v) => !v)}
-            >
-              Menu
-            </button>
-            <span className="text-sm text-muted-foreground">SchoolPlatform</span>
+            <div className="py-6">
+              <div className="container">
+                {children}
+              </div>
+            </div>
           </div>
-          <div className="flex items-center gap-2">
-            <NotificationsBell />
-            <TeacherDecisionNav />
-            <ThemeToggle />
-            {/* Connect wallet button (shows install/connect/disconnect) */}
-            {/* web3 provider mounted at main.tsx when available */}
-            {/* eslint-disable-next-line @typescript-eslint/ban-ts-comment */}
-            {/* @ts-ignore */}
-            <ConnectWalletButton />
-          </div>
-        </header>
-
-        <main className={cn("mx-auto w-full max-w-[1200px] p-3 md:p-6")}>
-          {children}
         </main>
       </div>
+      <footer className="border-t border-border bg-card/40">
+        <div className="container h-12 flex items-center">{/* footer */}</div>
+      </footer>
     </div>
   );
 }

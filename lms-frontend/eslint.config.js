@@ -15,6 +15,18 @@ export default tseslint.config([
       reactHooks.configs['recommended-latest'],
       reactRefresh.configs.vite,
     ],
+    rules: {
+      // Prevent accidental on-chain balance reads from FE services.
+      'no-restricted-imports': [
+        'error',
+        {
+          paths: [
+            { name: '@onchain/ethersWeb3', message: 'Do not import on-chain read helpers; use DB via services/wallet.ts' },
+            { name: '@onchain/web3', message: 'Do not import on-chain read helpers; use DB via services/wallet.ts' }
+          ],
+        },
+      ],
+    },
     languageOptions: {
       ecmaVersion: 2020,
       globals: globals.browser,

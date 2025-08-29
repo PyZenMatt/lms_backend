@@ -1,4 +1,5 @@
 import React from "react";
+import ConnectWalletButton from "@/components/ConnectWalletButton";
 import { getProfile, updateProfile, type Profile } from "../services/profile";
 import { Spinner } from "../components/ui/spinner";
 import { Alert } from "../components/ui/alert";
@@ -136,8 +137,14 @@ export default function ProfilePage() {
           </div>
           <div>
             <label className="text-sm">Wallet address</label>
-            <input className="w-full px-3 py-2 rounded-md border border-border bg-background"
-                   value={data.wallet_address || ""} onChange={e=>onChange("wallet_address", e.target.value)} />
+            <div className="flex items-center gap-2">
+              <input className="w-full px-3 py-2 rounded-md border border-border bg-background"
+                     value={data.wallet_address || ""} onChange={e=>onChange("wallet_address", e.target.value)} />
+              {/* Connect button for MetaMask */}
+              {/* eslint-disable-next-line @typescript-eslint/ban-ts-comment */}
+              {/* @ts-ignore */}
+              <ConnectWalletButton />
+            </div>
           </div>
 
           <button disabled={saving}

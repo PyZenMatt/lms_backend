@@ -22,3 +22,8 @@ export const API_BASE_URL = BASE;
 export const API_LOGIN_PATH = "/v1/token/";
 export const API_REFRESH_PATH = "/v1/token/refresh/";
 export const API_PING_PATH = "/v1/ping/";
+
+// feature flags and blockchain config
+export const VITE_DEV_FORCE_ENABLE_MINT_BURN = (import.meta.env.VITE_DEV_FORCE_ENABLE_MINT_BURN === 'true');
+export const VITE_TEO_CONTRACT_ADDRESS = import.meta.env.VITE_TEO_CONTRACT_ADDRESS ?? '';
+export const VITE_CHAIN_ID = import.meta.env.VITE_CHAIN_ID ?? '80002';

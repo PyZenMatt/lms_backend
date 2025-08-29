@@ -6,8 +6,8 @@ export default function NavItem({ to, children }: { to: string; children: React.
       to={to}
       className={({ isActive }) =>
         [
-          "px-3 py-1.5 rounded-md text-sm",
-          isActive ? "bg-secondary text-secondary-foreground" : "hover:bg-accent hover:text-accent-foreground",
+          "flex items-center gap-2 rounded-md px-3 py-2 hover:bg-muted/70 data-[active=true]:bg-muted focus-visible:outline-none focus-visible:shadow-focus",
+          isActive ? "data-[active=true]" : ""
         ].join(" ")
       }
     >

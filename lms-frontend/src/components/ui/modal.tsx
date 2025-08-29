@@ -52,35 +52,34 @@ export function ModalContent({
   }, [open, setOpen]);
 
   if (typeof document === "undefined") return null;
-  return open
-    ? createPortal(
-        <div
-          className={cn(
-            "fixed inset-0 z-[10000] flex items-end sm:items-center justify-center p-4",
-            overlayClassName
-          )}
-          onClick={() => setOpen(false)}
-          aria-modal
-          role="dialog"
-        >
-          <div
-            className="absolute inset-0 bg-black/40 backdrop-blur-[1px]"
-            aria-hidden
-          />
-          <div
-            className={cn(
-              "relative z-10 max-h-[85vh] w-full max-w-lg overflow-auto rounded-2xl border bg-white p-5 shadow-xl",
-              "dark:border-neutral-800 dark:bg-neutral-950",
-              className
-            )}
-            onClick={(e) => e.stopPropagation()}
-          >
-            {children}
-          </div>
-        </div>,
-        document.body
-      )
-    : null;
+  if (!open) return null;
+  return createPortal(
+    <div
+      className={cn(
+        "fixed inset-0 z-[10000] flex items-end sm:items-center justify-center p-4",
+        overlayClassName
+      )}
+      onClick={() => setOpen(false)}
+      aria-modal
+      role="dialog"
+    >
+      <div
+        className="absolute inset-0 bg-overlay/40 backdrop-blur-[1px]"
+        aria-hidden
+      />
+      <div
+        className={cn(
+          "relative z-10 max-h-[85vh] w-full max-w-lg overflow-auto rounded-lg border border-border bg-card p-5 shadow-card",
+          "dark:border-border dark:bg-card",
+          className
+        )}
+        onClick={(e) => e.stopPropagation()}
+      >
+        {children}
+      </div>
+    </div>,
+    document.body
+  );
 }
 
 export function ModalHeader({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {

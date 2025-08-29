@@ -6,7 +6,7 @@ export const Table = ({ className, ...props }: React.TableHTMLAttributes<HTMLTab
     <table
       className={cn(
         "w-full caption-bottom text-sm border-collapse",
-        "rounded-2xl overflow-hidden",
+        "rounded-lg overflow-hidden",
         className
       )}
       {...props}
@@ -15,17 +15,17 @@ export const Table = ({ className, ...props }: React.TableHTMLAttributes<HTMLTab
 );
 
 export const TableHeader = ({ className, ...props }: React.HTMLAttributes<HTMLTableSectionElement>) => (
-  <thead className={cn("bg-neutral-50 text-neutral-600 dark:bg-neutral-900 dark:text-neutral-300", className)} {...props} />
+  <thead className={cn("bg-muted text-muted-foreground", className)} {...props} />
 );
 
 export const TableBody = ({ className, ...props }: React.HTMLAttributes<HTMLTableSectionElement>) => (
-  <tbody className={cn("divide-y divide-neutral-100 dark:divide-neutral-800", className)} {...props} />
+  <tbody className={cn("divide-y divide-border", className)} {...props} />
 );
 
 export const TableRow = ({ className, ...props }: React.HTMLAttributes<HTMLTableRowElement>) => (
   <tr
     className={cn(
-      "hover:bg-neutral-50/70 dark:hover:bg-neutral-900/50 transition-colors",
+      "hover:bg-muted/60 transition-colors",
       className
     )}
     {...props}
@@ -35,7 +35,7 @@ export const TableRow = ({ className, ...props }: React.HTMLAttributes<HTMLTable
 export const TableHead = ({ className, ...props }: React.ThHTMLAttributes<HTMLTableCellElement>) => (
   <th
     className={cn(
-      "px-4 py-3 text-left font-medium border-b border-neutral-200 dark:border-neutral-800",
+      "px-4 py-3 text-left font-medium border-b border-border",
       className
     )}
     {...props}
@@ -43,11 +43,11 @@ export const TableHead = ({ className, ...props }: React.ThHTMLAttributes<HTMLTa
 );
 
 export const TableCell = ({ className, ...props }: React.TdHTMLAttributes<HTMLTableCellElement>) => (
-  <td className={cn("px-4 py-3 align-middle", className)} {...props} />
+  <td className={cn("px-4 py-3 align-middle text-foreground", className)} {...props} />
 );
 
 export const TableCaption = ({ className, ...props }: React.HTMLAttributes<HTMLTableCaptionElement>) => (
-  <caption className={cn("mt-3 text-xs text-neutral-500 dark:text-neutral-400", className)} {...props} />
+  <caption className={cn("mt-3 text-xs text-muted-foreground", className)} {...props} />
 );
 
 // Back-compat aliases for older imports

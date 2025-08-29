@@ -6,7 +6,12 @@ export default defineConfig({
   plugins: [react()],
   resolve: {
     alias: {
-      "@": path.resolve(__dirname, "./src"),
+  "@": path.resolve(__dirname, "./src"),
+  // Force single React copy to avoid invalid hook call / dispatcher is null errors
+  // Sometimes dependencies or symlinks can cause multiple React instances to be bundled.
+  // These aliases ensure all imports resolve to the workspace root node_modules.
+  "react": path.resolve(__dirname, "./node_modules/react"),
+  "react-dom": path.resolve(__dirname, "./node_modules/react-dom"),
     },
   },
 })

@@ -47,8 +47,8 @@ export function DropdownContent({ className, children }:{ className?: string; ch
     <div
       role="menu"
       className={cn(
-        "absolute right-0 mt-2 w-56 rounded-2xl border bg-white p-1.5 shadow-xl",
-        "dark:border-neutral-800 dark:bg-neutral-950",
+  "absolute right-0 mt-2 w-56 rounded-lg border border-border bg-card p-1.5 shadow-card",
+        "dark:border-border dark:bg-card",
         className
       )}
     >
@@ -73,8 +73,8 @@ export function DropdownItem({
       role="menuitem"
       onClick={() => { onSelect?.(); setOpen(false); }}
       className={cn(
-        "w-full rounded-xl px-3 py-2 text-left text-sm hover:bg-neutral-100",
-        "dark:hover:bg-neutral-900",
+        "w-full rounded-md px-3 py-2 text-left text-sm text-foreground hover:bg-muted/70",
+        "dark:hover:bg-muted/60",
         className
       )}
     >
