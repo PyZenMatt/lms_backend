@@ -1,6 +1,6 @@
 import * as React from "react";
-import { Input as FigmaInput } from "@/components/figma/ui/input";
-import { cn } from "@/components/figma/ui/utils";
+import { Input as FigmaInput } from "./input-figma-adapter";
+import { cn } from "./utils";
 
 export type InputProps = React.ComponentProps<typeof FigmaInput> & {
   invalid?: boolean;

@@ -1,6 +1,6 @@
 import * as React from "react";
-import { Button as FigmaButton } from "@/components/figma/ui/button";
-import { cn } from "@/components/figma/ui/utils";
+import { Button as FigmaButton } from "./button-figma-adapter";
+import { cn } from "./utils";
 
 export type ButtonProps = React.ComponentProps<typeof FigmaButton>;
 

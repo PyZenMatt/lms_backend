@@ -1,0 +1,167 @@
+:root{}
+
+/* Safety net for a few edge cases. Loaded last so it won't shadow theme tokens. */
+@layer components {
+  /* If someone uses bg-primary without a text color, give a sensible foreground. Avoid !important. */
+  .bg-primary:not([class*="text-"]) { color: var(--color-primary-foreground); }
+  .bg-primary.text-foreground { color: var(--color-primary-foreground); }
+}
+
+@layer utilities {
+  /* Small utility used by Login page instead of inline styles */
+  .login-card {
+    --radius: 0.75rem;
+    --shadow-card: 0 8px 30px rgba(2,6,23,0.10);
+  }
+}
+
+/* Layout: keep content aligned with the sidebar. Uses the CSS variables from SidebarProvider. */
+@layer base {
+  /* Default: content is offset by the sidebar width on desktop.
+     Use padding on the content container ('.container') instead of relying
+     on exact sibling structure; selectors are made more permissive so minor
+     DOM differences won't break the layout. */
+  [data-app="lms"] [data-slot="sidebar-wrapper"] .container {
+   /* Ensure the container keeps full width inside the app and receives padding for the sidebar.
+     Explicitly override width/max-width if bootstrap's .container sets them. */
+   box-sizing: border-box;
+   width: 100%;
+   max-width: none;
+   padding-left: calc(var(--sidebar-width));
+   transition: padding-left 200ms ease, max-width 200ms ease;
+  }
+
+  /* When the sidebar component inside the wrapper has data-state collapsed,
+     reduce offset to icon width. We target the container when the immediate
+     sidebar sibling has the collapsed state. */
+  @media (min-width: 768px) {
+    [data-app="lms"] [data-slot="sidebar-wrapper"] > [data-state="collapsed"] + .flex-1 .container,
+    [data-app="lms"] [data-slot="sidebar-wrapper"] [data-state="collapsed"] + .flex-1 .container {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: none;
+  padding-left: calc(var(--sidebar-width-icon));
+    }
+
+    /* Offcanvas collapsible variant should not reserve space */
+    [data-app="lms"] [data-slot="sidebar-wrapper"] > [data-collapsible="offcanvas"] + .flex-1 .container,
+    [data-app="lms"] [data-slot="sidebar-wrapper"] [data-collapsible="offcanvas"] + .flex-1 .container {
+      padding-left: 0;
+    }
+  }
+
+  /* Mobile: do not offset content (sidebar overlays) */
+  @media (max-width: 767px) {
+    [data-app="lms"] [data-slot="sidebar-wrapper"] .container {
+      padding-left: 0;
+    }
+    /* Fallback: in case pages don't use .container, apply padding/width rules to the flex content directly */
+    [data-app="lms"] [data-slot="sidebar-wrapper"] > .flex-1 {
+      box-sizing: border-box;
+      width: 100%;
+    }
+    @media (min-width: 768px) {
+      [data-app="lms"] [data-slot="sidebar-wrapper"] > .flex-1 {
+        padding-left: calc(var(--sidebar-width));
+        transition: padding-left 200ms ease;
+      }
+
+      [data-app="lms"] [data-slot="sidebar-wrapper"] > [data-state="collapsed"] + .flex-1 {
+        padding-left: calc(var(--sidebar-width-icon));
+      }
+
+      [data-app="lms"] [data-slot="sidebar-wrapper"] > [data-collapsible="offcanvas"] + .flex-1 {
+        padding-left: 0;
+      }
+    }
+  }
+}
+
+/*
+  Utility: disable token usage at runtime without removing them from the codebase.
+  Applying `.no-tokens` on the body (already added to index.html) will force a small set
+  of core variables to concrete values so the app renders with predictable CSS and
+  ignores custom token values.
+*/
+[data-app="lms"].no-tokens {
+  --background: #ffffff;
+  --foreground: #111827; /* slate-900 */
+  --card: #ffffff;
+  --card-foreground: #111827;
+  --primary: #0ea5e9; /* sky-500 */
+  --primary-foreground: #ffffff;
+  --muted: #f3f4f6; /* gray-100 */
+  --muted-foreground: #6b7280; /* gray-500 */
+  --sidebar: #ffffff;
+  --sidebar-foreground: #111827;
+  --sidebar-border: rgba(0,0,0,0.06);
+  --sidebar-accent: #f8fafc;
+  --border: rgba(0,0,0,0.06);
+  --radius: 0.625rem;
+  --shadow-card: 0 6px 20px rgba(2,6,23,0.08);
+}
+
+/* Restore emphasis, card shadows and spacing when tokens are used or disabled.
+   Scoped under [data-app="lms"] to avoid touching backend/admin styles. */
+[data-app="lms"] {
+  /* Strong text should respect the theme's bold token */
+  :is(strong, b) {
+    font-weight: var(--font-weight-bold, 700);
+  }
+
+  /* Make sure headings and key controls show the expected medium weight */
+  h1, h2, h3, h4 {
+    font-weight: var(--font-weight-medium, 500);
+  }
+
+  /* Card visual style: shadow, radius, background/foreground from tokens.
+     Use higher specificity (scoped selector) to beat external CSS like Bootstrap. */
+  .card, .shadow-card {
+    background-color: var(--card, #fff);
+    color: var(--card-foreground, #111827);
+    box-shadow: var(--shadow-card, 0 6px 20px rgba(2,6,23,0.08));
+    border-radius: var(--radius, 0.5rem);
+  }
+
+  /* Increase the gutter between sidebar and main content slightly so the
+     layout breathes compared to a tight edge. This adjusts the padding we
+     already set to include a gutter offset from the theme spacing. */
+  [data-slot="sidebar-wrapper"] .container {
+    padding-left: calc(var(--sidebar-width) + 1rem);
+    transition: padding-left 200ms ease;
+  }
+
+  @media (min-width: 768px) {
+    [data-slot="sidebar-wrapper"] > [data-state="collapsed"] + .flex-1 .container,
+    [data-slot="sidebar-wrapper"] [data-state="collapsed"] + .flex-1 .container {
+      padding-left: calc(var(--sidebar-width-icon) + 0.75rem);
+    }
+
+    [data-slot="sidebar-wrapper"] > [data-collapsible="offcanvas"] + .flex-1 .container,
+    [data-slot="sidebar-wrapper"] [data-collapsible="offcanvas"] + .flex-1 .container {
+      padding-left: 0.75rem; /* small gutter when sidebar overlays */
+    }
+  }
+}
+
+/* Immediate fix: ensure the app container used by React isn't pushed right by other global
+   styles (Bootstrap). This neutralizes padding/margins so content sits flush; we can
+   later reintroduce a namespaced offset tied to sidebar state. */
+[data-app="lms"] .app-container {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: none;
+  margin-left: 0;
+  margin-right: 0;
+  padding-left: 0;
+  padding-right: 0;
+}
+
+/* App-level small base overrides to ensure tokens are applied to the root elements. */
+@layer base {
+  html, body, #root { height: 100%; }
+  body { @apply bg-background text-foreground antialiased; }
+  * { @apply border-border; }
+
+  ::placeholder { color: var(--muted-foreground-hsl); @apply text-muted-foreground; }
+}

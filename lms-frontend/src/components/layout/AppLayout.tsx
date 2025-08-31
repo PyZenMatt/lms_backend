@@ -1,144 +1,211 @@
 import * as React from "react";
-import { Sidebar, type SidebarItem } from "@/components/ui/sidebar";
-import ThemeToggle from "@/components/ThemeToggle";
-import NotificationsBell from "@/components/NotificationsBell";
-import TeacherDecisionNav from "@/components/teo/TeacherDecisionNav";
+import { useAuth } from "@/components/figma/AuthContext";
+// using Figma AppSidebar as single source of truth
+import { AppSidebar } from "@/components/figma/AppSidebar";
 // Navbar wallet button removed to avoid duplicate connect controls.
 // ConnectWalletButton is still used on Profile and Wallet pages.
-import { useAuth } from "@/context/AuthContext";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
+// using figma header primitives instead of Menubar
+import { SidebarTrigger, SidebarProvider } from "@/components/figma/ui/sidebar";
+import { Button } from "@/components/figma/ui/button";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/figma/ui/avatar";
+import { Badge } from "@/components/figma/ui/badge";
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+} from "@/components/figma/ui/dropdown-menu";
+import { Wallet as WalletIcon, User as UserIcon, Settings as SettingsIcon, LogOut } from "lucide-react";
 
-export default function AppLayout({
-  items,
-  footer,
-  children,
-}: {
-  items?: SidebarItem[];
-  footer?: React.ReactNode;
-  children?: React.ReactNode;
-}) {
+export default function AppLayout({ children }: { children?: React.ReactNode }) {
   const [collapsed, setCollapsed] = React.useState(false);
   const [mobileOpen, setMobileOpen] = React.useState(false);
-  const { isAuthenticated, role, logout } = useAuth();
+  // removed isDesktop state and resize listener — layout now relies on CSS overrides
+  React.useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setMobileOpen(false);
+    };
+
+    if (mobileOpen) {
+      // lock body scroll when mobile drawer is open
+      const prev = document.body.style.overflow;
+      document.body.style.overflow = "hidden";
+      window.addEventListener("keydown", onKey);
+
+      return () => {
+        document.body.style.overflow = prev;
+        window.removeEventListener("keydown", onKey);
+      };
+    }
+
+    return () => {};
+  }, [mobileOpen]);
+  const { logout, user } = useAuth();
   const location = useLocation();
   const path = location?.pathname ?? "";
+
+  const navigate = useNavigate();
+
+  // derive the sidebar "page" token from the current pathname
+  const currentPage = React.useMemo(() => {
+    const p = (path || "").toLowerCase();
+    if (p === "/" || p === "/dashboard") return "dashboard";
+    if (p.startsWith("/courses")) return "courses";
+    if (p.startsWith("/peer-review")) return "peer-review";
+    if (p.startsWith("/community")) return "community";
+    if (p.startsWith("/gallery")) return "gallery";
+    if (p.startsWith("/discussions")) return "discussions";
+    if (p.startsWith("/achievements")) return "achievements";
+    if (p.startsWith("/teacher") || p.startsWith("/teacher-dashboard")) return "teacher-dashboard";
+    if (p.startsWith("/students")) return "students";
+    if (p.startsWith("/analytics")) return "analytics";
+    if (p.startsWith("/wallet")) return "wallet";
+    return "dashboard";
+  }, [path]);
 
   // Routes where the app chrome (navbar / sidebar / header spacer) should be hidden
   const isAuthRoute =
     path === "/login" || path === "/register" || path.startsWith("/verify-email");
 
-  // Default items if none provided — includes icons and role-based links
-  const defaultItems: SidebarItem[] = [];
-
-  // Common top items — role-aware dashboard and menus
-  if (role === "teacher" || role === "admin") {
-    // teacher/admin: dashboard goes to /teacher, studio goes to course creation
-    defaultItems.push({ to: "/teacher", label: "🏠 Dashboard", end: true });
-    defaultItems.push({ to: "/studio/courses/new", label: "🏫 Studio Docente" });
-    defaultItems.push({ to: "/courses", label: "📚 Corsi" });
-    defaultItems.push({ to: "/wallet", label: "👛 Wallet" });
-    // Restore TEO Inbox and Staking in the sidebar for teachers
-  // TEO Inbox page removed; decisions are handled via notifications
-
-  defaultItems.push({ to: "/teacher/staking", label: <>💎 Staking</> });
-  defaultItems.push({ to: "/teacher/pending-discounts", label: "Pending Discounts" });
-  // Teacher choices page removed; use the topbar inbox (TeacherDecisionNav) instead
-  // TEO Inbox and Staking are surfaced on the Teacher Dashboard only.
-    // teachers don't need 'I miei esercizi' in the sidebar; they manage exercises via Studio
-  } else {
-    // student / anonymous sidebar — learning-focused
-    defaultItems.push({ to: "/dashboard", label: "🏠 Dashboard", end: true });
-    defaultItems.push({ to: "/courses", label: "🔎 Esplora Corsi" });
-    defaultItems.push({ to: "/my/courses", label: "📘 I miei corsi" });
-    defaultItems.push({ to: "/wallet", label: "👛 Wallet" });
-    defaultItems.push({ to: "/my/exercises", label: "📝 I miei esercizi" });
-  }
-
-  // Auth-only items
-  if (isAuthenticated) {
-    // link to assigned reviews list by default
-    defaultItems.push({ to: "/reviews/assigned", label: "🔎 Revisioni" });
-  }
-
-  // Admin-only
-  if (role === "admin") {
-    defaultItems.push({ to: "/admin", label: "⚙️ Admin" });
-  }
-
-  defaultItems.push({ to: "/notifications", label: "🔔 Notifiche" });
-
-  const sidebarItems = items && items.length > 0 ? items : defaultItems;
-
-  // Add Login/Register or Logout action at the end
-  const trailingItems: SidebarItem[] = [];
-  if (isAuthenticated) {
-  trailingItems.push({ label: "⇦ Logout", icon: "⏏️", onClick: () => logout(), hideIconWhenCollapsed: true });
-  } else {
-    trailingItems.push({ to: "/login", label: "🔐 Login" });
-    trailingItems.push({ to: "/register", label: "✍️ Registrati" });
-  }
-
-  const finalItems = [...sidebarItems, ...trailingItems];
+  // sidebar data and footer are provided by the Figma AppSidebar component
 
   // If we're on an auth route, render a minimal shell without the app chrome
   if (isAuthRoute) {
     return (
       <div className="min-h-screen bg-background text-foreground">
-        <div className="container">
-          {children}
-        </div>
+        <main className="w-full">
+          <div className="container">{children}</div>
+        </main>
       </div>
     );
   }
-
+ 
   return (
     <div className="min-h-screen bg-background text-foreground">
-  {/* header spacer removed: topbar is rendered inside main and only when app chrome is visible */}
-      <div className="flex">
-        <Sidebar
-          items={finalItems}
-          footer={
-            footer ?? (
-              <div className="flex items-center justify-between gap-2">
-                <ThemeToggle />
-                <div className="text-xs text-muted-foreground">v1.0 • beta</div>
-              </div>
-            )
-          }
-          collapsed={collapsed}
-          onToggle={setCollapsed}
-          mobileOpen={mobileOpen}
-          onMobileClose={() => setMobileOpen(false)}
-        />
-        <main className="flex-1 py-6">
-          <div className="container">
-            {/* Topbar with toggles */}
-            <div className="h-14 flex items-center px-4 border-b border-border shadow-card bg-card/60 backdrop-blur">
-              <div className="flex items-center gap-2">
-                <button
-      className="inline-flex items-center justify-center rounded-md border border-border px-2 py-1 text-sm md:hidden focus-visible:outline-none focus-visible:shadow-focus"
-      onClick={() => setMobileOpen((v) => !v)}
+      <SidebarProvider
+        open={!collapsed}
+        onOpenChange={(open) => setCollapsed(!open)}
+      >
+          <AppSidebar
+            currentPage={currentPage}
+            onPageChange={(page) => {
+              // map sidebar page tokens to app routes
+              const pageToPath = (p: string) => {
+                switch (p) {
+                  // app index and most dashboards point to courses listing by default
+                  case "dashboard":
+                    return "/dashboard";
+                  case "courses":
+                    return "/courses";
+                  // peer-review in the app is routed to assigned reviews
+                  case "peer-review":
+                    return "/reviews/assigned";
+                  case "community":
+                    return "/community";
+                  case "gallery":
+                    return "/gallery";
+                  case "discussions":
+                    return "/discussions";
+                  case "achievements":
+                    return "/achievements";
+                  // teacher dashboard maps to teacher home
+                  case "teacher-dashboard":
+                    return "/teacher";
+                  case "students":
+                    return "/students";
+                  case "analytics":
+                    return "/analytics";
+                  case "wallet":
+                    return "/wallet";
+                  case "profile":
+                    return "/profile";
+                  default:
+                    return "/courses";
+                }
+              };
+
+              const to = pageToPath(page);
+              if (to) {
+                navigate(to);
+              }
+
+              // if we had a mobile drawer open, close it after navigation
+              setMobileOpen(false);
+            }}
+          />
+          <div className="flex-1 flex flex-col min-h-0">
+          {/* Header: use Figma Menubar styling 1:1 (minimal content, no subcomponents) */}
+          <header className="sticky top-0 z-40 border-b border-border bg-card/60 backdrop-blur w-full">
+            <div className="flex h-14 items-center px-4 lg:px-6">
+              <SidebarTrigger className="mr-4" />
+              <div className="flex-1" />
+              <div className="flex items-center gap-4">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => {
+                    /* navigate to wallet page */
+                    navigate("/wallet");
+                  }}
+                  className="flex items-center gap-2"
                 >
-                  Menu
-                </button>
-                <span className="text-sm text-muted-foreground">SchoolPlatform</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <NotificationsBell />
-                <TeacherDecisionNav />
-                <ThemeToggle />
-                {/* Wallet connect button removed from navbar to avoid duplicates; use Wallet page button */}
+                  <WalletIcon className="size-4" />
+                  <Badge variant="secondary" className="bg-purple-100 text-purple-800">
+                    {(user?.tokens ?? 0) + " ✨"}
+                  </Badge>
+                </Button>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+                      <Avatar className="h-8 w-8">
+                        <AvatarImage src={undefined} alt={undefined} />
+                        <AvatarFallback>U</AvatarFallback>
+                      </Avatar>
+                    </Button>
+                  </DropdownMenuTrigger>
+                    <DropdownMenuContent className="w-56" align="end" forceMount>
+                    <DropdownMenuLabel className="font-normal">
+                      <div className="flex flex-col space-y-1">
+                        <p className="text-sm font-medium leading-none">{user?.name ?? "User"}</p>
+                        <p className="text-xs leading-none text-muted-foreground">{user?.email ?? ""}</p>
+                        <Badge variant="outline" className="w-fit mt-1 capitalize">
+                          {user?.role ?? "role"}
+                        </Badge>
+                      </div>
+                    </DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={() => navigate("/wallet")}> 
+                      <WalletIcon className="mr-2 h-4 w-4" />
+                      <span>Wallet</span>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => navigate("/profile")}>
+                      <UserIcon className="mr-2 h-4 w-4" />
+                      <span>Profile</span>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => navigate("/settings")}>
+                      <SettingsIcon className="mr-2 h-4 w-4" />
+                      <span>Settings</span>
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={() => { if (typeof logout === 'function') { logout(); navigate('/login'); } else navigate('/login'); }}>
+                      <LogOut className="mr-2 h-4 w-4" />
+                      <span>Log out</span>
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </div>
             </div>
-            <div className="py-6">
-              <div className="container">
-                {children}
-              </div>
-            </div>
-          </div>
-        </main>
-      </div>
-      <footer className="border-t border-border bg-card/40">
+          </header>
+
+          <main className="flex-1 py-6 overflow-auto">
+            <div className="container app-container">{children}</div>
+          </main>
+        </div>
+      </SidebarProvider>
+    <footer className="border-t border-border bg-card/40 w-full">
         <div className="container h-12 flex items-center">{/* footer */}</div>
       </footer>
     </div>

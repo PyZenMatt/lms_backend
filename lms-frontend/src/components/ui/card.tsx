@@ -5,10 +5,10 @@ import {
   CardFooter as FigmaCardFooter,
   CardTitle as FigmaCardTitle,
   CardDescription as FigmaCardDescription,
-} from "@/components/figma/ui/card";
+} from "./card-figma-adapter";
 
 import * as React from "react";
-import { cn } from "@/components/figma/ui/utils";
+import { cn } from "./utils";
 
 export const CardHeader = FigmaCardHeader;
 export const CardContent = FigmaCardContent;

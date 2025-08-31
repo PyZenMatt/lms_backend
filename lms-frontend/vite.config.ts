@@ -7,6 +7,8 @@ export default defineConfig({
   resolve: {
     alias: {
   "@": path.resolve(__dirname, "./src"),
+  "@/components/ui": path.resolve(__dirname, "./src/components/ui"),
+  "@/components/figma/ui": path.resolve(__dirname, "./src/components/figma/ui"),
   "@onchain": path.resolve(__dirname, "./src/web3"),
   "onchain": path.resolve(__dirname, "./src/web3"),
   // Force single React copy to avoid invalid hook call / dispatcher is null errors

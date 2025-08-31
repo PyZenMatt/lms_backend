@@ -9,6 +9,8 @@ const badgeVariants = cva(
   {
     variants: {
       variant: {
+  // legacy alias used elsewhere
+  muted: "text-foreground [a&]:hover:bg-accent [a&]:hover:text-accent-foreground",
         default:
           "border-transparent bg-primary text-primary-foreground [a&]:hover:bg-primary/90",
         secondary:

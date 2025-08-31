@@ -2,6 +2,7 @@
 export * from "./input";
 export * from "./textarea";
 export * from "./card";
+export * from "./checkbox";
 export * from "./table";
 export * from "./skeleton";
 export * from "./tabs";
@@ -15,3 +16,5 @@ export * from "./pagination";
 export * from "./empty-state";
 export * from "./button";
 export * from "./label";
+export * from "./dropdown-menu";
+export * from "./utils";

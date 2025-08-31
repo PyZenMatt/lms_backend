@@ -1,5 +1,6 @@
 // src/context/AuthContext.tsx
 import React, { useContext, useEffect, useMemo, useState } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 import { API } from "../lib/config";
 import {
   saveTokens,
@@ -7,7 +8,6 @@ import {
   clearTokens,
   getRoleFromToken,
   getAccessToken,
-  getRefreshToken,
   type Tokens,
 } from "../lib/auth";
 
@@ -23,6 +23,9 @@ type AuthCtx = {
   login: (usernameOrEmail: string, password: string) => Promise<boolean>;
   logout: () => void;
   refreshRole: () => Promise<void>;
+  redirectAfterAuth: (roleArg?: Role) => void;
+  setSession: (tokens: Tokens, role?: Role) => void;
+  postAuth: (payload: { tokens?: Tokens; role?: Role; unverified?: boolean }) => Promise<void>;
 };
 
 const Ctx = React.createContext<AuthCtx | undefined>(undefined);
@@ -59,6 +62,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     role: Role;
   }>({ booting: true, isAuthenticated: !!loadTokens(), role: getRoleFromToken() });
 
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  // redirect helper: prefer ?redirect query, then location.state.from, then role map
+  const redirectAfterAuth = React.useCallback((roleArg?: Role) => {
+    try {
+      const params = new URLSearchParams(location.search);
+      const redirectParam = params.get("redirect");
+      const fromState = (location.state as any)?.from?.pathname as string | undefined;
+      const effectiveRole = roleArg ?? role;
+      const target = redirectParam || fromState || (effectiveRole === "admin" ? "/admin" : effectiveRole === "teacher" ? "/teacher" : "/dashboard");
+      navigate(target, { replace: true });
+    } catch {
+      navigate("/dashboard", { replace: true });
+    }
+  }, [location.search, location.state, navigate, role]);
+
   // Boot: se ho token ma non ho role nel JWT, provo a leggerlo dal server
   useEffect(() => {
     (async () => {
@@ -83,7 +103,33 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     })();
   }, []);
 
-  async function login(usernameOrEmail: string, password: string): Promise<boolean> {
+  // Unified post-auth handler: persist tokens, set auth state, and perform the
+  // correct navigation. If the backend signals the account as unverified we
+  // redirect to the verify-email flow instead of protected routes.
+  const postAuth = React.useCallback(async ({ tokens, role: roleArg, unverified = false }: { tokens?: Tokens; role?: Role; unverified?: boolean }) => {
+    if (tokens) {
+      try {
+        saveTokens(tokens);
+        console.debug("[Auth] postAuth: tokens saved");
+      } catch (err) {
+        console.debug("[Auth] postAuth: saveTokens failed", err);
+      }
+    }
+    const finalRole = roleArg ?? getRoleFromToken();
+    setAuth({ booting: false, isAuthenticated: !unverified, role: finalRole });
+    if (unverified) {
+      try {
+        navigate("/verify-email/sent", { replace: true });
+        return;
+  } catch (err) { console.debug("[Auth] boot role fetch failed", err); }
+    }
+    try {
+      console.debug("[Auth] postAuth: redirecting for role", finalRole);
+      redirectAfterAuth(finalRole);
+  } catch (err) { console.debug("[Auth] login: role fetch failed", err); }
+  }, [navigate, redirectAfterAuth]);
+
+  const login = React.useCallback(async (usernameOrEmail: string, password: string): Promise<boolean> => {
     // 1) tentativo: email/password (CustomTokenObtainPair)
     let r = await httpJSON<Tokens>(API.token, { email: usernameOrEmail, password });
     // 2) fallback: username/password (SimpleJWT default) se 400
@@ -92,10 +138,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
     if (!r.ok || !r.data?.access || !r.data?.refresh) return false;
 
-    saveTokens({ access: r.data.access, refresh: r.data.refresh });
+    // Delegate to the unified post-auth flow which handles persistence, state and redirect
     const deducedRole = getRoleFromToken();
-
-    // Prova a perfezionare il ruolo dal server (opzionale)
     let finalRole = deducedRole;
     try {
       const res = await fetch(API.role, {
@@ -105,18 +149,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         const data = await res.json();
         finalRole = (data?.role as Role) ?? finalRole;
       }
-    } catch {}
+  } catch (err) { console.debug("[Auth] refreshRole failed", err); }
 
-    setAuth({ booting: false, isAuthenticated: true, role: finalRole });
+    try {
+      await postAuth({ tokens: { access: r.data.access, refresh: r.data.refresh }, role: finalRole, unverified: false });
+  } catch (err) { console.debug("[Auth] postAuth navigate/redirect failed", err); }
     return true;
-  }
+  }, [postAuth]);
 
-  function logout() {
+  const logout = React.useCallback(() => {
     clearTokens();
     setAuth({ booting: false, isAuthenticated: false, role: null });
-  }
+  }, []);
 
-  async function refreshRole() {
+  const refreshRole = React.useCallback(async () => {
     const token = getAccessToken();
     if (!token) return;
     try {
@@ -126,7 +172,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setAuth((s) => ({ ...s, role: (data?.role as Role) ?? s.role }));
       }
     } catch {}
-  }
+  }, []);
+
+  const setSession = React.useCallback((tokens: Tokens, roleArg?: Role) => {
+    try {
+      saveTokens(tokens);
+    } catch {}
+    const finalRole = roleArg ?? getRoleFromToken();
+    setAuth({ booting: false, isAuthenticated: true, role: finalRole });
+  }, []);
+
+  // Unified post-auth handler: persist tokens, set auth state, and perform the
+  // correct navigation. If the backend signals the account as unverified we
+  // redirect to the verify-email flow instead of protected routes.
+  
 
   const value = useMemo<AuthCtx>(
     () => ({
@@ -135,12 +194,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       role,
       isTeacher: role === "teacher" || role === "admin",
       pendingTeoCount: 0,
-      setPendingTeoCount: (_n: number) => {},
-      login,
-      logout,
-      refreshRole,
+      setPendingTeoCount: (_n: number) => setPendingTeoCount(_n),
+  login,
+  logout,
+  refreshRole,
+  redirectAfterAuth,
+  setSession,
+  postAuth,
     }),
-    [booting, isAuthenticated, role]
+  [booting, isAuthenticated, role, redirectAfterAuth, login, logout, refreshRole, setSession, postAuth]
   );
 
   // Maintain pendingTeoCount state so pages can update the navbar badge.

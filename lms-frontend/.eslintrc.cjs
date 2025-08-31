@@ -14,6 +14,13 @@ module.exports = {
             'name': 'ethers',
             'message': "Import 'ethers' only from the on-chain adapter (src/web3/ethersWeb3.ts or @onchain/ethersWeb3) and avoid direct usage in DB/REST modules."
           }
+        ],
+        'patterns': [
+          {
+            'group': ["@/components/figma/ui/*"],
+            'message': "Import UI primitives only from '@/components/ui/*'. Direct imports from '@/components/figma/ui/*' are restricted — use the adapter files in 'src/components/ui/**' instead.",
+            'allowTypeImports': false
+          }
         ]
       }
     ],
@@ -23,3 +30,13 @@ module.exports = {
     '@typescript-eslint/no-unused-vars': ['warn', { 'argsIgnorePattern': '^_' }],
   }
 };
+
+// Allow adapter files to import directly from the figma primitives
+module.exports.overrides = [
+  {
+    files: ["src/components/ui/**"],
+    rules: {
+      'no-restricted-imports': 'off'
+    }
+  }
+]

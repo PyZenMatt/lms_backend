@@ -19,6 +19,8 @@
     "baseUrl": "./",
     "paths": {
   "@/*": ["src/*"],
+  "@/components/ui/*": ["src/components/ui/*"],
+  "@/components/figma/ui/*": ["src/components/figma/ui/*"],
   "@onchain/*": ["src/web3/*"],
   "onchain/*": ["src/web3/*"]
     },

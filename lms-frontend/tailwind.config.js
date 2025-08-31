@@ -1,7 +1,7 @@
 /** @type {import('tailwindcss').Config} */
 export default {
   darkMode: ["class"],
-  content: ["./index.html", "./src/**/*.{ts,tsx,js,jsx}"],
+  content: ["./index.html", "./src/**/*.{ts,tsx,js,jsx}", "./src/components/figma/ui/**/*.{ts,tsx}", "./src/components/ui/**/*.{ts,tsx}"],
   theme: {
     extend: {
       colors: {
@@ -65,5 +65,19 @@ export default {
       },
     },
   },
+  // Ensure dynamically-generated classes used by the design system aren't purged.
+  // Patterns cover shadow tokens, typography sizes, spacing gutters and font weights.
+  safelist: [
+    'font-normal',
+    'font-medium',
+    'font-semibold',
+    'font-bold',
+    { pattern: /shadow-(xs|sm|DEFAULT|md|lg|xl|2xl|card)/ },
+    { pattern: /text-(xs|sm|base|lg|xl|2xl|3xl|4xl)/ },
+    { pattern: /gap-(?:gutter|gutter-lg|\d+)/ },
+    { pattern: /p(?:x|y|t|b|l|r)?-(?:gutter|gutter-lg|\d+)/ },
+    { pattern: /bg-(?:primary|secondary|muted|accent|card|popover)/ },
+    { pattern: /text-(?:primary|secondary|muted|accent|card|popover)-foreground/ },
+  ],
   plugins: [],
 }

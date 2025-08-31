@@ -19,8 +19,8 @@ import { ProtectedRoute, RoleRoute } from "./routes/ProtectedRoute";
 // TeacherChoicesPage removed - use sidebar inbox (TeacherDecisionNav) instead
 import CoursesList from "./pages/CoursesList";
 import Notifications from "./pages/Notifications";
-import Login from "./pages/Login";
-import Register from "./pages/Register";
+// legacy Login/Register page files kept for reference but routes use the new Figma AuthForms
+import { AuthForms } from "./components/figma/AuthForms";
 import VerifyEmail from "./pages/VerifyEmail";
 import VerifyEmailSent from "./pages/VerifyEmailSent";
 import Forbidden from "./pages/Forbidden";
@@ -50,8 +50,8 @@ export default function App() {
 
       <Routes>
         {/* Auth routes - render without AppLayout (no navbar/spacer) */}
-        <Route path="/login" element={<ErrorBoundary><Login /></ErrorBoundary>} />
-        <Route path="/register" element={<ErrorBoundary><Register /></ErrorBoundary>} />
+  <Route path="/login" element={<ErrorBoundary><AuthForms defaultTab="login" /></ErrorBoundary>} />
+  <Route path="/register" element={<ErrorBoundary><AuthForms defaultTab="signup" /></ErrorBoundary>} />
         <Route path="/verify-email" element={<ErrorBoundary><VerifyEmail /></ErrorBoundary>} />
         <Route path="/verify-email/sent" element={<ErrorBoundary><VerifyEmailSent /></ErrorBoundary>} />
 

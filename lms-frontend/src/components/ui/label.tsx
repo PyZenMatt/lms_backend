@@ -1,5 +1,5 @@
 import * as React from "react";
-import { Label as FigmaLabel } from "@/components/figma/ui/label";
+import { Label as FigmaLabel } from "./label-figma-adapter";
 
 export type LabelProps = React.ComponentProps<typeof FigmaLabel> & {
   required?: boolean;

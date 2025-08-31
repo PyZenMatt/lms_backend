@@ -1,137 +1,171 @@
-import { createContext, useContext, useState, useEffect, ReactNode } from "react"
+// Re-export the application's central AuthProvider and hook so figma/demo
+// components use the real provider instead of a local duplicate. This
+// avoids duplicate contexts, runtime errors and TypeScript issues.
+import React from "react";
+import { AuthProvider as AppAuthProvider, useAuth as useAppAuth } from "@/context/AuthContext";
 
-interface User {
-  id: string
-  name: string
-  email: string
-  role: 'student' | 'teacher'
-  walletAddress?: string
-  tokens: number
-  avatar?: string
+type FigmaUser = {
+	id: string;
+	name: string;
+	email: string;
+	role: "student" | "teacher";
+	walletAddress?: string;
+	tokens: number;
+	avatar?: string;
+};
+
+type FigmaAuthCtx = {
+	user: FigmaUser | null;
+	login: (email: string, password: string) => Promise<boolean>;
+	logout: () => void;
+	signup: (name: string, email: string, password: string, role: "student" | "teacher") => Promise<boolean>;
+	connectWallet: () => Promise<boolean>;
+	updateTokens: (amount: number) => void;
+	isAuthenticated: boolean;
+	isTeacher: boolean;
+};
+
+export function AuthProvider({ children }: { children: React.ReactNode }) {
+	return <AppAuthProvider>{children}</AppAuthProvider>;
 }
 
-interface AuthContextType {
-  user: User | null
-  login: (email: string, password: string) => Promise<boolean>
-  logout: () => void
-  signup: (name: string, email: string, password: string, role: 'student' | 'teacher') => Promise<boolean>
-  connectWallet: () => Promise<boolean>
-  updateTokens: (amount: number) => void
-  isAuthenticated: boolean
-  isTeacher: boolean
-}
+export function useAuth(): FigmaAuthCtx {
+	const app = useAppAuth();
 
-const AuthContext = createContext<AuthContextType | undefined>(undefined)
+	const [user, setUser] = React.useState<FigmaUser | null>(() => {
+		try {
+			const s = localStorage.getItem("artlearn_user");
+			return s ? (JSON.parse(s) as FigmaUser) : null;
+		} catch {
+			return null;
+		}
+	});
 
-// Mock users for demo
-const mockUsers: User[] = [
-  {
-    id: '1',
-    name: 'Maya Chen',
-    email: 'maya@example.com',
-    role: 'student',
-    tokens: 247,
-    avatar: 'https://images.unsplash.com/photo-1494790108755-2616b612b789?w=40&h=40&fit=crop&crop=face'
-  },
-  {
-    id: '2',
-    name: 'Prof. Sarah Mitchell',
-    email: 'sarah@example.com',
-    role: 'teacher',
-    tokens: 1250,
-    avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=40&h=40&fit=crop&crop=face'
-  }
-]
+	React.useEffect(() => {
+		try {
+			const s = localStorage.getItem("artlearn_user");
+			setUser(s ? (JSON.parse(s) as FigmaUser) : null);
+		} catch {
+			setUser(null);
+		}
+		// keep in sync when central auth changes
+	}, [app.isAuthenticated]);
 
-export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<User | null>(null)
+	const login = async (email: string, password: string) => {
+		const ok = await app.login(email, password);
+		try {
+			const s = localStorage.getItem("artlearn_user");
+			if (s) setUser(JSON.parse(s));
+		} catch (err) { console.debug('[FigmaShim] login read local user failed', err); }
+		return ok;
+	};
 
-  useEffect(() => {
-    // Check for stored user session
-    const storedUser = localStorage.getItem('artlearn_user')
-    if (storedUser) {
-      setUser(JSON.parse(storedUser))
-    }
-  }, [])
+	const logout = () => {
+		app.logout();
+		setUser(null);
+		try {
+			localStorage.removeItem("artlearn_user");
+		} catch (err) { console.debug('[FigmaShim] logout remove user failed', err); }
+	};
 
-  const login = async (email: string, password: string): Promise<boolean> => {
-    // Mock authentication - in real app, this would call your API
-    const foundUser = mockUsers.find(u => u.email === email)
-    if (foundUser) {
-      setUser(foundUser)
-      localStorage.setItem('artlearn_user', JSON.stringify(foundUser))
-      return true
-    }
-    return false
-  }
+	const signup = async (name: string, email: string, password: string, role: "student" | "teacher") => {
+		// Try the real backend register endpoint first
+		const registerUrl = `${(import.meta.env.VITE_API_BASE_URL ?? 'http://127.0.0.1:8000/api').replace(/\/+$/, '')}/v1/register/`;
+		try {
+			const res = await fetch(registerUrl, {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ username: name, email, password, role }),
+			});
+			const text = await res.text();
+			let data: any = undefined;
+			try { data = text ? JSON.parse(text) : undefined; } catch (e) { data = text; }
+			console.debug('[FigmaShim] register response', res.status, data);
+			if (res.ok) {
+				
+				// backend created user: try to login to obtain tokens
+				const loginOk = await app.login(email, password);
+				if (loginOk) {
+					// app.login -> postAuth will handle redirect
+					try { localStorage.setItem('artlearn_user', JSON.stringify({ id: data.user.id, name: data.user.username, email: data.user.email, role: data.user.role, tokens: role === 'teacher' ? 500 : 50 })); } catch (err) { console.debug('[FigmaShim] save backend user failed', err); }
+					return true;
+				}
+				// login failed: possibly unverified email; redirect to verify-email/sent
+				if (typeof app.postAuth === 'function') {
+					try {
+						await app.postAuth({ role: data.user.role, unverified: true });
+						return true;
+					} catch (err) { console.debug('[FigmaShim] postAuth(unverified) failed', err); }
+				}
+				return false;
+			}
+		} catch (err) {
+			console.debug('[FigmaShim] register call failed, falling back to demo shim', err);
+		}
 
-  const logout = () => {
-    setUser(null)
-    localStorage.removeItem('artlearn_user')
-  }
+		// Fallback: Lightweight demo signup (offline/demo mode)
+		const newUser: FigmaUser = {
+			id: String(Date.now()),
+			name,
+			email,
+			role,
+			tokens: role === "teacher" ? 500 : 50,
+		};
+		try { localStorage.setItem("artlearn_user", JSON.stringify(newUser)); } catch (err) { console.debug('[FigmaShim] signup save local user failed', err); }
+		setUser(newUser);
+		// emulate tokens so app can bootstrap
+		try {
+			const header = btoa(JSON.stringify({ alg: "none" }));
+			const payload = btoa(JSON.stringify({ role: newUser.role }));
+			const access = `${header}.${payload}.sig`;
+			const fakeTokens = { access, refresh: String(Date.now()) };
+			if (typeof app.postAuth === "function") {
+				try { console.debug("[FigmaShim] signup: calling postAuth (fallback)", newUser.role); await app.postAuth({ tokens: fakeTokens, role: newUser.role, unverified: false }); console.debug("[FigmaShim] signup: postAuth returned (fallback)"); } catch (err) { console.debug('[FigmaShim] postAuth failed (fallback)', err); }
+			} else {
+				if (typeof app.setSession === "function") app.setSession(fakeTokens, newUser.role);
+				if (typeof app.redirectAfterAuth === "function") app.redirectAfterAuth(newUser.role);
+			}
+		} catch (err) { console.debug('[FigmaShim] signup fallback tokens failed', err); }
+		return true;
+	};
 
-  const signup = async (name: string, email: string, password: string, role: 'student' | 'teacher'): Promise<boolean> => {
-    // Mock signup - in real app, this would call your API
-    const newUser: User = {
-      id: Date.now().toString(),
-      name,
-      email,
-      role,
-      tokens: role === 'teacher' ? 500 : 50 // Teachers start with more tokens
-    }
-    
-    setUser(newUser)
-    localStorage.setItem('artlearn_user', JSON.stringify(newUser))
-    return true
-  }
+	const connectWallet = async () => {
+		if (typeof window !== "undefined" && (window as any).ethereum) {
+			try {
+				const eth = (window as any).ethereum as { request: (opts: { method: string }) => Promise<string[]> } | undefined;
+				if (!eth) return false;
+				const accounts = await eth.request({ method: "eth_requestAccounts" });
+				if (accounts && accounts.length > 0 && user) {
+					const updated = { ...user, walletAddress: accounts[0] } as FigmaUser;
+					setUser(updated);
+					try {
+						localStorage.setItem("artlearn_user", JSON.stringify(updated));
+					} catch (err) { console.debug("[FigmaShim] connectWallet: save user failed", err); }
+					return true;
+				}
+			} catch (err) { console.debug("[FigmaShim] connectWallet failed", err); }
+		}
+		return false;
+	};
 
-  const connectWallet = async (): Promise<boolean> => {
-    if (typeof window.ethereum !== 'undefined') {
-      try {
-        const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' })
-        if (accounts.length > 0 && user) {
-          const updatedUser = { ...user, walletAddress: accounts[0] }
-          setUser(updatedUser)
-          localStorage.setItem('artlearn_user', JSON.stringify(updatedUser))
-          return true
-        }
-      } catch (error) {
-        console.error('Failed to connect wallet:', error)
-      }
-    }
-    return false
-  }
+	const updateTokens = (amount: number) => {
+		if (user) {
+			const updated = { ...user, tokens: user.tokens + amount } as FigmaUser;
+			setUser(updated);
+			try {
+				localStorage.setItem("artlearn_user", JSON.stringify(updated));
+			} catch (err) { console.debug('[FigmaShim] updateTokens save failed', err); }
+		}
+	};
 
-  const updateTokens = (amount: number) => {
-    if (user) {
-      const updatedUser = { ...user, tokens: user.tokens + amount }
-      setUser(updatedUser)
-      localStorage.setItem('artlearn_user', JSON.stringify(updatedUser))
-    }
-  }
-
-  const value: AuthContextType = {
-    user,
-    login,
-    logout,
-    signup,
-    connectWallet,
-    updateTokens,
-    isAuthenticated: !!user,
-    isTeacher: user?.role === 'teacher'
-  }
-
-  return (
-    <AuthContext.Provider value={value}>
-      {children}
-    </AuthContext.Provider>
-  )
-}
-
-export function useAuth() {
-  const context = useContext(AuthContext)
-  if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider')
-  }
-  return context
+	return {
+		user,
+		login,
+		logout,
+		signup,
+		connectWallet,
+		updateTokens,
+		isAuthenticated: app.isAuthenticated,
+		isTeacher: app.isTeacher,
+	};
 }

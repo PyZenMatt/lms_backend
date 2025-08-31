@@ -1,6 +1,11 @@
 import * as React from "react";
-import { NavLink } from "react-router-dom";
+import { /* NavLink */ } from "react-router-dom";
 import { cn } from "@/lib/utils";
+import { useFocusTrap } from "./useFocusTrap";
+import type { MenuSection as MenuSectionType } from "@/components/ui/getMenuByRole";
+import { AppSidebar } from "@/components/figma/AppSidebar";
+import { SidebarProvider } from "@/components/figma/ui/sidebar";
+import { useNavigate } from "react-router-dom";
 
 /**
  * Sidebar semplice, desktop-first, con supporto "collapsed".
@@ -17,107 +22,121 @@ export type SidebarItem = {
   hideIconWhenCollapsed?: boolean;
 };
 
-export function Sidebar({
-  items,
-  footer,
-  collapsed,
-  onToggle,
-  className,
-  mobileOpen,
-  onMobileClose,
-}: {
-  items: SidebarItem[];
+export type MenuItem = {
+  to?: string;
+  label: React.ReactNode;
+  icon?: React.ReactNode;
+  badge?: number;
+};
+
+export type MenuSection = {
+  title?: string;
+  items: MenuItem[];
+};
+
+// Figma parity constants (adjustable)
+// Figma source: src/components/figma/ui/sidebar.tsx
+// 16rem -> 16 * 16 = 256px (expanded)
+// 3rem  -> 3 * 16  = 48px  (icon / collapsed)
+// 18rem -> 18 * 16 = 288px (mobile sheet)
+const SIDEBAR_WIDTH_EXPANDED = 256; // px (Figma: 16rem)
+const SIDEBAR_WIDTH_COLLAPSED = 48; // px (Figma: 3rem)
+const SIDEBAR_WIDTH_MOBILE = 288; // px (Figma: 18rem)
+// kept minimal constants for layout
+// no local spacing constants needed when delegating to AppSidebar
+
+export function Sidebar(props: {
+  sections?: MenuSectionType[];
   footer?: React.ReactNode;
   collapsed?: boolean;
   onToggle?: (v: boolean) => void;
   className?: string;
   mobileOpen?: boolean;
   onMobileClose?: () => void;
+  counts?: Record<string, number>;
 }) {
+  const { collapsed, className, mobileOpen, onMobileClose } = props;
+  const closeButtonRef = React.useRef<HTMLButtonElement | null>(null);
+  const drawerRef = React.useRef<HTMLDivElement | null>(null);
+
+  // apply focus trap when mobile drawer is open
+  useFocusTrap(drawerRef.current, { onClose: () => onMobileClose?.() });
+
+  // matchIsActive is no longer needed because menu is rendered by AppSidebar (figma)
+
+  // compute width for the inner visual sidebar. Outer <aside> reserves the expanded width
+  // on desktop to avoid layout-shift when collapsing; mobile drawer still uses computedWidth.
+  const innerWidth = mobileOpen
+    ? SIDEBAR_WIDTH_MOBILE
+    : collapsed
+    ? SIDEBAR_WIDTH_COLLAPSED
+    : SIDEBAR_WIDTH_EXPANDED;
+
+  // role heuristics are handled by the mounted AppSidebar (figma source)
+
+  const navigate = useNavigate();
+  const currentPage = window.location.pathname.split("/").filter(Boolean)[0] || "dashboard";
+  const onPageChange = (page: string) => {
+    // navigate to the page route; preserve mobile drawer close
+    navigate("/" + page);
+    if (mobileOpen) onMobileClose?.();
+  };
+
   return (
-    <aside
-      // desktop: md:flex; mobile: fixed drawer when mobileOpen
-      className={cn(
-        // base styles
-        "h-screen shrink-0 border-r border-[--color-sidebar-border] bg-[--color-sidebar] text-[--color-sidebar-foreground]",
-  // desktop layout: hidden on small, flex column on md+
-  "hidden md:flex md:flex-col",
-  // width: tighter collapsed width (w-12 = 48px) to align with toggle button
-  collapsed ? "w-12" : "w-64",
-  // mobile drawer visible when mobileOpen (kept separate from md rules)
-  mobileOpen && "fixed left-0 top-0 z-50 md:hidden translate-x-0 w-64",
-        className
+    <>
+      {/* Mobile overlay: covers the page when the drawer is open */}
+      {mobileOpen && (
+        <div
+          className="fixed inset-0 z-40 bg-black/40 md:hidden"
+          onClick={() => onMobileClose?.()}
+          aria-hidden="true"
+        />
       )}
-      aria-hidden={!mobileOpen && undefined}
-    >
-      {/* Mobile close overlay: clicking outside should close the drawer on small screens */}
+
+  <aside
+        // desktop: md:flex; mobile: fixed drawer when mobileOpen
+        className={cn(
+          // base styles
+            "h-screen border-r border-[--color-sidebar-border] bg-[--color-sidebar] text-[--color-sidebar-foreground]",
+          // desktop layout: hidden on small, flex column on md+
+          "hidden md:flex md:flex-col",
+          // animate width when collapsing/expanding
+          "transition-[width] duration-200 ease-in-out",
+    // NOTE: outer aside reserves the expanded width on desktop to prevent main reflow.
+    // The inner container animates between collapsed/expanded visually.
+    // mobile drawer visible when mobileOpen (kept separate from md rules)
+    mobileOpen && "fixed left-0 top-0 z-50 md:hidden translate-x-0",
+    className
+        )}
+        id="site-sidebar"
+        ref={drawerRef}
+    // reserve expanded width on desktop (prevents layout shift)
+    style={{ width: `${mobileOpen ? innerWidth : SIDEBAR_WIDTH_EXPANDED}px` }}
+        data-state={collapsed ? "collapsed" : "expanded"}
+        role="navigation"
+        aria-label="Primary"
+      >
+      {/* Mobile close overlay button (visually hidden, used to receive initial focus) */}
       {mobileOpen && (
         <button
+          ref={closeButtonRef}
           className="md:hidden absolute left-full top-0 h-full w-8 bg-transparent"
           onClick={() => onMobileClose?.()}
           aria-label="Close sidebar"
         />
       )}
-      <div className="flex h-14 items-center justify-between border-b border-[--color-sidebar-border] px-3">
-        <span className={cn("text-sm font-semibold", collapsed && "sr-only")}>SchoolPlatform</span>
-        <button
-          type="button"
-          onClick={() => onToggle?.(!collapsed)}
-          className="rounded-md border border-[--color-sidebar-border] bg-[--color-sidebar-accent] px-2 py-1 text-xs text-[--color-sidebar-accent-foreground] hover:bg-[--color-sidebar-accent]/80"
-          aria-label="Toggle sidebar"
-        >
-          {collapsed ? "›" : "‹"}
-        </button>
+
+      {/* Mount the Figma AppSidebar inside the real aside to get exact UI */}
+      {/* inner visual rail: animates width to collapsed/expanded while outer aside reserves space */}
+      <div
+        className="flex-1 overflow-y-auto p-0"
+        style={{ width: `${innerWidth}px`, transition: "width 200ms ease-in-out" }}
+      >
+        <SidebarProvider open={!collapsed}>
+          <AppSidebar currentPage={currentPage} onPageChange={onPageChange} />
+        </SidebarProvider>
       </div>
-
-      <nav className="flex-1 overflow-y-auto p-2">
-        <ul className="space-y-1">
-          {items.map((it) => (
-            <li key={String(it.to ?? it.label)}>
-              {it.onClick && !it.to ? (
-                // action button (e.g. Logout)
-                <button
-                  type="button"
-                  onClick={it.onClick}
-                  className={cn(
-                    "flex w-full items-center gap-2 rounded-lg px-2 py-2 text-sm text-left hover:bg-[--color-sidebar-accent]",
-                    // actions don't have an active state
-                    ""
-                  )}
-                >
-                  {/* hide the item icon when collapsed if requested (e.g. Logout emoticon) */}
-                  {it.icon && !(collapsed && it.hideIconWhenCollapsed) && (
-                    <span className="grid h-5 w-5 place-items-center">{it.icon}</span>
-                  )}
-                  <span className={cn(collapsed && "sr-only")}>{it.label}</span>
-                </button>
-              ) : (
-                <NavLink
-                  to={it.to ?? "#"}
-                  end={it.end}
-                  className={({ isActive }) =>
-                    cn(
-                      "flex items-center gap-2 rounded-lg px-2 py-2 text-sm hover:bg-[--color-sidebar-accent]",
-                      isActive && "bg-[--color-sidebar-accent] text-[--color-sidebar-primary]"
-                    )
-                  }
-                >
-                  {it.icon && !(collapsed && it.hideIconWhenCollapsed) && (
-                    <span className="grid h-5 w-5 place-items-center">{it.icon}</span>
-                  )}
-                  <span className={cn(collapsed && "sr-only")}>{it.label}</span>
-                </NavLink>
-              )}
-            </li>
-          ))}
-        </ul>
-      </nav>
-
-      {footer && (
-        <div className="border-t border-[--color-sidebar-border] p-2">
-          <div className={cn(collapsed && "sr-only")}>{footer}</div>
-        </div>
-      )}
-    </aside>
+  </aside>
+  </>
   );
 }

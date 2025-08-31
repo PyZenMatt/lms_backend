@@ -1,5 +1,5 @@
 /* Entry unico: tokens + Tailwind + rete di sicurezza bottoni */
-@import "./styles/globals.css";
+@import "./styles/theme/globals.css";
 @import "tailwindcss";
 
 /* Base minime (opzionali) */
@@ -9,9 +9,4 @@
   * { @apply border-border; }
 }
 
-/* Safety net: se qualcuno mette bg-primary senza text-*, o con text-foreground,
-   forziamo il testo giusto (primary-foreground) per evitare “nero su nero”. */
-@layer components {
-  .bg-primary:not([class*="text-"]) { color: var(--primary-foreground) !important; }
-  .bg-primary.text-foreground { color: var(--primary-foreground) !important; }
-}
+/* Safety-net moved to overrides.css (no !important). */

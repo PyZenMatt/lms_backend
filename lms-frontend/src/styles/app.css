@@ -1,37 +1,7 @@
-/* src/styles/app.css */
-@import "./globals.css";
+/* Compatibility: legacy import path. Prefer importing app.base.css + app.rest.css directly.
+  This file intentionally left minimal. */
+/* Tailwind v4 monolithic flow: import tailwindcss first, then theme tokens, then app overrides.
+  This aligns with @tailwindcss/postcss (v4) where @import "tailwindcss" composes layers internally. */
 @import "tailwindcss";
-
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
-/* Applica sempre i token al documento */
-@layer base {
-  html, body, #root {
-    height: 100%;
-  }
-  body {
-    background: var(--background-hsl);
-    color: var(--foreground-hsl);
-    @apply bg-background text-foreground;
-  }
-  * {
-    border-color: var(--border-hsl);
-    @apply border-border;
-  }
-
-  ::placeholder {
-    color: var(--muted-foreground-hsl);
-    @apply text-muted-foreground;
-  }
-}
-/* --- Safety net: testo leggibile sui bottoni primari --- */
-@layer components {
-  /* Caso più comune: qualcuno ha messo text-foreground su bg-primary */
-  .bg-primary.text-foreground { color: var(--color-primary-foreground) !important; }
-
-  /* Se manca completamente una text-*, garantiamo il colore corretto */
-  .bg-primary:not([class*="text-"]) { color: var(--color-primary-foreground) !important; }
-}
+@import "./theme/globals.css";
 

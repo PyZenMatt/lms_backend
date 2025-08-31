@@ -1,4 +1,4 @@
-import { Home, BookOpen, Users, Trophy, Palette, MessageCircle, Settings, User, UserCheck, GraduationCap, Wallet } from "lucide-react"
+import { Home, BookOpen, Users, Trophy, Palette, MessageCircle, User, UserCheck, GraduationCap, Wallet } from "lucide-react"
 import {
   Sidebar,
   SidebarContent,
@@ -103,7 +103,9 @@ export function AppSidebar({ currentPage, onPageChange }: AppSidebarProps) {
             </SidebarMenuButton>
           </SidebarMenuItem>
           <SidebarMenuItem>
-            <SidebarMenuButton>
+            <SidebarMenuButton
+              onClick={() => onPageChange("profile")}
+            >
               <User className="size-4" />
               <span>{user?.name}</span>
               <Badge variant="outline" className="ml-auto capitalize text-xs">

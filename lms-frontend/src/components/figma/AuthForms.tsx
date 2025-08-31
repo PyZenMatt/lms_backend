@@ -9,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from ".
 import { Palette, Sparkles, GraduationCap, Users } from "lucide-react"
 import { useAuth } from "./AuthContext"
 
-export function AuthForms() {
+export function AuthForms({ defaultTab = "login" }: { defaultTab?: "login" | "signup" }) {
   const { login, signup } = useAuth()
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState("")
@@ -60,6 +60,7 @@ export function AuthForms() {
     if (!success) {
       setError("Failed to create account")
     }
+  // signup now delegates to the central postAuth flow for persistence + redirect
     setIsLoading(false)
   }
 
@@ -76,7 +77,7 @@ export function AuthForms() {
           <p className="text-muted-foreground">Community-focused art education platform</p>
         </div>
 
-        <Tabs defaultValue="login" className="space-y-4">
+  <Tabs defaultValue={defaultTab} className="space-y-4">
           <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="login">Login</TabsTrigger>
             <TabsTrigger value="signup">Sign Up</TabsTrigger>
