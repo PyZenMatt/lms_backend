@@ -85,7 +85,7 @@ export default function ExerciseSubmit() {
 
       {!loading && !error && (
         <>
-          <div className="rounded-lg border p-4">
+          <div className="rounded-lg border border-border bg-card p-4 text-card-foreground shadow-card">
             <div className="text-sm text-muted-foreground whitespace-pre-wrap">{description}</div>
             <div className="mt-2 text-xs text-muted-foreground">Stato corrente: <b>{status || "—"}</b></div>
           </div>
@@ -98,7 +98,7 @@ export default function ExerciseSubmit() {
                 value={text}
                 onChange={(e) => setText(e.target.value)}
                 placeholder="Scrivi qui la tua risposta…"
-                className="min-h-[120px] w-full rounded-lg border p-3"
+                className="min-h-[120px] w-full rounded-lg border border-border bg-input-background text-foreground placeholder:text-muted-foreground p-3 focus-ring"
               />
             </div>
 
@@ -108,7 +108,7 @@ export default function ExerciseSubmit() {
                 type="file"
                 multiple
                 onChange={(e) => setFiles(Array.from(e.target.files ?? []))}
-                className="block w-full text-sm"
+                className="block w-full text-sm text-muted-foreground"
               />
               {files.length > 0 && (
                 <div className="mt-1 text-xs text-muted-foreground">{files.length} file selezionati</div>
@@ -119,7 +119,7 @@ export default function ExerciseSubmit() {
                 <button
                   type="submit"
                   disabled={submitting || (status === "submitted" && (reviewsCount === null || reviewsCount < 3))}
-                  className="rounded-lg bg-primary px-4 py-2 text-primary-foreground disabled:opacity-50 inline-flex items-center"
+                  className="rounded-lg bg-primary px-4 py-2 text-primary-foreground disabled:opacity-50 inline-flex items-center justify-center focus-ring"
                   title={status === "submitted" && (reviewsCount === null || reviewsCount < 3) ? "La tua consegna è in attesa di valutazioni: non puoi reinviare finché non riceve 3 valutazioni." : undefined}
                 >
                   {submitting ? (

@@ -83,16 +83,16 @@ export default function ProfilePage() {
         <div className="border border-border rounded-lg p-4 bg-card text-card-foreground space-y-3">
           <div className="flex items-center gap-3">
             {avatarPreview ? (
-              <img src={avatarPreview} className="w-20 h-20 rounded-md object-cover border border-border" />
+              <img src={avatarPreview} className="w-20 h-20 rounded-lg object-cover border border-border" />
             ) : data.avatar ? (
-              <img src={data.avatar} className="w-20 h-20 rounded-md object-cover border border-border" />
+              <img src={data.avatar} className="w-20 h-20 rounded-lg object-cover border border-border" />
             ) : (
-              <div className="w-20 h-20 rounded-md border border-border grid place-items-center text-xs text-muted-foreground">No avatar</div>
+              <div className="w-20 h-20 rounded-lg border border-border grid place-items-center text-xs text-muted-foreground">No avatar</div>
             )}
             <div>
               <label className="text-sm">Avatar</label>
-              <input type="file" accept="image/*" onChange={onPickAvatar}
-                     className="block text-sm mt-1" />
+    <input type="file" accept="image/*" onChange={onPickAvatar}
+      className="block text-sm mt-1 text-muted-foreground" />
               <p className="text-xs text-muted-foreground">PNG/JPG. Max ~ 2-5 MB (dipende dal server).</p>
             </div>
           </div>
@@ -100,45 +100,45 @@ export default function ProfilePage() {
           <div className="grid grid-cols-2 gap-2">
             <div>
               <label className="text-sm">Nome</label>
-              <input className="w-full px-3 py-2 rounded-md border border-border bg-background"
+              <input className="w-full px-3 py-2 rounded-lg border border-border bg-input-background text-foreground placeholder:text-muted-foreground focus-ring"
                      value={data.first_name || ""} onChange={e=>onChange("first_name", e.target.value)} />
             </div>
             <div>
               <label className="text-sm">Cognome</label>
-              <input className="w-full px-3 py-2 rounded-md border border-border bg-background"
+              <input className="w-full px-3 py-2 rounded-lg border border-border bg-input-background text-foreground placeholder:text-muted-foreground focus-ring"
                      value={data.last_name || ""} onChange={e=>onChange("last_name", e.target.value)} />
             </div>
           </div>
 
           <div>
             <label className="text-sm">Telefono</label>
-            <input className="w-full px-3 py-2 rounded-md border border-border bg-background"
-                   value={data.phone || ""} onChange={e=>onChange("phone", e.target.value)} />
+       <input className="w-full px-3 py-2 rounded-lg border border-border bg-input-background text-foreground placeholder:text-muted-foreground focus-ring"
+         value={data.phone || ""} onChange={e=>onChange("phone", e.target.value)} />
           </div>
 
           <div>
             <label className="text-sm">Indirizzo</label>
-            <input className="w-full px-3 py-2 rounded-md border border-border bg-background"
-                   value={data.address || ""} onChange={e=>onChange("address", e.target.value)} />
+       <input className="w-full px-3 py-2 rounded-lg border border-border bg-input-background text-foreground placeholder:text-muted-foreground focus-ring"
+         value={data.address || ""} onChange={e=>onChange("address", e.target.value)} />
           </div>
         </div>
 
         <div className="border border-border rounded-lg p-4 bg-card text-card-foreground space-y-3">
           <div>
             <label className="text-sm">Professione</label>
-            <input className="w-full px-3 py-2 rounded-md border border-border bg-background"
-                   value={data.profession || ""} onChange={e=>onChange("profession", e.target.value)} />
+       <input className="w-full px-3 py-2 rounded-lg border border-border bg-input-background text-foreground placeholder:text-muted-foreground focus-ring"
+         value={data.profession || ""} onChange={e=>onChange("profession", e.target.value)} />
           </div>
           <div>
             <label className="text-sm">Aspirazioni artistiche</label>
-            <textarea className="w-full px-3 py-2 rounded-md border border-border bg-background"
+            <textarea className="w-full px-3 py-2 rounded-lg border border-border bg-input-background text-foreground placeholder:text-muted-foreground focus-ring"
                       rows={4} value={data.artistic_aspirations || ""}
                       onChange={e=>onChange("artistic_aspirations", e.target.value)} />
           </div>
           <div>
             <label className="text-sm">Wallet address</label>
             <div className="flex items-center gap-2">
-              <input className="w-full px-3 py-2 rounded-md border border-border bg-background"
+              <input className="w-full px-3 py-2 rounded-lg border border-border bg-input-background text-foreground placeholder:text-muted-foreground focus-ring"
                      value={data.wallet_address || ""} onChange={e=>onChange("wallet_address", e.target.value)} />
               {/* Connect button for MetaMask */}
               {/* eslint-disable-next-line @typescript-eslint/ban-ts-comment */}
@@ -147,8 +147,8 @@ export default function ProfilePage() {
             </div>
           </div>
 
-          <button disabled={saving}
-                  className="px-4 py-2 rounded-md bg-primary text-primary-foreground">
+    <button disabled={saving}
+      className="px-4 py-2 rounded-lg bg-primary text-primary-foreground focus-ring disabled:opacity-50 inline-flex items-center justify-center">
             {saving ? "Salvataggio…" : "Salva"}
           </button>
           <div className="text-sm text-muted-foreground">{msg}</div>

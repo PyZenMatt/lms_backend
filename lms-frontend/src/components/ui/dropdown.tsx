@@ -32,12 +32,14 @@ export function DropdownTrigger({ children }:{ children: React.ReactNode }) {
   // Ensure child is a valid React element before cloning
   if (!React.isValidElement(children)) return null;
   const el = children as React.ReactElement;
-  return React.cloneElement(el as React.ReactElement<any>, ({
+  const injectedProps: React.DOMAttributes<HTMLElement> = {
     onClick: (e: React.MouseEvent) => {
       e.stopPropagation();
       setOpen((v: boolean) => !v);
     },
-  } as any));
+  };
+
+  return React.cloneElement(el, injectedProps as unknown as Record<string, unknown>);
 }
 
 export function DropdownContent({ className, children }:{ className?: string; children: React.ReactNode }) {
@@ -46,11 +48,11 @@ export function DropdownContent({ className, children }:{ className?: string; ch
   return (
     <div
       role="menu"
-      className={cn(
-  "absolute right-0 mt-2 w-56 rounded-lg border border-border bg-card p-1.5 shadow-card",
-        "dark:border-border dark:bg-card",
-        className
-      )}
+  className={cn(
+  "absolute right-0 mt-2 w-56 rounded-lg border border-border bg-popover text-popover-foreground p-1.5 shadow-card",
+    "dark:border-border",
+    className
+  )}
     >
       {children}
     </div>
@@ -73,8 +75,8 @@ export function DropdownItem({
       role="menuitem"
       onClick={() => { onSelect?.(); setOpen(false); }}
       className={cn(
-        "w-full rounded-md px-3 py-2 text-left text-sm text-foreground hover:bg-muted/70",
-        "dark:hover:bg-muted/60",
+  "w-full rounded-sm px-3 py-2 text-left text-sm text-popover-foreground hover:bg-muted/70 focus-ring",
+  "dark:hover:bg-muted/60",
         className
       )}
     >

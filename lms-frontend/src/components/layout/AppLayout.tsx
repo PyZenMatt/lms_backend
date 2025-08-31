@@ -6,6 +6,7 @@ import TeacherDecisionNav from "@/components/teo/TeacherDecisionNav";
 // Navbar wallet button removed to avoid duplicate connect controls.
 // ConnectWalletButton is still used on Profile and Wallet pages.
 import { useAuth } from "@/context/AuthContext";
+import { useLocation } from "react-router-dom";
 
 export default function AppLayout({
   items,
@@ -17,7 +18,14 @@ export default function AppLayout({
   children?: React.ReactNode;
 }) {
   const [collapsed, setCollapsed] = React.useState(false);
+  const [mobileOpen, setMobileOpen] = React.useState(false);
   const { isAuthenticated, role, logout } = useAuth();
+  const location = useLocation();
+  const path = location?.pathname ?? "";
+
+  // Routes where the app chrome (navbar / sidebar / header spacer) should be hidden
+  const isAuthRoute =
+    path === "/login" || path === "/register" || path.startsWith("/verify-email");
 
   // Default items if none provided — includes icons and role-based links
   const defaultItems: SidebarItem[] = [];
@@ -64,7 +72,7 @@ export default function AppLayout({
   // Add Login/Register or Logout action at the end
   const trailingItems: SidebarItem[] = [];
   if (isAuthenticated) {
-    trailingItems.push({ label: "⇦ Logout", icon: "⏏️", onClick: () => logout() });
+  trailingItems.push({ label: "⇦ Logout", icon: "⏏️", onClick: () => logout(), hideIconWhenCollapsed: true });
   } else {
     trailingItems.push({ to: "/login", label: "🔐 Login" });
     trailingItems.push({ to: "/register", label: "✍️ Registrati" });
@@ -72,35 +80,44 @@ export default function AppLayout({
 
   const finalItems = [...sidebarItems, ...trailingItems];
 
+  // If we're on an auth route, render a minimal shell without the app chrome
+  if (isAuthRoute) {
+    return (
+      <div className="min-h-screen bg-background text-foreground">
+        <div className="container">
+          {children}
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-background text-foreground">
-      <header className="border-b border-border bg-card/50 backdrop-blur">
-        <div className="container flex h-14 items-center gap-4">{/* nav */}</div>
-      </header>
+  {/* header spacer removed: topbar is rendered inside main and only when app chrome is visible */}
       <div className="flex">
-        <aside className="w-64 border-r border-border bg-card/40">
-          <Sidebar
-            items={finalItems}
-            footer={
-              footer ?? (
-                <div className="flex items-center justify-between gap-2">
-                  <ThemeToggle />
-                  <div className="text-xs text-muted-foreground">v1.0 • beta</div>
-                </div>
-              )
-            }
-            collapsed={collapsed}
-            onToggle={setCollapsed}
-          />
-        </aside>
+        <Sidebar
+          items={finalItems}
+          footer={
+            footer ?? (
+              <div className="flex items-center justify-between gap-2">
+                <ThemeToggle />
+                <div className="text-xs text-muted-foreground">v1.0 • beta</div>
+              </div>
+            )
+          }
+          collapsed={collapsed}
+          onToggle={setCollapsed}
+          mobileOpen={mobileOpen}
+          onMobileClose={() => setMobileOpen(false)}
+        />
         <main className="flex-1 py-6">
           <div className="container">
             {/* Topbar with toggles */}
             <div className="h-14 flex items-center px-4 border-b border-border shadow-card bg-card/60 backdrop-blur">
               <div className="flex items-center gap-2">
                 <button
-                  className="inline-flex items-center justify-center rounded-md border border-border px-2 py-1 text-sm md:hidden focus-visible:outline-none focus-visible:shadow-focus"
-                  onClick={() => setCollapsed((v) => !v)}
+      className="inline-flex items-center justify-center rounded-md border border-border px-2 py-1 text-sm md:hidden focus-visible:outline-none focus-visible:shadow-focus"
+      onClick={() => setMobileOpen((v) => !v)}
                 >
                   Menu
                 </button>

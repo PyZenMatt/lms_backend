@@ -4,31 +4,44 @@ import { cn } from "@/lib/utils";
 
 export type TextareaProps = React.TextareaHTMLAttributes<HTMLTextAreaElement> & {
   invalid?: boolean;
+  success?: boolean;
   hint?: string;
+  hintId?: string;
 };
 
 export const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
-  ({ className, invalid, hint, ...props }, ref) => {
+  ({ className, invalid, success, hint, hintId, ...props }, ref) => {
+    const stateClasses = invalid
+      ? "border-destructive focus:border-destructive focus:ring-destructive"
+      : success
+      ? "border-accent focus:border-accent focus:ring-accent"
+      : "border-border";
+
+    const disabledClasses = props.disabled
+      ? "bg-input-background/60 text-muted-foreground border-border/60 pointer-events-none cursor-not-allowed"
+      : "text-foreground";
+
     return (
       <div className="space-y-1">
         <textarea
           ref={ref}
+          aria-invalid={invalid ? true : undefined}
+          aria-describedby={hint ? hintId : undefined}
           className={cn(
-            "w-full min-h-[90px] rounded-md border bg-input-background px-3 py-2 text-sm outline-none transition",
-            "border-border text-foreground placeholder:text-muted-foreground",
-            "focus:ring-2 focus:ring-ring focus:border-ring",
-            "dark:bg-input/30 dark:text-foreground dark:border-border dark:focus:ring-ring",
-            invalid &&
-              "border-red-300 focus:border-red-300 focus:ring-red-200 dark:border-red-600 dark:focus:ring-red-900",
-            className
+            "w-full min-h-[90px] rounded-lg bg-input-background px-3 py-2 text-sm outline-none transition",
+            stateClasses,
+            disabledClasses,
+            "focus-ring",
+            className,
           )}
           {...props}
         />
         {hint ? (
           <p
+            id={hintId}
             className={cn(
-              "text-xs",
-              invalid ? "text-red-600 dark:text-red-400" : "text-muted-foreground"
+              "text-xs mt-1",
+              invalid ? "text-destructive-foreground" : "text-muted-foreground",
             )}
           >
             {hint}

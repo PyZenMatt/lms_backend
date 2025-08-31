@@ -1,19 +1,24 @@
 import React from "react";
 import { useAuth } from "../context/AuthContext";
 import { useNavigate, useLocation, Link } from "react-router-dom";
-import { getAccessToken, getRoleFromToken } from "@/lib/auth";
+import { getRoleFromToken } from "@/lib/auth";
 import { Button, Input, Label, Card, CardHeader, CardContent } from "@/components/ds";
-import PageHeader from "@/components/layout/PageHeader";
 
 export default function LoginPage() {
   const { login } = useAuth();
   const nav = useNavigate();
-  const location = useLocation() as any;
+  const location = useLocation() as ReturnType<() => { state?: { from?: { pathname?: string } } }>;
   const from: string | undefined = location?.state?.from?.pathname;
 
   const [ident, setIdent] = React.useState("");
   const [password, setPassword] = React.useState("");
   const [msg, setMsg] = React.useState("");
+  const identRef = React.useRef<HTMLInputElement | null>(null);
+
+  React.useEffect(() => {
+    // Autofocus the first field for keyboard users on mount
+    identRef.current?.focus();
+  }, []);
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -27,19 +32,17 @@ export default function LoginPage() {
       return;
     }
 
-    // Decide la home in base al ruolo
-    const role = getRoleFromToken(getAccessToken());
+  // Decide la home in base al ruolo
+  const role = getRoleFromToken();
     if (role === "admin")      { nav("/admin", { replace: true }); return; }
     if (role === "teacher")    { nav("/teacher", { replace: true }); return; }
     /* student/default */        nav("/dashboard", { replace: true });
   }
 
   return (
-    <>
-      <PageHeader title="Login" subtitle="Bentornato su TeoArt" />
-      <div className="min-h-[calc(100vh-8rem)] flex items-center">
-        <div className="container">
-          <Card className="mx-auto max-w-md">
+    <div className="min-h-screen flex items-center justify-center bg-background">
+      <div className="container">
+        <Card className="mx-auto max-w-md">
             <CardHeader>
               <h1 className="text-xl font-semibold">Accedi</h1>
               <p className="text-sm text-muted-foreground mt-1">Usa le tue credenziali per proseguire</p>
@@ -48,7 +51,7 @@ export default function LoginPage() {
               <form onSubmit={onSubmit} className="mt-2 grid gap-4">
                 <div className="grid gap-2">
                   <Label htmlFor="ident">Email o Username</Label>
-                  <Input id="ident" type="text" autoComplete="username" value={ident} onChange={e=>setIdent(e.target.value)} />
+                  <Input ref={identRef} id="ident" type="text" autoComplete="username" value={ident} onChange={e=>setIdent(e.target.value)} />
                 </div>
                 <div className="grid gap-2">
                   <Label htmlFor="password">Password</Label>
@@ -64,6 +67,5 @@ export default function LoginPage() {
           </Card>
         </div>
       </div>
-    </>
-  );
+    );
 }

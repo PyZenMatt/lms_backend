@@ -113,7 +113,7 @@ export function AuthForms() {
                     />
                   </div>
                   {error && (
-                    <p className="text-sm text-destructive">{error}</p>
+                    <p id="auth-form-error" className="text-sm text-destructive-foreground">{error}</p>
                   )}
                   <Button type="submit" className="w-full" disabled={isLoading}>
                     {isLoading ? "Signing in..." : "Sign In"}
@@ -207,6 +207,7 @@ export function AuthForms() {
                       value={signupForm.password}
                       onChange={(e) => setSignupForm({...signupForm, password: e.target.value})}
                       required
+                      hintId="signup-password-hint"
                     />
                   </div>
                   <div className="space-y-2">
@@ -218,10 +219,11 @@ export function AuthForms() {
                       value={signupForm.confirmPassword}
                       onChange={(e) => setSignupForm({...signupForm, confirmPassword: e.target.value})}
                       required
+                      hintId="signup-confirm-password-hint"
                     />
                   </div>
                   {error && (
-                    <p className="text-sm text-destructive">{error}</p>
+                    <p id="auth-form-error" className="text-sm text-destructive-foreground">{error}</p>
                   )}
                   
                   <div className="bg-gradient-to-r from-purple-50 to-pink-50 p-3 rounded-lg border border-purple-200">

@@ -13,6 +13,8 @@ export type SidebarItem = {
   icon?: React.ReactNode;
   end?: boolean;
   onClick?: () => void;
+  // when true, the icon will be hidden when the sidebar is collapsed
+  hideIconWhenCollapsed?: boolean;
 };
 
 export function Sidebar({
@@ -21,21 +23,41 @@ export function Sidebar({
   collapsed,
   onToggle,
   className,
+  mobileOpen,
+  onMobileClose,
 }: {
   items: SidebarItem[];
   footer?: React.ReactNode;
   collapsed?: boolean;
   onToggle?: (v: boolean) => void;
   className?: string;
+  mobileOpen?: boolean;
+  onMobileClose?: () => void;
 }) {
   return (
     <aside
+      // desktop: md:flex; mobile: fixed drawer when mobileOpen
       className={cn(
-        "hidden h-screen shrink-0 border-r border-[--color-sidebar-border] bg-[--color-sidebar] text-[--color-sidebar-foreground] md:flex md:flex-col",
-        collapsed ? "w-[72px]" : "w-64",
+        // base styles
+        "h-screen shrink-0 border-r border-[--color-sidebar-border] bg-[--color-sidebar] text-[--color-sidebar-foreground]",
+  // desktop layout: hidden on small, flex column on md+
+  "hidden md:flex md:flex-col",
+  // width: tighter collapsed width (w-12 = 48px) to align with toggle button
+  collapsed ? "w-12" : "w-64",
+  // mobile drawer visible when mobileOpen (kept separate from md rules)
+  mobileOpen && "fixed left-0 top-0 z-50 md:hidden translate-x-0 w-64",
         className
       )}
+      aria-hidden={!mobileOpen && undefined}
     >
+      {/* Mobile close overlay: clicking outside should close the drawer on small screens */}
+      {mobileOpen && (
+        <button
+          className="md:hidden absolute left-full top-0 h-full w-8 bg-transparent"
+          onClick={() => onMobileClose?.()}
+          aria-label="Close sidebar"
+        />
+      )}
       <div className="flex h-14 items-center justify-between border-b border-[--color-sidebar-border] px-3">
         <span className={cn("text-sm font-semibold", collapsed && "sr-only")}>SchoolPlatform</span>
         <button
@@ -63,7 +85,10 @@ export function Sidebar({
                     ""
                   )}
                 >
-                  {it.icon && <span className="grid h-5 w-5 place-items-center">{it.icon}</span>}
+                  {/* hide the item icon when collapsed if requested (e.g. Logout emoticon) */}
+                  {it.icon && !(collapsed && it.hideIconWhenCollapsed) && (
+                    <span className="grid h-5 w-5 place-items-center">{it.icon}</span>
+                  )}
                   <span className={cn(collapsed && "sr-only")}>{it.label}</span>
                 </button>
               ) : (
@@ -77,7 +102,9 @@ export function Sidebar({
                     )
                   }
                 >
-                  {it.icon && <span className="grid h-5 w-5 place-items-center">{it.icon}</span>}
+                  {it.icon && !(collapsed && it.hideIconWhenCollapsed) && (
+                    <span className="grid h-5 w-5 place-items-center">{it.icon}</span>
+                  )}
                   <span className={cn(collapsed && "sr-only")}>{it.label}</span>
                 </NavLink>
               )}

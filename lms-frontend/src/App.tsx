@@ -49,13 +49,15 @@ export default function App() {
       <ToastHost />
 
       <Routes>
+        {/* Auth routes - render without AppLayout (no navbar/spacer) */}
+        <Route path="/login" element={<ErrorBoundary><Login /></ErrorBoundary>} />
+        <Route path="/register" element={<ErrorBoundary><Register /></ErrorBoundary>} />
+        <Route path="/verify-email" element={<ErrorBoundary><VerifyEmail /></ErrorBoundary>} />
+        <Route path="/verify-email/sent" element={<ErrorBoundary><VerifyEmailSent /></ErrorBoundary>} />
+
         <Route element={<AppLayoutRoute />}>
           {/* Public */}
           <Route index element={<Navigate to="/courses" replace />} />
-          <Route path="/login" element={<ErrorBoundary><Login /></ErrorBoundary>} />
-          <Route path="/register" element={<ErrorBoundary><Register /></ErrorBoundary>} />
-          <Route path="/verify-email" element={<ErrorBoundary><VerifyEmail /></ErrorBoundary>} />
-          <Route path="/verify-email/sent" element={<ErrorBoundary><VerifyEmailSent /></ErrorBoundary>} />
           <Route path="/forbidden" element={<ErrorBoundary><Forbidden /></ErrorBoundary>} />
           <Route path="/courses" element={<ErrorBoundary><CoursesList /></ErrorBoundary>} />
           <Route path="/_smoke/dropdown" element={<ErrorBoundary><DropdownSmoke /></ErrorBoundary>} />
