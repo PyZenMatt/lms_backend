@@ -33,5 +33,9 @@
     "noFallthroughCasesInSwitch": true,
     "noUncheckedSideEffectImports": true
   },
-  "include": ["src"]
+  "include": ["src"],
+  "exclude": [
+    "src/components/figma/demo/**",
+    "src/components/figma/ui/chart.tsx"
+  ]
 }

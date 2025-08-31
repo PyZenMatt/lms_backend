@@ -9,10 +9,6 @@ type Toast = {
   duration?: number; // ms
 };
 
-export function showToast(payload: Omit<Toast, "id">) {
-  window.dispatchEvent(new CustomEvent("toast:show", { detail: payload }));
-}
-
 export default function ToastHost() {
   const [toasts, setToasts] = React.useState<Toast[]>([]);
 
@@ -50,7 +46,7 @@ export default function ToastHost() {
       {toasts.map((t) => (
         <div
           key={t.id}
-          className={`w-full max-w-md rounded-md px-4 py-3 shadow-lg ${variantClasses(t.variant)}`}
+          className={`w-full max-w-md rounded-md px-4 py-3 shadow-card ${variantClasses(t.variant)}`}
           role="status"
           aria-live="polite"
         >

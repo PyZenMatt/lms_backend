@@ -2,7 +2,7 @@ import React from "react";
 import { useAuth } from "../../context/AuthContext";
 import { getStakingOverview, stakeTeo, unstakeTeo } from "../../services/payments";
 import type { StakingOverview } from "../../services/payments";
-import { showToast } from "../../components/ToastHost";
+import { showToast } from "@/lib/toast";
 
 export default function StakingPage() {
   const { isAuthenticated, isTeacher } = useAuth();

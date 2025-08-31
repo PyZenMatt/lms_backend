@@ -94,19 +94,19 @@ export default function TeacherDashboard() {
 
       {/* Metriche */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <div className="rounded-2xl border p-4">
+        <div className="rounded-lg border p-4">
           <div className="text-sm text-muted-foreground">Corsi totali</div>
           <div className="mt-1 text-2xl font-semibold">{stat(stats?.total_courses)}</div>
         </div>
-        <div className="rounded-2xl border p-4">
+        <div className="rounded-lg border p-4">
           <div className="text-sm text-muted-foreground">Studenti totali</div>
           <div className="mt-1 text-2xl font-semibold">{stat(stats?.total_students)}</div>
         </div>
-        <div className="rounded-2xl border p-4">
+        <div className="rounded-lg border p-4">
           <div className="text-sm text-muted-foreground">Prezzo medio</div>
           <div className="mt-1 text-2xl font-semibold">{fmtEUR(stats?.avg_price_eur ?? null)}</div>
         </div>
-        <div className="rounded-2xl border p-4">
+        <div className="rounded-lg border p-4">
           <div className="text-sm text-muted-foreground">Corsi in revisione</div>
           <div className="mt-1 text-2xl font-semibold">{stat(stats?.pending_courses)}</div>
         </div>
@@ -128,8 +128,8 @@ export default function TeacherDashboard() {
           {items.map((c) => {
             const cover = c.cover_image ?? c.cover_url;
             return (
-              <a key={c.id} href={`/courses/${c.id}`} className="block rounded-2xl border p-4 hover:shadow-sm">
-                {cover && <img src={cover} alt="" className="mb-3 aspect-[16/9] w-full rounded-xl object-cover" />}
+        <a key={c.id} href={`/courses/${c.id}`} className="block rounded-lg border p-4 hover:shadow-card">
+          {cover && <img src={cover} alt="" className="mb-3 aspect-[16/9] w-full rounded-lg object-cover" />}
                 <h3 className="line-clamp-2 text-lg font-semibold">{c.title}</h3>
                 <div className="mt-1 text-sm text-muted-foreground">{c.description ?? "—"}</div>
                 <div className="mt-2 font-medium">{fmtEUR(c.price_eur)}</div>

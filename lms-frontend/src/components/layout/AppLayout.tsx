@@ -1,6 +1,5 @@
 import * as React from "react";
 import { Sidebar, type SidebarItem } from "@/components/ui/sidebar";
-import { cn } from "@/lib/utils";
 import ThemeToggle from "@/components/ThemeToggle";
 import NotificationsBell from "@/components/NotificationsBell";
 import TeacherDecisionNav from "@/components/teo/TeacherDecisionNav";
@@ -97,7 +96,7 @@ export default function AppLayout({
         <main className="flex-1 py-6">
           <div className="container">
             {/* Topbar with toggles */}
-            <div className="h-14 flex items-center px-4 border-b border-border shadow-sm bg-card/60 backdrop-blur">
+            <div className="h-14 flex items-center px-4 border-b border-border shadow-card bg-card/60 backdrop-blur">
               <div className="flex items-center gap-2">
                 <button
                   className="inline-flex items-center justify-center rounded-md border border-border px-2 py-1 text-sm md:hidden focus-visible:outline-none focus-visible:shadow-focus"

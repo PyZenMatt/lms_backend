@@ -87,7 +87,7 @@ export function Dashboard({ onContinueCourse, onNavigateToPage }: DashboardProps
         <div className="lg:col-span-2 space-y-4">
           <h3>Continue Learning</h3>
           <div className="space-y-3">
-            <Card className="cursor-pointer hover:shadow-md transition-shadow">
+            <Card className="cursor-pointer hover:shadow-card transition-shadow">
               <CardContent className="p-4">
                 <div className="flex gap-4">
                   <ImageWithFallback 
@@ -115,7 +115,7 @@ export function Dashboard({ onContinueCourse, onNavigateToPage }: DashboardProps
               </CardContent>
             </Card>
 
-            <Card className="cursor-pointer hover:shadow-md transition-shadow">
+            <Card className="cursor-pointer hover:shadow-card transition-shadow">
               <CardContent className="p-4">
                 <div className="flex gap-4">
                   <ImageWithFallback 

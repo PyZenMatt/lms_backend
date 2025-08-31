@@ -1,6 +1,6 @@
 // src/services/payments.ts
 import { api } from "../lib/api"
-import { showToast } from "../components/ToastHost"
+import { showToast } from "@/lib/toast"
 
 /** =========================
  *  Tipi e helper comuni

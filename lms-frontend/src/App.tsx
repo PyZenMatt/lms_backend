@@ -35,6 +35,7 @@ import CourseBuilder from "./pages/studio/CourseBuilder"
 import { useParams } from "react-router-dom";
 import WalletPage from "./pages/WalletPage";
 import PendingDiscountsPage from "./features/discounts/pages/PendingDiscountsPage";
+import DropdownSmoke from "./pages/_smoke/DropdownSmoke";
 
 function BuyRedirect() {
   const { id } = useParams();
@@ -57,6 +58,7 @@ export default function App() {
           <Route path="/verify-email/sent" element={<ErrorBoundary><VerifyEmailSent /></ErrorBoundary>} />
           <Route path="/forbidden" element={<ErrorBoundary><Forbidden /></ErrorBoundary>} />
           <Route path="/courses" element={<ErrorBoundary><CoursesList /></ErrorBoundary>} />
+          <Route path="/_smoke/dropdown" element={<ErrorBoundary><DropdownSmoke /></ErrorBoundary>} />
           <Route path="/courses/:id" element={<ErrorBoundary><CourseDetail /></ErrorBoundary>} />
 
           <Route

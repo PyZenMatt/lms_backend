@@ -6,6 +6,7 @@
 // - Handles 401 → refresh token (once) via `${BASE}${API_REFRESH_PATH}`.
 
 import eventBus from "./eventBus";
+import { showToast as showToastLocal } from "./toast";
 
 export type ApiResult<T = any> = {
   ok: boolean;
@@ -358,7 +359,16 @@ if (typeof window !== "undefined") {
 
 export function showToast(opts: ToastOptions) {
   try {
-    if (typeof runtimeShowToast === "function") runtimeShowToast(opts);
+    if (typeof runtimeShowToast === "function") {
+      runtimeShowToast(opts);
+      return;
+    }
+    // Fallback to local toast helper so callers using lib/api.showToast still work
+    try {
+      showToastLocal({ message: opts.message, variant: opts.variant, title: opts.title });
+    } catch {
+      // swallow
+    }
   } catch {
     // swallow errors in environments without a ToastHost
   }
