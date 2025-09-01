@@ -4,4 +4,4 @@
   This aligns with @tailwindcss/postcss (v4) where @import "tailwindcss" composes layers internally. */
 @import "tailwindcss";
 @import "./theme/globals.css";
-
+/* Load app-level overrides last to avoid shadowing tokens/utilities */

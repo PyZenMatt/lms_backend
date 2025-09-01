@@ -10,6 +10,8 @@ import {
   getAccessToken,
   type Tokens,
 } from "../lib/auth";
+import { getProfile } from "../services/profile";
+import { getDbWallet } from "../services/wallet";
 
 type Role = "student" | "teacher" | "admin" | null;
 
@@ -99,6 +101,26 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           }
         } catch {}
       }
+      // attempt to populate local UI-friendly user cache so legacy figma shim components
+      // (which read `localStorage.artlearn_user`) display real data in the sidebar.
+      try {
+        const profile = await getProfile();
+        if (profile) {
+          const walletRes = await getDbWallet();
+          const tokensCount = walletRes.ok ? (walletRes.data.balance_teo ?? 0) : 0;
+          const profileRec = profile as Record<string, unknown>;
+          const artUser = {
+            id: profileRec?.id ? String(profileRec.id) : (profile.username ?? profile.email ?? ""),
+            name: (profile.username ?? ((`${profile.first_name ?? ""} ${profile.last_name ?? ""}`).trim() || profile.email || "User")),
+            email: profile.email ?? "",
+            role: profile.role ?? r ?? "student",
+            tokens: Number.isFinite(Number(tokensCount)) ? Number(tokensCount) : 0,
+            avatar: profile.avatar ?? null,
+            walletAddress: profile.wallet_address ?? (walletRes.ok ? walletRes.data.address ?? null : null),
+          };
+          try { localStorage.setItem("artlearn_user", JSON.stringify(artUser)); } catch (e) { console.debug('[Auth] save artlearn_user failed', e); }
+        }
+  } catch (err) { console.debug('[Auth] profile sync failed', err); }
       setAuth({ booting: false, isAuthenticated: true, role: r });
     })();
   }, []);
@@ -117,6 +139,25 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
     const finalRole = roleArg ?? getRoleFromToken();
     setAuth({ booting: false, isAuthenticated: !unverified, role: finalRole });
+    // populate artlearn_user so legacy UI components (figma shim) pick up real data
+    try {
+      const profile = await getProfile();
+      if (profile) {
+        const walletRes = await getDbWallet();
+        const tokensCount = walletRes.ok ? (walletRes.data.balance_teo ?? 0) : 0;
+        const profileRec = profile as Record<string, unknown>;
+        const artUser = {
+          id: profileRec?.id ? String(profileRec.id) : (profile.username ?? profile.email ?? ""),
+          name: (profile.username ?? ((`${profile.first_name ?? ""} ${profile.last_name ?? ""}`).trim() || profile.email || "User")),
+          email: profile.email ?? "",
+          role: profile.role ?? finalRole ?? "student",
+          tokens: Number.isFinite(Number(tokensCount)) ? Number(tokensCount) : 0,
+          avatar: profile.avatar ?? null,
+          walletAddress: profile.wallet_address ?? (walletRes.ok ? walletRes.data.address ?? null : null),
+        };
+        try { localStorage.setItem("artlearn_user", JSON.stringify(artUser)); } catch (e) { console.debug('[Auth] save artlearn_user failed', e); }
+      }
+  } catch (err) { console.debug('[Auth] postAuth profile sync failed', err); }
     if (unverified) {
       try {
         navigate("/verify-email/sent", { replace: true });
@@ -171,13 +212,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         const data = await res.json();
         setAuth((s) => ({ ...s, role: (data?.role as Role) ?? s.role }));
       }
-    } catch {}
+  } catch (e) { console.debug('[Auth] redirectAfterAuth navigate failed', e); }
   }, []);
 
   const setSession = React.useCallback((tokens: Tokens, roleArg?: Role) => {
     try {
       saveTokens(tokens);
-    } catch {}
+  } catch (e) { console.debug('[Auth] login role fetch failed', e); }
     const finalRole = roleArg ?? getRoleFromToken();
     setAuth({ booting: false, isAuthenticated: true, role: finalRole });
   }, []);

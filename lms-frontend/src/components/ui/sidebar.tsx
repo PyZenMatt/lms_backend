@@ -2,6 +2,7 @@ import * as React from "react";
 import { /* NavLink */ } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { useFocusTrap } from "./useFocusTrap";
+import { useScrollLock } from "./useScrollLock";
 import type { MenuSection as MenuSectionType } from "@/components/ui/getMenuByRole";
 import { AppSidebar } from "@/components/figma/AppSidebar";
 import { SidebarProvider } from "@/components/figma/ui/sidebar";
@@ -60,7 +61,18 @@ export function Sidebar(props: {
   const drawerRef = React.useRef<HTMLDivElement | null>(null);
 
   // apply focus trap when mobile drawer is open
-  useFocusTrap(drawerRef.current, { onClose: () => onMobileClose?.() });
+  useFocusTrap(mobileOpen ? drawerRef.current : null, { onClose: () => onMobileClose?.() });
+  // lock body scroll while mobile drawer is open
+  useScrollLock(mobileOpen);
+
+  // when opening on mobile, move focus to the (visually hidden) close button
+  React.useEffect(() => {
+    if (mobileOpen) {
+      try {
+        closeButtonRef.current?.focus();
+      } catch {}
+    }
+  }, [mobileOpen]);
 
   // matchIsActive is no longer needed because menu is rendered by AppSidebar (figma)
 
@@ -94,24 +106,21 @@ export function Sidebar(props: {
       )}
 
   <aside
-        // desktop: md:flex; mobile: fixed drawer when mobileOpen
         className={cn(
-          // base styles
-            "h-screen border-r border-[--color-sidebar-border] bg-[--color-sidebar] text-[--color-sidebar-foreground]",
-          // desktop layout: hidden on small, flex column on md+
-          "hidden md:flex md:flex-col",
-          // animate width when collapsing/expanding
+          // base colors and border
+          "border-r border-[--color-sidebar-border] bg-[--color-sidebar] text-[--color-sidebar-foreground]",
+          // desktop: visible as column; mobile: hidden unless mobileOpen
+          mobileOpen
+            ? "fixed left-0 top-0 z-50 md:hidden flex flex-col h-[100svh]"
+            : "hidden md:flex md:flex-col md:h-screen",
+          // animate width when collapsing/expanding on desktop
           "transition-[width] duration-200 ease-in-out",
-    // NOTE: outer aside reserves the expanded width on desktop to prevent main reflow.
-    // The inner container animates between collapsed/expanded visually.
-    // mobile drawer visible when mobileOpen (kept separate from md rules)
-    mobileOpen && "fixed left-0 top-0 z-50 md:hidden translate-x-0",
-    className
+          className
         )}
         id="site-sidebar"
         ref={drawerRef}
-    // reserve expanded width on desktop (prevents layout shift)
-    style={{ width: `${mobileOpen ? innerWidth : SIDEBAR_WIDTH_EXPANDED}px` }}
+        // reserve expanded width on desktop (prevents layout shift)
+        style={{ width: `${mobileOpen ? innerWidth : SIDEBAR_WIDTH_EXPANDED}px` }}
         data-state={collapsed ? "collapsed" : "expanded"}
         role="navigation"
         aria-label="Primary"
@@ -130,7 +139,13 @@ export function Sidebar(props: {
       {/* inner visual rail: animates width to collapsed/expanded while outer aside reserves space */}
       <div
         className="flex-1 overflow-y-auto p-0"
-        style={{ width: `${innerWidth}px`, transition: "width 200ms ease-in-out" }}
+        // include safe-area padding for notch/home indicator
+        style={{
+          width: `${innerWidth}px`,
+          transition: "width 200ms ease-in-out",
+          paddingTop: "env(safe-area-inset-top)",
+          paddingBottom: "env(safe-area-inset-bottom)",
+        }}
       >
         <SidebarProvider open={!collapsed}>
           <AppSidebar currentPage={currentPage} onPageChange={onPageChange} />

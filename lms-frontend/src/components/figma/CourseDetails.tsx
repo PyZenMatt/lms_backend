@@ -172,7 +172,7 @@ export function CourseDetails({ courseId, onBack, onEdit }: CourseDetailsProps) 
           </Button>
           <div>
             <h1>{course.title}</h1>
-            <div className="flex items-center gap-4 font-size: var(--text-sm) text-muted-foreground">
+            <div className="flex items-center gap-4 text-sm text-muted-foreground">
               <Badge variant={course.status === 'published' ? 'default' : 'secondary'}>
                 {course.status}
               </Badge>
@@ -202,7 +202,7 @@ export function CourseDetails({ courseId, onBack, onEdit }: CourseDetailsProps) 
                 <Users className="size-5 text-blue-600" />
               </div>
               <div>
-                <p className="font-size: var(--text-sm) text-muted-foreground">Enrolled Students</p>
+                <p className="text-sm text-muted-foreground">Enrolled Students</p>
                 <p className="text-2xl font-medium">{course.students}</p>
               </div>
             </div>
@@ -215,7 +215,7 @@ export function CourseDetails({ courseId, onBack, onEdit }: CourseDetailsProps) 
                 <TrendingUp className="size-5 text-green-600" />
               </div>
               <div>
-                <p className="font-size: var(--text-sm) text-muted-foreground">Completion Rate</p>
+                <p className="text-sm text-muted-foreground">Completion Rate</p>
                 <p className="text-2xl font-medium">{course.completionRate}%</p>
               </div>
             </div>
@@ -228,7 +228,7 @@ export function CourseDetails({ courseId, onBack, onEdit }: CourseDetailsProps) 
                 <Star className="size-5 text-purple-600" />
               </div>
               <div>
-                <p className="font-size: var(--text-sm) text-muted-foreground">Average Rating</p>
+                <p className="text-sm text-muted-foreground">Average Rating</p>
                 <p className="text-2xl font-medium">{course.rating}</p>
               </div>
             </div>
@@ -241,7 +241,7 @@ export function CourseDetails({ courseId, onBack, onEdit }: CourseDetailsProps) 
                 <Clock className="size-5 text-amber-600" />
               </div>
               <div>
-                <p className="font-size: var(--text-sm) text-muted-foreground">Avg. Completion</p>
+                <p className="text-sm text-muted-foreground">Avg. Completion</p>
                 <p className="text-2xl font-medium">{course.avgCompletionTime}</p>
               </div>
             </div>
@@ -271,7 +271,7 @@ export function CourseDetails({ courseId, onBack, onEdit }: CourseDetailsProps) 
                   className="w-full h-48 rounded-lg object-cover"
                 />
                 <div className="space-y-2">
-                  <p className="font-size: var(--text-sm)">{course.description}</p>
+                  <p className="text-sm">{course.description}</p>
                   <div className="flex flex-wrap gap-2">
                     <Badge variant="outline" className="capitalize">{course.level}</Badge>
                     <Badge variant="outline">{course.duration}</Badge>
@@ -306,10 +306,10 @@ export function CourseDetails({ courseId, onBack, onEdit }: CourseDetailsProps) 
                       )}
                     </div>
                     <div>
-                      <p className="font-size: var(--text-sm) font-medium">
+                      <p className="text-sm font-medium">
                         {activity.student} {activity.action}
                       </p>
-                      <p className="font-size: var(--text-xs) text-muted-foreground">{activity.time}</p>
+                      <p className="text-xs text-muted-foreground">{activity.time}</p>
                     </div>
                   </div>
                 ))}
@@ -335,7 +335,7 @@ export function CourseDetails({ courseId, onBack, onEdit }: CourseDetailsProps) 
                       </Avatar>
                       <div>
                         <h4 className="font-medium">{student.name}</h4>
-                        <p className="font-size: var(--text-sm) text-muted-foreground">
+                        <p className="text-sm text-muted-foreground">
                           Joined {student.joinedDate} • Last active {student.lastActive}
                         </p>
                       </div>
@@ -343,8 +343,8 @@ export function CourseDetails({ courseId, onBack, onEdit }: CourseDetailsProps) 
                     <div className="text-right space-y-2">
                       <div className="flex items-center gap-3">
                         <div className="text-right">
-                          <p className="font-size: var(--text-sm) font-medium">{student.progress}% Complete</p>
-                          <p className="font-size: var(--text-xs) text-muted-foreground">
+                          <p className="text-sm font-medium">{student.progress}% Complete</p>
+                          <p className="text-xs text-muted-foreground">
                             {student.completedLessons}/{student.totalLessons} lessons
                           </p>
                         </div>
@@ -384,7 +384,7 @@ export function CourseDetails({ courseId, onBack, onEdit }: CourseDetailsProps) 
                       </div>
                       <div>
                         <h4 className="font-medium">{index + 1}. {lesson.title}</h4>
-                        <div className="flex items-center gap-4 font-size: var(--text-sm) text-muted-foreground">
+                        <div className="flex items-center gap-4 text-sm text-muted-foreground">
                           <span>{lesson.studentsCompleted}/{lesson.totalStudents} completed</span>
                           <span>Avg: {lesson.avgTimeSpent}</span>
                           {lesson.exerciseSubmissions > 0 && (
@@ -395,7 +395,7 @@ export function CourseDetails({ courseId, onBack, onEdit }: CourseDetailsProps) 
                     </div>
                     <div className="flex items-center gap-4">
                       <div className="text-right">
-                        <p className="font-size: var(--text-sm) font-medium">{lesson.completionRate}%</p>
+                        <p className="text-sm font-medium">{lesson.completionRate}%</p>
                         <Progress value={lesson.completionRate} className="h-1 w-16" />
                       </div>
                       <div className="flex items-center gap-2">
@@ -424,19 +424,19 @@ export function CourseDetails({ courseId, onBack, onEdit }: CourseDetailsProps) 
               <CardContent className="space-y-4">
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
-                    <span className="font-size: var(--text-sm)">Average Session Time</span>
+                    <span className="text-sm">Average Session Time</span>
                     <span className="font-medium">24 minutes</span>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="font-size: var(--text-sm)">Course Completion Rate</span>
+                    <span className="text-sm">Course Completion Rate</span>
                     <span className="font-medium">{course.completionRate}%</span>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="font-size: var(--text-sm)">Exercise Submission Rate</span>
+                    <span className="text-sm">Exercise Submission Rate</span>
                     <span className="font-medium">85%</span>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="font-size: var(--text-sm)">Peer Review Participation</span>
+                    <span className="text-sm">Peer Review Participation</span>
                     <span className="font-medium">72%</span>
                   </div>
                 </div>
@@ -451,22 +451,22 @@ export function CourseDetails({ courseId, onBack, onEdit }: CourseDetailsProps) 
               <CardContent className="space-y-4">
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
-                    <span className="font-size: var(--text-sm)">Student Satisfaction</span>
+                    <span className="text-sm">Student Satisfaction</span>
                     <div className="flex items-center gap-1">
                       <Star className="size-4 fill-yellow-400 text-yellow-400" />
                       <span className="font-medium">{course.rating}/5</span>
                     </div>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="font-size: var(--text-sm)">Enrollment Growth</span>
+                    <span className="text-sm">Enrollment Growth</span>
                     <span className="font-medium text-green-600">+15% this month</span>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="font-size: var(--text-sm)">Community Engagement</span>
+                    <span className="text-sm">Community Engagement</span>
                     <span className="font-medium">High</span>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="font-size: var(--text-sm)">Tokens Distributed</span>
+                    <span className="text-sm">Tokens Distributed</span>
                     <span className="font-medium">2,847 ✨</span>
                   </div>
                 </div>

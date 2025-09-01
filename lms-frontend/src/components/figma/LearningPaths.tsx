@@ -1,5 +1,5 @@
-import { useState } from "react"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/card"
+import { useState, useEffect, useCallback } from "react"
+import { Card, CardContent } from "./ui/card"
 import { Button } from "./ui/button"
 import { Badge } from "./ui/badge"
 import { Progress } from "./ui/progress"
@@ -12,18 +12,17 @@ import {
   Users, 
   Star, 
   Search,
-  Filter,
   Play,
-  CheckCircle,
   Lock,
   Award,
-  Target,
-  Palette,
   GraduationCap
 } from "lucide-react"
 import { useAuth } from "./AuthContext"
 import { ImageWithFallback } from "./figma/ImageWithFallback"
 import { toast } from "sonner"
+import { listCourses } from "@/services/courses"
+import { getEnrolledCourses } from "@/services/student"
+import { enrollInCourse } from "@/services/enrollment"
 
 interface Course {
   id: string
@@ -58,125 +57,93 @@ export function LearningPaths({ onContinueCourse }: LearningPathsProps) {
   const [selectedCategory, setSelectedCategory] = useState("all")
   const [activeTab, setActiveTab] = useState("browse")
 
-  // Mock courses data
-  const allCourses: Course[] = [
-    {
-      id: '1',
-      title: 'Digital Painting Fundamentals',
-      description: 'Master the basics of digital art creation with professional techniques and industry-standard workflows.',
-      instructor: 'Prof. Sarah Mitchell',
-      instructorAvatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=40&h=40&fit=crop&crop=face',
-      thumbnail: 'https://images.unsplash.com/photo-1513475382585-d06e58bcb0e0?w=400&h=300&fit=crop',
-      level: 'beginner',
-      duration: '8 weeks',
-      lessons: 24,
-      students: 1247,
-      rating: 4.8,
-      reviews: 156,
-      price: 0,
-      tokens: 120,
-      category: 'Digital Art',
-      tags: ['Digital Painting', 'Fundamentals', 'Beginner-friendly'],
-      enrolled: true,
-      progress: 65,
-      featured: true
-    },
-    {
-      id: '2',
-      title: 'Character Design Workshop',
-      description: 'Create compelling characters from concept to final render with professional character design techniques.',
-      instructor: 'Maya Rodriguez',
-      instructorAvatar: 'https://images.unsplash.com/photo-1494790108755-2616b612b789?w=40&h=40&fit=crop&crop=face',
-      thumbnail: 'https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=400&h=300&fit=crop',
-      level: 'intermediate',
-      duration: '6 weeks',
-      lessons: 18,
-      students: 892,
-      rating: 4.9,
-      reviews: 124,
-      price: 0,
-      tokens: 150,
-      category: 'Character Design',
-      tags: ['Character Design', 'Storytelling', 'Intermediate'],
-      enrolled: true,
-      progress: 30
-    },
-    {
-      id: '3',
-      title: 'Advanced Color Theory',
-      description: 'Deep dive into color psychology and advanced color techniques for professional artwork.',
-      instructor: 'Dr. James Park',
-      instructorAvatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=40&h=40&fit=crop&crop=face',
-      thumbnail: 'https://images.unsplash.com/photo-1541961017774-22349e4a1262?w=400&h=300&fit=crop',
-      level: 'advanced',
-      duration: '4 weeks',
-      lessons: 12,
-      students: 567,
-      rating: 4.7,
-      reviews: 89,
-      price: 0,
-      tokens: 100,
-      category: 'Color Theory',
-      tags: ['Color Theory', 'Advanced', 'Psychology'],
-      featured: true
-    },
-    {
-      id: '4',
-      title: 'Environment Art Masterclass',
-      description: 'Learn to create stunning environments and landscapes for games, films, and concept art.',
-      instructor: 'Alex Chen',
-      instructorAvatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=40&h=40&fit=crop&crop=face',
-      thumbnail: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&h=300&fit=crop',
-      level: 'intermediate',
-      duration: '10 weeks',
-      lessons: 30,
-      students: 623,
-      rating: 4.6,
-      reviews: 78,
-      price: 0,
-      tokens: 200,
-      category: 'Environment Art',
-      tags: ['Environment', 'Landscapes', 'Concept Art']
-    },
-    {
-      id: '5',
-      title: 'Portrait Drawing Basics',
-      description: 'Master the fundamentals of portrait drawing with traditional and digital techniques.',
-      instructor: 'Emma Thompson',
-      instructorAvatar: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=40&h=40&fit=crop&crop=face',
-      thumbnail: 'https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=400&h=300&fit=crop',
-      level: 'beginner',
-      duration: '5 weeks',
-      lessons: 15,
-      students: 934,
-      rating: 4.5,
-      reviews: 112,
-      price: 0,
-      tokens: 80,
-      category: 'Drawing',
-      tags: ['Portrait', 'Drawing', 'Traditional']
-    },
-    {
-      id: '6',
-      title: 'Animation Principles',
-      description: 'Learn the 12 principles of animation and create your first animated sequences.',
-      instructor: 'Carlos Rivera',
-      instructorAvatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=40&h=40&fit=crop&crop=face',
-      thumbnail: 'https://images.unsplash.com/photo-1626785774573-4b799315345d?w=400&h=300&fit=crop',
-      level: 'intermediate',
-      duration: '8 weeks',
-      lessons: 22,
-      students: 445,
-      rating: 4.8,
-      reviews: 67,
-      price: 0,
-      tokens: 180,
-      category: 'Animation',
-      tags: ['Animation', 'Motion', 'Principles']
-    }
-  ]
+  // stateful lists populated from API
+  const [allCourses, setAllCourses] = useState<Course[]>([])
+  const [enrolledCourses, setEnrolledCourses] = useState<Course[]>([])
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
-  const enrolledCourses = allCourses.filter(course => course.enrolled)
+  // helper to map API course shape to UI Course
+  const mapApiToUi = useCallback((c: Record<string, unknown>): Course => {
+    const getStr = (k: string) => {
+      const v = c[k]
+      return typeof v === "string" ? v : undefined
+    }
+    const getNum = (k: string) => {
+      const v = c[k]
+      return typeof v === "number" ? v : undefined
+    }
+
+    const idRaw = c["id"] ?? c["course_id"]
+    const id = typeof idRaw === "string" || typeof idRaw === "number" ? String(idRaw) : ""
+
+    const levelRaw = c["level"]
+    const level = (typeof levelRaw === "string" && (levelRaw === "beginner" || levelRaw === "intermediate" || levelRaw === "advanced")) ? (levelRaw as 'beginner' | 'intermediate' | 'advanced') : 'beginner'
+
+    const tokensRaw = c["tokens"] ?? c["token_cost"] ?? c["price_tokens"]
+    const tokens = typeof tokensRaw === "number" ? tokensRaw : 0
+
+    const progressRaw = c["progress_percent"] ?? c["progress"]
+    const progress = typeof progressRaw === "number" ? progressRaw : undefined
+
+    return {
+      id,
+      title: getStr("title") ?? getStr("name") ?? "",
+      description: getStr("description") ?? "",
+      instructor: getStr("instructor") ?? getStr("instructor_name") ?? "",
+      instructorAvatar: getStr("instructor_avatar") ?? getStr("instructorAvatar") ?? "",
+      thumbnail: getStr("cover_url") ?? getStr("cover_image") ?? getStr("thumbnail") ?? "",
+      level,
+      duration: getStr("duration") ?? `${getNum("lessons_count") ?? getNum("lessons") ?? 0} lessons`,
+      lessons: getNum("lessons_count") ?? getNum("lessons") ?? 0,
+      students: getNum("students_count") ?? getNum("students") ?? 0,
+      rating: getNum("rating") ?? 0,
+      reviews: getNum("reviews") ?? 0,
+      price: (getNum("price") ?? getNum("price_eur") ?? 0) as number,
+      tokens,
+      category: getStr("category") ?? getStr("category_name") ?? "",
+      tags: Array.isArray(c["tags"]) ? (c["tags"] as string[]) : [],
+      enrolled: !!(c["enrolled"] || c["is_enrolled"] || progress !== undefined),
+      progress,
+      featured: !!c["featured"],
+    }
+  }, [])
+
+  // load courses from API
+  useEffect(() => {
+    let mounted = true
+    ;(async () => {
+      setLoading(true)
+      try {
+        const allRes = await listCourses({ page: 1, page_size: 100 })
+        if (!mounted) return
+        if (allRes.ok) {
+          const mapped = allRes.data.map(mapApiToUi)
+          setAllCourses(mapped)
+        }
+
+        const enrolledRes = await getEnrolledCourses(1, 100)
+        if (!mounted) return
+        if (enrolledRes.ok) {
+          const mappedEnrolled = enrolledRes.data.items.map(mapApiToUi)
+          setEnrolledCourses(mappedEnrolled)
+          // mark enrolled in allCourses list if needed
+          setAllCourses(prev => {
+            const byId = new Map(prev.map(p => [p.id, p]))
+            mappedEnrolled.forEach(e => byId.set(e.id, { ...(byId.get(e.id) ?? e), enrolled: true, progress: e.progress }))
+            return Array.from(byId.values())
+          })
+        }
+      } catch (err: unknown) {
+        if (err instanceof Error) setError(err.message)
+        else setError(String(err))
+      } finally {
+        setLoading(false)
+      }
+    })()
+    return () => { mounted = false }
+  }, [mapApiToUi])
+
   const availableCourses = allCourses.filter(course => !course.enrolled)
   const featuredCourses = allCourses.filter(course => course.featured)
 
@@ -194,12 +161,30 @@ export function LearningPaths({ onContinueCourse }: LearningPathsProps) {
 
   const handleEnrollCourse = (courseId: string) => {
     const course = allCourses.find(c => c.id === courseId)
-    if (course && user) {
+    if (!course) return
+    if (!user) {
+      toast.error("You must be logged in to enroll in a course")
+      return
+    }
+
+    ;(async () => {
+      setLoading(true)
+      const res = await enrollInCourse(courseId)
+      setLoading(false)
+      if (!res.ok) {
+        toast.error(`Enrollment failed (HTTP ${res.status})`)
+        return
+      }
+
+      // update UI state: mark as enrolled and add to enrolled list
+      const updated = { ...course, enrolled: true, progress: course.progress ?? 0 }
+      setAllCourses(prev => prev.map(p => (p.id === courseId ? updated : p)))
+      setEnrolledCourses(prev => [updated, ...prev])
       updateTokens(-course.tokens)
       toast(`Enrolled in ${course.title}!`, {
         description: `You've spent ${course.tokens} ✨ tokens. Start learning now!`
       })
-    }
+    })()
   }
 
   const handleContinueCourse = (courseId: string) => {

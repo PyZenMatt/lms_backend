@@ -76,9 +76,7 @@ export default function AppLayout({ children }: { children?: React.ReactNode }) 
   if (isAuthRoute) {
     return (
       <div className="min-h-screen bg-background text-foreground">
-        <main className="w-full">
-          <div className="container">{children}</div>
-        </main>
+        <main className="w-full px-4 lg:px-6">{children}</main>
       </div>
     );
   }
@@ -139,7 +137,7 @@ export default function AppLayout({ children }: { children?: React.ReactNode }) 
           <div className="flex-1 flex flex-col min-h-0">
           {/* Header: use Figma Menubar styling 1:1 (minimal content, no subcomponents) */}
           <header className="sticky top-0 z-40 border-b border-border bg-card/60 backdrop-blur w-full">
-            <div className="flex h-14 items-center px-4 lg:px-6">
+            <div className={"w-full flex h-14 items-center px-4 lg:px-6 transition-[padding-left] duration-200 " + (collapsed ? "pl-0" : "pl-[var(--sidebar-width)]") }>
               <SidebarTrigger className="mr-4" />
               <div className="flex-1" />
               <div className="flex items-center gap-4">
@@ -200,15 +198,16 @@ export default function AppLayout({ children }: { children?: React.ReactNode }) 
             </div>
           </header>
 
-          <main className="flex-1 py-6 overflow-auto">
-            <div className="container app-container">{children}</div>
+          <main className="flex-1 overflow-auto">
+            <div className={"w-full py-6 px-4 lg:px-6 transition-[padding-left] duration-200 " + (collapsed ? "pl-0" : "pl-[var(--sidebar-width)]")}>
+              <div className="max-w-[1280px] mx-auto">{children}</div>
+            </div>
           </main>
         </div>
       </SidebarProvider>
     <footer className="border-t border-border bg-card/40 w-full">
-        <div className="container h-12 flex items-center">{/* footer */}</div>
+  <div className="w-full max-w-[1280px] mx-auto h-12 flex items-center px-4 lg:px-6">{/* footer */}</div>
       </footer>
     </div>
   );
 }
-

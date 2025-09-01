@@ -24,8 +24,12 @@
     --text-4xl: 2.25rem;    --leading-4xl: 2.5rem;   /* 36/40 */
     --weight-regular: 400;
     --weight-medium: 500;
-    --weight-semibold: 600;
-    --weight-bold: 700;
+  --weight-semibold: 600;
+  --weight-bold: 700;
+  /* Canonical font weight tokens used by base typography rules */
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-bold: 700;
   --card: #ffffff;
   --card-foreground: oklch(0.145 0 0);
   --popover: oklch(1 0 0);
@@ -44,8 +48,10 @@
   --input: transparent;
   --input-background: #f3f3f5;
     --color-overlay: #000000; /* Overlay color token for overlay usage */
+  /* duplicate for compatibility with components expecting these names */
   --font-weight-medium: 500;
   --font-weight-normal: 400;
+  --font-weight-bold: 700;
   --ring: oklch(0.708 0 0);
   --chart-1: oklch(0.646 0.222 41.116);
   --chart-2: oklch(0.6 0.118 184.704);
@@ -125,6 +131,7 @@
   --ring: oklch(0.439 0 0);
   --font-weight-medium: 500;
   --font-weight-normal: 400;
+  --font-weight-bold: 700;
   --chart-1: oklch(0.488 0.243 264.376);
   --chart-2: oklch(0.696 0.17 162.48);
   --chart-3: oklch(0.769 0.188 70.08);
@@ -203,6 +210,8 @@
   --color-chart-3: var(--chart-3);
   --color-chart-4: var(--chart-4);
   --color-chart-5: var(--chart-5);
+  /* Radii used by Figma components (includes xs for rounded-xs) */
+  --radius-xs: calc(var(--radius) - 6px);
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
@@ -219,6 +228,16 @@
   );
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
+
+  /* Shadows used by Figma components (concrete values to generate utilities) */
+  --shadow-xs: 0 1px 2px rgba(0,0,0,0.04);
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.08);
+  --shadow: 0 1px 6px rgba(0,0,0,0.08);
+  --shadow-md: 0 4px 8px rgba(0,0,0,0.08);
+  --shadow-lg: 0 10px 15px rgba(0,0,0,0.08);
+  --shadow-xl: 0 20px 25px rgba(0,0,0,0.10);
+  --shadow-2xl: 0 25px 50px rgba(0,0,0,0.12);
+  --shadow-card: 0 6px 20px rgba(2,6,23,0.08);
 }
 
 @layer base {
@@ -233,6 +252,11 @@
     color: var(--foreground, var(--foreground-hsl));
   /* Use the --font-sans token (Inter) as the computed font-family */
   font-family: var(--font-sans);
+  }
+
+  /* Emphasis semantics: ensure bold text renders with the theme */
+  :is(strong, b) {
+    font-weight: var(--font-weight-bold, 700);
   }
 }
 
@@ -296,4 +320,3 @@
 html {
   font-size: var(--font-size);
 }
-

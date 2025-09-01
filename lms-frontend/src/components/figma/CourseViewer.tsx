@@ -200,17 +200,17 @@ export function CourseViewer({ courseId, onBack, onNavigateToPage }: CourseViewe
           />
           <div>
             <h4 className="font-medium">{course.instructor}</h4>
-            <p className="font-size: var(--text-sm) text-muted-foreground">Course Instructor</p>
+            <p className="text-sm text-muted-foreground">Course Instructor</p>
           </div>
         </div>
         
         <div className="space-y-2">
-          <div className="flex items-center justify-between font-size: var(--text-sm)">
+          <div className="flex items-center justify-between text-sm">
             <span>Course Progress</span>
             <span>{Math.round((completedLessons / totalLessons) * 100)}%</span>
           </div>
           <Progress value={(completedLessons / totalLessons) * 100} className="h-2" />
-          <p className="font-size: var(--text-xs) text-muted-foreground">
+          <p className="text-xs text-muted-foreground">
             {completedLessons} of {totalLessons} lessons completed
           </p>
         </div>
@@ -243,10 +243,10 @@ export function CourseViewer({ courseId, onBack, onNavigateToPage }: CourseViewe
                   )}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <h5 className="font-medium font-size: var(--text-sm) truncate">
+                  <h5 className="font-medium text-sm truncate">
                     {lesson.order}. {lesson.title}
                   </h5>
-                  <div className="flex items-center gap-2 font-size: var(--text-xs) opacity-80">
+                  <div className="flex items-center gap-2 text-xs opacity-80">
                     <Clock className="size-3" />
                     <span>{lesson.duration}</span>
                     {lesson.exercise && (
@@ -271,7 +271,7 @@ export function CourseViewer({ courseId, onBack, onNavigateToPage }: CourseViewe
         <div className="flex-1 flex items-center justify-center text-center p-8">
           <div>
             <BookOpen className="size-16 mx-auto mb-4 text-muted-foreground" />
-            <h3 className="font-size: var(--text-lg) font-medium mb-2">Select a Lesson</h3>
+            <h3 className="text-lg font-medium mb-2">Select a Lesson</h3>
             <p className="text-muted-foreground">
               Choose a lesson from the sidebar to start learning
             </p>
@@ -289,7 +289,7 @@ export function CourseViewer({ courseId, onBack, onNavigateToPage }: CourseViewe
               <p className="text-muted-foreground">{currentLesson.description}</p>
             </div>
             <div className="flex items-center gap-4">
-              <div className="flex items-center gap-1 font-size: var(--text-sm) text-muted-foreground">
+              <div className="flex items-center gap-1 text-sm text-muted-foreground">
                 <Clock className="size-4" />
                 <span>{currentLesson.duration}</span>
               </div>
@@ -305,7 +305,7 @@ export function CourseViewer({ courseId, onBack, onNavigateToPage }: CourseViewe
           {currentLesson.completed && (
             <div className="flex items-center gap-2 p-3 bg-green-50 border border-green-200 rounded-lg">
               <CheckCircle className="size-5 text-green-600" />
-              <span className="font-size: var(--text-sm) font-medium text-green-800">
+              <span className="text-sm font-medium text-green-800">
                 Lesson Completed ✨
               </span>
             </div>
@@ -330,8 +330,8 @@ export function CourseViewer({ courseId, onBack, onNavigateToPage }: CourseViewe
                   <div className="mt-6 bg-black rounded-lg aspect-video flex items-center justify-center">
                     <div className="text-center text-white">
                       <Play className="size-16 mx-auto mb-4 opacity-80" />
-                      <p className="font-size: var(--text-lg) font-medium">Video Lesson</p>
-                      <p className="font-size: var(--text-sm) opacity-80">Click to play lesson video</p>
+                      <p className="text-lg font-medium">Video Lesson</p>
+                      <p className="text-sm opacity-80">Click to play lesson video</p>
                     </div>
                   </div>
                 </div>
@@ -354,7 +354,7 @@ export function CourseViewer({ courseId, onBack, onNavigateToPage }: CourseViewe
                     <div>
                       <h4 className="font-medium mb-2">Instructions</h4>
                       <div className="bg-muted/50 p-4 rounded-lg">
-                        <pre className="whitespace-pre-wrap font-size: var(--text-sm)">{currentLesson.exercise.instructions}</pre>
+                        <pre className="whitespace-pre-wrap text-sm">{currentLesson.exercise.instructions}</pre>
                       </div>
                     </div>
                     <div className="space-y-3">
@@ -375,7 +375,7 @@ export function CourseViewer({ courseId, onBack, onNavigateToPage }: CourseViewe
                     <div className="space-y-3">
                       <div className="flex items-center gap-2 p-3 bg-green-50 border border-green-200 rounded-lg">
                         <CheckCircle className="size-5 text-green-600" />
-                        <span className="font-size: var(--text-sm) font-medium text-green-800">
+                        <span className="text-sm font-medium text-green-800">
                           Exercise Completed ✨
                         </span>
                       </div>
@@ -383,7 +383,7 @@ export function CourseViewer({ courseId, onBack, onNavigateToPage }: CourseViewe
                         <div className="space-y-2">
                           <h4 className="font-medium">Your Submission</h4>
                           <div className="p-4 border rounded-lg bg-muted/50">
-                            <p className="font-size: var(--text-sm)">{currentLesson.exercise.submission}</p>
+                            <p className="text-sm">{currentLesson.exercise.submission}</p>
                           </div>
                         </div>
                       )}
@@ -430,8 +430,8 @@ export function CourseViewer({ courseId, onBack, onNavigateToPage }: CourseViewe
             Back to Courses
           </Button>
           <div className="flex-1">
-            <h1 className="font-size: var(--text-lg) font-medium">{course.title}</h1>
-            <div className="flex items-center gap-4 font-size: var(--text-sm) text-muted-foreground">
+            <h1 className="text-lg font-medium">{course.title}</h1>
+            <div className="flex items-center gap-4 text-sm text-muted-foreground">
               <div className="flex items-center gap-1">
                 <Users className="size-3" />
                 <span>{course.students} students</span>
