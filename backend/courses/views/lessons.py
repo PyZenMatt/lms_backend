@@ -125,24 +125,30 @@ class LessonViewSet(viewsets.ModelViewSet):
                         status=status.HTTP_200_OK,
                     )
                 else:
-                    return Response(
-                        {
-                            "completed": True,
-                            "course_completed": True,
-                            "detail": "Corso già completato!",
-                        },
-                        status=status.HTTP_200_OK,
-                    )
-            else:
-                return Response(
-                    {
-                        "completed": True,
-                        "course_completed": False,
-                        "progress": f"{completed_lessons}/{total_lessons}",
-                        "detail": f"Lezione completata! Progresso: {completed_lessons}/{total_lessons}",
+                    # Even if course already marked completed, still return unlocked info
+                    pass
+            # Determine next lesson and first exercise to unlock
+            next_lesson = (
+                Lesson.objects.filter(course=course, order__gt=lesson.order).order_by("order").first()
+            )
+            next_lesson_id = next_lesson.id if next_lesson else None
+            # unlock first exercise of current lesson (if any)
+            current_ex = lesson.exercises.first()
+            current_ex_id = current_ex.id if current_ex else None
+
+            return Response(
+                {
+                    "completed": True,
+                    "course_completed": completed_lessons >= total_lessons,
+                    "progress": f"{completed_lessons}/{total_lessons}",
+                    "detail": f"Lezione completata! Progresso: {completed_lessons}/{total_lessons}",
+                    "unlocked": {
+                        "exercise_id": current_ex_id,
+                        "next_lesson_id": next_lesson_id,
                     },
-                    status=status.HTTP_200_OK,
-                )
+                },
+                status=status.HTTP_200_OK,
+            )
 
         except ImportError:
             # Fallback if reward system is not available

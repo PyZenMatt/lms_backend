@@ -240,29 +240,88 @@ class CourseOutlineAPIView(generics.RetrieveAPIView):
             enrolled = CourseEnrollment.objects.filter(student=request.user, course_id=course_id).exists()
             enrollment_status = "enrolled" if enrolled else "not_enrolled"
 
-            # Build normalized payload
+            # Build normalized payload using DB to compute sequential unlocking and exercise status
+            from courses.models import Lesson, LessonCompletion, Exercise, ExerciseSubmission
+
             lessons = []
             next_lesson_id = None
             completed_ids = []
 
-            for l in details.get("lessons", []):
-                lid = int(l.get("id")) if l.get("id") is not None else None
-                is_completed = bool(l.get("is_completed") or l.get("completed") or False)
-                if lid and is_completed:
+            # Compute completed lesson ids for the current student (if requested)
+            if include_progress and request.user.is_authenticated:
+                completed_qs = LessonCompletion.objects.filter(
+                    student=request.user, lesson__course_id=course_id
+                )
+                completed_set = set(completed_qs.values_list("lesson_id", flat=True))
+            else:
+                completed_set = set()
+
+            # Determine the highest order completed so we can unlock the next lesson
+            lessons_qs = Lesson.objects.filter(course_id=course_id).order_by("order")
+            last_completed_order = 0
+            if completed_set:
+                last_completed_order = (
+                    Lesson.objects.filter(id__in=completed_set).aggregate(models.Max("order"))["order__max"]
+                    or 0
+                )
+
+            for lesson in lessons_qs:
+                lid = lesson.id
+                is_completed = lid in completed_set
+                if is_completed:
                     completed_ids.append(lid)
                 if next_lesson_id is None and not is_completed:
                     next_lesson_id = lid
 
+                # free preview flag not implemented in model; default False
+                is_free_preview = False
+
+                # sequential unlock: lessons with order <= last_completed_order + 1 are unlocked
+                sequential_unlocked = lesson.order <= (last_completed_order + 1)
+
+                locked_reason = None
+                if not enrolled and not is_free_preview:
+                    locked_reason = "not_enrolled"
+                elif not sequential_unlocked:
+                    locked_reason = "locked_sequential"
+
+                # provide basic exercise info (first exercise) and whether it's unlocked for the student
+                first_ex = lesson.exercises.first()
+                exercise_payload = None
+                if first_ex:
+                    # check if the student has a passing submission for this exercise
+                    passed = False
+                    if request.user.is_authenticated:
+                        sub = (
+                            ExerciseSubmission.objects.filter(exercise=first_ex, student=request.user)
+                            .order_by("-created_at")
+                            .first()
+                        )
+                        if sub:
+                            passed = bool(sub.passed or sub.is_approved)
+
+                    # exercise unlocked when the lesson itself is completed, or when the lesson is sequentially unlocked
+                    exercise_unlocked = is_completed or sequential_unlocked
+                    exercise_payload = {
+                        "id": first_ex.id,
+                        "title": first_ex.title,
+                        "description": first_ex.description,
+                        "time_estimate": first_ex.time_estimate,
+                        "unlocked": exercise_unlocked,
+                        "completed": passed,
+                    }
+
                 lessons.append(
                     {
                         "id": lid,
-                        "title": l.get("title"),
-                        "section_id": l.get("section_id"),
-                        "position": l.get("order") or l.get("position") or None,
-                        "duration_sec": (int(l.get("duration")) * 60) if l.get("duration") is not None else None,
-                        "content_type": l.get("lesson_type") or l.get("lesson_type"),
-                        "is_free_preview": bool(l.get("is_free_preview") or False),
-                        "lock_reason": None if enrolled or bool(l.get("is_free_preview")) else "not_enrolled",
+                        "title": lesson.title,
+                        "section_id": None,
+                        "position": lesson.order,
+                        "duration_sec": (lesson.duration * 60) if lesson.duration is not None else None,
+                        "content_type": lesson.lesson_type,
+                        "is_free_preview": is_free_preview,
+                        "lock_reason": locked_reason,
+                        "exercise": exercise_payload,
                     }
                 )
 
