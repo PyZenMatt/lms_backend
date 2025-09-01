@@ -2,7 +2,6 @@ import * as React from "react";
 import { /* NavLink */ } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { useFocusTrap } from "./useFocusTrap";
-import { useScrollLock } from "./useScrollLock";
 import type { MenuSection as MenuSectionType } from "@/components/ui/getMenuByRole";
 import { AppSidebar } from "@/components/figma/AppSidebar";
 import { SidebarProvider } from "@/components/figma/ui/sidebar";
@@ -60,19 +59,8 @@ export function Sidebar(props: {
   const closeButtonRef = React.useRef<HTMLButtonElement | null>(null);
   const drawerRef = React.useRef<HTMLDivElement | null>(null);
 
-  // apply focus trap when mobile drawer is open
+  // apply focus trap when mobile drawer is open (hook accepts null to disable)
   useFocusTrap(mobileOpen ? drawerRef.current : null, { onClose: () => onMobileClose?.() });
-  // lock body scroll while mobile drawer is open
-  useScrollLock(mobileOpen);
-
-  // when opening on mobile, move focus to the (visually hidden) close button
-  React.useEffect(() => {
-    if (mobileOpen) {
-      try {
-        closeButtonRef.current?.focus();
-      } catch {}
-    }
-  }, [mobileOpen]);
 
   // matchIsActive is no longer needed because menu is rendered by AppSidebar (figma)
 
@@ -106,24 +94,28 @@ export function Sidebar(props: {
       )}
 
   <aside
+        // desktop: md:flex; mobile: fixed drawer when mobileOpen
         className={cn(
-          // base colors and border
-          "border-r border-[--color-sidebar-border] bg-[--color-sidebar] text-[--color-sidebar-foreground]",
-          // desktop: visible as column; mobile: hidden unless mobileOpen
-          mobileOpen
-            ? "fixed left-0 top-0 z-50 md:hidden flex flex-col h-[100svh]"
-            : "hidden md:flex md:flex-col md:h-screen",
-          // animate width when collapsing/expanding on desktop
+          // base styles
+            "h-screen border-r border-[--color-sidebar-border] bg-[--color-sidebar] text-[--color-sidebar-foreground]",
+          // desktop layout: hidden on small, flex column on md+
+          "hidden md:flex md:flex-col",
+          // animate width when collapsing/expanding
           "transition-[width] duration-200 ease-in-out",
-          className
+    // NOTE: outer aside reserves the expanded width on desktop to prevent main reflow.
+    // The inner container animates between collapsed/expanded visually.
+    // mobile drawer visible when mobileOpen (kept separate from md rules)
+  mobileOpen && "fixed left-0 top-0 z-50 md:hidden translate-x-0",
+    className
         )}
         id="site-sidebar"
         ref={drawerRef}
-        // reserve expanded width on desktop (prevents layout shift)
-        style={{ width: `${mobileOpen ? innerWidth : SIDEBAR_WIDTH_EXPANDED}px` }}
-        data-state={collapsed ? "collapsed" : "expanded"}
-        role="navigation"
-        aria-label="Primary"
+    // reserve expanded width on desktop (prevents layout shift)
+    style={{ width: `${mobileOpen ? innerWidth : SIDEBAR_WIDTH_EXPANDED}px` }}
+  data-state={collapsed ? "collapsed" : "expanded"}
+  role={mobileOpen ? "dialog" : "navigation"}
+  aria-label="Primary"
+  aria-modal={mobileOpen ? true : undefined}
       >
       {/* Mobile close overlay button (visually hidden, used to receive initial focus) */}
       {mobileOpen && (
@@ -139,13 +131,7 @@ export function Sidebar(props: {
       {/* inner visual rail: animates width to collapsed/expanded while outer aside reserves space */}
       <div
         className="flex-1 overflow-y-auto p-0"
-        // include safe-area padding for notch/home indicator
-        style={{
-          width: `${innerWidth}px`,
-          transition: "width 200ms ease-in-out",
-          paddingTop: "env(safe-area-inset-top)",
-          paddingBottom: "env(safe-area-inset-bottom)",
-        }}
+  style={{ width: `${innerWidth}px`, transition: "width 200ms ease-in-out", maxWidth: mobileOpen ? '100vw' : undefined }}
       >
         <SidebarProvider open={!collapsed}>
           <AppSidebar currentPage={currentPage} onPageChange={onPageChange} />

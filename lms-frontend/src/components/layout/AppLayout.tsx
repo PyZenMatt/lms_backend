@@ -137,7 +137,7 @@ export default function AppLayout({ children }: { children?: React.ReactNode }) 
           <div className="flex-1 flex flex-col min-h-0">
           {/* Header: use Figma Menubar styling 1:1 (minimal content, no subcomponents) */}
           <header className="sticky top-0 z-40 border-b border-border bg-card/60 backdrop-blur w-full">
-            <div className={"w-full flex h-14 items-center px-4 lg:px-6 transition-[padding-left] duration-200 " + (collapsed ? "pl-0" : "pl-[var(--sidebar-width)]") }>
+            <div className={"w-full flex h-14 items-center px-4 lg:px-6 transition-[padding-left] duration-200 " + (collapsed ? "md:pl-0" : "md:pl-[var(--sidebar-width)]") }>
               <SidebarTrigger className="mr-4" />
               <div className="flex-1" />
               <div className="flex items-center gap-4">
@@ -199,7 +199,7 @@ export default function AppLayout({ children }: { children?: React.ReactNode }) 
           </header>
 
           <main className="flex-1 overflow-auto">
-            <div className={"w-full py-6 px-4 lg:px-6 transition-[padding-left] duration-200 " + (collapsed ? "pl-0" : "pl-[var(--sidebar-width)]")}>
+            <div className={"w-full py-6 px-4 lg:px-6 transition-[padding-left] duration-200 " + (collapsed ? "md:pl-0" : "md:pl-[var(--sidebar-width)]")}>
               <div className="max-w-[1280px] mx-auto">{children}</div>
             </div>
           </main>
