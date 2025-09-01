@@ -47,7 +47,7 @@ class CourseLessonsView(APIView):
                 )
 
         lessons = Lesson.objects.filter(course_id=course_id).order_by("order")
-        serializer = LessonListSerializer(lessons, many=True)
+        serializer = LessonListSerializer(lessons, many=True, context={"request": request})
         return Response(serializer.data)
 
 

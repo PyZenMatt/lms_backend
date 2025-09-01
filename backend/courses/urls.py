@@ -14,6 +14,7 @@ from courses.views.courses import (
     CourseListAPIView,
     CourseListCreateView,
     TeacherCoursesView,
+    CourseOutlineAPIView,
 )
 from courses.views.enrollments import (
     CourseEnrollmentView,
@@ -100,6 +101,12 @@ urlpatterns = [
         "courses-service/<int:pk>/",
         CourseDetailAPIView.as_view(),
         name="course-detail-api",
+    ),
+    # Course outline + progress
+    path(
+        "courses/<int:course_id>/outline/",
+        CourseOutlineAPIView.as_view(),
+        name="course-outline",
     ),
     # === ENROLLMENTS ===
     path(

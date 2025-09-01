@@ -31,19 +31,19 @@ class HybridTeoCoinService:
         return self.db_service.get_staked_balance(user)
 
     def add_balance(
-        self, user, amount, transaction_type, description="", course_id=None
+        self, user, amount, transaction_type, description="", course=None
     ):
         """Add TeoCoin to user's balance"""
         return self.db_service.add_balance(
-            user, amount, transaction_type, description, course_id
+            user, amount, transaction_type, description, course
         )
 
     def deduct_balance(
-        self, user, amount, transaction_type, description="", course_id=None
+        self, user, amount, transaction_type, description="", course=None
     ):
         """Deduct TeoCoin from user's balance"""
         return self.db_service.deduct_balance(
-            user, amount, transaction_type, description, course_id
+            user, amount, transaction_type, description, course
         )
 
     # ========== STAKING OPERATIONS ==========
@@ -62,10 +62,10 @@ class HybridTeoCoinService:
         """Calculate TeoCoin discount for course"""
         return self.db_service.calculate_discount(user, course_price)
 
-    def apply_course_discount(self, user, course_price, course_id, course_title=""):
+    def apply_course_discount(self, user, course_price, course, course_title=""):
         """Apply TeoCoin discount to course purchase"""
         return self.db_service.apply_course_discount(
-            user, course_price, course_id, course_title
+            user, course_price, course, course_title
         )
 
     # ========== TEACHER REWARDS ==========

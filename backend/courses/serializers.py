@@ -14,6 +14,7 @@ from .models import (
 
 class LessonListSerializer(serializers.ModelSerializer):
     exercises_count = serializers.SerializerMethodField()
+    completed = serializers.SerializerMethodField()
     lesson_type_display = serializers.CharField(
         source="get_lesson_type_display", read_only=True
     )
@@ -22,6 +23,7 @@ class LessonListSerializer(serializers.ModelSerializer):
         model = Lesson
         fields = [
             "id",
+            "completed",
             "title",
             "order",
             "duration",
@@ -32,6 +34,18 @@ class LessonListSerializer(serializers.ModelSerializer):
 
     def get_exercises_count(self, obj):
         return obj.exercises.count()
+
+    def get_completed(self, obj):
+        # Return whether the requesting user has completed this lesson
+        request = self.context.get("request")
+        if not request or not getattr(request, "user", None) or not request.user.is_authenticated:
+            return False
+        try:
+            from courses.models import LessonCompletion
+
+            return LessonCompletion.objects.filter(student=request.user, lesson=obj).exists()
+        except Exception:
+            return False
 
 
 class ExerciseSubmissionSerializer(serializers.ModelSerializer):

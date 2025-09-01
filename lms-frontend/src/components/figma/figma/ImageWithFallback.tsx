@@ -1,27 +1,43 @@
 import React, { useState } from 'react'
 
-const ERROR_IMG_SRC =
-  'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iODgiIGhlaWdodD0iODgiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgc3Ryb2tlPSIjMDAwIiBzdHJva2UtbGluZWpvaW49InJvdW5kIiBvcGFjaXR5PSIuMyIgZmlsbD0ibm9uZSIgc3Ryb2tlLXdpZHRoPSIzLjciPjxyZWN0IHg9IjE2IiB5PSIxNiIgd2lkdGg9IjU2IiBoZWlnaHQ9IjU2IiByeD0iNiIvPjxwYXRoIGQ9Im0xNiA1OCAxNi0xOCAzMiAzMiIvPjxjaXJjbGUgY3g9IjUzIiBjeT0iMzUiIHI9IjciLz48L3N2Zz4KCg=='
+// ImageWithFallback: renders an <img /> when available. When missing or errored
+// it will render a simple placeholder DIV for regular images (cards/thumbnails),
+// but return null for avatar-like images to avoid extra markup in tight avatar
+// slots. Avatar detection is heuristic (checks for `rounded-full` in className).
 
-export function ImageWithFallback(props: React.ImgHTMLAttributes<HTMLImageElement>) {
+type Props = React.ImgHTMLAttributes<HTMLImageElement> & { showPlaceholder?: boolean }
+
+export function ImageWithFallback(props: Props) {
   const [didError, setDidError] = useState(false)
 
   const handleError = () => {
     setDidError(true)
   }
 
-  const { src, alt, style, className, ...rest } = props
+  const { src, alt, style, className, showPlaceholder = true, ...rest } = props
 
-  return didError ? (
-    <div
-      className={`inline-block bg-gray-100 text-center align-middle ${className ?? ''}`}
-      style={style}
-    >
-      <div className="flex items-center justify-center w-full h-full">
-        <img src={ERROR_IMG_SRC} alt="Error loading image" {...rest} data-original-url={src} />
-      </div>
-    </div>
-  ) : (
-    <img src={src} alt={alt} className={className} style={style} {...rest} onError={handleError} />
-  )
+  // treat empty / missing src as an error so fallback is shown
+  const hasSrc = !!src && String(src).trim() !== ""
+  const showFallback = didError || !hasSrc
+
+  // Heuristic: if the caller passed a rounded avatar class, don't render any
+  // placeholder element (the UI often expects compact avatar slots).
+  const isAvatar = typeof className === 'string' && className.includes('rounded-full')
+
+  if (showFallback) {
+    if (!showPlaceholder) return null
+    if (isAvatar) return null
+
+  // Render a minimal rectangular placeholder. Always include a neutral
+  // background so the placeholder is visible even when callers pass only
+  // sizing classes (e.g. "w-full h-48"). Callers can still override
+  // sizing via `className`.
+  const sizingClass = className ?? 'w-full h-48'
+  // add a faint border so the placeholder is visible against various
+  // backgrounds (helps when the app background and placeholder are similar)
+  const placeholderClass = `${sizingClass} bg-gray-100 border border-gray-200 rounded-md`
+  return <div className={placeholderClass} style={style} aria-hidden />
+  }
+
+  return <img src={src} alt={alt} className={className} style={style} {...rest} onError={handleError} />
 }

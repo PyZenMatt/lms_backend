@@ -18,11 +18,11 @@ import {
   GraduationCap
 } from "lucide-react"
 import { useAuth } from "./AuthContext"
+import { useNavigate } from "react-router-dom"
 import { ImageWithFallback } from "./figma/ImageWithFallback"
 import { toast } from "sonner"
 import { listCourses } from "@/services/courses"
 import { getEnrolledCourses } from "@/services/student"
-import { enrollInCourse } from "@/services/enrollment"
 
 interface Course {
   id: string
@@ -51,7 +51,7 @@ interface LearningPathsProps {
 }
 
 export function LearningPaths({ onContinueCourse }: LearningPathsProps) {
-  const { user, updateTokens } = useAuth()
+  const { user } = useAuth()
   const [searchTerm, setSearchTerm] = useState("")
   const [selectedLevel, setSelectedLevel] = useState("all")
   const [selectedCategory, setSelectedCategory] = useState("all")
@@ -60,8 +60,8 @@ export function LearningPaths({ onContinueCourse }: LearningPathsProps) {
   // stateful lists populated from API
   const [allCourses, setAllCourses] = useState<Course[]>([])
   const [enrolledCourses, setEnrolledCourses] = useState<Course[]>([])
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+  // local UI state
+  const [, setLoading] = useState(false)
 
   // helper to map API course shape to UI Course
   const mapApiToUi = useCallback((c: Record<string, unknown>): Course => {
@@ -80,11 +80,32 @@ export function LearningPaths({ onContinueCourse }: LearningPathsProps) {
     const levelRaw = c["level"]
     const level = (typeof levelRaw === "string" && (levelRaw === "beginner" || levelRaw === "intermediate" || levelRaw === "advanced")) ? (levelRaw as 'beginner' | 'intermediate' | 'advanced') : 'beginner'
 
-    const tokensRaw = c["tokens"] ?? c["token_cost"] ?? c["price_tokens"]
-    const tokens = typeof tokensRaw === "number" ? tokensRaw : 0
+  const tokensRaw = c["tokens"] ?? c["token_cost"] ?? c["price_tokens"]
+  const tokens = typeof tokensRaw === "number" ? tokensRaw : 0
 
     const progressRaw = c["progress_percent"] ?? c["progress"]
     const progress = typeof progressRaw === "number" ? progressRaw : undefined
+
+    // price extraction: try multiple possible keys and accept strings like "9.99"
+    const tryNum = (k: string) => {
+      const v = c[k]
+      if (typeof v === 'number') return v
+      if (typeof v === 'string') {
+        const p = parseFloat(v.replace(',', '.'))
+        return Number.isFinite(p) ? p : undefined
+      }
+      if (typeof v === 'object' && v !== null) {
+        const maybe = (v as any).price ?? (v as any).value ?? (v as any).amount
+        if (typeof maybe === 'number') return maybe
+        if (typeof maybe === 'string') {
+          const p = parseFloat((maybe as string).replace(',', '.'))
+          return Number.isFinite(p) ? p : undefined
+        }
+      }
+      return undefined
+    }
+
+    const priceCandidate = tryNum('price') ?? tryNum('price_eur') ?? tryNum('student_pay_eur') ?? tryNum('price_amount') ?? tryNum('price_amount_eur')
 
     return {
       id,
@@ -99,7 +120,7 @@ export function LearningPaths({ onContinueCourse }: LearningPathsProps) {
       students: getNum("students_count") ?? getNum("students") ?? 0,
       rating: getNum("rating") ?? 0,
       reviews: getNum("reviews") ?? 0,
-      price: (getNum("price") ?? getNum("price_eur") ?? 0) as number,
+  price: (typeof priceCandidate === 'number' ? priceCandidate : 0) as number,
       tokens,
       category: getStr("category") ?? getStr("category_name") ?? "",
       tags: Array.isArray(c["tags"]) ? (c["tags"] as string[]) : [],
@@ -125,7 +146,8 @@ export function LearningPaths({ onContinueCourse }: LearningPathsProps) {
         const enrolledRes = await getEnrolledCourses(1, 100)
         if (!mounted) return
         if (enrolledRes.ok) {
-          const mappedEnrolled = enrolledRes.data.items.map(mapApiToUi)
+          // Ensure enrolled flag is set for courses coming from the enrolled API
+          const mappedEnrolled = enrolledRes.data.items.map(mapApiToUi).map(e => ({ ...e, enrolled: true }))
           setEnrolledCourses(mappedEnrolled)
           // mark enrolled in allCourses list if needed
           setAllCourses(prev => {
@@ -135,8 +157,7 @@ export function LearningPaths({ onContinueCourse }: LearningPathsProps) {
           })
         }
       } catch (err: unknown) {
-        if (err instanceof Error) setError(err.message)
-        else setError(String(err))
+        console.debug("Error loading courses:", err)
       } finally {
         setLoading(false)
       }
@@ -159,6 +180,8 @@ export function LearningPaths({ onContinueCourse }: LearningPathsProps) {
     return matchesSearch && matchesLevel && matchesCategory
   })
 
+  const navigate = useNavigate()
+
   const handleEnrollCourse = (courseId: string) => {
     const course = allCourses.find(c => c.id === courseId)
     if (!course) return
@@ -167,28 +190,24 @@ export function LearningPaths({ onContinueCourse }: LearningPathsProps) {
       return
     }
 
-    ;(async () => {
-      setLoading(true)
-      const res = await enrollInCourse(courseId)
-      setLoading(false)
-      if (!res.ok) {
-        toast.error(`Enrollment failed (HTTP ${res.status})`)
-        return
-      }
+    // If already enrolled, go to the course player/detail instead of checkout
+    if (course.enrolled) {
+      // If already enrolled, send students to the learning player
+      navigate(`/learn/${courseId}`)
+      return
+    }
 
-      // update UI state: mark as enrolled and add to enrolled list
-      const updated = { ...course, enrolled: true, progress: course.progress ?? 0 }
-      setAllCourses(prev => prev.map(p => (p.id === courseId ? updated : p)))
-      setEnrolledCourses(prev => [updated, ...prev])
-      updateTokens(-course.tokens)
-      toast(`Enrolled in ${course.title}!`, {
-        description: `You've spent ${course.tokens} ✨ tokens. Start learning now!`
-      })
-    })()
+    // Redirect to the Course checkout page implemented in the app
+    navigate(`/courses/${courseId}/checkout`)
   }
 
   const handleContinueCourse = (courseId: string) => {
-    onContinueCourse?.(courseId)
+    if (onContinueCourse) {
+      onContinueCourse(courseId)
+    } else {
+      // Default student path: learning player
+      navigate(`/learn/${courseId}`)
+    }
   }
 
   const LevelBadge = ({ level }: { level: string }) => {
@@ -204,14 +223,21 @@ export function LearningPaths({ onContinueCourse }: LearningPathsProps) {
     )
   }
 
-  const CourseCard = ({ course, showProgress = false }: { course: Course, showProgress?: boolean }) => (
+  const CourseCard = ({ course, showProgress = false, showPrice = true }: { course: Course, showProgress?: boolean, showPrice?: boolean }) => (
     <Card className="overflow-hidden hover:shadow-lg transition-shadow">
       <div className="relative">
         <ImageWithFallback
           src={course.thumbnail}
           alt={course.title}
           className="w-full h-48 object-cover"
+          showPlaceholder={true}
         />
+        {/* price badge overlay (visible even when image is fallback) - hide for enrolled courses */}
+  {!course.enrolled && showPrice && typeof course.price === 'number' && course.price > 0 && (
+          <div className="absolute top-3 right-3 bg-white/90 dark:bg-black/80 px-2 py-1 rounded-md text-sm font-semibold">
+            {new Intl.NumberFormat('it-IT', { style: 'currency', currency: 'EUR' }).format(course.price)}
+          </div>
+        )}
         {course.featured && (
           <Badge className="absolute top-3 left-3 bg-yellow-500">
             <Award className="size-3 mr-1" />
@@ -268,11 +294,17 @@ export function LearningPaths({ onContinueCourse }: LearningPathsProps) {
         </div>
 
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Badge variant="outline" className="bg-purple-50 border-purple-200 text-purple-800">
-              {course.tokens} ✨
-            </Badge>
-            <span className="text-xs text-muted-foreground">tokens</span>
+          <div className="flex items-center gap-4">
+            {/* show price in EUR when available; hide for enrolled courses */}
+            {!course.enrolled && showPrice && typeof course.price === 'number' && course.price > 0 && (
+              <div className="text-sm font-semibold">{new Intl.NumberFormat('it-IT', { style: 'currency', currency: 'EUR' }).format(course.price)}</div>
+            )}
+            <div className="flex items-center gap-2">
+              <Badge variant="outline" className="bg-purple-50 border-purple-200 text-purple-800">
+                {course.tokens} ✨
+              </Badge>
+              <span className="text-xs text-muted-foreground">tokens</span>
+            </div>
           </div>
           
           {course.enrolled ? (
@@ -405,7 +437,7 @@ export function LearningPaths({ onContinueCourse }: LearningPathsProps) {
           {enrolledCourses.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {enrolledCourses.map(course => (
-                <CourseCard key={course.id} course={course} showProgress />
+                <CourseCard key={course.id} course={course} showProgress showPrice={false} />
               ))}
             </div>
           ) : (
@@ -425,6 +457,18 @@ export function LearningPaths({ onContinueCourse }: LearningPathsProps) {
         </TabsContent>
 
         <TabsContent value="featured" className="space-y-4">
+          {/* "Pensati per te" — recommendations planned; placeholder for now */}
+          <Card>
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-lg font-medium">Pensati per te</h3>
+                  <p className="text-sm text-muted-foreground">In arrivo — mostreremo suggerimenti personalizzati in base ai tuoi corsi</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {featuredCourses.map(course => (
               <CourseCard key={course.id} course={course} showProgress={course.enrolled} />

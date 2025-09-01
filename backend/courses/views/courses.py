@@ -13,6 +13,7 @@ from rest_framework.response import Response
 from services.course_service import course_service
 from services.exceptions import CourseNotFoundError, TeoArtServiceException
 from users.permissions import IsAdminOrApprovedTeacherOrReadOnly, IsTeacher
+from rest_framework.permissions import IsAuthenticated
 
 logger = logging.getLogger(__name__)
 
@@ -213,6 +214,87 @@ class CourseDetailAPIView(generics.RetrieveAPIView):
                 {"error": "An error occurred while retrieving course details"},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
+
+
+class CourseOutlineAPIView(generics.RetrieveAPIView):
+    """
+    New endpoint returning course outline + progress in a single payload.
+
+    GET /api/v1/courses/{course_id}/outline?include_progress=1
+    """
+    permission_classes = [IsAuthenticated]
+
+    def retrieve(self, request, *args, **kwargs):
+        course_id = kwargs.get("course_id") or kwargs.get("pk")
+        include_progress = request.GET.get("include_progress") in ("1", "true", "True")
+        try:
+            if not course_id:
+                return Response({"error": "Course ID is required"}, status=status.HTTP_400_BAD_REQUEST)
+
+            # Reuse existing service which already computes lessons and per-user completion
+            details = course_service.get_course_details(int(course_id), user=request.user if include_progress else None)
+
+            # Compute enrollment_status
+            from courses.models import CourseEnrollment
+
+            enrolled = CourseEnrollment.objects.filter(student=request.user, course_id=course_id).exists()
+            enrollment_status = "enrolled" if enrolled else "not_enrolled"
+
+            # Build normalized payload
+            lessons = []
+            next_lesson_id = None
+            completed_ids = []
+
+            for l in details.get("lessons", []):
+                lid = int(l.get("id")) if l.get("id") is not None else None
+                is_completed = bool(l.get("is_completed") or l.get("completed") or False)
+                if lid and is_completed:
+                    completed_ids.append(lid)
+                if next_lesson_id is None and not is_completed:
+                    next_lesson_id = lid
+
+                lessons.append(
+                    {
+                        "id": lid,
+                        "title": l.get("title"),
+                        "section_id": l.get("section_id"),
+                        "position": l.get("order") or l.get("position") or None,
+                        "duration_sec": (int(l.get("duration")) * 60) if l.get("duration") is not None else None,
+                        "content_type": l.get("lesson_type") or l.get("lesson_type"),
+                        "is_free_preview": bool(l.get("is_free_preview") or False),
+                        "lock_reason": None if enrolled or bool(l.get("is_free_preview")) else "not_enrolled",
+                    }
+                )
+
+            progress = {
+                "completed_lesson_ids": completed_ids,
+                "percent": details.get("progress") if isinstance(details.get("progress"), int) else 0,
+                "next_lesson_id": next_lesson_id,
+            }
+
+            payload = {
+                "course": {
+                    "id": details.get("id"),
+                    "title": details.get("title"),
+                    "slug": None,
+                    "cover": details.get("cover_image"),
+                    "teacher": details.get("creator"),
+                    "enrollment_status": enrollment_status,
+                },
+                "sections": [],  # no sections model yet; FE will render lessons grouped if needed
+                "lessons": lessons,
+                "progress": progress,
+            }
+
+            return Response(payload)
+        except CourseNotFoundError:
+            return Response({"error": "Course not found"}, status=status.HTTP_404_NOT_FOUND)
+        except TeoArtServiceException as e:
+            logger.warning(f"Service error in CourseOutlineAPIView: {e}")
+            return Response({"error": str(e)}, status=(e.status_code if hasattr(e, "status_code") else status.HTTP_400_BAD_REQUEST))
+        except Exception as e:
+            logger.error(f"Unexpected error in CourseOutlineAPIView: {e}")
+            return Response({"error": "An error occurred while retrieving course outline"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 class TeacherCoursesView(generics.ListAPIView):

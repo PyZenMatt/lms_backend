@@ -1,5 +1,38 @@
 // src/services/courses.ts
-import { api } from "../lib/api"
+import { api } from "@/lib/api"
+
+export type CourseOutlineLesson = {
+  id: number
+  title: string
+  section_id?: number | null
+  position?: number | null
+  duration_sec?: number | null
+  content_type?: string | null
+  is_free_preview?: boolean
+  lock_reason?: string | null
+}
+
+export type CourseOutlinePayload = {
+  course: {
+    id: number
+    title: string
+    slug?: string | null
+    cover?: string | null
+    teacher?: any
+    enrollment_status: "enrolled" | "not_enrolled"
+  }
+  sections: any[]
+  lessons: CourseOutlineLesson[]
+  progress: { completed_lesson_ids: number[]; percent: number; next_lesson_id: number | null }
+}
+
+export async function getCourseOutline(courseId: number): Promise<{ ok: boolean; status: number; data?: CourseOutlinePayload; error?: any }> {
+  const path = `/api/v1/courses/${courseId}/outline/?include_progress=1`
+  const res = await api.get<CourseOutlinePayload>(path)
+  if (res.ok) return { ok: true, status: res.status, data: res.data }
+  return { ok: false, status: res.status, error: res.error }
+}
+// ...existing code...
 
 // -------------------------
 // Costanti / Tipi categoria
@@ -95,7 +128,7 @@ function normalizeList(payload: Course[] | DrfPaginated<Course>): ListOut {
 // API
 // -------------------------
 export async function listCourses(params: ListParams = {}) {
-  const res = await api.get<Course[] | DrfPaginated<Course>>("/v1/courses/", { query: params as any })
+  const res = await api.get<Course[] | DrfPaginated<Course>>("/v1/courses/", { params: params as any })
   if (!res.ok) return { ok: false as const, status: res.status, data: [] as Course[] } as ListOut
   return normalizeList(res.data)
 }

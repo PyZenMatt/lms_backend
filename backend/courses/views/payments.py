@@ -579,7 +579,7 @@ class ConfirmPaymentView(APIView):
                     amount=purchase_bonus,
                     transaction_type="course_purchase_bonus",
                     description=f"Purchase bonus for course: {course.title}",
-                    course_id=str(course_id),
+                    course=course,
                 )
                 if success:
                     logger.info(
@@ -714,7 +714,7 @@ class ConfirmPaymentView(APIView):
 
                     # Log the notify call with offered preview when possible
                     try:
-                        from services.discount_calc import compute_discount_breakdown
+                        # Use the module-level compute_discount_breakdown already imported
                         offered_preview = compute_discount_breakdown(
                             price_eur=snap.price_eur,
                             discount_percent=snap.discount_percent,

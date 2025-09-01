@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/card"
 import { Button } from "./ui/button"
 import { Badge } from "./ui/badge"
@@ -21,6 +21,9 @@ import {
   Star
 } from "lucide-react"
 import { useAuth } from "./AuthContext"
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { markLessonComplete } from '@/services/lessons'
+import { useCourseOutline } from '@/hooks/useCourseOutline'
 import { ImageWithFallback } from "./figma/ImageWithFallback"
 import { toast } from "sonner"
 
@@ -67,110 +70,79 @@ interface CourseViewerProps {
 }
 
 export function CourseViewer({ courseId, onBack, onNavigateToPage }: CourseViewerProps) {
-  const { user, updateTokens } = useAuth()
+  const { updateTokens } = useAuth()
   const [selectedLesson, setSelectedLesson] = useState<string | null>(null)
   const [exerciseSubmission, setExerciseSubmission] = useState("")
 
-  // Mock course data - in real app, this would come from API
+  // Fetch real data via hook
+  const { data, isLoading, isError, error } = useCourseOutline(courseId)
+
+  // Map API lessons into local shape
+  const apiLessons = data?.lessons ?? []
   const course: Course = {
-    id: courseId,
-    title: 'Digital Painting Fundamentals',
-    description: 'Master the basics of digital art creation with professional techniques and industry-standard workflows.',
-    instructor: 'Prof. Sarah Mitchell',
-    instructorAvatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=40&h=40&fit=crop&crop=face',
-    thumbnail: 'https://images.unsplash.com/photo-1513475382585-d06e58bcb0e0?w=600&h=300&fit=crop',
+    id: String(courseId),
+    title: data?.course?.title ?? "Caricamento...",
+    description: "",
+    instructor: data?.course?.teacher?.username ?? "",
+    instructorAvatar: data?.course?.cover ?? "",
+    thumbnail: data?.course?.cover ?? "",
     level: 'beginner',
-    duration: '8 weeks',
-    students: 1247,
-    rating: 4.8,
-    reviews: 156,
-    progress: 65,
-    lessons: [
-      {
-        id: '1',
-        title: 'Introduction to Digital Art',
-        description: 'Overview of digital art tools and basic concepts',
-        duration: '15 min',
-        content: 'Welcome to Digital Painting Fundamentals! In this lesson, we\'ll explore the essential tools and concepts that form the foundation of digital art creation...',
-        completed: true,
-        locked: false,
-        order: 1
-      },
-      {
-        id: '2',
-        title: 'Setting Up Your Workspace',
-        description: 'Configuring your digital art software and hardware',
-        duration: '20 min',
-        content: 'A well-organized workspace is crucial for productive digital art creation. Let\'s walk through setting up your canvas, brushes, and workspace layout...',
-        exercise: {
-          title: 'Workspace Setup',
-          description: 'Create and customize your first digital workspace',
-          instructions: '1. Open your digital art software\n2. Create a new canvas (1920x1080px)\n3. Set up a basic brush palette\n4. Organize your tool panels\n5. Save your workspace preset',
-          timeEstimate: '30 minutes',
-          completed: true,
-          submission: 'I set up my workspace with custom brush presets and organized panels. The 1920x1080 canvas works great for my screen resolution!'
-        },
-        completed: true,
-        locked: false,
-        order: 2
-      },
-      {
-        id: '3',
-        title: 'Understanding Light and Shadow',
-        description: 'Fundamental principles of lighting in digital art',
-        duration: '25 min',
-        content: 'Light and shadow are the building blocks of realistic digital art. Understanding how light behaves will transform your artwork from flat to dimensional...',
-        exercise: {
-          title: 'Light Study Practice',
-          description: 'Create a simple sphere with realistic lighting',
-          instructions: '1. Draw a perfect circle\n2. Establish your light source direction\n3. Add cast shadow and form shadow\n4. Include reflected light\n5. Add highlights for dimension',
-          timeEstimate: '45 minutes',
-          completed: false
-        },
-        completed: false,
-        locked: false,
-        order: 3
-      },
-      {
-        id: '4',
-        title: 'Color Theory Basics',
-        description: 'Essential color relationships and harmony',
-        duration: '30 min',
-        content: 'Color theory provides the framework for creating harmonious and impactful artwork. We\'ll explore color wheels, temperature, and emotional impact...',
-        exercise: {
-          title: 'Color Palette Creation',
-          description: 'Design complementary color palettes',
-          instructions: '1. Choose a base color\n2. Find its complement\n3. Create triadic variations\n4. Test warm vs cool temperatures\n5. Apply to a simple composition',
-          timeEstimate: '40 minutes'
-        },
-        completed: false,
-        locked: true,
-        order: 4
-      },
-      {
-        id: '5',
-        title: 'Brush Techniques',
-        description: 'Mastering different brush strokes and textures',
-        duration: '35 min',
-        content: 'Different brush techniques create various textures and effects. Master these fundamental strokes to expand your artistic vocabulary...',
-        completed: false,
-        locked: true,
-        order: 5
-      }
-    ]
+    duration: '',
+    students: 0,
+    rating: 0,
+    reviews: 0,
+    progress: data?.progress?.percent ?? 0,
+    lessons: apiLessons.map((l, idx) => ({
+      id: String(l.id ?? idx),
+      title: l.title ?? `Lezione ${idx + 1}`,
+      description: "",
+      duration: l.duration_sec ? `${Math.round((l.duration_sec || 0) / 60)} min` : "",
+      content: "",
+      completed: !!data?.progress?.completed_lesson_ids?.includes(l.id),
+      locked: data?.course?.enrollment_status !== 'enrolled' && !l.is_free_preview,
+      order: l.position ?? idx + 1,
+    }))
   }
+
+  useEffect(() => {
+    if (isError) {
+      toast(String((error as unknown as Error)?.message ?? String(error)))
+    }
+  }, [isError, error])
 
   const currentLesson = selectedLesson ? course.lessons.find(l => l.id === selectedLesson) : null
   const completedLessons = course.lessons.filter(l => l.completed).length
   const totalLessons = course.lessons.length
 
   const handleCompleteLesson = (lessonId: string) => {
-    // Mark lesson as complete and unlock next lesson
-    updateTokens(5) // Reward for completing lesson
-    toast("Lesson completed! ✨", {
-      description: "You earned 5 tokens. Next lesson unlocked!"
-    })
+    // use mutation instead of local mock
+  void markCompleteMutation.mutateAsync(Number(lessonId))
   }
+
+  const qc = useQueryClient()
+  const markCompleteMutation = useMutation({
+    mutationFn: async (lessonId: number) => {
+      const res = await markLessonComplete(lessonId)
+      if (!res.ok) throw res.error || new Error('Failed to mark complete')
+      return res.data
+    },
+  onSuccess: () => {
+      // reward tokens locally and invalidate outline
+      updateTokens(5)
+      toast("Lesson completed! ✨", {
+        description: "You earned 5 tokens. Next lesson unlocked!"
+      })
+      try {
+        qc.invalidateQueries({ queryKey: ['courseOutline', Number(courseId ?? '')] })
+      } catch {
+        // fallback: refetch local hook if available
+      }
+    },
+    onError: (err: unknown) => {
+      const msg = err && typeof err === 'object' && 'message' in err ? (err as any).message : String(err)
+      toast(String(msg))
+    }
+  })
 
   const handleSubmitExercise = (lessonId: string) => {
     if (!exerciseSubmission.trim()) {
@@ -219,47 +191,51 @@ export function CourseViewer({ courseId, onBack, onNavigateToPage }: CourseViewe
       <div className="space-y-2">
         <h4 className="font-medium">Course Content</h4>
         <div className="space-y-1">
-          {course.lessons.map((lesson) => (
-            <button
-              key={lesson.id}
-              onClick={() => !lesson.locked && setSelectedLesson(lesson.id)}
-              disabled={lesson.locked}
-              className={`w-full p-3 rounded-lg text-left transition-colors ${
-                selectedLesson === lesson.id 
-                  ? 'bg-primary text-primary-foreground' 
-                  : lesson.locked 
-                    ? 'bg-muted/50 text-muted-foreground cursor-not-allowed'
-                    : 'hover:bg-muted'
-              }`}
-            >
-              <div className="flex items-center gap-3">
-                <div className="flex-shrink-0">
-                  {lesson.completed ? (
-                    <CheckCircle className="size-5 text-green-600" />
-                  ) : lesson.locked ? (
-                    <Lock className="size-5" />
-                  ) : (
-                    <Play className="size-5" />
-                  )}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <h5 className="font-medium text-sm truncate">
-                    {lesson.order}. {lesson.title}
-                  </h5>
-                  <div className="flex items-center gap-2 text-xs opacity-80">
-                    <Clock className="size-3" />
-                    <span>{lesson.duration}</span>
-                    {lesson.exercise && (
-                      <>
-                        <Target className="size-3" />
-                        <span>Exercise</span>
-                      </>
+          {isLoading ? (
+            <div className="p-4">Caricamento lezioni…</div>
+          ) : (
+            course.lessons.map((lesson) => (
+              <button
+                key={lesson.id}
+                onClick={() => !lesson.locked && setSelectedLesson(lesson.id)}
+                disabled={lesson.locked}
+                className={`w-full p-3 rounded-lg text-left transition-colors ${
+                  selectedLesson === lesson.id 
+                    ? 'bg-primary text-primary-foreground' 
+                    : lesson.locked 
+                      ? 'bg-muted/50 text-muted-foreground cursor-not-allowed'
+                      : 'hover:bg-muted'
+                }`}
+              >
+                <div className="flex items-center gap-3">
+                  <div className="flex-shrink-0">
+                    {lesson.completed ? (
+                      <CheckCircle className="size-5 text-green-600" />
+                    ) : lesson.locked ? (
+                      <Lock className="size-5" />
+                    ) : (
+                      <Play className="size-5" />
                     )}
                   </div>
+                  <div className="flex-1 min-w-0">
+                    <h5 className="font-medium text-sm truncate">
+                      {lesson.order}. {lesson.title}
+                    </h5>
+                    <div className="flex items-center gap-2 text-xs opacity-80">
+                      <Clock className="size-3" />
+                      <span>{lesson.duration}</span>
+                      {lesson.exercise && (
+                        <>
+                          <Target className="size-3" />
+                          <span>Exercise</span>
+                        </>
+                      )}
+                    </div>
+                  </div>
                 </div>
-              </div>
-            </button>
-          ))}
+              </button>
+            ))
+          )}
         </div>
       </div>
     </div>
