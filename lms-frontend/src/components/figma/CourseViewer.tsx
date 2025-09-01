@@ -1,11 +1,38 @@
-import { useState, useEffect } from "react"
+import React, { useState, useEffect, useRef, useMemo } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/card"
 import { Button } from "./ui/button"
 import { Badge } from "./ui/badge"
 import { Progress } from "./ui/progress"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs"
-import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar"
+// Avatar not used in this file
 import { Textarea } from "./ui/textarea"
+
+// Stable wrapper around Textarea that logs mount/unmount and forwards ref.
+const TextareaWithMountLogger = (function () {
+  const Component = (props: React.ComponentProps<typeof Textarea> & { ref?: React.Ref<HTMLTextAreaElement> }, ref: React.Ref<HTMLTextAreaElement> | null) => {
+    const localRef = useRef<HTMLTextAreaElement | null>(null)
+    useEffect(() => {
+      console.debug('[CourseViewer] TextareaWithMountLogger mounted', { localRef: localRef.current })
+      return () => { console.debug('[CourseViewer] TextareaWithMountLogger unmounted') }
+    }, [])
+    return (
+      <Textarea
+        {...props}
+        ref={(el: HTMLTextAreaElement | null) => {
+          localRef.current = el
+          if (!ref) return
+          if (typeof ref === 'function') {
+            try { (ref as (el: HTMLTextAreaElement | null) => void)(el) } catch (e) { console.debug('ref function call failed', e) }
+          } else {
+            try { (ref as React.MutableRefObject<HTMLTextAreaElement | null>).current = el } catch (e) { console.debug('ref assignment failed', e) }
+          }
+        }}
+      />
+    )
+  }
+  return React.forwardRef(Component) as unknown as React.FC<React.ComponentProps<typeof Textarea>> & { displayName?: string }
+})()
+TextareaWithMountLogger.displayName = 'TextareaWithMountLogger'
 import { 
   ArrowLeft, 
   Play, 
@@ -16,13 +43,14 @@ import {
   Upload,
   BookOpen,
   Target,
-  Award,
+  // Award,
   Users,
   Star
 } from "lucide-react"
 import { useAuth } from "./AuthContext"
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { markLessonComplete } from '@/services/lessons'
+import { submitExercise } from '@/services/exercises'
 import { useCourseOutline } from '@/hooks/useCourseOutline'
 import { ImageWithFallback } from "./figma/ImageWithFallback"
 import { toast } from "sonner"
@@ -35,12 +63,13 @@ interface Lesson {
   videoUrl?: string
   content: string
   exercise?: {
-    title: string
-    description: string
-    instructions: string
-    timeEstimate: string
-    completed?: boolean
-    submission?: string
+  id?: number
+  title: string
+  description?: string | null
+  timeEstimate?: string
+  completed?: boolean
+  unlocked?: boolean
+  submission?: string | null
   }
   completed: boolean
   locked: boolean
@@ -72,37 +101,57 @@ interface CourseViewerProps {
 export function CourseViewer({ courseId, onBack, onNavigateToPage }: CourseViewerProps) {
   const { updateTokens } = useAuth()
   const [selectedLesson, setSelectedLesson] = useState<string | null>(null)
-  const [exerciseSubmission, setExerciseSubmission] = useState("")
+  const [activeTab, setActiveTab] = useState<'content' | 'exercise'>('content')
+  // Use a ref for the exercise text to avoid parent re-renders on each keystroke
+  const exerciseSubmissionRef = useRef<string>("")
+  const renderCount = useRef(0)
+  renderCount.current += 1
+  // debug log to trace re-renders and textarea events
+  // Remove or guard with env var in production if noisy
+  console.debug(`[CourseViewer] render #${renderCount.current} selectedLesson=${selectedLesson} activeTab=${activeTab}`)
 
   // Fetch real data via hook
   const { data, isLoading, isError, error } = useCourseOutline(courseId)
 
-  // Map API lessons into local shape
-  const apiLessons = data?.lessons ?? []
-  const course: Course = {
-    id: String(courseId),
-    title: data?.course?.title ?? "Caricamento...",
-    description: "",
-    instructor: data?.course?.teacher?.username ?? "",
-    instructorAvatar: data?.course?.cover ?? "",
-    thumbnail: data?.course?.cover ?? "",
-    level: 'beginner',
-    duration: '',
-    students: 0,
-    rating: 0,
-    reviews: 0,
-    progress: data?.progress?.percent ?? 0,
-    lessons: apiLessons.map((l, idx) => ({
-      id: String(l.id ?? idx),
-      title: l.title ?? `Lezione ${idx + 1}`,
+  // Map API lessons into local shape and memoize to avoid remounting children on every render
+  const course: Course = useMemo(() => {
+    const apiLessons = data?.lessons ?? []
+    return {
+      id: String(courseId),
+      title: data?.course?.title ?? "Caricamento...",
       description: "",
-      duration: l.duration_sec ? `${Math.round((l.duration_sec || 0) / 60)} min` : "",
-      content: "",
-      completed: !!data?.progress?.completed_lesson_ids?.includes(l.id),
-      locked: data?.course?.enrollment_status !== 'enrolled' && !l.is_free_preview,
-      order: l.position ?? idx + 1,
-    }))
-  }
+      instructor: data?.course?.teacher?.username ?? "",
+      instructorAvatar: data?.course?.cover ?? "",
+      thumbnail: data?.course?.cover ?? "",
+      level: 'beginner',
+      duration: '',
+      students: 0,
+      rating: 0,
+      reviews: 0,
+      progress: data?.progress?.percent ?? 0,
+      lessons: apiLessons.map((l, idx) => ({
+        id: String(l.id ?? idx),
+        title: l.title ?? `Lezione ${idx + 1}`,
+        description: "",
+        duration: l.duration_sec ? `${Math.round((l.duration_sec || 0) / 60)} min` : "",
+        content: "",
+        completed: !!data?.progress?.completed_lesson_ids?.includes(l.id),
+        locked: data?.course?.enrollment_status !== 'enrolled' && !l.is_free_preview,
+        order: l.position ?? idx + 1,
+        exercise: l.exercise
+          ? {
+              id: l.exercise.id,
+              title: l.exercise.title,
+              description: l.exercise.description ?? null,
+              timeEstimate: l.exercise.time_estimate ? String(l.exercise.time_estimate) : "--",
+              completed: !!l.exercise.completed,
+              unlocked: !!l.exercise.unlocked,
+              submission: null,
+            }
+          : undefined,
+      }))
+    }
+  }, [data, courseId])
 
   useEffect(() => {
     if (isError) {
@@ -127,39 +176,100 @@ export function CourseViewer({ courseId, onBack, onNavigateToPage }: CourseViewe
       return res.data
     },
   onSuccess: () => {
-      // reward tokens locally and invalidate outline
       updateTokens(5)
       toast("Lesson completed! ✨", {
         description: "You earned 5 tokens. Next lesson unlocked!"
       })
+      const key = ['courseOutline', Number(courseId ?? '')]
       try {
-        qc.invalidateQueries({ queryKey: ['courseOutline', Number(courseId ?? '')] })
+        qc.invalidateQueries({ queryKey: key })
       } catch {
-        // fallback: refetch local hook if available
+        // ignore
       }
     },
     onError: (err: unknown) => {
-      const msg = err && typeof err === 'object' && 'message' in err ? (err as any).message : String(err)
+      const msg = err && typeof err === 'object' && 'message' in err ? String((err as Record<string, unknown>)['message'] ?? String(err)) : String(err)
       toast(String(msg))
     }
   })
 
-  const handleSubmitExercise = (lessonId: string) => {
-    if (!exerciseSubmission.trim()) {
+  const submitMutation = useMutation({
+    mutationFn: async ({ exerciseId, text }: { exerciseId: number; text: string }) => {
+      const payload = { text }
+      const res = await submitExercise(exerciseId, payload)
+      if (!res.ok) throw res.error || new Error('Failed to submit exercise')
+      return res.data
+    },
+  onSuccess: () => {
+      updateTokens(10)
+  // reset uncontrolled ref and clear the DOM value
+  exerciseSubmissionRef.current = ""
+  try { if (textareaRef.current) textareaRef.current.value = '' } catch (e) { console.debug('[CourseViewer] reset textarea value failed', e) }
+      toast("Exercise submitted! ✨", {
+        description: "You earned 10 tokens. Your work will be sent for peer review.",
+        action: {
+          label: "Review Others",
+          onClick: () => onNavigateToPage?.('peer-review'),
+        },
+      })
+      const key = ['courseOutline', Number(courseId ?? '')]
+      try {
+        qc.invalidateQueries({ queryKey: key })
+      } catch {
+        // ignore
+      }
+    },
+    onError: (err: unknown) => {
+      const msg = err && typeof err === 'object' && 'message' in err ? String((err as Record<string, unknown>)['message'] ?? String(err)) : String(err)
+      toast(String(msg))
+    },
+  })
+
+  const handleSubmitExercise = () => {
+    if (!exerciseSubmissionRef.current.trim()) {
       toast("Please add your submission before submitting")
       return
     }
-    
-    updateTokens(10) // Reward for exercise submission
-    setExerciseSubmission("")
-    toast("Exercise submitted! ✨", {
-      description: "You earned 10 tokens. Your work will be sent for peer review.",
-      action: {
-        label: "Review Others",
-        onClick: () => onNavigateToPage?.('peer-review')
-      }
-    })
+    const exId = currentLesson?.exercise?.id
+    if (!exId) {
+      toast("No exercise available for this lesson")
+      return
+    }
+    if (!currentLesson?.exercise?.unlocked) {
+      toast("Exercise is locked. Complete the lesson first.")
+      return
+    }
+  submitMutation.mutate({ exerciseId: Number(exId), text: exerciseSubmissionRef.current })
   }
+
+  // File attach handling
+  const fileInputRef = useRef<HTMLInputElement | null>(null)
+  const [attachedFiles, setAttachedFiles] = useState<File[] | null>(null)
+  const onAttachClick = () => {
+    fileInputRef.current?.click()
+  }
+  const onFilesChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) setAttachedFiles(Array.from(e.target.files))
+  }
+
+  // Autofocus textarea when opening exercise tab to avoid losing focus
+  const textareaRef = useRef<HTMLTextAreaElement | null>(null)
+  useEffect(() => {
+    if (activeTab === 'exercise') {
+      // small timeout to ensure the element is mounted
+      setTimeout(() => textareaRef.current?.focus(), 50)
+    }
+  }, [activeTab, selectedLesson])
+
+  // Track textarea mount/unmount and log exerciseSubmission changes to debug focus loss
+  useEffect(() => {
+    console.debug('[CourseViewer] textarea ref at effect', { textareaRef: textareaRef.current, activeElement: document.activeElement?.tagName })
+  }, [activeTab, selectedLesson])
+
+  // keep a light debug of the ref value when needed
+  useEffect(() => {
+    console.debug('[CourseViewer] exerciseSubmissionRef at mount', { value: exerciseSubmissionRef.current, activeElement: document.activeElement?.tagName })
+  }, [])
 
   const LessonSidebar = () => (
     <div className="w-80 border-r bg-muted/20 p-4 space-y-4 overflow-y-auto">
@@ -197,7 +307,12 @@ export function CourseViewer({ courseId, onBack, onNavigateToPage }: CourseViewe
             course.lessons.map((lesson) => (
               <button
                 key={lesson.id}
-                onClick={() => !lesson.locked && setSelectedLesson(lesson.id)}
+                onClick={() => {
+                  if (!lesson.locked) {
+                    setSelectedLesson(lesson.id)
+                    setActiveTab('content')
+                  }
+                }}
                 disabled={lesson.locked}
                 className={`w-full p-3 rounded-lg text-left transition-colors ${
                   selectedLesson === lesson.id 
@@ -275,6 +390,26 @@ export function CourseViewer({ courseId, onBack, onNavigateToPage }: CourseViewe
                   Mark Complete
                 </Button>
               )}
+              {currentLesson.exercise && (
+                <Button
+                  variant="outline"
+                  onClick={() => currentLesson.exercise && (currentLesson.exercise.unlocked || currentLesson.completed) && setActiveTab('exercise')}
+                  className="ml-2"
+                  disabled={!currentLesson.exercise.unlocked && !currentLesson.completed}
+                >
+                  {!currentLesson.exercise.unlocked && !currentLesson.completed ? (
+                    <span className="flex items-center gap-2">
+                      <Lock className="size-4" />
+                      Exercise (locked)
+                    </span>
+                  ) : (
+                    <span className="flex items-center gap-2">
+                      <Target className="size-4 mr-2" />
+                      Open Exercise
+                    </span>
+                  )}
+                </Button>
+              )}
             </div>
           </div>
 
@@ -288,10 +423,10 @@ export function CourseViewer({ courseId, onBack, onNavigateToPage }: CourseViewe
           )}
         </div>
 
-        <Tabs defaultValue="content" className="space-y-4">
+  <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as 'content' | 'exercise')} className="space-y-4">
           <TabsList>
             <TabsTrigger value="content">Lesson Content</TabsTrigger>
-            {currentLesson.exercise && (
+            {currentLesson.exercise && (currentLesson.exercise.unlocked || currentLesson.exercise.completed) && (
               <TabsTrigger value="exercise">Exercise</TabsTrigger>
             )}
           </TabsList>
@@ -315,7 +450,7 @@ export function CourseViewer({ courseId, onBack, onNavigateToPage }: CourseViewe
             </Card>
           </TabsContent>
 
-          {currentLesson.exercise && (
+          {currentLesson.exercise && (currentLesson.exercise.unlocked || currentLesson.exercise.completed) && (
             <TabsContent value="exercise" className="space-y-4">
               <Card>
                 <CardHeader>
@@ -330,7 +465,7 @@ export function CourseViewer({ courseId, onBack, onNavigateToPage }: CourseViewe
                     <div>
                       <h4 className="font-medium mb-2">Instructions</h4>
                       <div className="bg-muted/50 p-4 rounded-lg">
-                        <pre className="whitespace-pre-wrap text-sm">{currentLesson.exercise.instructions}</pre>
+                        <pre className="whitespace-pre-wrap text-sm">{currentLesson.exercise.description ?? ''}</pre>
                       </div>
                     </div>
                     <div className="space-y-3">
@@ -368,23 +503,42 @@ export function CourseViewer({ courseId, onBack, onNavigateToPage }: CourseViewe
                     <div className="space-y-4">
                       <div className="space-y-2">
                         <h4 className="font-medium">Submit Your Work</h4>
-                        <Textarea
+                        <TextareaWithMountLogger
+                          ref={textareaRef}
                           placeholder="Describe your exercise completion, attach images, or share your process..."
-                          value={exerciseSubmission}
-                          onChange={(e) => setExerciseSubmission(e.target.value)}
+                          defaultValue={exerciseSubmissionRef.current}
+                          onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => {
+                            // update ref only, avoid setState to prevent re-renders
+                            exerciseSubmissionRef.current = e.target.value
+                            console.debug('[CourseViewer] textarea onChange (ref only)', { value: e.target.value })
+                          }}
+                          onFocus={() => { console.debug('[CourseViewer] textarea onFocus') }}
+                          onBlur={() => { console.debug('[CourseViewer] textarea onBlur'); console.trace('[CourseViewer] textarea blur trace') }}
                           className="min-h-24"
                         />
                       </div>
                       <div className="flex items-center gap-3">
-                        <Button onClick={() => handleSubmitExercise(currentLesson.id)}>
+                        <Button type="button" onClick={() => handleSubmitExercise()}>
                           <Upload className="size-4 mr-2" />
                           Submit Exercise
                         </Button>
-                        <Button variant="outline">
+                        <Button type="button" variant="outline" onClick={onAttachClick}>
                           <FileText className="size-4 mr-2" />
                           Attach Files
                         </Button>
+                        <input
+                          ref={fileInputRef}
+                          type="file"
+                          multiple
+                          onChange={onFilesChange}
+                          className="hidden"
+                        />
                       </div>
+                      {attachedFiles && attachedFiles.length > 0 && (
+                        <div className="mt-2 text-sm text-muted-foreground">
+                          Attached: {attachedFiles.map(f => f.name).join(', ')}
+                        </div>
+                      )}
                     </div>
                   )}
                 </CardContent>

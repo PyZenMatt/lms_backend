@@ -10,6 +10,14 @@ export type CourseOutlineLesson = {
   content_type?: string | null
   is_free_preview?: boolean
   lock_reason?: string | null
+  exercise?: {
+    id: number
+    title: string
+    description?: string | null
+    time_estimate?: number | null
+    unlocked?: boolean
+    completed?: boolean
+  } | null
 }
 
 export type CourseOutlinePayload = {
