@@ -9,6 +9,9 @@ from django.core.exceptions import ImproperlyConfigured  # <— mancava
 
 from .base import *
 
+# Ensure runtime marks this as production for settings relying on ENVIRONMENT
+ENVIRONMENT = "production"
+
 DEBUG = False
 
 # Parse ALLOWED_HOSTS e CSRF_TRUSTED_ORIGINS
@@ -44,6 +47,12 @@ CORS_ALLOW_CREDENTIALS = True
 # Cookie security
 SESSION_COOKIE_SECURE = True
 CSRF_COOKIE_SECURE = True
+
+# WhiteNoise: strict manifest can cause 500s if manifest is missing.
+# Keep cache-busting benefits but avoid hard failures at runtime.
+WHITENOISE_AUTOREFRESH = False
+WHITENOISE_USE_FINDERS = False
+WHITENOISE_MANIFEST_STRICT = False
 
 # Stripe: enforcement in prod, ma consentiamo di bypassare durante il build
 # impostando ENFORCE_STRIPE=0 (es. in build step su Render).

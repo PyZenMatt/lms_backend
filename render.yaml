@@ -13,6 +13,8 @@ services:
     envVars:
       - key: DJANGO_SETTINGS_MODULE
         value: schoolplatform.settings.prod
+      - key: ENVIRONMENT
+        value: production
       - key: SECRET_KEY
         generateValue: true
       - key: SENTRY_DSN
