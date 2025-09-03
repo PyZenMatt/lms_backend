@@ -8,7 +8,7 @@ services:
     env: python
     plan: free
     rootDir: .
-    buildCommand: pip install -r requirements.txt && python manage.py collectstatic --noinput && python manage.py migrate --noinput
+  buildCommand: pip install -r requirements.txt && python manage.py collectstatic --noinput --clear && python manage.py migrate --noinput
     startCommand: gunicorn schoolplatform.wsgi:application --workers=3 --threads=2 --timeout=120 -b 0.0.0.0:$PORT
     envVars:
       - key: DJANGO_SETTINGS_MODULE
