@@ -32,4 +32,4 @@ EXPOSE 8000
 ENV PORT=8000
 
 ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
-CMD ["gunicorn", "schoolplatform.wsgi:application", "--workers=3", "--threads=2", "--timeout=120", "-b", "0.0.0.0:8000"]
+CMD ["gunicorn", "schoolplatform.wsgi:application", "--workers=3", "--threads=2", "--timeout=120", "-b", "0.0.0.0:${PORT:-8000}"]
