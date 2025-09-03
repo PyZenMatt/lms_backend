@@ -16,10 +16,15 @@ fi
 
 # If no command supplied, default to starting gunicorn on $PORT (with fallback)
 if [ "$#" -eq 0 ]; then
+	default_cmd="gunicorn schoolplatform.wsgi:application --workers=3 --threads=2 --timeout=120 -b 0.0.0.0:${PORT:-8000}"
 	echo "No command supplied; starting gunicorn on 0.0.0.0:${PORT:-8000}"
-	exec bash -lc "gunicorn schoolplatform.wsgi:application --workers=3 --threads=2 --timeout=120 -b 0.0.0.0:${PORT:-8000}"
+	echo "ENTRYPOINT: default_cmd=\"$default_cmd\""
+	echo "ENTRYPOINT: PORT=\"${PORT:-}\""
+	exec bash -lc "$default_cmd"
 fi
 
 # Execute provided command via bash -lc so shell-style env/parameter expansion works
 cmd="$*"
+echo "ENTRYPOINT: executing provided cmd: \"$cmd\""
+echo "ENTRYPOINT: PORT=\"${PORT:-}\""
 exec bash -lc "$cmd"
