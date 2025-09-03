@@ -26,11 +26,11 @@ services:
           name: lms-db
           property: connectionString
       - key: ALLOWED_HOSTS
-        value: lms-api.onrender.com
+        value: schoolplatform.onrender.com
       - key: CORS_ALLOWED_ORIGINS
-        value: https://lms-frontend.onrender.com
+        value: https://schoolplatform-frontend.onrender.com
       - key: CSRF_TRUSTED_ORIGINS
-        value: https://lms-frontend.onrender.com,https://lms-api.onrender.com
+        value: https://schoolplatform-frontend.onrender.com,https://schoolplatform.onrender.com
 
   - type: static
     name: lms-frontend
