@@ -8,13 +8,15 @@ services:
     env: python
     plan: free
     rootDir: .
-  buildCommand: pip install -r requirements.txt && python manage.py collectstatic --noinput --clear && python manage.py migrate --noinput
-    startCommand: gunicorn schoolplatform.wsgi:application --workers=3 --threads=2 --timeout=120 -b 0.0.0.0:$PORT
+  buildCommand: pip install -r requirements.txt
+  startCommand: python manage.py collectstatic --noinput --clear && python manage.py migrate --noinput && gunicorn schoolplatform.wsgi:application --workers=3 --threads=2 --timeout=120 -b 0.0.0.0:$PORT
     envVars:
       - key: DJANGO_SETTINGS_MODULE
         value: schoolplatform.settings.prod
       - key: ENVIRONMENT
         value: production
+      - key: STATIC_URL
+  value: /static/
       - key: SECRET_KEY
         generateValue: true
       - key: SENTRY_DSN
@@ -45,4 +47,4 @@ services:
         destination: "/index.html"
     envVars:
       - key: VITE_API_BASE_URL
-        value: "https://lms-api.onrender.com"
+        value: "https://schoolplatform.onrender.com"

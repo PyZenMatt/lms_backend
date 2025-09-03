@@ -26,8 +26,10 @@ for origin in _raw_csrf:
         )
     CSRF_TRUSTED_ORIGINS.append(origin)
 
+# Allow disabling SSL requirement locally by setting DB_SSL_REQUIRE=0
+_ssl_required = os.getenv("DB_SSL_REQUIRE", "1") == "1"
 DATABASES = {
-    "default": dj_database_url.config(conn_max_age=600, ssl_require=True)
+    "default": dj_database_url.config(conn_max_age=600, ssl_require=_ssl_required)
 }
 
 # Email backend (prod)

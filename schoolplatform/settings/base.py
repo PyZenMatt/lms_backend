@@ -110,7 +110,8 @@ REST_FRAMEWORK = {
 AUTH_USER_MODEL = "users.User"
 
 # Static & Media
-STATIC_URL = "/static/"
+# Allow override via env to avoid conflicts with upstream routing
+STATIC_URL = os.getenv("STATIC_URL", "/static/")
 STATIC_ROOT = BASE_DIR / "staticfiles"
 
 # Django 4.2+/5.x: preferisci STORAGES al vecchio STATICFILES_STORAGE
