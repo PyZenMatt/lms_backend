@@ -9,7 +9,7 @@ def main():
     # Use DJANGO_SETTINGS_MODULE from env, fallback to dev
     os.environ.setdefault(
         "DJANGO_SETTINGS_MODULE",
-        os.getenv("DJANGO_SETTINGS_MODULE", "schoolplatform.settings.dev"),
+        os.getenv("DJANGO_SETTINGS_MODULE", "schoolplatform.settings.prod"),
     )
     try:
         from django.core.management import execute_from_command_line
