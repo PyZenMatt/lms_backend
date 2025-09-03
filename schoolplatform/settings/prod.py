@@ -4,6 +4,7 @@ import dj_database_url
 import sentry_sdk
 from sentry_sdk.integrations.celery import CeleryIntegration
 from sentry_sdk.integrations.django import DjangoIntegration
+from django.core.exceptions import ImproperlyConfigured
 
 from .base import *
 
@@ -45,6 +46,9 @@ CORS_ALLOW_CREDENTIALS = True
 # Cookie security for prod
 SESSION_COOKIE_SECURE = True
 CSRF_COOKIE_SECURE = True
+
+# Respect proxy headers (Render sets X-Forwarded-Proto)
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 
 # Stripe: enforce secret key in prod
 if not STRIPE_SECRET_KEY:
