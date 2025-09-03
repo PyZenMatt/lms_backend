@@ -32,4 +32,5 @@ EXPOSE 8000
 ENV PORT=8000
 
 ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
-CMD ["gunicorn", "schoolplatform.wsgi:application", "--workers=3", "--threads=2", "--timeout=120", "-b", "0.0.0.0:${PORT:-8000}"]
+# Use shell form so ${PORT:-8000} is expanded by the shell at runtime
+CMD gunicorn schoolplatform.wsgi:application --workers=3 --threads=2 --timeout=120 -b 0.0.0.0:${PORT:-8000}

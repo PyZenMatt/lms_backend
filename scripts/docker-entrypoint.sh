@@ -14,4 +14,12 @@ if ! python manage.py migrate --noinput; then
 	echo "Migrations failed or DB not ready; continuing"
 fi
 
-exec "$@"
+# If no command supplied, default to starting gunicorn on $PORT (with fallback)
+if [ "$#" -eq 0 ]; then
+	echo "No command supplied; starting gunicorn on 0.0.0.0:${PORT:-8000}"
+	exec bash -lc "gunicorn schoolplatform.wsgi:application --workers=3 --threads=2 --timeout=120 -b 0.0.0.0:${PORT:-8000}"
+fi
+
+# Execute provided command via bash -lc so shell-style env/parameter expansion works
+cmd="$*"
+exec bash -lc "$cmd"
