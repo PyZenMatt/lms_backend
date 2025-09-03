@@ -8,14 +8,13 @@ BASE_DIR = Path(__file__).resolve().parent.parent.parent
 load_dotenv(BASE_DIR / ".env")
 
 # Avoid printing secrets to stdout in production. Use conditional debug logging.
+# Keep debug logs minimal and avoid printing sensitive values like STRIPE_SECRET_KEY.
 if os.getenv("ENVIRONMENT", "development") != "production":
     try:
         import logging
 
         logging.getLogger(__name__).debug("BASE_DIR: %s", BASE_DIR)
-        logging.getLogger(__name__).debug(
-            "Loaded STRIPE_SECRET_KEY: %s", os.getenv("STRIPE_SECRET_KEY")
-        )
+        # Intentionally avoid logging secret values (STRIPE_SECRET_KEY).
     except Exception:
         # best-effort logging; do not raise during settings import
         pass

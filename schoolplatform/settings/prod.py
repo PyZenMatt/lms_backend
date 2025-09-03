@@ -51,7 +51,11 @@ CSRF_COOKIE_SECURE = True
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 
 # Stripe: enforce secret key in prod
-if not STRIPE_SECRET_KEY:
+# Allow enforcing the presence of STRIPE_SECRET_KEY via ENFORCE_STRIPE.
+# This permits build-time environments (where runtime envs aren't available)
+# to bypass the strict check by setting ENFORCE_STRIPE=0.
+ENFORCE_STRIPE = os.getenv("ENFORCE_STRIPE", "1").strip() not in ("0", "false", "no")
+if ENFORCE_STRIPE and not STRIPE_SECRET_KEY:
     raise ImproperlyConfigured(
         "STRIPE_SECRET_KEY environment variable is required for production"
     )
