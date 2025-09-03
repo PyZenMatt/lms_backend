@@ -167,10 +167,10 @@ class LoginApiView(views.APIView):
         # Attempt to authenticate user
         user = authenticate(request, username=email, password=password)
 
-    # Use structured logging; never log passwords.
-    logger = logging.getLogger(__name__)
-    logger.debug("Login attempt for email: %s", email)
-    logger.debug("Authenticated user: %s", user)
+        # Use structured logging; never log passwords.
+        logger = logging.getLogger(__name__)
+        logger.debug("Login attempt for email: %s", email)
+        logger.debug("Authenticated user: %s", user)
 
         if not user:
             # Log authentication failure without sensitive data
