@@ -1,22 +1,18 @@
 import re
+from django.core.exceptions import ImproperlyConfigured
 
 import dj_database_url
 import sentry_sdk
 from sentry_sdk.integrations.celery import CeleryIntegration
 from sentry_sdk.integrations.django import DjangoIntegration
-from django.core.exceptions import ImproperlyConfigured
 
 from .base import *
 
 DEBUG = False
 
-# Parse ALLOWED_HOSTS and CSRF_TRUSTED_ORIGINS, ignore empty, strip, and validate scheme for CSRF
-ALLOWED_HOSTS = [
-    h.strip() for h in os.getenv("ALLOWED_HOSTS", "").split(",") if h.strip()
-]
-raw_csrf = [
-    h.strip() for h in os.getenv("CSRF_TRUSTED_ORIGINS", "").split(",") if h.strip()
-]
+# Hosts / CSRF
+ALLOWED_HOSTS = [h.strip() for h in os.getenv("ALLOWED_HOSTS", "").split(",") if h.strip()]
+raw_csrf = [h.strip() for h in os.getenv("CSRF_TRUSTED_ORIGINS", "").split(",") if h.strip()]
 CSRF_TRUSTED_ORIGINS = []
 for origin in raw_csrf:
     if not re.match(r"^https?://", origin):
@@ -25,46 +21,35 @@ for origin in raw_csrf:
         )
     CSRF_TRUSTED_ORIGINS.append(origin)
 
-DATABASES = {"default": dj_database_url.config(conn_max_age=600, ssl_require=True)}
+DATABASES = {
+    "default": dj_database_url.config(conn_max_age=600, ssl_require=True)
+}
 
-
-# Email backend for prod
+# Email backend per prod
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 
-# CORS for prod - frontend is served from different origin
+# CORS in prod
 CORS_ALLOW_ALL_ORIGINS = False
 CORS_ALLOWED_ORIGINS = [
-    "https://schoolplatform-frontend.onrender.com",  # Frontend origin
-    # Backend origin (for admin)
+    "https://schoolplatform-frontend.onrender.com",
     "https://schoolplatform.onrender.com",
-    "https://www.schoolplatform.onrender.com",  # www variant
+    "https://www.schoolplatform.onrender.com",
 ]
-
-# Allow credentials for cross-origin requests
 CORS_ALLOW_CREDENTIALS = True
 
-# Cookie security for prod
+# Cookie security
 SESSION_COOKIE_SECURE = True
 CSRF_COOKIE_SECURE = True
 
-# Respect proxy headers (Render sets X-Forwarded-Proto)
-SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+# Stripe obbligatorio in prod
+if not STRIPE_SECRET_KEY:
+    raise ImproperlyConfigured("STRIPE_SECRET_KEY environment variable is required for production")
 
-# Stripe: enforce secret key in prod
-# Allow enforcing the presence of STRIPE_SECRET_KEY via ENFORCE_STRIPE.
-# This permits build-time environments (where runtime envs aren't available)
-# to bypass the strict check by setting ENFORCE_STRIPE=0.
-ENFORCE_STRIPE = os.getenv("ENFORCE_STRIPE", "1").strip() not in ("0", "false", "no")
-if ENFORCE_STRIPE and not STRIPE_SECRET_KEY:
-    raise ImproperlyConfigured(
-        "STRIPE_SECRET_KEY environment variable is required for production"
-    )
+# Forza DB system in prod
+USE_DB_TEOCOIN_SYSTEM = True
+TEOCOIN_SYSTEM = "database"
 
-# TeoCoin System Configuration for Production
-USE_DB_TEOCOIN_SYSTEM = True  # Force DB system in production
-TEOCOIN_SYSTEM = "database"  # Use database, not blockchain for internal operations
-
-# Sentry (only prod)
+# Sentry
 sentry_sdk.init(
     dsn=os.getenv("SENTRY_DSN"),
     integrations=[DjangoIntegration(), CeleryIntegration()],
@@ -73,47 +58,11 @@ sentry_sdk.init(
     environment=ENVIRONMENT,
 )
 
-# Logging (file + console for prod)
-# Ensure the log directory exists so file handlers can open files when
-# running locally or when the entrypoint hasn't created it yet.
-try:
-    LOG_DIR = BASE_DIR / "logs"
-    LOG_DIR.mkdir(parents=True, exist_ok=True)
-except Exception:
-    # Best-effort: if we can't create the dir, allow logging config to
-    # raise later and fall back to console-only logging if desired.
-    pass
+# Logging: console-only in Render (evita problemi di permessi/file)
 LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,
-    "formatters": {
-        "verbose": {
-            "format": "{levelname} {asctime} {module} {process:d} {thread:d} {message}",
-            "style": "{",
-        },
-        "simple": {
-            "format": "{levelname} {message}",
-            "style": "{",
-        },
-    },
-    "handlers": {
-        "file": {
-            "level": "INFO",
-            "class": "logging.FileHandler",
-            "filename": BASE_DIR / "logs" / "api_performance.log",
-            "formatter": "verbose",
-        },
-        "console": {
-            "level": "DEBUG",
-            "class": "logging.StreamHandler",
-            "formatter": "simple",
-        },
-    },
-    "loggers": {
-        "api_performance": {
-            "handlers": ["file", "console"],
-            "level": "INFO",
-            "propagate": False,
-        },
-    },
+    "formatters": {"simple": {"format": "{levelname} {message}", "style": "{"}},
+    "handlers": {"console": {"level": "INFO", "class": "logging.StreamHandler", "formatter": "simple"}},
+    "root": {"handlers": ["console"], "level": "INFO"},
 }
