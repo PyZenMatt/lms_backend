@@ -26,6 +26,17 @@ if [ "$#" -eq 0 ]; then
 	# "echo ..." to perform expansion safely here and log the expanded command.
 	expanded_default_cmd=$(bash -lc "echo $default_cmd")
 	echo "ENTRYPOINT: expanded default_cmd=\"$expanded_default_cmd\""
+	# Normalize: strip surrounding single/double quotes if any
+	expanded_default_cmd=${expanded_default_cmd%"}
+	expanded_default_cmd=${expanded_default_cmd#"}
+	expanded_default_cmd=${expanded_default_cmd%\'}
+	expanded_default_cmd=${expanded_default_cmd#\'}
+	# If the command is wrapped like: /bin/sh -c <inner>, extract <inner>
+	if [[ "$expanded_default_cmd" == /bin/sh\ -c* ]]; then
+		# remove leading '/bin/sh -c ' prefix
+		expanded_default_cmd=${expanded_default_cmd#/bin/sh -c }
+	fi
+	echo "ENTRYPOINT: normalized default_cmd=\"$expanded_default_cmd\""
 	exec bash -lc "$expanded_default_cmd"
 fi
 
@@ -37,4 +48,14 @@ echo "ENTRYPOINT: PORT=\"${PORT:-}\""
 # have been left literal by the caller (Render sometimes wraps the command).
 expanded_cmd=$(bash -lc "echo $cmd")
 echo "ENTRYPOINT: expanded provided cmd: \"$expanded_cmd\""
+# Normalize: strip surrounding quotes
+expanded_cmd=${expanded_cmd%"}
+expanded_cmd=${expanded_cmd#"}
+expanded_cmd=${expanded_cmd%\'}
+expanded_cmd=${expanded_cmd#\'}
+# If wrapped as '/bin/sh -c <inner>', remove the wrapper so we exec <inner> directly
+if [[ "$expanded_cmd" == /bin/sh\ -c* ]]; then
+	expanded_cmd=${expanded_cmd#/bin/sh -c }
+fi
+echo "ENTRYPOINT: normalized provided cmd: \"$expanded_cmd\""
 exec bash -lc "$expanded_cmd"
