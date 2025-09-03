@@ -8,8 +8,8 @@ Deploying the Django backend to Render (quick guide)
 3) Create a new Web Service on Render
    - Environment: Python
    - Root directory: this repo root (where `manage.py` lives)
-   - Build command:
-     pip install -r requirements.txt && python manage.py collectstatic --noinput && python manage.py migrate --noinput
+    - Build command:
+       mkdir -p staticfiles && pip install -r requirements.txt && python manage.py collectstatic --noinput --clear && python manage.py migrate --noinput
    - Start command:
      gunicorn schoolplatform.wsgi:application --workers=3 --threads=2 --timeout=120
 

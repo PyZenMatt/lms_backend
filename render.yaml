@@ -8,15 +8,17 @@ services:
     env: python
     plan: free
     rootDir: .
-  buildCommand: pip install -r requirements.txt
-  startCommand: python manage.py collectstatic --noinput --clear && python manage.py migrate --noinput && gunicorn schoolplatform.wsgi:application --workers=3 --threads=2 --timeout=120 -b 0.0.0.0:$PORT
+    # Ensure staticfiles dir exists, install deps, run collectstatic and migrations during build
+    buildCommand: mkdir -p staticfiles && pip install -r requirements.txt && python manage.py collectstatic --noinput --clear && python manage.py migrate --noinput
+    # Start command should only run the app server; build already ran collectstatic/migrate
+    startCommand: gunicorn schoolplatform.wsgi:application --workers=3 --threads=2 --timeout=120 -b 0.0.0.0:$PORT
     envVars:
       - key: DJANGO_SETTINGS_MODULE
         value: schoolplatform.settings.prod
       - key: ENVIRONMENT
         value: production
       - key: STATIC_URL
-  value: /static/
+        value: /static/
       - key: SECRET_KEY
         generateValue: true
       - key: SENTRY_DSN

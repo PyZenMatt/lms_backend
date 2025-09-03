@@ -20,7 +20,9 @@ RUN pip install --upgrade pip && pip install --no-cache-dir -r requirements.txt
 # Copy project
 COPY . /app/
 
-# Collect static files at build time (optional) — safe if static files present
+# Ensure staticfiles dir exists and collect static files at build time
+RUN mkdir -p /app/staticfiles
+# Collect static (allow failure in case env not ready during image build)
 RUN python manage.py collectstatic --noinput || true
 
 # Entrypoint will run migrations at container start (tolerant to DB not ready)
