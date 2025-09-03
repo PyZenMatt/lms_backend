@@ -48,8 +48,8 @@ INSTALLED_APPS = [
     "services.apps.ServicesConfig",
 ]
 
+
 MIDDLEWARE = [
-   MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
     "corsheaders.middleware.CorsMiddleware",
