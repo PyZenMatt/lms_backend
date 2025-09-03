@@ -8,6 +8,7 @@ venv/
 
 # Django
 *.sqlite3
+staticfiles/
 
 # Editor
 .vscode/
