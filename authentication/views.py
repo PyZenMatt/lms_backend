@@ -167,14 +167,14 @@ class LoginApiView(views.APIView):
         # Attempt to authenticate user
         user = authenticate(request, username=email, password=password)
 
-        # Debug logging (consider using proper logging in production)
-        print(f"Email: {email}, Password: {password}")
-        print(f"Utente autenticato: {user}")  # Authenticated user
+    # Use structured logging; never log passwords.
+    logger = logging.getLogger(__name__)
+    logger.debug("Login attempt for email: %s", email)
+    logger.debug("Authenticated user: %s", user)
 
         if not user:
-            # Log authentication failure for debugging
-            # Authentication failed for email
-            print(f"Autenticazione fallita per email: {email}")
+            # Log authentication failure without sensitive data
+            logger.warning("Authentication failed for email: %s", email)
             return Response(
                 {"detail": "Credenziali non valide."},  # Invalid credentials
                 status=status.HTTP_401_UNAUTHORIZED,
