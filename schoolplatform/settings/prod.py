@@ -74,6 +74,15 @@ sentry_sdk.init(
 )
 
 # Logging (file + console for prod)
+# Ensure the log directory exists so file handlers can open files when
+# running locally or when the entrypoint hasn't created it yet.
+try:
+    LOG_DIR = BASE_DIR / "logs"
+    LOG_DIR.mkdir(parents=True, exist_ok=True)
+except Exception:
+    # Best-effort: if we can't create the dir, allow logging config to
+    # raise later and fall back to console-only logging if desired.
+    pass
 LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,
