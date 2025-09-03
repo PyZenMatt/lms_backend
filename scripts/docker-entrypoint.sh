@@ -20,11 +20,21 @@ if [ "$#" -eq 0 ]; then
 	echo "No command supplied; starting gunicorn on 0.0.0.0:${PORT:-8000}"
 	echo "ENTRYPOINT: default_cmd=\"$default_cmd\""
 	echo "ENTRYPOINT: PORT=\"${PORT:-}\""
-	exec bash -lc "$default_cmd"
+	# Expand any shell-style parameter expansions (eg. ${PORT:-8000}) so the final
+	# command passed to exec contains the actual port value when Render wraps
+	# the Start Command (it may pass a '/bin/sh -c ...' payload). Use bash -lc
+	# "echo ..." to perform expansion safely here and log the expanded command.
+	expanded_default_cmd=$(bash -lc "echo $default_cmd")
+	echo "ENTRYPOINT: expanded default_cmd=\"$expanded_default_cmd\""
+	exec bash -lc "$expanded_default_cmd"
 fi
 
 # Execute provided command via bash -lc so shell-style env/parameter expansion works
 cmd="$*"
 echo "ENTRYPOINT: executing provided cmd: \"$cmd\""
 echo "ENTRYPOINT: PORT=\"${PORT:-}\""
-exec bash -lc "$cmd"
+# Expand provided cmd to resolve any ${PORT} or other shell expansions that may
+# have been left literal by the caller (Render sometimes wraps the command).
+expanded_cmd=$(bash -lc "echo $cmd")
+echo "ENTRYPOINT: expanded provided cmd: \"$expanded_cmd\""
+exec bash -lc "$expanded_cmd"
