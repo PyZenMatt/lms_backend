@@ -1,0 +1,4 @@
+INFO 2025-09-04 08:23:11,446 middleware 15 124441202842496 API POST /api/v1/token/ - 0.206s - 200
+INFO 2025-09-04 08:23:11,459 middleware 15 124441202842496 API GET /api/v1/dashboard/role/ - 0.002s - 200
+INFO 2025-09-04 08:23:20,684 middleware 15 124441202842496 API POST /api/v1/token/ - 0.245s - 200
+INFO 2025-09-04 08:23:20,697 middleware 15 124441202842496 API GET /api/v1/dashboard/role/ - 0.002s - 200
