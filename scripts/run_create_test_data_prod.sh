@@ -1,8 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Usage:
-#   ./scripts/run_create_test_data_prod.sh --yes-im-sure
+# Usage: ./scripts/run_create_test_data_prod.sh --yes-im-sure
 # This script runs migrations and the create_test_data management command
 # using the production Django settings. It requires an explicit --yes-im-sure
 # argument to avoid accidental execution in production.
