@@ -30,9 +30,12 @@ class TeoCoinBalanceView(APIView):
             return Response({"success": True, "balance": balance_data})
 
         except Exception as e:
-            logger.error(f"Error getting balance for user {request.user.id}: {e}")
+            # Log full exception with traceback for debugging
+            logger.exception(f"Error getting balance for user {getattr(request.user, 'id', None)}: {e}")
+            # Surface the exception message in development to help debug client-side.
+            # (In production, consider hiding internal errors.)
             return Response(
-                {"success": False, "error": "Failed to get balance"},
+                {"success": False, "error": "Failed to get balance", "detail": str(e)},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
 
