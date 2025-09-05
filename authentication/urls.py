@@ -16,6 +16,8 @@ from .views import LoginApiView, LogoutView, RegisterView, VerifyEmailView
 urlpatterns = [
     # User registration endpoint
     path("register/", RegisterView.as_view(), name="register"),
+    # Compatibility alias for older frontend clients that call token/register/
+    path("token/register/", RegisterView.as_view(), name="token-register-alias"),
     # Email verification endpoint (GET request with UID and token)
     path(
         "verify-email/<str:uid>/<str:token>/",

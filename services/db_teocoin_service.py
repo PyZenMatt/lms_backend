@@ -58,36 +58,58 @@ class DBTeoCoinService:
         Returns:
             Dict with available_balance, staked_balance, pending_withdrawal
         """
-        balance_obj, created = DBTeoCoinBalance.objects.get_or_create(
-            user=user,
-            defaults={
+        # Defensive: if no user provided, or DB is unreachable, return zeroed balances
+        if not user:
+            logger.debug("get_user_balance called with no user - returning zero balances")
+            return {
                 "available_balance": Decimal("0.00"),
                 "staked_balance": Decimal("0.00"),
                 "pending_withdrawal": Decimal("0.00"),
-            },
-        )
-
-        # For students, exclude staking completely (students don't stake)
-        if hasattr(user, "role") and getattr(user, "role", None) == "student":
-            return {
-                "available_balance": balance_obj.available_balance,
-                # Students don't have staking
-                "staked_balance": Decimal("0.00"),
-                "pending_withdrawal": balance_obj.pending_withdrawal,
-                "total_balance": balance_obj.available_balance
-                + balance_obj.pending_withdrawal,
+                "total_balance": Decimal("0.00"),
             }
-        else:
-            # For teachers and admins, include staking
+
+        try:
+            balance_obj, created = DBTeoCoinBalance.objects.get_or_create(
+                user=user,
+                defaults={
+                    "available_balance": Decimal("0.00"),
+                    "staked_balance": Decimal("0.00"),
+                    "pending_withdrawal": Decimal("0.00"),
+                },
+            )
+
+            # For students, exclude staking completely (students don't stake)
+            if hasattr(user, "role") and getattr(user, "role", None) == "student":
+                return {
+                    "available_balance": balance_obj.available_balance,
+                    # Students don't have staking
+                    "staked_balance": Decimal("0.00"),
+                    "pending_withdrawal": balance_obj.pending_withdrawal,
+                    "total_balance": balance_obj.available_balance
+                    + balance_obj.pending_withdrawal,
+                }
+            else:
+                # For teachers and admins, include staking
+                return {
+                    "available_balance": balance_obj.available_balance,
+                    "staked_balance": balance_obj.staked_balance,
+                    "pending_withdrawal": balance_obj.pending_withdrawal,
+                    "total_balance": (
+                        balance_obj.available_balance
+                        + balance_obj.staked_balance
+                        + balance_obj.pending_withdrawal
+                    ),
+                }
+
+        except Exception as e:
+            # Catch DB connection errors and other unexpected exceptions.
+            # Return a safe zero-balance object so callers (and the API) don't 500
+            logger.exception(f"DBTeoCoinService.get_user_balance failed for user {getattr(user, 'id', None)}: {e}")
             return {
-                "available_balance": balance_obj.available_balance,
-                "staked_balance": balance_obj.staked_balance,
-                "pending_withdrawal": balance_obj.pending_withdrawal,
-                "total_balance": (
-                    balance_obj.available_balance
-                    + balance_obj.staked_balance
-                    + balance_obj.pending_withdrawal
-                ),
+                "available_balance": Decimal("0.00"),
+                "staked_balance": Decimal("0.00"),
+                "pending_withdrawal": Decimal("0.00"),
+                "total_balance": Decimal("0.00"),
             }
 
     def get_available_balance(self, user: User) -> Decimal:

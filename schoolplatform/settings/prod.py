@@ -37,12 +37,17 @@ EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 
 # CORS (frontend separato)
 CORS_ALLOW_ALL_ORIGINS = False
-CORS_ALLOWED_ORIGINS = [
-    "https://schoolplatform-frontend.onrender.com",  # FE
-    "https://schoolplatform.onrender.com",           # BE (admin)
-    # Nota: Render in genere non usa 'www.' per i subdomain; tienilo solo se realmente attivo.
-    # "https://www.schoolplatform.onrender.com",
-]
+# Allow override via comma-separated env var (useful for local prod-like testing)
+_cors_env = [h.strip() for h in os.getenv("CORS_ALLOWED_ORIGINS", "").split(",") if h.strip()]
+if _cors_env:
+    CORS_ALLOWED_ORIGINS = _cors_env
+else:
+    CORS_ALLOWED_ORIGINS = [
+        "https://schoolplatform-frontend.onrender.com",  # FE
+        "https://schoolplatform.onrender.com",           # BE (admin)
+        # Nota: Render in genere non usa 'www.' per i subdomain; tienilo solo se realmente attivo.
+        # "https://www.schoolplatform.onrender.com",
+    ]
 
 CORS_ALLOW_CREDENTIALS = True
 
