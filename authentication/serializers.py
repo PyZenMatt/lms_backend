@@ -4,6 +4,9 @@ from django.utils.encoding import force_bytes
 from django.utils.http import urlsafe_base64_encode
 from rest_framework import serializers
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+from rest_framework_simplejwt.serializers import TokenRefreshSerializer
+from rest_framework_simplejwt.tokens import RefreshToken
+from django.contrib.auth import get_user_model
 
 # Get the custom User model
 User = get_user_model()
@@ -48,6 +51,51 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
         token["teo_coins"] = teo_balance
 
         return token
+
+
+class CustomTokenRefreshSerializer(TokenRefreshSerializer):
+    """
+    Custom refresh serializer that preserves/adds the same custom claims
+    (username, role, teo_coins) to the newly issued access token so the
+    frontend can reliably read role from the JWT after a refresh.
+    """
+
+    def validate(self, attrs):
+        data = super().validate(attrs)
+        refresh = attrs.get("refresh")
+        if not refresh:
+            return data
+
+        try:
+            token = RefreshToken(refresh)
+            user_id = token.get("user_id")
+            if user_id:
+                User = get_user_model()
+                try:
+                    user = User.objects.get(pk=user_id)
+                    access = token.access_token
+                    # add the same claims we add at token obtain time
+                    access["username"] = user.username
+                    access["role"] = user.role
+                    teo_balance = 0
+                    if getattr(user, "wallet_address", None):
+                        try:
+                            from blockchain.blockchain import teocoin_service
+
+                            balance = teocoin_service.get_balance(user.wallet_address)
+                            teo_balance = float(balance) if balance else 0
+                        except Exception:
+                            teo_balance = 0
+                    access["teo_coins"] = teo_balance
+                    data["access"] = str(access)
+                except User.DoesNotExist:
+                    # no-op: leave data as returned by parent
+                    pass
+        except Exception:
+            # best-effort: if anything goes wrong, return parent data
+            pass
+
+        return data
 
 
 class RegisterSerializer(serializers.ModelSerializer):

@@ -20,6 +20,8 @@ from django.views.generic import TemplateView
 from rest_framework import generics, permissions, status, views
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework_simplejwt.views import TokenRefreshView
+from .serializers import CustomTokenRefreshSerializer
 
 from .serializers import EmailVerifySerializer, LoginSerializer, RegisterSerializer
 
@@ -315,3 +317,9 @@ class LogoutView(views.APIView):
 
         logger.info("🔓 Logout completed successfully")
         return response
+
+
+
+class CustomTokenRefreshView(TokenRefreshView):
+    """Use the custom serializer so refreshed access tokens include custom claims."""
+    serializer_class = CustomTokenRefreshSerializer
