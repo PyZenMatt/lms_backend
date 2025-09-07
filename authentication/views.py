@@ -323,3 +323,51 @@ class LogoutView(views.APIView):
 class CustomTokenRefreshView(TokenRefreshView):
     """Use the custom serializer so refreshed access tokens include custom claims."""
     serializer_class = CustomTokenRefreshSerializer
+    def post(self, request, *args, **kwargs):
+        """
+        Construct a refreshed access token and inject custom claims (username, role, teo_coins)
+        directly to ensure frontend receives role claim even if serializer path behaved
+        unexpectedly in some environments.
+        Falls back to default serializer behaviour on failure.
+        """
+        from rest_framework.response import Response
+        from rest_framework import status
+        import logging
+
+        logger = logging.getLogger(__name__)
+
+        refresh_token = request.data.get("refresh")
+        if not refresh_token:
+            return Response({"detail": "refresh token required"}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            token = RefreshToken(refresh_token)
+            user_id = token.get("user_id")
+            if user_id:
+                User = get_user_model()
+                try:
+                    user = User.objects.get(pk=user_id)
+                    access = token.access_token
+                    access["username"] = user.username
+                    access["role"] = user.role
+                    teo_balance = 0
+                    if getattr(user, "wallet_address", None):
+                        try:
+                            from blockchain.blockchain import teocoin_service
+
+                            balance = teocoin_service.get_balance(user.wallet_address)
+                            teo_balance = float(balance) if balance else 0
+                        except Exception:
+                            teo_balance = 0
+                    access["teo_coins"] = teo_balance
+                    data = {"access": str(access), "refresh": str(refresh_token)}
+                    return Response(data)
+                except User.DoesNotExist:
+                    logger.warning("CustomTokenRefreshView: user not found for refresh token")
+
+        except Exception as e:
+            # If anything goes wrong, fall back to serializer behaviour
+            logger.exception("CustomTokenRefreshView: direct refresh path failed, falling back: %s", e)
+
+        # Fallback: use parent implementation
+        return super().post(request, *args, **kwargs)

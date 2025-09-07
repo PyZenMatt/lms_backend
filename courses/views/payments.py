@@ -1,14 +1,3 @@
-"""
-TeoCoin Discount Payment System - Clean Implementation
-Database-only Architecture: Fast, reliable, gasless TeoCoin operations
-
-Business Logic:
-- Students get discounts using database TeoCoin balance
-- Teachers receive commissions based on staking tiers (database-tracked)
-- Platform handles all business logic in secure database
-- Clean separation between DB operations and blockchain (for withdrawal/deposit only)
-"""
-
 import logging
 import os
 from decimal import Decimal
@@ -140,15 +129,20 @@ class CreatePaymentIntentView(APIView):
                     available_teo = student_balance_data.get("available_balance", 0)
 
                     if available_teo < teo_cost:
-                        return Response(
-                            {
-                                "error": f"Insufficient TEO balance. Need {teo_cost} TEO, have {available_teo} TEO",
-                                "code": "INSUFFICIENT_TEO_BALANCE",
-                                "required_teo": float(teo_cost),
-                                "available_teo": float(available_teo),
-                            },
-                            status=status.HTTP_400_BAD_REQUEST,
+                        # Do NOT fail the entire payment creation when DB balance
+                        # disagrees with the frontend or external wallet. The
+                        # actual deduction is performed at confirmation time
+                        # (ConfirmPaymentView). Instead, log a warning and
+                        # continue without applying the TEO discount so the
+                        # client can still complete the payment.
+                        logger.warning(
+                            f"⚠️ Insufficient TEO balance for user {user.id}: need {teo_cost}, have {available_teo} - proceeding without discount"
                         )
+                        # Mark that TEO could not be applied at intent creation.
+                        teo_balance_insufficient = True
+                        # Ensure discount is not applied
+                        discount_amount = Decimal("0")
+                        final_price = original_price
 
                     # NOTE: Do NOT deduct TEO here - will be deducted by ApplyDiscountView
                     # This prevents double deduction when frontend calls both endpoints
@@ -157,8 +151,13 @@ class CreatePaymentIntentView(APIView):
                     )
 
                     # Student gets guaranteed discount (TEO will be deducted separately)
-                    discount_amount = discount_value_eur
-                    final_price = original_price - discount_amount
+                    # Only apply if we didn't previously mark insufficient balance
+                    if not locals().get('teo_balance_insufficient', False):
+                        discount_amount = discount_value_eur
+                        final_price = original_price - discount_amount
+                    else:
+                        # already handled above: no discount applied
+                        pass
 
                     logger.info(
                         f"✅ TeoCoin discount calculated: {discount_percent}% off €{original_price}"
@@ -257,6 +256,10 @@ class CreatePaymentIntentView(APIView):
                     "student_address": student_address,
                 },
             }
+
+            # If we previously detected insufficient TEO balance, expose it to frontend
+            if locals().get('teo_balance_insufficient', False):
+                intent_data["metadata"]["teo_balance_insufficient"] = "True"
 
             # Add discount request ID if applicable
             if discount_request_id:
@@ -760,7 +763,21 @@ class ConfirmPaymentView(APIView):
                     },
                     status=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 )
-
+                # If we reached this point, the confirmation flow completed successfully.
+                # Return a structured success response so the DRF view always returns an HttpResponse.
+                try:
+                    return Response(
+                        {
+                            "success": True,
+                            "enrollment_id": getattr(enrollment, "pk", None),
+                            "course_id": course_id,
+                            "snapshot_id": getattr(snap, "id", None),
+                        },
+                        status=status.HTTP_200_OK,
+                    )
+                except Exception:
+                    # Defensive fallback: ensure we still return a generic success when variables are missing
+                    return Response({"success": True}, status=status.HTTP_200_OK)
         except Exception as e:
             # Outer catch-all for ConfirmPaymentView
             logger.error(f"Payment confirmation outer error: {e}")

@@ -61,18 +61,29 @@ class CustomTokenRefreshSerializer(TokenRefreshSerializer):
     """
 
     def validate(self, attrs):
+        import logging
+        logger = logging.getLogger(__name__)
+        logger.debug("CustomTokenRefreshSerializer.validate: entry")
+        # Call parent to perform standard validation and token checks
         data = super().validate(attrs)
         refresh = attrs.get("refresh")
+
         if not refresh:
             return data
 
         try:
             token = RefreshToken(refresh)
             user_id = token.get("user_id")
+            logger.debug(f"CustomTokenRefreshSerializer: token user_id={user_id}")
             if user_id:
                 User = get_user_model()
                 try:
                     user = User.objects.get(pk=user_id)
+                    logger.debug(
+                        "CustomTokenRefreshSerializer: found user id=%s role=%s",
+                        getattr(user, "id", None),
+                        getattr(user, "role", None),
+                    )
                     access = token.access_token
                     # add the same claims we add at token obtain time
                     access["username"] = user.username
