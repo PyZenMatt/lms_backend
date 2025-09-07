@@ -13,4 +13,5 @@ staticfiles/
 # Editor
 .vscode/
 .idea/
+backend/.env.parity
 .docker-compose.yml
