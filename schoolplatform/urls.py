@@ -35,6 +35,23 @@ schema_view = get_schema_view(
 
 # Health check endpoint
 from django.http import HttpResponse
+import os
+from pathlib import Path
+
+def version(request):
+    # Return the app version: prefer GIT_COMMIT env, fallback to a lightweight file or package
+    git_commit = os.getenv("GIT_COMMIT")
+    if git_commit:
+        return HttpResponse(git_commit, content_type="text/plain")
+    # Fallback to reading a VERSION file if present
+    try:
+        base = Path(__file__).resolve().parent.parent
+        version_file = base / "VERSION"
+        if version_file.exists():
+            return HttpResponse(version_file.read_text().strip(), content_type="text/plain")
+    except Exception:
+        pass
+    return HttpResponse("unknown", content_type="text/plain")
 
 def healthz(_):
     return HttpResponse("ok", content_type="text/plain")
@@ -68,6 +85,7 @@ urlpatterns = [
     path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
     path('redoc/', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
     path("healthz/", healthz),
+    path("version/", version),
 ]
 
 # Compatibility aliases for older frontend paths (no /v1/rewards/ prefix)

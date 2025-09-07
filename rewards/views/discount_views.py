@@ -23,6 +23,9 @@ from rewards.serializers import (
     DiscountBreakdownSerializer,
     PaymentDiscountSnapshotSerializer,
 )
+from services.db_teocoin_service import db_teocoin_service
+from math import ceil
+from django.conf import settings
 from notifications.services import teocoin_notification_service
 
 logger = logging.getLogger(__name__)
@@ -66,6 +69,26 @@ def preview_discount(request):
     )
 
     out = DiscountBreakdownSerializer(result).data if isinstance(result, dict) else result
+    # Compute tokens_required based on rule: RATE_TEOCOIN_EUR (default 1.0)
+    try:
+        rate = float(getattr(settings, "RATE_TEOCOIN_EUR", 1.0))
+        discount_percent = float(data.get("discount_percent", 0) or 0)
+        price = float(data.get("price_eur", 0) or 0)
+        tokens_required = int(ceil((price * (discount_percent / 100.0)) / (rate if rate > 0 else 1.0)))
+    except Exception:
+        tokens_required = 0
+
+    # Read user DB balance (available)
+    try:
+        balance = db_teocoin_service.get_balance(request.user)
+        # balance is Decimal
+        balance_numeric = float(balance)
+    except Exception:
+        balance_numeric = 0.0
+
+    eligible = balance_numeric >= tokens_required
+
+    # Attach tokens/balance eligibility into the response wrapper
     # Structured logging for preview (non-blocking)
     try:
         logger.info("discount_preview", extra={
@@ -83,7 +106,7 @@ def preview_discount(request):
     except Exception:
         logger.debug("discount_preview logging failed")
 
-    return Response({"ok": True, "data": out}, status=status.HTTP_200_OK)
+    return Response({"ok": True, "data": out, "tokens_required": tokens_required, "balance": balance_numeric, "eligible": eligible}, status=status.HTTP_200_OK)
 
 
 @api_view(["POST"])
@@ -475,6 +498,55 @@ def confirm_discount(request):
         })
     except Exception:
         logger.debug("discount_pending_notified_enrichment logging failed")
+
+    # BEFORE returning success, enforce tokens availability if frontend requested TEO discount
+    try:
+        # compute tokens_required same as preview
+        rate = float(getattr(settings, "RATE_TEOCOIN_EUR", 1.0))
+        discount_percent = float(data.get("discount_percent", 0) or 0)
+        price = float(data.get("price_eur", 0) or 0)
+        tokens_required = int(ceil((price * (discount_percent / 100.0)) / (rate if rate > 0 else 1.0)))
+    except Exception:
+        tokens_required = 0
+
+    try:
+        user_balance = float(db_teocoin_service.get_balance(request.user))
+    except Exception:
+        user_balance = 0.0
+
+    # If tokens_required > 0 then confirm must ensure user has enough tokens. Otherwise no deduction needed.
+    if tokens_required > 0:
+        if user_balance < tokens_required:
+            try:
+                logger.info("discount_rejected_insufficient_balance", extra={
+                    "event": "discount_rejected_insufficient_balance",
+                    "user_id": request.user.id if request.user else None,
+                    "order_id": order_id,
+                    "tokens_required": tokens_required,
+                    "balance": user_balance,
+                })
+            except Exception:
+                pass
+            return Response({"ok": False, "error": "INSUFFICIENT_TOKENS"}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Deduct tokens atomically and record a DB transaction (use db_teocoin_service.deduct_balance)
+        try:
+            from decimal import Decimal
+
+            success = db_teocoin_service.deduct_balance(
+                user=request.user,
+                amount=Decimal(str(tokens_required)),
+                transaction_type="discount",
+                description=f"Discount deduction for order {order_id}",
+                course=getattr(snap, 'course', None),
+            )
+            if not success:
+                # Log and return 500 since deduction failed unexpectedly
+                logger.error(f"discount_confirm deduction failed for order {order_id}")
+                return Response({"ok": False, "error": "DEDUCTION_FAILED"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        except Exception as e:
+            logger.exception("discount_confirm deduction exception: %s", e)
+            return Response({"ok": False, "error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     return Response({"ok": True, "created": created, "snapshot": snapshot_data, "breakdown": breakdown}, status=status_code)
 

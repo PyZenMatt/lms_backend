@@ -25,9 +25,17 @@ def test_teocoin_discount_deduction():
     """
     Test che verifica la deduzione del saldo TeoCoin dopo l'acquisto
     """
-    # Cerca un utente esistente
+    # Cerca un utente esistente, altrimenti creane uno per il test
     user = User.objects.filter(role="student").first()
-    assert user is not None, "No student user found for testing"
+    if user is None:
+        user = User.objects.create_user(
+            username="test_student",
+            email="test_student@example.com",
+            password="testpassword",
+            role="student",
+            first_name="Test",
+            last_name="Student",
+        )
 
     # Inizializza il servizio TeoCoin
     db_teo_service = DBTeoCoinService()
@@ -45,9 +53,26 @@ def test_teocoin_discount_deduction():
         balance_obj.available_balance = Decimal("100.00")
         balance_obj.save()
 
-    # Cerca un corso per il test
+    # Cerca un corso per il test, altrimenti creane uno
     course = Course.objects.first()
-    assert course is not None, "No course found for testing"
+    if course is None:
+        # Ensure there's a teacher to assign
+        teacher = User.objects.filter(role="teacher").first()
+        if teacher is None:
+            teacher = User.objects.create_user(
+                username="test_teacher",
+                email="test_teacher@example.com",
+                password="testpassword",
+                role="teacher",
+                first_name="Teacher",
+                last_name="Test",
+            )
+        course = Course.objects.create(
+            title="Test Course for TeoCoin",
+            description="Auto-created course for test",
+            price_eur=Decimal("50.00"),
+            teacher=teacher,
+        )
 
     # Registra il saldo iniziale
     initial_balance = db_teo_service.get_available_balance(user)

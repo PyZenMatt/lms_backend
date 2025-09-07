@@ -27,9 +27,12 @@ for origin in _raw_csrf:
     CSRF_TRUSTED_ORIGINS.append(origin)
 
 # Allow disabling SSL requirement locally by setting DB_SSL_REQUIRE=0
-_ssl_required = os.getenv("DB_SSL_REQUIRE", "1") == "1"
+ssl_require = os.getenv("DB_SSL_REQUIRE", "1") not in ("0", "false", "False", "no", "No")
 DATABASES = {
-    "default": dj_database_url.config(conn_max_age=600, ssl_require=_ssl_required)
+    "default": dj_database_url.config(
+        conn_max_age=600,
+        ssl_require=ssl_require,  # <- ora controllato da ENV
+    )
 }
 
 # Email backend (prod)
@@ -52,8 +55,9 @@ else:
 CORS_ALLOW_CREDENTIALS = True
 
 # Cookie security
-SESSION_COOKIE_SECURE = True
-CSRF_COOKIE_SECURE = True
+# Allow overriding secure flags in local prod-like runs via env vars (0/1)
+SESSION_COOKIE_SECURE = os.getenv("SESSION_COOKIE_SECURE", "1") == "1"
+CSRF_COOKIE_SECURE = os.getenv("CSRF_COOKIE_SECURE", "1") == "1"
 
 # WhiteNoise: strict manifest can cause 500s if manifest is missing.
 # Keep cache-busting benefits but avoid hard failures at runtime.
@@ -114,6 +118,11 @@ LOGGING = {
             "handlers": ["file", "console"],
             "level": "INFO",
             "propagate": False,
+        },
+        # root logger should also print to console for container stdout parity
+        "": {
+            "handlers": ["console"],
+            "level": "INFO",
         },
     },
 }

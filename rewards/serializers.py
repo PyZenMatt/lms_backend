@@ -137,6 +137,8 @@ class DiscountPreviewInputSerializer(serializers.Serializer):
 
 class DiscountConfirmInputSerializer(DiscountPreviewInputSerializer):
     order_id = serializers.CharField(max_length=200)
+    # Optional hint from frontend indicating tokens the client expects to spend
+    tokens_to_spend = serializers.IntegerField(required=False, min_value=0)
 
 
 class DiscountBreakdownSerializer(serializers.Serializer):
