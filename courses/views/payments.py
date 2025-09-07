@@ -418,10 +418,25 @@ class ConfirmPaymentView(APIView):
         try:
             course = get_object_or_404(Course, id=course_id)
             user = request.user
-            payment_intent_id = request.data.get("payment_intent_id")
+            # Accept several possible keys that the frontend may send.
+            # Frontends can post different shapes (payment_intent, payment_intent_id, pi_id, intent_id).
+            payment_intent_id = (
+                request.data.get("payment_intent_id")
+                or request.data.get("payment_intent")
+                or request.data.get("pi_id")
+                or request.data.get("intent_id")
+                or request.data.get("pi")
+            )
+            # If payment_intent is an object/Stripe response, accept its `id` field
+            try:
+                if isinstance(payment_intent_id, dict) and payment_intent_id.get("id"):
+                    payment_intent_id = payment_intent_id.get("id")
+            except Exception:
+                pass
             process_discount = request.data.get("process_discount", True)
 
             if not payment_intent_id:
+                logger.error(f"ConfirmPaymentView: missing payment_intent id in payload: {request.data}")
                 return Response(
                     {
                         "error": "Payment intent ID required",
