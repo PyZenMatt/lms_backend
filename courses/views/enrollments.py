@@ -554,6 +554,14 @@ class CourseEnrollmentView(APIView):
                 debug_messages.append("🗑️ Student dashboard cache invalidated")
 
                 debug_messages.append("🎉 Enrollment completed successfully!")
+                # Emit an info-level log with summary data to make production traces easier to search
+                try:
+                    logger.info(
+                        f"[CourseEnrollmentView] enrollment_complete course_id={course_id} user_id={request.user.id} enrollment_id={enrollment_record.pk} payment_intent={stripe_payment_intent}",
+                    )
+                except Exception:
+                    logger.debug("[CourseEnrollmentView] failed to emit enrollment summary log")
+
                 return Response(
                     {
                         "success": True,

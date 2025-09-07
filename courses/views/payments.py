@@ -435,6 +435,14 @@ class ConfirmPaymentView(APIView):
                 pass
             process_discount = request.data.get("process_discount", True)
 
+            # Diagnostic: log incoming payload shape and key fields to aid investigation
+            try:
+                logger.info(
+                    f"[ConfirmPayment] incoming payload keys={list(request.data.keys())} payment_intent_id={payment_intent_id} user_id={user.id} course_id={course_id} process_discount={process_discount}"
+                )
+            except Exception:
+                logger.debug("[ConfirmPayment] failed to log incoming payload summary")
+
             if not payment_intent_id:
                 logger.error(f"ConfirmPaymentView: missing payment_intent id in payload: {request.data}")
                 return Response(
@@ -448,6 +456,15 @@ class ConfirmPaymentView(APIView):
             # Verify payment with Stripe
             stripe.api_key = settings.STRIPE_SECRET_KEY
             payment_intent = stripe.PaymentIntent.retrieve(payment_intent_id)
+
+            # Diagnostic: log Stripe PaymentIntent basic info (id, status, metadata keys)
+            try:
+                pi_meta = getattr(payment_intent, "metadata", {}) or {}
+                logger.info(
+                    f"[ConfirmPayment] Stripe PI retrieved: id={getattr(payment_intent, 'id', None)} status={getattr(payment_intent, 'status', None)} metadata_keys={list(pi_meta.keys())}"
+                )
+            except Exception:
+                logger.debug("[ConfirmPayment] failed to log Stripe PaymentIntent info")
 
             if payment_intent.status != "succeeded":
                 return Response(
@@ -475,6 +492,9 @@ class ConfirmPaymentView(APIView):
             ).first()
 
             if existing_enrollment:
+                logger.warning(
+                    f"[ConfirmPayment] user_id={user.id} already has enrollment id={existing_enrollment.pk} for course_id={course_id} - skipping creation"
+                )
                 return Response(
                     {
                         "error": "Already enrolled in this course",
@@ -499,9 +519,13 @@ class ConfirmPaymentView(APIView):
                 teocoin_discount_request_id=discount_request_id,
             )
 
-            logger.info(
-                f"✅ Student enrolled: {user.username} in {course.title} for €{final_price}"
-            )
+            # Diagnostic: log enrollment creation details
+            try:
+                logger.info(
+                    f"✅ Student enrolled: username={user.username} user_id={user.id} course_id={course_id} course_title={course.title} enrollment_id={getattr(enrollment,'pk',None)} payment_intent={payment_intent_id} final_price=€{final_price}"
+                )
+            except Exception:
+                logger.debug("[ConfirmPayment] failed to log enrollment creation details")
 
             # CRITICAL: Deduct TeoCoin AFTER payment confirmed and enrollment created
             if use_teocoin_discount and discount_amount > 0:
