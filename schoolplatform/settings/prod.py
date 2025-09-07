@@ -58,6 +58,13 @@ CORS_ALLOW_CREDENTIALS = True
 # Allow overriding secure flags in local prod-like runs via env vars (0/1)
 SESSION_COOKIE_SECURE = os.getenv("SESSION_COOKIE_SECURE", "1") == "1"
 CSRF_COOKIE_SECURE = os.getenv("CSRF_COOKIE_SECURE", "1") == "1"
+# When the frontend is hosted on a different origin (eg. Render), the browser
+# will only send session/csrf cookies on cross-site requests if SameSite=None
+# and Secure is enabled. Explicitly set to None here to allow credentialed
+# fetch() calls from the frontend domain (CORS_ALLOW_CREDENTIALS=True).
+# Note: some local/prod-like variants may override this via env if needed.
+SESSION_COOKIE_SAMESITE = os.getenv("SESSION_COOKIE_SAMESITE", "None")
+CSRF_COOKIE_SAMESITE = os.getenv("CSRF_COOKIE_SAMESITE", "None")
 
 # WhiteNoise: strict manifest can cause 500s if manifest is missing.
 # Keep cache-busting benefits but avoid hard failures at runtime.
