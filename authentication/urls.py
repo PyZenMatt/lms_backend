@@ -9,7 +9,8 @@ This module defines all the URL patterns for authentication-related views:
 """
 
 from django.urls import path
-from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
+from rest_framework_simplejwt.views import TokenObtainPairView
+from .views import CustomTokenRefreshView
 
 from .views import LoginApiView, LogoutView, RegisterView, VerifyEmailView
 
@@ -33,6 +34,6 @@ urlpatterns = [
         "token/", TokenObtainPairView.as_view(), name="token_obtain_pair"
     ),  # Get access/refresh tokens
     path(
-        "token/refresh/", TokenRefreshView.as_view(), name="token_refresh"
-    ),  # Refresh access token
+        "token/refresh/", CustomTokenRefreshView.as_view(), name="token_refresh"
+    ),  # Refresh access token (customized to include role claim)
 ]
