@@ -802,21 +802,24 @@ class ConfirmPaymentView(APIView):
                     },
                     status=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 )
-                # If we reached this point, the confirmation flow completed successfully.
-                # Return a structured success response so the DRF view always returns an HttpResponse.
-                try:
-                    return Response(
-                        {
-                            "success": True,
-                            "enrollment_id": getattr(enrollment, "pk", None),
-                            "course_id": course_id,
-                            "snapshot_id": getattr(snap, "id", None),
-                        },
-                        status=status.HTTP_200_OK,
-                    )
-                except Exception:
-                    # Defensive fallback: ensure we still return a generic success when variables are missing
-                    return Response({"success": True}, status=status.HTTP_200_OK)
+            # If we reached this point (i.e. not inside the inner exception block),
+            # the confirmation flow completed successfully. Provide a structured
+            # success response (this code path was previously unreachable due to
+            # being nested under the exception return block).
+            try:
+                return Response(
+                    {
+                        "success": True,
+                        "status": "enrolled",
+                        "enrollment_id": getattr(enrollment, "pk", None),
+                        "course_id": course_id,
+                        "snapshot_id": getattr(snap, "id", None),
+                    },
+                    status=status.HTTP_200_OK,
+                )
+            except Exception:
+                # Defensive fallback: ensure we still return a generic success when variables are missing
+                return Response({"success": True, "status": "enrolled"}, status=status.HTTP_200_OK)
         except Exception as e:
             # Outer catch-all for ConfirmPaymentView
             logger.error(f"Payment confirmation outer error: {e}")
