@@ -88,6 +88,20 @@ class Course(models.Model):
         default=False,
         help_text="Il corso deve essere approvato da un admin prima di essere messo in vendita.",
     )
+    # Audit fields for approval
+    approved_at = models.DateTimeField(
+        null=True,
+        blank=True,
+        help_text="Timestamp quando il corso è stato approvato da un admin",
+    )
+    approved_by = models.ForeignKey(
+        User,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="approved_courses",
+        help_text="Admin che ha approvato il corso",
+    )
     reward_distributed = models.PositiveIntegerField(
         default=0,
         help_text="Totale TeoCoins distribuiti come ricompensa per questo corso",
