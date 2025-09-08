@@ -69,6 +69,7 @@ class ExerciseSubmissionSerializer(serializers.ModelSerializer):
             "exercise_id",
             "title",
             "content",
+            "student",
             "text",
             "created_at",
             "average_score",
