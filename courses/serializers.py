@@ -9,7 +9,9 @@ from .models import (
     Lesson,
     TeacherChoicePreference,
     TeacherDiscountDecision,
+    PeerReviewFeedbackItem,
 )
+from courses.utils.peer_feedback_parser import parse_peer_review_blob
 
 
 class LessonListSerializer(serializers.ModelSerializer):
@@ -106,19 +108,74 @@ class ExerciseSubmissionSerializer(serializers.ModelSerializer):
 
     def get_reviews(self, obj):
         result = []
-        for r in obj.reviews.all():
+        # Keep ordering stable (by reviewed_at). Only include completed reviews
+        # so the frontend does not receive empty/unreviewed entries.
+        reviews_qs = obj.reviews.filter(reviewed_at__isnull=False).order_by("reviewed_at")
+
+        def _norm_score(v):
+            try:
+                return int(v) if v is not None else 0
+            except Exception:
+                return 0
+
+        for r in reviews_qs:
+            reviewer = None
+            if getattr(r, "reviewer", None):
+                try:
+                    name = (
+                        r.reviewer.get_full_name()
+                        if callable(getattr(r.reviewer, "get_full_name", None))
+                        else getattr(r.reviewer, "first_name", None)
+                    )
+                except Exception:
+                    name = getattr(r.reviewer, "username", None)
+                reviewer = {
+                    "id": getattr(r.reviewer, "id", None),
+                    "username": getattr(r.reviewer, "username", None),
+                    "name": name or getattr(r.reviewer, "username", None),
+                }
+
+            tech = getattr(r, "technical", None) if hasattr(r, "technical") else getattr(r, "technique", None)
+            creat = getattr(r, "creative", None)
+            follow = getattr(r, "following", None)
+
+            technical_score = _norm_score(tech)
+            creative_score = _norm_score(creat)
+            following_score = _norm_score(follow)
+
+            strengths = getattr(r, "strengths_comment", None)
+            suggestions = getattr(r, "suggestions_comment", None)
+            final = getattr(r, "final_comment", None)
+
+            if not (strengths or suggestions or final):
+                try:
+                    parsed = parse_peer_review_blob(getattr(r, "comment", "") or "")
+                except Exception:
+                    parsed = {"highlights": "", "suggestions": "", "final": ""}
+                strengths = strengths or parsed.get("highlights")
+                suggestions = suggestions or parsed.get("suggestions")
+                final = final or parsed.get("final")
+
+            fallback = getattr(r, "comment", None)
+
             result.append(
                 {
                     "id": getattr(r, "id", None),
-                    "reviewer": r.reviewer.username if getattr(r, "reviewer", None) else None,
+                    "reviewer": reviewer,
                     "reviewer_id": getattr(r.reviewer, "id", None) if getattr(r, "reviewer", None) else None,
-                    "score": r.score,
-                    "technical": getattr(r, "technical", None),
-                    "creative": getattr(r, "creative", None),
-                    "following": getattr(r, "following", None),
-                    "comment": getattr(r, "comment", None),
+                    "score": getattr(r, "score", None),
+                    "technical": technical_score,
+                    "creative": creative_score,
+                    "following": following_score,
+                    "strengths_comment": strengths,
+                    "suggestions_comment": suggestions,
+                    "final_comment": final,
+                    "technical_comment": getattr(r, "technical_comment", None) if hasattr(r, "technical_comment") else None,
+                    "creative_comment": getattr(r, "creative_comment", None) if hasattr(r, "creative_comment") else None,
+                    "following_comment": getattr(r, "following_comment", None) if hasattr(r, "following_comment") else None,
+                    "comment": fallback,
                     "recommendations": getattr(r, "recommendations", None),
-                    "reviewed_at": r.reviewed_at,
+                    "reviewed_at": getattr(r, "reviewed_at", None),
                 }
             )
         return result
@@ -127,6 +184,15 @@ class ExerciseSubmissionSerializer(serializers.ModelSerializer):
         if getattr(obj, "student", None):
             return {"id": obj.student.id, "name": getattr(obj.student, "username", None)}
         return None
+
+
+class PeerReviewFeedbackItemSerializer(serializers.ModelSerializer):
+    reviewer = UserSerializer(read_only=True)
+    review = serializers.IntegerField(source='review.id', read_only=True, required=False)
+
+    class Meta:
+        model = PeerReviewFeedbackItem
+        fields = ["id", "reviewer", "review", "area", "content", "created_at"]
 
     def validate(self, attrs):
         # Verifica che il contenuto non sia vuoto

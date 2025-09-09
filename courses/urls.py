@@ -34,9 +34,11 @@ from courses.views.exercises import (
     ReviewExerciseView,
     ReviewHistoryView,
     SubmissionDetailForReviewerView,
+    AreaFeedbackView,
     SubmissionDetailView,
     SubmissionHistoryView,
     SubmitExerciseView,
+    MySubmissionsListView,
 )
 from courses.views.hybrid_payment import HybridPaymentView
 
@@ -197,6 +199,11 @@ urlpatterns = [
         name="submission-detail-for-reviewer",
     ),
     path(
+        "peer-reviews/submissions/<int:submission_id>/feedback/",
+        AreaFeedbackView.as_view(),
+        name="area-feedback",
+    ),
+    path(
         "exercises/submissions/",
         SubmissionHistoryView.as_view(),
         name="submission-history",
@@ -212,6 +219,8 @@ urlpatterns = [
         ExerciseDebugReviewersView.as_view(),
         name="exercise-debug-reviewers",
     ),
+        # === STUDENT SUBMISSIONS / FEEDBACK ===
+        path("reviews/my-submissions/", MySubmissionsListView.as_view(), name="my-submissions"),
     path("exercises/<int:id>/", ExerciseDetailView.as_view(), name="exercise-detail"),
     # === PENDING COURSES ===
     path("pending-courses/", PendingCoursesView.as_view(), name="pending-courses"),

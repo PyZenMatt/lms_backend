@@ -588,6 +588,10 @@ class ExerciseReview(models.Model):
     following = models.SmallIntegerField(null=True, blank=True)
     # Optional free-text comment and recommendations array (JSON)
     comment = models.TextField(null=True, blank=True)
+    # Per-area textual comments (new canonical fields for FE)
+    technical_comment = models.TextField(null=True, blank=True)
+    creative_comment = models.TextField(null=True, blank=True)
+    following_comment = models.TextField(null=True, blank=True)
     recommendations = models.JSONField(null=True, blank=True)
     reviewed_at = models.DateTimeField(null=True, blank=True)
 
@@ -656,6 +660,34 @@ class ExerciseReview(models.Model):
                 related_object_id=str(review.pk) if review.pk else None,
                 notes="Reward pending - wallet not linked",
             )
+
+
+class PeerReviewFeedbackItem(models.Model):
+    AREA_CHOICES = [
+        ("highlights", "Highlight Strengths"),
+        ("suggestions", "Constructive Suggestions"),
+        ("final", "Final Thoughts"),
+    ]
+
+    submission = models.ForeignKey(
+        ExerciseSubmission, on_delete=models.CASCADE, related_name="feedback_items"
+    )
+    # Link back to the ExerciseReview that produced this item when available
+    review = models.ForeignKey(
+        'ExerciseReview', on_delete=models.SET_NULL, null=True, blank=True, related_name='feedback_items'
+    )
+    reviewer = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name="given_feedback_items"
+    )
+    area = models.CharField(max_length=20, choices=AREA_CHOICES)
+    content = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return f"FeedbackItem {self.area} for submission {self.submission_id} by {self.reviewer_id}"
 
 
 class ReviewerReputation(models.Model):

@@ -1,12 +1,25 @@
 import logging
 import random
 
-from courses.models import Course, Exercise, ExerciseReview, ExerciseSubmission, Lesson
-from courses.serializers import ExerciseSerializer, ExerciseSubmissionSerializer
+from courses.models import (
+    Course,
+    Exercise,
+    ExerciseReview,
+    ExerciseSubmission,
+    Lesson,
+    PeerReviewFeedbackItem,
+)
+from courses.serializers import (
+    ExerciseSerializer,
+    ExerciseSubmissionSerializer,
+    PeerReviewFeedbackItemSerializer,
+)
+from courses.utils.peer_feedback_parser import parse_peer_review_blob
 from django.db import transaction
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
+from django.utils.dateparse import parse_datetime
 from notifications.models import Notification
 from rest_framework import generics, status
 from rest_framework.exceptions import PermissionDenied
@@ -17,6 +30,7 @@ from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
 from users.models import User
 from users.permissions import IsTeacher
+from django.db.models import Count, Avg, Q, Max
 
 logger = logging.getLogger(__name__)
 
@@ -142,6 +156,177 @@ class SubmissionDetailForReviewerView(APIView):
             return Response({"detail": "Non autorizzato."}, status=403)
 
         return Response(ExerciseSubmissionSerializer(submission).data, status=200)
+
+
+class AreaFeedbackView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, submission_id):
+        raw_area = (request.query_params.get('area') or '').strip().lower()
+        if not raw_area:
+            return Response({'detail': 'area query param required'}, status=400)
+
+        submission = get_object_or_404(ExerciseSubmission, id=submission_id)
+
+        # permission: student owner or staff or teacher of course or reviewer
+        is_owner = submission.student_id == request.user.id if getattr(submission, 'student_id', None) is not None else (getattr(submission, 'student', None) and submission.student.id == request.user.id)
+        is_staff = getattr(request.user, 'is_staff', False)
+        is_course_teacher = False
+        if getattr(submission, 'exercise', None) and getattr(submission.exercise, 'lesson', None) and getattr(submission.exercise.lesson, 'course', None):
+            is_course_teacher = submission.exercise.lesson.course.teacher_id == request.user.id
+        is_reviewer = submission.reviewers.filter(id=request.user.id).exists() if hasattr(submission, 'reviewers') else False
+        if not (is_owner or is_staff or is_course_teacher or is_reviewer):
+            return Response({'detail': 'Forbidden'}, status=403)
+
+        # Normalize requested area to canonical backend keys. Accept both
+        # legacy frontend values and canonical ones used by FE: technical,
+        # creative, following, as well as narrative keys highlights/suggestions/final.
+        explicit_areas = {'highlights', 'suggestions', 'final'}
+        legacy_map = {
+            'technique': 'technical',
+            'composition': 'following',
+            'creativity': 'creative',
+            'technical': 'technical',
+            'creative': 'creative',
+            'following': 'following',
+        }
+
+        area_key = legacy_map.get(raw_area, raw_area)
+
+        explicit_items = []
+        legacy_items = []
+
+        # If caller asked for an explicit peer-review area, fetch those items
+        if area_key in explicit_areas:
+            explicit_qs = PeerReviewFeedbackItem.objects.filter(submission=submission, area=area_key).order_by('created_at')
+            # Normalize explicit items to expose a canonical `comment` text field
+            explicit_items = list(PeerReviewFeedbackItemSerializer(explicit_qs, many=True, context={'request': request}).data)
+            for it in explicit_items:
+                # keep backward-compatible `content` but expose `comment` as primary textual field
+                if it.get('comment') is None:
+                    it['comment'] = it.get('content')
+
+        # If caller asked for one of the legacy frontend keys or canonical per-area keys,
+        # derive items from existing ExerciseReview rows and expose a normalized `comment` field.
+        if area_key in legacy_map.values() or area_key in explicit_areas:
+            # gather reviewed ExerciseReview rows
+            reviews = submission.reviews.filter(reviewed_at__isnull=False).order_by('reviewed_at') if hasattr(submission, 'reviews') else []
+            for r in reviews:
+                # technical / highlights
+                if area_key == 'technical' or area_key == 'highlights':
+                    if getattr(r, 'technical', None) is not None:
+                        legacy_items.append({
+                            'id': f'review-{getattr(r, "id", "")}-tech',
+                            'reviewer': {'id': r.reviewer.id, 'name': getattr(r.reviewer, 'username', None)} if getattr(r, 'reviewer', None) else None,
+                            'area': area_key,
+                            # prefer dedicated per-area comment fields where present, else fallback to the generic comment
+                            'comment': getattr(r, 'technical_comment', None) or getattr(r, 'comment', None),
+                            'created_at': r.reviewed_at,
+                        })
+                    # highlights special: also include composite breakdown if present
+                    if area_key == 'highlights' and (getattr(r, 'technical', None) is not None or getattr(r, 'creative', None) is not None or getattr(r, 'following', None) is not None):
+                        parts = []
+                        if getattr(r, 'technical', None) is not None:
+                            parts.append(f"Technical: {r.technical}/5")
+                        if getattr(r, 'creative', None) is not None:
+                            parts.append(f"Creative: {r.creative}/5")
+                        if getattr(r, 'following', None) is not None:
+                            parts.append(f"Following: {r.following}/5")
+                        legacy_items.append({
+                            'id': f'review-{getattr(r, "id", "")}-highlights',
+                            'reviewer': {'id': r.reviewer.id, 'name': getattr(r.reviewer, 'username', None)} if getattr(r, 'reviewer', None) else None,
+                            'area': area_key,
+                            'comment': None,  # prefer explicit strengths_comment / parsed highlights from detail; keep None here for frontend fallback
+                            'created_at': r.reviewed_at,
+                        })
+                # following / composition
+                if area_key == 'following':
+                    if getattr(r, 'following', None) is not None:
+                        legacy_items.append({
+                            'id': f'review-{getattr(r, "id", "")}-comp',
+                            'reviewer': {'id': r.reviewer.id, 'name': getattr(r.reviewer, 'username', None)} if getattr(r, 'reviewer', None) else None,
+                            'area': area_key,
+                            'comment': getattr(r, 'following_comment', None) or getattr(r, 'comment', None),
+                            'created_at': r.reviewed_at,
+                        })
+                # creative / creativity
+                if area_key == 'creative':
+                    if getattr(r, 'creative', None) is not None:
+                        legacy_items.append({
+                            'id': f'review-{getattr(r, "id", "")}-crea',
+                            'reviewer': {'id': r.reviewer.id, 'name': getattr(r.reviewer, 'username', None)} if getattr(r, 'reviewer', None) else None,
+                            'area': area_key,
+                            'comment': getattr(r, 'creative_comment', None) or getattr(r, 'comment', None),
+                            'created_at': r.reviewed_at,
+                        })
+                # suggestions -> recommendations
+                if area_key == 'suggestions':
+                    if getattr(r, 'recommendations', None):
+                        try:
+                            recs = r.recommendations if isinstance(r.recommendations, list) else [str(r.recommendations)]
+                        except Exception:
+                            recs = [str(r.recommendations)]
+                        for idx, rec in enumerate(recs):
+                            legacy_items.append({
+                                'id': f'review-{getattr(r, "id", "")}-rec-{idx}',
+                                'reviewer': {'id': r.reviewer.id, 'name': getattr(r.reviewer, 'username', None)} if getattr(r, 'reviewer', None) else None,
+                                'area': area_key,
+                                'comment': rec,
+                                'created_at': r.reviewed_at,
+                            })
+                # final -> comment
+                if area_key == 'final':
+                    if getattr(r, 'comment', None):
+                        legacy_items.append({
+                            'id': f'review-{getattr(r, "id", "")}-comment',
+                            'reviewer': {'id': r.reviewer.id, 'name': getattr(r.reviewer, 'username', None)} if getattr(r, 'reviewer', None) else None,
+                            'area': area_key,
+                            'comment': r.comment,
+                            'created_at': r.reviewed_at,
+                        })
+
+        # Combine explicit items and legacy items (explicit items first), then sort by created_at
+        combined = []
+        combined.extend(explicit_items)
+        combined.extend(legacy_items)
+
+        def _key(x):
+            v = x.get('created_at')
+            if v is None:
+                return 0
+            # If serializer produced a string, try to parse it
+            if isinstance(v, str):
+                dt = parse_datetime(v)
+            else:
+                dt = v
+            if dt is None:
+                return 0
+            # Ensure we return a numeric timestamp for stable sorting
+            try:
+                if timezone.is_aware(dt):
+                    return dt.timestamp()
+                # make naive datetimes timezone-aware using current timezone
+                aware = timezone.make_aware(dt)
+                return aware.timestamp()
+            except Exception:
+                # As a last resort, fall back to string comparison
+                return str(v)
+
+        combined_sorted = sorted(combined, key=_key)
+
+        received = len(combined_sorted)
+        expected = 3
+
+        # Ensure output items only contain reviewer and a textual `comment` field
+        out_items = []
+        for it in combined_sorted:
+            out_items.append({
+                'reviewer': it.get('reviewer'),
+                'comment': it.get('comment'),
+                'created_at': it.get('created_at'),
+            })
+
+        return Response({'submission_id': submission.id, 'area': area_key, 'received': received, 'expected': expected, 'items': out_items}, status=200)
 
 
 class SubmitExerciseView(APIView):
@@ -291,6 +476,18 @@ class ReviewExerciseView(APIView):
         # optional comment and recommendations
         if comment is not None:
             review.comment = str(comment)
+        # Optional per-area textual comments (canonical fields for frontend)
+        # Accept null/empty values (they will be left as None/blank) but persist if provided
+        technical_comment = request.data.get("technical_comment")
+        creative_comment = request.data.get("creative_comment")
+        following_comment = request.data.get("following_comment")
+
+        if technical_comment is not None:
+            review.technical_comment = str(technical_comment) if technical_comment is not None else None
+        if creative_comment is not None:
+            review.creative_comment = str(creative_comment) if creative_comment is not None else None
+        if following_comment is not None:
+            review.following_comment = str(following_comment) if following_comment is not None else None
         if recommendations is not None:
             # Expecting list-like or JSON string
             review.recommendations = recommendations
@@ -655,4 +852,179 @@ class SubmissionDetailView(APIView):
         if not (is_owner or is_staff or is_course_teacher):
             return Response({"detail": "Non autorizzato."}, status=403)
 
-        return Response(ExerciseSubmissionSerializer(submission).data, status=200)
+        # Build normalized detail contract expected by frontend
+        reviews_out = []
+        # Only include completed reviews (those with reviewed_at set)
+        for r in ExerciseReview.objects.filter(submission=submission, reviewed_at__isnull=False).select_related('reviewer'):
+            reviews_out.append({
+                'reviewer': {
+                    'username': getattr(r.reviewer, 'username', None),
+                    'name': getattr(r.reviewer, 'username', None),
+                } if getattr(r, 'reviewer', None) else None,
+                # numeric breakdown (1–5)
+                'technical': getattr(r, 'technical', None),
+                'creative': getattr(r, 'creative', None),
+                'following': getattr(r, 'following', None),
+
+                # NEW: per-area textual comments (align with serializer contract)
+                'technical_comment': getattr(r, 'technical_comment', None),
+                'creative_comment': getattr(r, 'creative_comment', None),
+                'following_comment': getattr(r, 'following_comment', None),
+
+                # narrative/legacy fields (kept for compatibility)
+                'strengths_comment': getattr(r, 'strengths_comment', None),
+                'suggestions_comment': getattr(r, 'suggestions_comment', None),
+                'final_comment': getattr(r, 'final_comment', None),
+                'comment': getattr(r, 'comment', None),
+                'created_at': r.reviewed_at,
+            })
+
+        return Response({"submission_id": submission.id, "reviews": reviews_out}, status=200)
+
+
+class MySubmissionsListView(APIView):
+    """
+    GET: Return the current user's ExerciseSubmissions with aggregated
+    feedback counts and per-area averages.
+
+    Contract follows the frontend expectation: items[], count
+    """
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        # Annotate counts and averages to avoid N+1
+        qs = (
+            ExerciseSubmission.objects.filter(student=request.user)
+            .select_related("exercise", "exercise__lesson", "exercise__lesson__course")
+            .prefetch_related("reviews", "reviewers")
+            .annotate(
+                reviewers_count=Count("reviewers", distinct=True),
+                total_feedback_received=Count(
+                    "reviews",
+                    filter=(Q(reviews__score__isnull=False) | Q(reviews__technical__isnull=False) | Q(reviews__creative__isnull=False) | Q(reviews__following__isnull=False)),
+                ),
+                technical_received=Count("reviews", filter=Q(reviews__technical__isnull=False)),
+                creative_received=Count("reviews", filter=Q(reviews__creative__isnull=False)),
+                following_received=Count("reviews", filter=Q(reviews__following__isnull=False)),
+                technical_avg=Avg("reviews__technical"),
+                creative_avg=Avg("reviews__creative"),
+                following_avg=Avg("reviews__following"),
+                last_reviewed_at=Max("reviews__reviewed_at"),
+            )
+            .order_by("-created_at")
+        )
+
+        items = []
+        for s in qs:
+            course = None
+            if getattr(s, "exercise", None) and getattr(s.exercise, "lesson", None) and getattr(s.exercise.lesson, "course", None):
+                c = s.exercise.lesson.course
+                course = {"id": c.id, "title": c.title}
+
+            # Map internal model areas to canonical frontend keys
+            reviewers_count = getattr(s, "reviewers_count", 0) or 0
+            expected_per_area = reviewers_count
+
+            tech_avg = getattr(s, "technical_avg", None)
+            creat_avg = getattr(s, "creative_avg", None)
+            follow_avg = getattr(s, "following_avg", None)
+
+            area_list = [
+                {
+                    "key": "technical",
+                    "label": "Technique",
+                    "received": int(getattr(s, "technical_received", 0) or 0),
+                    "expected": expected_per_area,
+                    "avg": round(float(tech_avg), 1) if tech_avg is not None else None,
+                    "items": [],
+                },
+                {
+                    "key": "creative",
+                    "label": "Creative",
+                    "received": int(getattr(s, "creative_received", 0) or 0),
+                    "expected": expected_per_area,
+                    "avg": round(float(creat_avg), 1) if creat_avg is not None else None,
+                    "items": [],
+                },
+                {
+                    "key": "following",
+                    "label": "Following",
+                    "received": int(getattr(s, "following_received", 0) or 0),
+                    "expected": expected_per_area,
+                    "avg": round(float(follow_avg), 1) if follow_avg is not None else None,
+                    "items": [],
+                },
+            ]
+
+            # Compute overall_avg as mean of available area averages (1-5 scale)
+            avgs = [a["avg"] for a in [
+                {"avg": round(float(tech_avg), 1) if tech_avg is not None else None},
+                {"avg": round(float(follow_avg), 1) if follow_avg is not None else None},
+                {"avg": round(float(creat_avg), 1) if creat_avg is not None else None},
+            ] if a["avg"] is not None]
+            overall_avg = round(sum(avgs) / len(avgs), 1) if avgs else None
+
+            updated_at = getattr(s, "last_reviewed_at", None) or getattr(s, "submitted_at", None) or getattr(s, "created_at", None)
+
+            status = "submitted"
+            if getattr(s, "reviewed", False):
+                status = "completed"
+            elif reviewers_count > 0:
+                status = "under_review"
+
+            items.append(
+                {
+                    "submission_id": s.id,
+                    "exercise": {"id": s.exercise.id if s.exercise else None, "title": s.exercise.title if s.exercise else None},
+                    "course": course,
+                    "status": status,
+                    "created_at": s.created_at,
+                    "updated_at": updated_at,
+                    "feedback": {"received": int(getattr(s, "total_feedback_received", 0) or 0), "expected": expected_per_area},
+                    "areas": area_list,
+                    "overall_avg": overall_avg,
+                }
+            )
+
+            # Backfill per-area reviewer items (up to 3) with numeric scores 0-5
+            try:
+                reviews_qs = s.reviews.filter(reviewed_at__isnull=False).order_by('reviewed_at')
+                for a in area_list:
+                    key = a['key']
+                    preview_items = []
+                    for r in reviews_qs:
+                        if not getattr(r, 'reviewer', None):
+                            continue
+                        # Build reviewer info
+                        try:
+                            name = (
+                                r.reviewer.get_full_name()
+                                if callable(getattr(r.reviewer, 'get_full_name', None))
+                                else getattr(r.reviewer, 'first_name', None)
+                            )
+                        except Exception:
+                            name = getattr(r.reviewer, 'username', None)
+                        reviewer = {"username": getattr(r.reviewer, 'username', None), "name": name or getattr(r.reviewer, 'username', None)}
+
+                        # pick the numeric score for the canonical key
+                        score_field = None
+                        if key == 'technical':
+                            score_field = getattr(r, 'technical', None) if hasattr(r, 'technical') else getattr(r, 'technique', None)
+                        elif key == 'creative':
+                            score_field = getattr(r, 'creative', None)
+                        elif key == 'following':
+                            score_field = getattr(r, 'following', None)
+
+                        try:
+                            score_val = int(score_field) if score_field is not None else 0
+                        except Exception:
+                            score_val = 0
+
+                        preview_items.append({"reviewer": reviewer, "score": score_val, "review_id": getattr(r, 'id', None), "created_at": getattr(r, 'reviewed_at', None)})
+
+                    # limit to first 3 reviewers
+                    a['items'] = preview_items[:3]
+            except Exception:
+                pass
+
+        return Response({"items": items, "count": qs.count()}, status=200)
