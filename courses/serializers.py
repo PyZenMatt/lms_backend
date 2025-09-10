@@ -143,20 +143,28 @@ class ExerciseSubmissionSerializer(serializers.ModelSerializer):
             creative_score = _norm_score(creat)
             following_score = _norm_score(follow)
 
+            # Narrative fields: prefer explicit stored strengths/suggestions/final
+            # If PeerReviewFeedbackItem rows exist for this review, use them.
             strengths = getattr(r, "strengths_comment", None)
             suggestions = getattr(r, "suggestions_comment", None)
             final = getattr(r, "final_comment", None)
 
-            if not (strengths or suggestions or final):
-                try:
-                    parsed = parse_peer_review_blob(getattr(r, "comment", "") or "")
-                except Exception:
-                    parsed = {"highlights": "", "suggestions": "", "final": ""}
-                strengths = strengths or parsed.get("highlights")
-                suggestions = suggestions or parsed.get("suggestions")
-                final = final or parsed.get("final")
+            # Try to load PeerReviewFeedbackItem entries linked to this review
+            try:
+                # import locally to avoid circular imports at module load
+                from courses.models import PeerReviewFeedbackItem
 
-            fallback = getattr(r, "comment", None)
+                items = PeerReviewFeedbackItem.objects.filter(review=r)
+                for it in items:
+                    if it.area == 'highlights' and not strengths:
+                        strengths = it.content
+                    if it.area == 'suggestions' and not suggestions:
+                        suggestions = it.content
+                    if it.area == 'final' and not final:
+                        final = it.content
+            except Exception:
+                # If anything fails, leave narrative fields as they are (prefer empty over parsing blob)
+                pass
 
             result.append(
                 {
@@ -173,7 +181,6 @@ class ExerciseSubmissionSerializer(serializers.ModelSerializer):
                     "technical_comment": getattr(r, "technical_comment", None) if hasattr(r, "technical_comment") else None,
                     "creative_comment": getattr(r, "creative_comment", None) if hasattr(r, "creative_comment") else None,
                     "following_comment": getattr(r, "following_comment", None) if hasattr(r, "following_comment") else None,
-                    "comment": fallback,
                     "recommendations": getattr(r, "recommendations", None),
                     "reviewed_at": getattr(r, "reviewed_at", None),
                 }

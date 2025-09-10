@@ -586,13 +586,11 @@ class ExerciseReview(models.Model):
     technical = models.SmallIntegerField(null=True, blank=True)
     creative = models.SmallIntegerField(null=True, blank=True)
     following = models.SmallIntegerField(null=True, blank=True)
-    # Optional free-text comment and recommendations array (JSON)
-    comment = models.TextField(null=True, blank=True)
     # Per-area textual comments (new canonical fields for FE)
     technical_comment = models.TextField(null=True, blank=True)
     creative_comment = models.TextField(null=True, blank=True)
     following_comment = models.TextField(null=True, blank=True)
-    recommendations = models.JSONField(null=True, blank=True)
+    # recommendations field removed as part of cleanup
     reviewed_at = models.DateTimeField(null=True, blank=True)
 
     @staticmethod

@@ -219,8 +219,8 @@ class AreaFeedbackView(APIView):
                             'id': f'review-{getattr(r, "id", "")}-tech',
                             'reviewer': {'id': r.reviewer.id, 'name': getattr(r.reviewer, 'username', None)} if getattr(r, 'reviewer', None) else None,
                             'area': area_key,
-                            # prefer dedicated per-area comment fields where present, else fallback to the generic comment
-                            'comment': getattr(r, 'technical_comment', None) or getattr(r, 'comment', None),
+                            # prefer dedicated per-area comment fields where present; do NOT fallback to generic blob for vote areas
+                            'comment': getattr(r, 'technical_comment', None),
                             'created_at': r.reviewed_at,
                         })
                     # highlights special: also include composite breakdown if present
@@ -246,7 +246,7 @@ class AreaFeedbackView(APIView):
                             'id': f'review-{getattr(r, "id", "")}-comp',
                             'reviewer': {'id': r.reviewer.id, 'name': getattr(r.reviewer, 'username', None)} if getattr(r, 'reviewer', None) else None,
                             'area': area_key,
-                            'comment': getattr(r, 'following_comment', None) or getattr(r, 'comment', None),
+                            'comment': getattr(r, 'following_comment', None),
                             'created_at': r.reviewed_at,
                         })
                 # creative / creativity
@@ -256,7 +256,7 @@ class AreaFeedbackView(APIView):
                             'id': f'review-{getattr(r, "id", "")}-crea',
                             'reviewer': {'id': r.reviewer.id, 'name': getattr(r.reviewer, 'username', None)} if getattr(r, 'reviewer', None) else None,
                             'area': area_key,
-                            'comment': getattr(r, 'creative_comment', None) or getattr(r, 'comment', None),
+                            'comment': getattr(r, 'creative_comment', None),
                             'created_at': r.reviewed_at,
                         })
                 # suggestions -> recommendations
@@ -875,7 +875,6 @@ class SubmissionDetailView(APIView):
                 'strengths_comment': getattr(r, 'strengths_comment', None),
                 'suggestions_comment': getattr(r, 'suggestions_comment', None),
                 'final_comment': getattr(r, 'final_comment', None),
-                'comment': getattr(r, 'comment', None),
                 'created_at': r.reviewed_at,
             })
 
