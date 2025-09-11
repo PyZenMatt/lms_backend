@@ -19,6 +19,7 @@ from django.utils import timezone
 
 from rewards.models import PaymentDiscountSnapshot
 from services.wallet_hold_service import WalletHoldService
+from payments.services import settle_discount_snapshot
 
 logger = logging.getLogger(__name__)
 
@@ -54,98 +55,265 @@ class StripeWebhookView(View):
             return HttpResponseBadRequest("Invalid signature")
         
         # Handle the event
-        if event['type'] == 'checkout.session.completed':
-            return self._handle_checkout_completed(event['data']['object'])
-        elif event['type'] == 'payment_intent.succeeded':
-            return self._handle_payment_succeeded(event['data']['object'])
-        elif event['type'] == 'payment_intent.payment_failed':
+        event_type = event.get('type')
+        event_id = event.get('id')
+        logger.info(f"🔄 Stripe webhook received", extra={
+            "event_id": event_id, 
+            "event_type": event_type,
+            "timestamp": event.get('created'),
+        })
+
+        if event_type == 'checkout.session.completed':
+            return self._handle_checkout_completed(event_id, event['data']['object'])
+        elif event_type == 'payment_intent.succeeded':
+            return self._handle_payment_succeeded(event_id, event['data']['object'])
+        elif event_type == 'payment_intent.payment_failed':
             return self._handle_payment_failed(event['data']['object'])
         else:
-            logger.info(f"Unhandled event type: {event['type']}")
+            logger.info(f"Unhandled event type: {event_type}")
             return HttpResponse(status=200)
     
-    def _handle_checkout_completed(self, session):
+    def _handle_checkout_completed(self, event_id, session):
         """
         Handle checkout.session.completed webhook
-        
+
         Find PaymentDiscountSnapshot by stripe_checkout_session_id and capture the hold
         """
         checkout_session_id = session.get('id')
         payment_intent_id = session.get('payment_intent')
-        
-        logger.info(f"🔄 Processing checkout.session.completed: {checkout_session_id}")
-        
+
+        # Prefer using the Stripe event id as idempotency sentinel
+        provider_event_id = f"stripe:{event_id}"
+        logger.info(
+            "🔄 Processing checkout.session.completed",
+            extra={
+                "checkout_session_id": checkout_session_id,
+                "payment_intent_id": payment_intent_id,
+                "provider_event_id": provider_event_id,
+                "webhook_correlation_attempt": "starting",
+            },
+        )
+
         if not checkout_session_id:
             logger.error("Missing checkout session ID")
             return HttpResponseBadRequest("Missing checkout session ID")
-        
+
         try:
+            # IDEMPOTENCY: Check if this event was already processed by looking for external_txn_id
+            # Instead of PaymentEvent table, use the external_txn_id in snapshot as idempotency guard
+            event_idempotency_id = f"stripe_event:{event_id}"
+            
+            # Try to find existing snapshot that was already processed for this exact event
+            already_processed = PaymentDiscountSnapshot.objects.filter(
+                external_txn_id=event_idempotency_id,
+                status='confirmed'
+            ).exists()
+            
+            if already_processed:
+                logger.info(f"Event {event_id} already processed - idempotent no-op")
+                return HttpResponse(status=200)
+
             with transaction.atomic():
-                # Find discount application by Stripe checkout session ID
-                snapshot = PaymentDiscountSnapshot.objects.filter(
-                    stripe_checkout_session_id=checkout_session_id,
-                    status='applied'
-                ).first()
+                # Correlation strategy: prefer explicit metadata.discount_snapshot_id, then checkout session, then payment intent
+                snapshot = None
+                correlation_method = "none"
+                correlation_value = None
                 
-                if not snapshot:
-                    logger.warning(f"No discount application found for checkout session: {checkout_session_id}")
-                    return HttpResponse(status=200)  # Not an error, just no discount applied
-                
+                # 1) metadata discount_snapshot_id
+                try:
+                    meta_snap_id = (session.get('metadata') or {}).get('discount_snapshot_id')
+                    if meta_snap_id:
+                        snapshot = PaymentDiscountSnapshot.objects.select_for_update().filter(
+                            id=meta_snap_id, 
+                            status__in=['pending', 'applied']
+                        ).first()
+                        if snapshot:
+                            correlation_method = "metadata.discount_snapshot_id"
+                            correlation_value = meta_snap_id
+                except Exception as e:
+                    logger.warning(f"Failed metadata lookup: {e}")
+                    snapshot = None
+
+                # 2) fallback: stripe_checkout_session_id
+                if not snapshot and checkout_session_id:
+                    snapshot = PaymentDiscountSnapshot.objects.select_for_update().filter(
+                        stripe_checkout_session_id=checkout_session_id,
+                        status__in=['pending', 'applied'],
+                    ).first()
+                    if snapshot:
+                        correlation_method = "stripe_checkout_session_id"
+                        correlation_value = checkout_session_id
+
+                # 3) fallback: stripe_payment_intent_id
+                if not snapshot and payment_intent_id:
+                    snapshot = PaymentDiscountSnapshot.objects.select_for_update().filter(
+                        stripe_payment_intent_id=payment_intent_id,
+                        status__in=['pending', 'applied'],
+                    ).first()
+                    if snapshot:
+                        correlation_method = "stripe_payment_intent_id"
+                        correlation_value = payment_intent_id
+
+                # Log correlation result
+                if snapshot:
+                    logger.info(f"✅ Snapshot found via {correlation_method}: {correlation_value} → snapshot_id={snapshot.id}")
+                else:
+                    logger.warning(
+                        f"❌ No snapshot found via any method",
+                        extra={
+                            "checkout_session_id": checkout_session_id,
+                            "payment_intent_id": payment_intent_id,
+                            "metadata_discount_snapshot_id": (session.get('metadata') or {}).get('discount_snapshot_id'),
+                            "correlation_attempts": ["metadata", "checkout_session", "payment_intent"],
+                        }
+                    )
+                    return HttpResponse(status=200)
+
                 # Update stripe_payment_intent_id if available
                 if payment_intent_id and not snapshot.stripe_payment_intent_id:
                     snapshot.stripe_payment_intent_id = payment_intent_id
                     snapshot.save(update_fields=['stripe_payment_intent_id'])
-                
-                # Capture the TEO hold
-                success = self._capture_teo_hold(snapshot)
-                
+
+                # Use service to settle (idempotent)
+                success = settle_discount_snapshot(snapshot, provider_event_id, external_txn_id=payment_intent_id or checkout_session_id)
+
                 if success:
-                    logger.info(f"✅ Successfully captured TEO hold for checkout session: {checkout_session_id}")
+                    # Mark the snapshot with the event ID for idempotency
+                    snapshot.external_txn_id = event_idempotency_id
+                    snapshot.save(update_fields=['external_txn_id'])
+                    
+                    logger.info(
+                        f"✅ Successfully settled TEO hold for checkout session: {checkout_session_id}",
+                        extra={
+                            "snapshot_id": snapshot.id,
+                            "correlation_method": correlation_method,
+                            "provider_event_id": provider_event_id,
+                            "external_txn_id": payment_intent_id or checkout_session_id,
+                            "operation": "settle_completed",
+                        }
+                    )
                     return HttpResponse(status=200)
                 else:
-                    logger.error(f"❌ Failed to capture TEO hold for checkout session: {checkout_session_id}")
+                    logger.error(
+                        f"❌ Failed to settle TEO hold for checkout session: {checkout_session_id}",
+                        extra={
+                            "snapshot_id": snapshot.id,
+                            "correlation_method": correlation_method,
+                            "provider_event_id": provider_event_id,
+                        }
+                    )
                     return HttpResponse(status=500)
-        
+
         except Exception as e:
             logger.error(f"Error processing checkout.session.completed: {e}", exc_info=True)
             return HttpResponse(status=500)
     
-    def _handle_payment_succeeded(self, payment_intent):
+    def _handle_payment_succeeded(self, event_id, payment_intent):
         """
         Handle payment_intent.succeeded webhook
         
         Alternative capture method using payment_intent_id
         """
         payment_intent_id = payment_intent.get('id')
-        
-        logger.info(f"🔄 Processing payment_intent.succeeded: {payment_intent_id}")
-        
+        provider_event_id = f"stripe:{event_id}"
+        logger.info(
+            "🔄 Processing payment_intent.succeeded",
+            extra={
+                "payment_intent_id": payment_intent_id, 
+                "provider_event_id": provider_event_id,
+                "webhook_correlation_attempt": "starting",
+            },
+        )
+
         if not payment_intent_id:
             logger.error("Missing payment intent ID")
             return HttpResponseBadRequest("Missing payment intent ID")
-        
+
         try:
+            # IDEMPOTENCY: Check if this event was already processed
+            event_idempotency_id = f"stripe_event:{event_id}"
+            
+            already_processed = PaymentDiscountSnapshot.objects.filter(
+                external_txn_id=event_idempotency_id,
+                status='confirmed'
+            ).exists()
+            
+            if already_processed:
+                logger.info(f"Event {event_id} already processed - idempotent no-op")
+                return HttpResponse(status=200)
+
             with transaction.atomic():
-                # Find discount application by Stripe payment intent ID
-                snapshot = PaymentDiscountSnapshot.objects.filter(
-                    stripe_payment_intent_id=payment_intent_id,
-                    status='applied'
-                ).first()
+                # Find discount snapshot by payment intent ID in pending or applied state
+                # Also try metadata.discount_snapshot_id if present
+                snapshot = None
+                correlation_method = "none"
+                correlation_value = None
                 
+                # 1) metadata discount_snapshot_id
+                meta_snap_id = (payment_intent.get('metadata') or {}).get('discount_snapshot_id')
+                if meta_snap_id:
+                    snapshot = PaymentDiscountSnapshot.objects.select_for_update().filter(
+                        id=meta_snap_id, 
+                        status__in=['pending', 'applied']
+                    ).first()
+                    if snapshot:
+                        correlation_method = "metadata.discount_snapshot_id"
+                        correlation_value = meta_snap_id
+                
+                # 2) fallback: stripe_payment_intent_id
                 if not snapshot:
-                    logger.warning(f"No discount application found for payment intent: {payment_intent_id}")
-                    return HttpResponse(status=200)  # Not an error, just no discount applied
-                
-                # Capture the TEO hold
-                success = self._capture_teo_hold(snapshot)
-                
+                    snapshot = PaymentDiscountSnapshot.objects.select_for_update().filter(
+                        stripe_payment_intent_id=payment_intent_id,
+                        status__in=['pending', 'applied'],
+                    ).first()
+                    if snapshot:
+                        correlation_method = "stripe_payment_intent_id"
+                        correlation_value = payment_intent_id
+
+                # Log correlation result
+                if snapshot:
+                    logger.info(f"✅ Snapshot found via {correlation_method}: {correlation_value} → snapshot_id={snapshot.id}")
+                else:
+                    logger.warning(
+                        f"❌ No snapshot found for payment intent: {payment_intent_id}",
+                        extra={
+                            "payment_intent_id": payment_intent_id,
+                            "metadata_discount_snapshot_id": meta_snap_id,
+                            "correlation_attempts": ["metadata", "payment_intent_id"],
+                        }
+                    )
+                    return HttpResponse(status=200)
+
+                # Use service to settle (idempotent)
+                success = settle_discount_snapshot(snapshot, provider_event_id, external_txn_id=payment_intent_id)
+
                 if success:
-                    logger.info(f"✅ Successfully captured TEO hold for payment intent: {payment_intent_id}")
+                    # Mark the snapshot with the event ID for idempotency
+                    snapshot.external_txn_id = event_idempotency_id
+                    snapshot.save(update_fields=['external_txn_id'])
+                    
+                    logger.info(
+                        f"✅ Successfully settled TEO hold for payment intent: {payment_intent_id}",
+                        extra={
+                            "snapshot_id": snapshot.id,
+                            "correlation_method": correlation_method,
+                            "provider_event_id": provider_event_id,
+                            "external_txn_id": payment_intent_id,
+                            "operation": "settle_completed",
+                        }
+                    )
                     return HttpResponse(status=200)
                 else:
-                    logger.error(f"❌ Failed to capture TEO hold for payment intent: {payment_intent_id}")
+                    logger.error(
+                        f"❌ Failed to settle TEO hold for payment intent: {payment_intent_id}",
+                        extra={
+                            "snapshot_id": snapshot.id,
+                            "correlation_method": correlation_method,
+                            "provider_event_id": provider_event_id,
+                        }
+                    )
                     return HttpResponse(status=500)
-        
+
         except Exception as e:
             logger.error(f"Error processing payment_intent.succeeded: {e}", exc_info=True)
             return HttpResponse(status=500)
@@ -248,8 +416,8 @@ class StripeWebhookView(View):
             
             # Release the hold (return TEO tokens to available balance)
             success = wallet_hold_service.release_hold(
-                hold_id=snapshot.wallet_hold_id,
-                description=f"TEO discount released due to payment failure - snapshot {snapshot.id}"
+                snapshot.wallet_hold_id,
+                f"TEO discount released due to payment failure - snapshot {snapshot.id}",
             )
             
             if success:

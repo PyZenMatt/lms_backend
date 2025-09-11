@@ -27,7 +27,7 @@ from django.test import TestCase, Client
 from django.urls import reverse
 from django.db.models import Sum
 from courses.models import Course
-from payments.models import PaymentDiscountSnapshot
+from rewards.models import PaymentDiscountSnapshot
 from blockchain.models import DBTeoCoinTransaction
 from services.wallet_hold_service import WalletHoldService
 import json
@@ -268,6 +268,57 @@ class IdempotencyTestRunner:
             return current_balance == initial_balance - hold_amount
         
         return False
+
+    def test_create_hold_deferred_and_capture_idempotent(self):
+        """New test: create_hold must not deduct available balance; capture_hold deducts once."""
+        print("\n🧪 Test: create_hold deferred deduction and idempotent capture")
+        self._cleanup_snapshots()
+
+        initial_balance = self._get_teo_balance()
+        session_id = f"test_deferred_{int(time.time() * 1000)}"
+
+        # Trigger discount which will create a hold
+        response, _ = self._make_discount_request(10, session_id)
+        snapshot = PaymentDiscountSnapshot.objects.filter(
+            user=self.test_user,
+            course=self.test_course,
+            checkout_session_id=session_id
+        ).first()
+
+        assert snapshot is not None, "Snapshot must exist"
+        assert snapshot.wallet_hold_id, "Snapshot must have wallet_hold_id"
+
+        # Balance should be unchanged after create_hold
+        after_hold_balance = self._get_teo_balance()
+        print(f"  Initial balance: {initial_balance}, after hold: {after_hold_balance}")
+        if after_hold_balance != initial_balance:
+            print("  ❌ Balance changed on create_hold")
+            return False
+
+        # Capture the hold
+        hold_service = WalletHoldService()
+        captured_amount = hold_service.capture_hold(snapshot.wallet_hold_id, description="test capture")
+        if not captured_amount:
+            print("  ❌ capture_hold failed")
+            return False
+
+        # Balance should decrease by captured_amount
+        post_capture_balance = self._get_teo_balance()
+        print(f"  Post capture balance: {post_capture_balance}, captured_amount: {captured_amount}")
+        if post_capture_balance != initial_balance - int(captured_amount):
+            print("  ❌ Balance did not decrease correctly on capture")
+            return False
+
+        # Calling capture again must be idempotent (no further balance change)
+        captured_again = hold_service.capture_hold(snapshot.wallet_hold_id, description="test capture retry")
+        after_retry_balance = self._get_teo_balance()
+        print(f"  After retry balance: {after_retry_balance}")
+        if after_retry_balance != post_capture_balance:
+            print("  ❌ Re-capture caused balance change")
+            return False
+
+        return True
+
     
     def run_all_tests(self):
         """Esegui tutti i test"""

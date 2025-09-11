@@ -50,52 +50,40 @@ class WalletHoldService:
             Hold ID if successful, None if failed
         """
         try:
-            # Check if user has sufficient balance
-            user_balance = db_teocoin_service.get_balance(user)
-            
-            if user_balance < amount:
-                logger.error(
-                    f"Insufficient balance for hold: user={user.username}, "
-                    f"balance={user_balance}, requested={amount}"
-                )
-                return None
-            
+            # Determine effective available balance subtracting active holds
             with transaction.atomic():
-                # First, deduct the balance using the proper service method
-                success = db_teocoin_service.deduct_balance(
-                    user=user,
-                    amount=amount,
-                    transaction_type="hold",
-                    description=f"HOLD: {description}",
-                    course=course
-                )
-                
-                if not success:
-                    logger.error(f"Failed to deduct balance for hold: insufficient funds")
+                available = db_teocoin_service.get_balance(user)
+                active_holds = self._sum_active_holds(user)
+                effective_available = available - active_holds
+
+                if effective_available < amount:
+                    logger.error(
+                        f"Insufficient effective balance for hold: user={user.username}, "
+                        f"available={available}, active_holds={active_holds}, requested={amount}"
+                    )
                     return None
-                
-                # Create hold tracking transaction (this won't affect balance since it's already deducted)
+
+                # Create hold tracking transaction without touching available balance yet
                 hold_description = f"HOLD: {description} (amount: {amount})"
                 if hold_reference:
                     hold_description = f"HOLD: {description} (ref: {hold_reference}, amount: {amount})"
-                
+
                 hold_tx = DBTeoCoinTransaction.objects.create(
                     user=user,
-                    amount=0,  # Balance already deducted by deduct_balance()
+                    amount=0,
                     transaction_type="hold",
                     description=hold_description,
-                    course=course
+                    course=course,
                 )
-                
+
                 hold_id = str(hold_tx.pk)
-                
+
                 logger.info(
-                    f"TEO hold created: hold_id={hold_id}, user={user.username}, "
+                    f"TEO hold created (deferred deduction): hold_id={hold_id}, user={user.username}, "
                     f"amount={amount}, description={description}, reference={hold_reference}"
                 )
-                
+
                 return hold_id
-                
         except Exception as e:
             logger.error(f"Failed to create hold: {e}")
             return None
@@ -122,38 +110,54 @@ class WalletHoldService:
                 # Find the hold transaction
                 hold_tx = DBTeoCoinTransaction.objects.select_for_update().get(
                     id=hold_id,
-                    transaction_type="hold"
+                    transaction_type="hold",
                 )
-                
+
                 # Check if already captured
                 if "[CAPTURED" in hold_tx.description:
                     logger.warning(f"Hold {hold_id} already captured")
-                    # Extract amount from description
                     return self._extract_amount_from_description(hold_tx.description)
-                
-                # Extract hold amount from description (since amount is now 0 in hold transactions)
+
+                # Extract hold amount from description
                 hold_amount = self._extract_amount_from_description(hold_tx.description)
-                
+
+                # Detect legacy pre-deduction: if a prior negative transaction exists for this user
+                legacy_deducted = self._has_legacy_deduction(hold_tx)
+
+                # If legacy deduction detected, we assume balance already reduced at hold creation
+                if not legacy_deducted:
+                    # Deduct available balance now (capture time)
+                    success = db_teocoin_service.deduct_balance(
+                        user=hold_tx.user,
+                        amount=hold_amount,
+                        transaction_type="hold_capture",
+                        description=f"CAPTURE: {description}",
+                        course=course or hold_tx.course,
+                    )
+
+                    if not success:
+                        logger.error(f"Failed to deduct balance during capture for hold {hold_id}")
+                        return None
+
                 # Create capture transaction to mark completion
                 capture_tx = DBTeoCoinTransaction.objects.create(
                     user=hold_tx.user,
-                    amount=0,  # No additional balance change, just marking capture
+                    amount=0,
                     transaction_type="hold_capture",
                     description=f"CAPTURE: {description} (hold: {hold_id}, amount: {hold_amount})",
-                    course=course or hold_tx.course
+                    course=course or hold_tx.course,
                 )
-                
+
                 # Update hold description to indicate it was captured
                 hold_tx.description = f"{hold_tx.description} [CAPTURED by {capture_tx.pk}]"
                 hold_tx.save(update_fields=["description"])
-                
+
                 logger.info(
                     f"TEO hold captured: hold_id={hold_id}, capture_id={capture_tx.pk}, "
-                    f"amount={hold_amount}, user={hold_tx.user.pk}"
+                    f"amount={hold_amount}, user={hold_tx.user.pk}, legacy_deducted={legacy_deducted}"
                 )
-                
+
                 return hold_amount
-                
         except DBTeoCoinTransaction.DoesNotExist:
             logger.error(f"Hold transaction not found: {hold_id}")
             return None
@@ -181,55 +185,57 @@ class WalletHoldService:
                 # Find the hold transaction
                 hold_tx = DBTeoCoinTransaction.objects.select_for_update().get(
                     id=hold_id,
-                    transaction_type="hold"
+                    transaction_type="hold",
                 )
-                
+
                 # Check if already captured (cannot release captured holds)
                 if "[CAPTURED" in hold_tx.description:
                     logger.error(f"Cannot release captured hold {hold_id}")
                     return None
-                
+
                 # Check if already released
                 if "[RELEASED" in hold_tx.description:
                     logger.warning(f"Hold {hold_id} already released")
                     return self._extract_amount_from_description(hold_tx.description)
-                
-                # Extract hold amount (we need to get it from the description since amount is now 0)
+
+                # Extract hold amount
                 hold_amount = self._extract_amount_from_description(hold_tx.description)
-                
-                # Restore the balance using the proper service method
-                success = db_teocoin_service.add_balance(
-                    user=hold_tx.user,
-                    amount=hold_amount,
-                    transaction_type="hold_release",
-                    description=f"RELEASE: {reason}",
-                    course=hold_tx.course
-                )
-                
-                if not success:
-                    logger.error(f"Failed to restore balance for hold release")
-                    return None
-                
-                # Create release transaction for tracking (balance already restored)
+
+                # Detect legacy pre-deduction: if the balance was reduced at hold creation, restore it
+                legacy_deducted = self._has_legacy_deduction(hold_tx)
+
+                if legacy_deducted:
+                    success = db_teocoin_service.add_balance(
+                        user=hold_tx.user,
+                        amount=hold_amount,
+                        transaction_type="hold_release",
+                        description=f"RELEASE: {reason}",
+                        course=hold_tx.course,
+                    )
+
+                    if not success:
+                        logger.error(f"Failed to restore balance for legacy hold release {hold_id}")
+                        return None
+
+                # Create release transaction for tracking
                 release_tx = DBTeoCoinTransaction.objects.create(
                     user=hold_tx.user,
-                    amount=0,  # Balance already restored by add_balance()
+                    amount=0,
                     transaction_type="hold_release",
                     description=f"RELEASE: {reason} (hold: {hold_id}, amount: {hold_amount})",
-                    course=hold_tx.course
+                    course=hold_tx.course,
                 )
-                
+
                 # Update hold description to indicate it was released
                 hold_tx.description = f"{hold_tx.description} [RELEASED by {release_tx.pk}]"
                 hold_tx.save(update_fields=["description"])
-                
+
                 logger.info(
                     f"TEO hold released: hold_id={hold_id}, release_id={release_tx.pk}, "
-                    f"amount={hold_amount}, user={hold_tx.user.pk}"
+                    f"amount={hold_amount}, user={hold_tx.user.pk}, legacy_deducted={legacy_deducted}"
                 )
-                
+
                 return hold_amount
-                
         except DBTeoCoinTransaction.DoesNotExist:
             logger.error(f"Hold transaction not found: {hold_id}")
             return None
@@ -288,6 +294,43 @@ class WalletHoldService:
         except:
             pass
         return Decimal("0")
+
+    def _sum_active_holds(self, user: User) -> Decimal:
+        """
+        Sum amounts from active hold transactions for a user.
+        """
+        try:
+            qs = DBTeoCoinTransaction.objects.filter(user=user, transaction_type="hold").exclude(
+                description__icontains="[RELEASED"
+            ).exclude(description__icontains="[CAPTURED")
+            total = Decimal("0")
+            for tx in qs:
+                total += self._extract_amount_from_description(tx.description)
+            return total
+        except Exception:
+            return Decimal("0")
+
+    def _has_legacy_deduction(self, hold_tx: DBTeoCoinTransaction) -> bool:
+        """
+        Heuristic to detect if the hold was created under the old flow that deducted
+        balance at creation time. We look for an earlier negative transaction for the
+        same user that references a hold-like description and occurred at or before
+        the hold transaction.
+        """
+        try:
+            user = hold_tx.user
+            # Look for negative amount transactions before or at hold creation
+            prior = (
+                DBTeoCoinTransaction.objects.filter(user=user, amount__lt=0)
+                .filter(created_at__lte=hold_tx.created_at)
+                .order_by("-created_at")
+                .first()
+            )
+            if prior and ("HOLD:" in (prior.description or "") or prior.transaction_type in ("hold", "course_discount")):
+                return True
+        except Exception:
+            pass
+        return False
 
 
 # Default service instance

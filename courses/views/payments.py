@@ -258,16 +258,45 @@ class CreatePaymentIntentView(APIView):
                     discount_request_id
                 )
 
+            # ISSUE-04A: Add correlation metadata for webhook lookup
+            # Look for existing applied discount snapshot for this user + course
+            existing_snapshot = None
+            if use_teocoin_discount and discount_amount > 0:
+                existing_snapshot = PaymentDiscountSnapshot.objects.filter(
+                    student=user,
+                    course=course,
+                    status__in=["applied", "pending"],
+                    wallet_hold_id__isnull=False
+                ).order_by('-created_at').first()
+                
+                if existing_snapshot:
+                    # Add critical metadata for webhook correlation
+                    intent_data["metadata"]["discount_snapshot_id"] = str(existing_snapshot.id)
+                    intent_data["metadata"]["hold_id"] = str(existing_snapshot.wallet_hold_id)
+                    intent_data["metadata"]["order_id"] = str(existing_snapshot.order_id) if existing_snapshot.order_id else ""
+                    logger.info(f"🔗 Added correlation metadata: snapshot_id={existing_snapshot.id}, hold_id={existing_snapshot.wallet_hold_id}")
+
             logger.info(f"💳 Stripe intent data: {intent_data}")
 
             try:
                 payment_intent = stripe.PaymentIntent.create(**intent_data)
                 logger.info(f"✅ Stripe payment intent created: {payment_intent.id}")
+                
+                # ISSUE-04A: Immediately persist stripe_payment_intent_id in existing snapshot  
+                snapshot_updated = False
+                if existing_snapshot:
+                    existing_snapshot.stripe_payment_intent_id = payment_intent.id
+                    existing_snapshot.external_txn_id = payment_intent.id
+                    existing_snapshot.save(update_fields=['stripe_payment_intent_id', 'external_txn_id'])
+                    logger.info(f"🔗 Updated snapshot {existing_snapshot.id} with stripe_payment_intent_id: {payment_intent.id}")
+                    snapshot_updated = True
+                
                 # Persist a PaymentDiscountSnapshot now (idempotent). This ensures
                 # a snapshot exists as soon as the payment intent is created so
                 # teacher notifications and frontend can rely on it.
+                # SKIP if we already updated an existing snapshot to prevent duplicates
                 try:
-                    if use_teocoin_discount and discount_amount > 0:
+                    if use_teocoin_discount and discount_amount > 0 and not snapshot_updated:
                         # Resolve tier from teacher profile if available
                         tier = None
                         tp = getattr(course.teacher, "teacher_profile", None)
@@ -333,7 +362,8 @@ class CreatePaymentIntentView(APIView):
                                     .filter(
                                         Q(order_id__startswith='local_') |
                                         Q(order_id__startswith='discount_synthetic_') |
-                                        Q(order_id__startswith='discount_')
+                                        Q(order_id__startswith='discount_') |
+                                        Q(order_id__startswith='checkout_session_')  # FIX: Include checkout session snapshots
                                     )
                                     .order_by('-created_at')
                                     .first()
@@ -350,7 +380,12 @@ class CreatePaymentIntentView(APIView):
                             else:
                                 snap, created = get_or_create_payment_snapshot(order_id=str(payment_intent.id), defaults=defaults_payload, source="stripe")
                         except Exception:
-                            snap, created = PaymentDiscountSnapshot.objects.get_or_create(order_id=str(payment_intent.id), defaults=defaults_payload)
+                            # ALSO respect snapshot_updated flag in fallback to prevent duplicates
+                            if not snapshot_updated:
+                                snap, created = PaymentDiscountSnapshot.objects.get_or_create(order_id=str(payment_intent.id), defaults=defaults_payload)
+                            else:
+                                snap = existing_snapshot
+                                created = False
                 except Exception:
                     logger.exception("Failed to persist PaymentDiscountSnapshot at intent creation")
             except Exception as stripe_err:
@@ -530,23 +565,31 @@ class ConfirmPaymentView(APIView):
                         f"💰 Payment confirmed, now capturing TEO hold: {discount_amount} TEO"
                     )
                     
-                    # Find existing applied discount snapshot with hold
+                    # FIRST: Find and update existing applied snapshot with stripe_payment_intent_id
+                    # This is critical for webhook correlation and settlement service
                     applied_snapshot = PaymentDiscountSnapshot.objects.filter(
                         student=user,
                         course=course,
                         status="applied",
-                        wallet_hold_id__isnull=False,
-                        external_txn_id=payment_intent_id
-                    ).first()
+                        wallet_hold_id__isnull=False
+                    ).order_by('-created_at').first()
                     
+                    if applied_snapshot:
+                        # Update snapshot with stripe_payment_intent_id for webhook correlation
+                        applied_snapshot.stripe_payment_intent_id = payment_intent_id
+                        applied_snapshot.external_txn_id = payment_intent_id
+                        applied_snapshot.save(update_fields=['stripe_payment_intent_id', 'external_txn_id'])
+                        logger.info(f"🔗 Updated snapshot {applied_snapshot.id} with stripe_payment_intent_id: {payment_intent_id}")
+                    
+                    # SECOND: Find the snapshot with updated stripe_payment_intent_id for capturing hold
                     if not applied_snapshot:
-                        # Try to find by order_id or any applied snapshot for this user/course
                         applied_snapshot = PaymentDiscountSnapshot.objects.filter(
                             student=user,
                             course=course,
                             status="applied",
-                            wallet_hold_id__isnull=False
-                        ).order_by('-created_at').first()
+                            wallet_hold_id__isnull=False,
+                            external_txn_id=payment_intent_id
+                        ).first()
                     
                     if applied_snapshot and applied_snapshot.wallet_hold_id:
                         # CAPTURE THE HOLD: Convert hold to actual deduction
@@ -697,7 +740,8 @@ class ConfirmPaymentView(APIView):
                             .filter(
                                 Q(order_id__startswith='local_') |
                                 Q(order_id__startswith='discount_synthetic_') |
-                                Q(order_id__startswith='discount_')
+                                Q(order_id__startswith='discount_') |
+                                Q(order_id__startswith='checkout_session_')  # FIX: Include checkout session snapshots
                             )
                             .order_by('-created_at')
                             .first()

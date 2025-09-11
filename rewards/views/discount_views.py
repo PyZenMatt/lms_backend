@@ -23,6 +23,7 @@ from rewards.serializers import (
     DiscountBreakdownSerializer,
     PaymentDiscountSnapshotSerializer,
 )
+from drf_spectacular.utils import extend_schema
 from services.db_teocoin_service import db_teocoin_service
 from math import ceil
 from django.conf import settings
@@ -33,6 +34,11 @@ logger = logging.getLogger(__name__)
 
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
+@extend_schema(
+    operation_id="rewards_discounts_preview_create",
+    request=DiscountPreviewInputSerializer,
+    responses={200: DiscountBreakdownSerializer},
+)
 def preview_discount(request):
     serializer = DiscountPreviewInputSerializer(data=request.data)
     if not serializer.is_valid():
@@ -111,6 +117,11 @@ def preview_discount(request):
 
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
+@extend_schema(
+    operation_id="rewards_discounts_confirm_create",
+    request=DiscountConfirmInputSerializer,
+    responses={200: PaymentDiscountSnapshotSerializer, 201: PaymentDiscountSnapshotSerializer},
+)
 def confirm_discount(request):
     serializer = DiscountConfirmInputSerializer(data=request.data)
     if not serializer.is_valid():
@@ -141,8 +152,8 @@ def confirm_discount(request):
     existing_discount = PaymentDiscountSnapshot.objects.filter(
         student=student,
         course=course_obj,
-        checkout_session_id=checkout_session_id,
-        status__in=["applied", "confirmed"]
+    checkout_session_id=checkout_session_id,
+    status__in=["applied", "confirmed", "pending"]
     ).first()
     
     if existing_discount:
@@ -340,6 +351,7 @@ def confirm_discount(request):
                 "tier_teo_bonus_multiplier": (tier.get("teo_bonus_multiplier") if tier else None),
                 
                 # NEW IDEMPOTENCY FIELDS
+                # Use 'applied' to indicate a hold with successful TEO reservation
                 "status": "applied",
                 "checkout_session_id": checkout_session_id,
                 "idempotency_key": idempotency_key,
@@ -374,7 +386,7 @@ def confirm_discount(request):
                     student=student,
                     course=course_obj,
                     checkout_session_id=checkout_session_id,
-                    status__in=["applied", "confirmed"]
+                    status__in=["applied", "confirmed", "pending"]
                 )
                 created = False
                 # Release our hold since we're using existing snapshot
@@ -411,8 +423,8 @@ def confirm_discount(request):
             "checkout_session_id": checkout_session_id,
             "wallet_hold_id": hold_id,
             "created": created,
-            "snapshot_id": getattr(snap, "id", None),
-            "status": "applied",
+                    "snapshot_id": getattr(snap, "id", None),
+                    "status": "pending",
         })
     except Exception:
         logger.debug("discount_confirm logging failed")
@@ -430,14 +442,14 @@ def confirm_discount(request):
     
     return Response(
         {
-            "ok": True, 
-            "created": created, 
-            "snapshot": snapshot_data, 
+            "ok": True,
+            "created": created,
+            "snapshot": snapshot_data,
             "breakdown": breakdown,
             "hold_id": hold_id,
-            "status": "applied"
-        }, 
-        status=status_code
+            "status": "pending",
+        },
+        status=status_code,
     )
 
 
