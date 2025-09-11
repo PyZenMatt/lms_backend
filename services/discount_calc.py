@@ -27,7 +27,8 @@ def quantize_teo(d: Decimal) -> Decimal:
 
 def compute_discount_breakdown(
     price_eur: Decimal,
-    discount_percent: Decimal,
+    discount_percent: Optional[Decimal] = None,
+    discount_amount_eur: Optional[Decimal] = None,
     tier: Optional[Dict] = None,
     accept_teo: bool = False,
     accept_ratio: Optional[Decimal] = None,
@@ -37,7 +38,8 @@ def compute_discount_breakdown(
 
     Inputs:
       - price_eur: Decimal
-      - discount_percent: Decimal (e.g., Decimal('10') for 10%)
+      - discount_percent: Decimal (e.g., Decimal('10') for 10%) - DEPRECATED for opportunities
+      - discount_amount_eur: Decimal (e.g., Decimal('15') for 15 EUR flat) - PREFERRED for opportunities
       - tier: optional dict with keys:
           - teacher_split_percent (0..100)
           - platform_split_percent (0..100)
@@ -51,7 +53,18 @@ def compute_discount_breakdown(
     """
     # Normalize inputs
     price = Decimal(price_eur)
-    discount_pct = Decimal(discount_percent) / Decimal("100")
+    
+    # Calculate discount amount - prefer flat amount over percentage
+    if discount_amount_eur is not None:
+        # Use flat discount amount (authoritative for opportunities)
+        discount_amount = Decimal(discount_amount_eur)
+    elif discount_percent is not None:
+        # Fall back to percentage calculation (legacy)
+        discount_pct = Decimal(discount_percent) / Decimal("100")
+        discount_amount = price * discount_pct
+    else:
+        # No discount
+        discount_amount = Decimal("0")
 
     if tier is None:
         # Default Bronze
@@ -72,9 +85,7 @@ def compute_discount_breakdown(
     teacher_gross_eur = (price * teacher_split_pct)
     platform_gross_eur = (price * platform_split_pct)
 
-    # Discount amount (always applied to student)
-    discount_amount = (price * discount_pct)
-    # Student pays net
+    # Student pays net (discount already calculated above)
     student_pay = price - discount_amount
 
     # Absorption logic

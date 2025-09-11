@@ -16,12 +16,18 @@ def get_or_create_payment_snapshot(*, order_id: str | None = None, external_txn_
                                    defaults: dict, source: str = "local") -> tuple:
     """Idempotent creation of PaymentDiscountSnapshot.
 
-    Prioritizes external_txn_id for uniqueness; falls back to order_id. Raises
-    ValueError if neither key is provided. Returns (snapshot, created).
+    Prioritizes external_txn_id for uniqueness; falls back to order_id. Also checks
+    if order_id matches an existing external_txn_id to prevent duplicates.
+    Returns (snapshot, created).
     """
     if external_txn_id:
         key = {"external_txn_id": external_txn_id}
     elif order_id:
+        # First check if order_id matches an existing external_txn_id (to prevent duplicates)
+        existing = PaymentDiscountSnapshot.objects.filter(external_txn_id=order_id).first()
+        if existing:
+            return existing, False
+        # Otherwise use order_id as key
         key = {"order_id": order_id}
     else:
         raise ValueError("external_txn_id or order_id required for idempotent snapshot creation")
@@ -61,10 +67,13 @@ def get_platform_balance():
 @transaction.atomic
 def apply_discount_and_snapshot(*, student_user_id: int, teacher_id: int,
                                 course_id: int, teo_cost: Decimal,
-                                offered_teacher_teo: Decimal) -> dict:
+                                offered_teacher_teo: Decimal, idempotency_key: str | None = None,
+                                stripe_checkout_session_id: str | None = None,
+                                stripe_payment_intent_id: str | None = None) -> dict:
     """
-    1) Debit TEO from student's DB balance
+    1) Validate student has sufficient TEO balance (no deduction yet)
     2) Create PaymentDiscountSnapshot (status=pending) and TeacherDiscountDecision (pending)
+    3) TEO deduction happens only when teacher accepts via teacher_make_decision()
     Returns {snapshot_id, pending_decision_id}
     """
     if teo_cost <= 0:
@@ -72,60 +81,100 @@ def apply_discount_and_snapshot(*, student_user_id: int, teacher_id: int,
     if offered_teacher_teo < 0:
         raise ValidationError("offered_teacher_teo invalid")
 
-    # Lock student balance for update (create if missing)
+    # If idempotency_key provided, check for existing ACTIVE or PENDING snapshot first
+    if idempotency_key:
+        existing_snap = PaymentDiscountSnapshot.objects.filter(idempotency_key=idempotency_key).first()
+        if existing_snap:
+            # Return existing decision/snapshot without processing again
+            decision = TeacherDiscountDecision.objects.filter(
+                teacher_id=teacher_id,
+                student_id=student_user_id,
+                course_id=course_id,
+            ).order_by("-created_at").first()
+
+            return {
+                "snapshot_id": existing_snap.id,
+                "pending_decision_id": decision.id if decision else None,
+            }
+
+    # Get student (no balance deduction yet - only when teacher accepts)
     student = User.objects.get(id=student_user_id)
-    # Ensure a DBTeoCoinBalance exists for the student
-    student_balance, _ = DBTeoCoinBalance.objects.get_or_create(user=student, defaults={"available_balance": Decimal("0"), "staked_balance": Decimal("0")})
-    # Now lock the existing row for update
-    student_balance = DBTeoCoinBalance.objects.select_for_update().get(user=student)
+    
+    # Check student has sufficient balance (validation only, no deduction)
+    student_balance, _ = DBTeoCoinBalance.objects.get_or_create(
+        user=student,
+        defaults={"available_balance": Decimal("0"), "staked_balance": Decimal("0")},
+    )
     if student_balance.available_balance < teo_cost:
         raise ValidationError("Insufficient TEO balance")
 
-    # 1) Debit student
-    student_balance.available_balance -= teo_cost
-    student_balance.save(update_fields=["available_balance"])
-    # Record DB transaction (course relation if available)
-    txn_kwargs = dict(
-        user=student,
-        transaction_type="spent_discount",
-        amount=teo_cost,
-        description=f"Discount apply course_id={course_id}",
-    )
-    if course_id:
-        txn_kwargs["course_id"] = course_id
-    DBTeoCoinTransaction.objects.create(**txn_kwargs)
+    # NOTE: No TEO deduction here - this happens only when teacher accepts the decision
 
-    # 2) Snapshot + decision
-    # Create a minimal PaymentDiscountSnapshot as audit snapshot. Use an
-    # idempotent helper so repeated calls (webhook + local) reuse the same row
-    # when a stable key is available. Prefer external_txn_id if present.
-    defaults = dict(
-        course_id=course_id,
-        student=student,
-        teacher_id=teacher_id,
-        price_eur=0,
-        discount_percent=0,
-        student_pay_eur=0,
-        teacher_eur=0,
-        platform_eur=0,
-        teacher_teo=offered_teacher_teo,
-        platform_teo=Decimal("0"),
-        absorption_policy="teo",
-        teacher_accepted_teo=Decimal("0"),
-    )
+    # 2) Create snapshot + decision (no TEO deduction until teacher accepts)
+    # Try to find existing snapshot for this student/course/teacher combination first
+    # This prevents duplicate snapshots when payment flow already created one
+    existing_snap = None
+    if course_id and teacher_id and not idempotency_key:  # Skip time-based lookup if using idempotency
+        try:
+            # Look for recent snapshot (within last hour) for same student/course/teacher
+            one_hour_ago = timezone.now() - timezone.timedelta(hours=1)
+            existing_snap = PaymentDiscountSnapshot.objects.filter(
+                student=student,
+                course_id=course_id,
+                teacher_id=teacher_id,
+                created_at__gte=one_hour_ago
+            ).first()
+        except Exception:
+            existing_snap = None
+    
+    if existing_snap:
+        # Reuse existing snapshot instead of creating duplicate
+        snap = existing_snap
+        created = False
+    else:
+        # Create new snapshot only if none exists
+        defaults = dict(
+            course_id=course_id,
+            student=student,
+            teacher_id=teacher_id,
+            price_eur=0,
+            discount_percent=0,
+            student_pay_eur=0,
+            teacher_eur=0,
+            platform_eur=0,
+            teacher_teo=offered_teacher_teo,
+            platform_teo=Decimal("0"),
+            absorption_policy="teo",
+            teacher_accepted_teo=Decimal("0"),
+        )
+        
+        # Add additional fields to defaults
+        if idempotency_key:
+            defaults["idempotency_key"] = idempotency_key
+        if stripe_checkout_session_id:
+            defaults["stripe_checkout_session_id"] = stripe_checkout_session_id
+        if stripe_payment_intent_id:
+            defaults["stripe_payment_intent_id"] = stripe_payment_intent_id
 
-    # If caller provided a stable order_id or external id, prefer it; else
-    # synthesize a stable platform id based on student/course (no timestamp)
-    # to allow dedup but still be human-debuggable.
-    # Here we don't have external id passed in; generate a synthetic but stable id
-    synthetic_order_id = f"discount_synthetic_{student_user_id}_{course_id}"
-    try:
-        snap, created = get_or_create_payment_snapshot(order_id=synthetic_order_id, defaults=defaults, source="local")
-    except Exception:
-        # Fallback to direct create if helper fails for any reason
-        snapshot = PaymentDiscountSnapshot.objects.create(**{**defaults, "order_id": synthetic_order_id, "source": "local"})
-        snap = snapshot
-        created = True
+        # Use idempotency_key for creation if available, otherwise fallback to synthetic order_id
+        if idempotency_key:
+            try:
+                snap = PaymentDiscountSnapshot.objects.create(**{**defaults, "source": "local"})
+                created = True
+            except IntegrityError:
+                # Idempotency key already exists, fetch existing
+                snap = PaymentDiscountSnapshot.objects.filter(idempotency_key=idempotency_key).first()
+                created = False
+        else:
+            # Legacy path: generate synthetic order_id
+            synthetic_order_id = f"discount_synthetic_{student_user_id}_{course_id}"
+            try:
+                snap, created = get_or_create_payment_snapshot(order_id=synthetic_order_id, defaults=defaults, source="local")
+            except Exception:
+                # Fallback to direct create if helper fails for any reason
+                snapshot = PaymentDiscountSnapshot.objects.create(**{**defaults, "order_id": synthetic_order_id, "source": "local"})
+                snap = snapshot
+                created = True
 
     # Prepare fields required by TeacherDiscountDecision.clean()
     course_price = Decimal("0.01")
@@ -218,20 +267,24 @@ def teacher_make_decision(*, decision_id: int, accept: bool, actor=None) -> dict
 
     if accept:
         # Ensure teacher balance exists and lock it
-        DBTeoCoinBalance.objects.get_or_create(user=decision.teacher, defaults={"available_balance": Decimal("0"), "staked_balance": Decimal("0")})
+        DBTeoCoinBalance.objects.get_or_create(
+            user=decision.teacher,
+            defaults={"available_balance": Decimal("0"), "staked_balance": Decimal("0")},
+        )
         teacher_balance = DBTeoCoinBalance.objects.select_for_update().get(user=decision.teacher)
 
         if amount > 0:
+            # Credit teacher inside the transaction with locked row to avoid races
             teacher_balance.available_balance = q8(teacher_balance.available_balance + amount)
             teacher_balance.save(update_fields=["available_balance"])
 
-            # DB ledger: avoid duplicates
+            # DB ledger: avoid duplicates using get_or_create by unique description
             desc = f"TEO from discount snapshot_id={getattr(snapshot, 'id', None)} decision={decision.id}"
             DBTeoCoinTransaction.objects.get_or_create(
                 user=decision.teacher,
                 transaction_type="discount_accept",
                 description=desc,
-                defaults={"amount": amount, "course_id": getattr(decision, 'course_id', None)},
+                defaults={"amount": amount, "course_id": getattr(decision, "course_id", None)},
             )
 
             # Chain ledger: best-effort
@@ -279,6 +332,34 @@ def teacher_make_decision(*, decision_id: int, accept: bool, actor=None) -> dict
             snapshot.save(update_fields=["teacher_accepted_teo", "final_teacher_teo", "status", "closed_at"])
         except Exception:
             pass
+
+    # Upsert or update TeacherDiscountAbsorption opportunity linked to this snapshot
+    try:
+        from rewards.models import TeacherDiscountAbsorption
+
+        if snapshot:
+            # Ensure a single opportunity row per snapshot (1:1)
+            TeacherDiscountAbsorption.objects.update_or_create(
+                teacher=decision.teacher,
+                course=snapshot.course,
+                student=snapshot.student,
+                teo_used_by_student=snapshot.teacher_teo or Decimal("0"),
+                discount_amount_eur=snapshot.discount_amount_eur or Decimal("0"),
+                defaults={
+                    "course_price_eur": getattr(snapshot, "price_eur", Decimal("0")),
+                    "discount_percentage": getattr(snapshot, "discount_percent", 0),
+                    "teacher_commission_rate": getattr(decision, "teacher_commission_rate", Decimal("0")),
+                    "option_b_teacher_teo": snapshot.teacher_teo or Decimal("0"),
+                    "status": "absorbed" if accept else "refused",
+                    "final_teacher_teo": amount if accept else Decimal("0"),
+                    "final_teacher_eur": getattr(snapshot, "teacher_eur", Decimal("0")) if not accept else None,
+                    "final_platform_eur": getattr(snapshot, "platform_eur", Decimal("0")) if not accept else None,
+                    "expires_at": timezone.now() + timezone.timedelta(hours=24),
+                },
+            )
+    except Exception:
+        # Non-critical: opportunity upsert failure shouldn't block decision processing
+        pass
 
     return {
         "decision_id": decision.id,

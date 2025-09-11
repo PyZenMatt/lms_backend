@@ -3,6 +3,7 @@ from decimal import Decimal
 
 from django.db import models
 from django.utils import timezone
+from django.db.models import Q
 from users.models import User
 
 
@@ -337,6 +338,18 @@ class PaymentDiscountSnapshot(models.Model):
     # conditional UniqueConstraint below.
     external_txn_id = models.CharField(max_length=120, db_index=True, null=True, blank=True)
     order_id = models.CharField(max_length=120, db_index=True, null=True, blank=True)
+    
+    # Idempotency key for discount application (prevents double TEO deduction)
+    # Format: "{user_id}_{course_id}_{checkout_session_id}"
+    idempotency_key = models.CharField(max_length=200, db_index=True, null=True, blank=True)
+    
+    # Checkout session identifier - persists across multiple attempts within same session
+    checkout_session_id = models.CharField(max_length=120, db_index=True, null=True, blank=True)
+    
+    # Stripe correlation fields for webhook capture
+    stripe_checkout_session_id = models.CharField(max_length=200, db_index=True, null=True, blank=True, help_text="Stripe Checkout Session ID for webhook correlation")
+    stripe_payment_intent_id = models.CharField(max_length=200, db_index=True, null=True, blank=True, help_text="Stripe Payment Intent ID for webhook correlation")
+    
     source = models.CharField(max_length=16, default="local")  # 'local' | 'stripe'
     course = models.ForeignKey("courses.Course", on_delete=models.SET_NULL, null=True)
     student = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name="payment_snapshots")
@@ -345,6 +358,8 @@ class PaymentDiscountSnapshot(models.Model):
     # Inputs
     price_eur = models.DecimalField(max_digits=10, decimal_places=2)
     discount_percent = models.IntegerField()
+    # Flat discount amount (5/10/15 EUR) - authoritative source for opportunities
+    discount_amount_eur = models.DecimalField(max_digits=10, decimal_places=2, default=Decimal("0"))
 
     # Outputs (EUR)
     student_pay_eur = models.DecimalField(max_digits=10, decimal_places=2)
@@ -357,13 +372,38 @@ class PaymentDiscountSnapshot(models.Model):
 
     absorption_policy = models.CharField(max_length=32, default="none")
     teacher_accepted_teo = models.DecimalField(max_digits=18, decimal_places=8, default=Decimal("0"))
+    
+    # Link to opportunity/decision (if applicable)
+    decision = models.OneToOneField(
+        "courses.TeacherDiscountDecision",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="payment_snapshot"
+    )
 
     # Finalization fields updated when teacher makes a decision
     STATUS_CHOICES = [
-        ("pending", "Pending"),
-        ("closed", "Closed"),
+        ("draft", "Draft"),
+        ("applied", "Applied (Pending Payment)"),
+        ("confirmed", "Confirmed"),
+        ("failed", "Failed"),
+        ("expired", "Expired"),
+        ("superseded", "Superseded"),
+        ("pending", "Pending"),  # Legacy status for backward compatibility
+        ("closed", "Closed"),   # Legacy status for backward compatibility
     ]
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="pending", db_index=True)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="draft", db_index=True)
+    
+    # Wallet transaction tracking for TEO holds/captures
+    wallet_hold_id = models.CharField(max_length=100, null=True, blank=True, help_text="TEO wallet hold transaction ID")
+    wallet_capture_id = models.CharField(max_length=100, null=True, blank=True, help_text="TEO wallet capture transaction ID")
+    
+    # Timestamps for state transitions
+    applied_at = models.DateTimeField(null=True, blank=True, help_text="When discount was applied (hold created)")
+    confirmed_at = models.DateTimeField(null=True, blank=True, help_text="When payment confirmed (hold captured)")
+    failed_at = models.DateTimeField(null=True, blank=True, help_text="When payment failed (hold released)")
+    
     closed_at = models.DateTimeField(null=True, blank=True)
     # Final teacher teo recorded at decision time (quantized to 8 decimals)
     final_teacher_teo = models.DecimalField(max_digits=18, decimal_places=8, null=True, blank=True, default=Decimal("0"))
@@ -392,6 +432,24 @@ class PaymentDiscountSnapshot(models.Model):
                 fields=["order_id"],
                 name="uniq_snapshot_by_order_id",
                 condition=~models.Q(order_id=None),
+            ),
+            # IDEMPOTENCY CONSTRAINT: Prevent duplicate discount applications for same session
+            # Key: user + course + checkout_session_id must be unique for active statuses
+            models.UniqueConstraint(
+                fields=["student", "course", "checkout_session_id"],
+                name="uniq_discount_per_checkout_session",
+                condition=Q(
+                    checkout_session_id__isnull=False,
+                    status__in=["applied", "confirmed"]
+                ),
+            ),
+            # Legacy idempotency: prevent duplicate discount applications while snapshot is pending
+            # Allow same idempotency_key for historical/closed snapshots but prevent
+            # concurrent/pending duplicates.
+            models.UniqueConstraint(
+                fields=["idempotency_key"],
+                name="uniq_snapshot_by_idempotency_key_pending",
+                condition=Q(idempotency_key__isnull=False) & Q(status="pending"),
             ),
         ]
 

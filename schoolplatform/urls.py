@@ -65,6 +65,7 @@ urlpatterns = [
     path("api/v1/", include("users.urls")),
     path("api/v1/", include("rewards.urls")),
     path("api/v1/", include("notifications.urls")),
+    path("api/v1/payments/", include("payments.urls")),
     path("api/v1/blockchain/", include("blockchain.urls")),
     # Compatibility alias for on-chain mint endpoint used by frontend
     path("api/v1/onchain/mint/", onchain_mint, name="onchain_mint_alias"),

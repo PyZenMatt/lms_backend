@@ -164,6 +164,7 @@ class PaymentDiscountSnapshotSerializer(serializers.ModelSerializer):
             "teacher",
             "price_eur",
             "discount_percent",
+            "discount_amount_eur",
             "student_pay_eur",
             "teacher_eur",
             "platform_eur",
@@ -228,13 +229,26 @@ class PaymentDiscountSnapshotSerializer(serializers.ModelSerializer):
 
             accept_ratio = max_ratio if max_ratio is not None else Decimal("1")
 
-            breakdown = compute_discount_breakdown(
-                price_eur=obj.price_eur,
-                discount_percent=obj.discount_percent,
-                tier=tier,
-                accept_teo=True,
-                accept_ratio=accept_ratio,
-            )
+            # Use flat discount amount if available, otherwise fall back to percentage
+            discount_amount_eur = getattr(obj, "discount_amount_eur", None)
+            if discount_amount_eur and discount_amount_eur > 0:
+                # Use flat discount (preferred for opportunities)
+                breakdown = compute_discount_breakdown(
+                    price_eur=obj.price_eur,
+                    discount_amount_eur=discount_amount_eur,
+                    tier=tier,
+                    accept_teo=True,
+                    accept_ratio=accept_ratio,
+                )
+            else:
+                # Fall back to percentage-based calculation
+                breakdown = compute_discount_breakdown(
+                    price_eur=obj.price_eur,
+                    discount_percent=obj.discount_percent,
+                    tier=tier,
+                    accept_teo=True,
+                    accept_ratio=accept_ratio,
+                )
 
             teacher_teo = breakdown.get("teacher_teo")
             if teacher_teo is None:

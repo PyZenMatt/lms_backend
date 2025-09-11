@@ -10,10 +10,15 @@ class NotificationSerializer(serializers.ModelSerializer):
     link = serializers.SerializerMethodField()
     # Enrichment for discount pending notifications: offer preview (string, 8 d.p.)
     offered_teacher_teo = serializers.SerializerMethodField()
+    discount_eur = serializers.SerializerMethodField()
     # Include resolved decision id for FE actions
     decision_id = serializers.SerializerMethodField()
     # Hint the FE about what the related id refers to (best-effort)
     related_object_type = serializers.SerializerMethodField()
+    # Include additional structured fields from extra_data
+    tier = serializers.SerializerMethodField()
+    staking_allowed = serializers.SerializerMethodField()
+    expires_at = serializers.SerializerMethodField()
 
     class Meta:
         model = Notification
@@ -26,11 +31,29 @@ class NotificationSerializer(serializers.ModelSerializer):
             "related_object",
             "link",
             "offered_teacher_teo",
+            "discount_eur",
             "related_object_id",
             "related_object_type",
             "decision_id",
+            "tier",
+            "staking_allowed",
+            "expires_at",
         ]
         ordering = ["-created_at"]
+
+    def _get_extra_data(self, obj):
+        """Parse extra_data JSON if available"""
+        try:
+            extra_data = getattr(obj, "extra_data", None)
+            if extra_data:
+                if isinstance(extra_data, str):
+                    import json
+                    return json.loads(extra_data)
+                elif isinstance(extra_data, dict):
+                    return extra_data
+        except Exception:
+            pass
+        return {}
 
     def get_link(self, obj):
         """Generate appropriate navigation links based on notification type"""
@@ -87,9 +110,7 @@ class NotificationSerializer(serializers.ModelSerializer):
         """Include a backward-compatible absorption_id for discount notifications"""
         data = super().to_representation(instance)
         try:
-            if data.get("notification_type") == "teocoin_discount_pending" and data.get(
-                "related_object_id"
-            ):
+            if data.get("notification_type") in ["teocoin_discount_pending", "teocoin_discount_pending_urgent"] and data.get("related_object_id"):
                 data["absorption_id"] = data["related_object_id"]
         except Exception:
             pass
@@ -146,14 +167,18 @@ class NotificationSerializer(serializers.ModelSerializer):
         """Return offered_teacher_teo as string with 8 d.p. for teocoin_discount_pending.
 
         Priority:
-        1) Resolve via TeacherDiscountDecision.related (obj.related_object_id assumed to be decision.id)
+        1) Check extra_data for offered_teacher_teo (source of truth from services)
+        2) Resolve via TeacherDiscountDecision.related (obj.related_object_id assumed to be decision.id)
            offered = (teo_cost + teacher_bonus) / 1e18 → format 8 d.p.
-        2) Legacy fallback: resolve via PaymentDiscountSnapshot (order_id or pk) and reuse
+        3) Legacy fallback: resolve via PaymentDiscountSnapshot (order_id or pk) and reuse
            PaymentDiscountSnapshotSerializer.offered_teacher_teo
-        3) If nothing can be resolved, return None (avoid misleading "0.00000000").
+        4) If nothing can be resolved, return None (avoid misleading "0.00000000").
         """
         try:
-            if obj.notification_type != "teocoin_discount_pending":
+            # For pending/urgent discount notifications we intentionally do not
+            # expose offered_teacher_teo (TEO amounts) in the API. Always return
+            # None to avoid leaking TEO quantities to the frontend.
+            if obj.notification_type in ("teocoin_discount_pending", "teocoin_discount_pending_urgent"):
                 return None
 
             decision_id = obj.related_object_id
@@ -220,19 +245,26 @@ class NotificationSerializer(serializers.ModelSerializer):
     def get_decision_id(self, obj):
         """Prefer direct related_object_id as the TeacherDiscountDecision id for pending discount notifications.
 
-        Backward compatibility: if related_object_id points to a snapshot/order, try to resolve the
-        matching pending decision the old way.
+        Priority:
+        1) Check extra_data for decision_id (source of truth from services)
+        2) Direct related_object_id as the TeacherDiscountDecision id
+        3) Backward compatibility: if related_object_id points to a snapshot/order, try to resolve the
+           matching pending decision the old way.
         """
         try:
-            if obj.notification_type != "teocoin_discount_pending":
+            if obj.notification_type not in ("teocoin_discount_pending", "teocoin_discount_pending_urgent"):
                 return None
+
+            # Priority 1: Check extra_data first
+            extra_data = self._get_extra_data(obj)
+            if extra_data.get("decision_id") is not None:
+                return extra_data["decision_id"]
+
             # Fast path: if related_object_id is a real decision id
             try:
                 from courses.models import TeacherDiscountDecision
 
-                dec = TeacherDiscountDecision.objects.filter(
-                    pk=obj.related_object_id
-                ).first()
+                dec = TeacherDiscountDecision.objects.filter(pk=obj.related_object_id).first()
                 if dec:
                     return getattr(dec, "id", None)
             except Exception:
@@ -271,11 +303,103 @@ class NotificationSerializer(serializers.ModelSerializer):
         except Exception:
             return None
 
+    def get_discount_eur(self, obj):
+        """Return discount in EUR (5/10/15) for discount notifications.
+
+        Strategy:
+        1) Check extra_data for discount_eur (source of truth from services)
+        2) If related_object_id points to a TeacherDiscountDecision, read discount_percentage
+        3) Else, try PaymentDiscountSnapshot.discount_percent
+        4) Map percent -> fixed eur amount using known mapping (5/10/15) or None
+        """
+        try:
+            if obj.notification_type not in ("teocoin_discount_pending", "teocoin_discount_pending_urgent"):
+                return None
+
+            # Priority 1: Check extra_data first
+            extra_data = self._get_extra_data(obj)
+            if extra_data.get("discount_eur") is not None:
+                return extra_data["discount_eur"]
+
+            # Try TeacherDiscountDecision
+            try:
+                from courses.models import TeacherDiscountDecision
+
+                dec = TeacherDiscountDecision.objects.filter(pk=obj.related_object_id).first()
+                if dec:
+                    pct = getattr(dec, "discount_percentage", None)
+                    if pct in (5, 10, 15):
+                        return int(pct)
+            except Exception:
+                pass
+
+            # Fallback to snapshot
+            try:
+                from rewards.models import PaymentDiscountSnapshot
+
+                snap = PaymentDiscountSnapshot.objects.filter(pk=obj.related_object_id).first()
+                if not snap:
+                    snap = PaymentDiscountSnapshot.objects.filter(order_id=str(obj.related_object_id)).first()
+                if snap:
+                    pct = getattr(snap, "discount_percent", None)
+                    if pct in (5, 10, 15):
+                        return int(pct)
+            except Exception:
+                pass
+        except Exception:
+            pass
+        return None
+
     def get_related_object_type(self, obj):
         try:
-            if obj.notification_type == "teocoin_discount_pending":
+            if obj.notification_type in ("teocoin_discount_pending", "teocoin_discount_pending_urgent"):
                 # As of Aug 2025 we bind related_object_id to the TeacherDiscountDecision
                 return "TeacherDiscountDecision"
+        except Exception:
+            pass
+        return None
+
+    def get_tier(self, obj):
+        """Return tier name for discount notifications"""
+        try:
+            if obj.notification_type not in ("teocoin_discount_pending", "teocoin_discount_pending_urgent"):
+                return None
+
+            # Check extra_data first
+            extra_data = self._get_extra_data(obj)
+            tier = extra_data.get("tier")
+            if tier:
+                return str(tier)
+        except Exception:
+            pass
+        return None
+
+    def get_staking_allowed(self, obj):
+        """Return staking_allowed for discount notifications"""
+        try:
+            if obj.notification_type not in ("teocoin_discount_pending", "teocoin_discount_pending_urgent"):
+                return None
+
+            # Check extra_data first
+            extra_data = self._get_extra_data(obj)
+            staking = extra_data.get("staking_allowed")
+            if isinstance(staking, bool):
+                return staking
+        except Exception:
+            pass
+        return None
+
+    def get_expires_at(self, obj):
+        """Return expires_at for discount notifications"""
+        try:
+            if obj.notification_type not in ("teocoin_discount_pending", "teocoin_discount_pending_urgent"):
+                return None
+
+            # Check extra_data first
+            extra_data = self._get_extra_data(obj)
+            expires = extra_data.get("expires_at")
+            if expires:
+                return str(expires)
         except Exception:
             pass
         return None

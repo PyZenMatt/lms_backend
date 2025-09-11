@@ -55,6 +55,8 @@ class Notification(models.Model):
         blank=True,
         help_text="URL di destinazione per azione diretta",
     )
+    # Free-form JSON for structured metadata (discount_eur, offered_teacher_teo, etc.)
+    extra_data = models.JSONField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:

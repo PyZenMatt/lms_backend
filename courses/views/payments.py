@@ -99,65 +99,52 @@ class CreatePaymentIntentView(APIView):
             if use_teocoin_discount and discount_percent > 0:
                 try:
                     logger.info(
-                        f"🔄 Processing DB TeoCoin discount: {discount_percent}% for user {user.id}"
+                        f"🔄 Processing TEO discount: {discount_percent}% for user {user.id}"
                     )
 
-                    # Initialize DB TeoCoin service
-                    db_teo_service = DBTeoCoinService()
-
-                    # Accept explicit discount_eur from frontend if provided (robustness)
-                    discount_eur_input = request.data.get("discount_eur", None)
-                    if discount_eur_input is not None:
-                        try:
-                            discount_value_eur = Decimal(str(discount_eur_input))
-                            logger.info(f"🔎 Using frontend-provided discount_eur={discount_value_eur}")
-                        except Exception:
-                            # fallback to percent-based calculation
-                            discount_value_eur = (
-                                original_price * Decimal(discount_percent) / Decimal("100")
-                            )
+                    # NO IMMEDIATE TEO DEDUCTION - discount should already be applied via confirm_discount
+                    # Check if there's an existing applied discount snapshot with hold for this session
+                    
+                    # Try to extract checkout_session_id from breakdown payload or generate one
+                    breakdown_data = request.data.get("breakdown", {})
+                    checkout_session_id = breakdown_data.get("checkout_session_id")
+                    
+                    if not checkout_session_id:
+                        # Generate session ID to find existing discount snapshots
+                        checkout_session_id = f"payment_session_{user.id}_{course_id}_{timezone.now().strftime('%Y%m%d_%H%M%S')}"
+                    
+                    # Look for existing applied discount for this user + course
+                    existing_discount = PaymentDiscountSnapshot.objects.filter(
+                        student=user,
+                        course=course,
+                        status="applied",
+                        wallet_hold_id__isnull=False
+                    ).order_by('-created_at').first()
+                    
+                    if existing_discount:
+                        # Use existing discount
+                        discount_amount = existing_discount.discount_amount_eur
+                        final_price = existing_discount.student_pay_eur
+                        
+                        logger.info(
+                            f"✅ Using existing applied discount: snapshot_id={existing_discount.id}, "
+                            f"discount_amount={discount_amount}, hold_id={existing_discount.wallet_hold_id}"
+                        )
                     else:
-                        # Calculate TEO cost (1 EUR discount = 1 TEO, matching frontend)
-                        discount_value_eur = (
-                            original_price * Decimal(discount_percent) / Decimal("100")
-                        )
-
-                    teo_cost = discount_value_eur  # 1 TEO = 1 EUR discount value
-
-                    # Check student TEO balance using DB system (matches frontend)
-                    student_balance_data = db_teo_service.get_user_balance(user)
-                    available_teo = student_balance_data.get("available_balance", 0)
-
-                    if available_teo < teo_cost:
-                        # Do NOT fail the entire payment creation when DB balance
-                        # disagrees with the frontend or external wallet. The
-                        # actual deduction is performed at confirmation time
-                        # (ConfirmPaymentView). Instead, log a warning and
-                        # continue without applying the TEO discount so the
-                        # client can still complete the payment.
+                        # NO DISCOUNT APPLIED YET - User must call confirm_discount first
                         logger.warning(
-                            f"⚠️ Insufficient TEO balance for user {user.id}: need {teo_cost}, have {available_teo} - proceeding without discount"
+                            f"⚠️ No applied discount found for user {user.id}, course {course_id}. "
+                            f"Frontend should call confirm_discount first."
                         )
-                        # Mark that TEO could not be applied at intent creation.
-                        teo_balance_insufficient = True
-                        # Ensure discount is not applied
+                        # Return metadata to inform frontend
+                        teo_discount_not_applied = True
+                        # Proceed with full price for now
                         discount_amount = Decimal("0")
                         final_price = original_price
 
-                    # NOTE: Do NOT deduct TEO here - will be deducted by ApplyDiscountView
-                    # This prevents double deduction when frontend calls both endpoints
                     logger.info(
-                        f"✅ TEO balance check passed: {available_teo} TEO available for {teo_cost} TEO cost"
+                        f"✅ TEO discount processed: discount=€{discount_amount}, final_price=€{final_price}"
                     )
-
-                    # Student gets guaranteed discount (TEO will be deducted separately)
-                    # Only apply if we didn't previously mark insufficient balance
-                    if not locals().get('teo_balance_insufficient', False):
-                        discount_amount = discount_value_eur
-                        final_price = original_price - discount_amount
-                    else:
-                        # already handled above: no discount applied
-                        pass
 
                     logger.info(
                         f"✅ TeoCoin discount calculated: {discount_percent}% off €{original_price}"
@@ -260,6 +247,10 @@ class CreatePaymentIntentView(APIView):
             # If we previously detected insufficient TEO balance, expose it to frontend
             if locals().get('teo_balance_insufficient', False):
                 intent_data["metadata"]["teo_balance_insufficient"] = "True"
+                
+            # If TEO discount was not applied, inform frontend
+            if locals().get('teo_discount_not_applied', False):
+                intent_data["metadata"]["teo_discount_not_applied"] = "True"
 
             # Add discount request ID if applicable
             if discount_request_id:
@@ -307,6 +298,7 @@ class CreatePaymentIntentView(APIView):
                             "teacher": course.teacher if getattr(course, "teacher", None) else None,
                             "price_eur": original_price,
                             "discount_percent": int(discount_percent) if 'discount_percent' in locals() else 0,
+                            "discount_amount_eur": discount_amount,
                             "student_pay_eur": breakdown.get("student_pay_eur"),
                             "teacher_eur": breakdown.get("teacher_eur"),
                             "platform_eur": breakdown.get("platform_eur"),
@@ -319,6 +311,9 @@ class CreatePaymentIntentView(APIView):
                             "tier_platform_split_percent": (tier.get("platform_split_percent") if tier else None),
                             "tier_max_accept_discount_ratio": (tier.get("max_accept_discount_ratio") if tier else None),
                             "tier_teo_bonus_multiplier": (tier.get("teo_bonus_multiplier") if tier else None),
+                            
+                            # STRIPE CORRELATION FOR WEBHOOK
+                            "stripe_payment_intent_id": payment_intent.id,
                         }
                         try:
                             # Try to find an existing local snapshot created by the frontend
@@ -347,7 +342,8 @@ class CreatePaymentIntentView(APIView):
                                 if attached:
                                     attached.external_txn_id = str(payment_intent.id)
                                     attached.source = 'stripe'
-                                    attached.save(update_fields=['external_txn_id', 'source'])
+                                    attached.stripe_payment_intent_id = payment_intent.id
+                                    attached.save(update_fields=['external_txn_id', 'source', 'stripe_payment_intent_id'])
                             if attached:
                                 snap = attached
                                 created = False
@@ -527,68 +523,66 @@ class ConfirmPaymentView(APIView):
             except Exception:
                 logger.debug("[ConfirmPayment] failed to log enrollment creation details")
 
-            # CRITICAL: Deduct TeoCoin AFTER payment confirmed and enrollment created
+            # CRITICAL: Capture TEO hold AFTER payment confirmed and enrollment created
             if use_teocoin_discount and discount_amount > 0:
                 try:
                     logger.info(
-                        f"💰 Payment confirmed, now deducting TeoCoin: {discount_amount} TEO"
+                        f"💰 Payment confirmed, now capturing TEO hold: {discount_amount} TEO"
                     )
-                    db_teo_service = DBTeoCoinService()
-                    pre_balance = db_teo_service.get_available_balance(user)
-                    logger.info(
-                        f"💰 TeoCoin balance before deduction: {pre_balance} TEO"
-                    )
-
-                    # Check if discount was already applied for this course
-                    from blockchain.models import DBTeoCoinTransaction
-
-                    existing_discount = DBTeoCoinTransaction.objects.filter(
-                        user=user,
+                    
+                    # Find existing applied discount snapshot with hold
+                    applied_snapshot = PaymentDiscountSnapshot.objects.filter(
+                        student=user,
                         course=course,
-                        transaction_type="spent_discount",
-                        amount__lt=0,  # Negative amount indicates deduction
+                        status="applied",
+                        wallet_hold_id__isnull=False,
+                        external_txn_id=payment_intent_id
                     ).first()
-
-                    if existing_discount:
-                        logger.info(
-                            f"✅ TeoCoin discount already applied: {abs(existing_discount.amount)} TEO for course {course_id}"
-                        )
-                        logger.info(
-                            f"💡 Skipping duplicate deduction - discount was already processed"
-                        )
-                    else:
-                        # Apply TeoCoin deduction for the first time
-                        logger.info(
-                            f"🔄 Applying TeoCoin deduction for course {course_id}..."
-                        )
-
-                        success = db_teo_service.deduct_balance(
-                            user=user,
-                            amount=discount_amount,
-                            transaction_type="spent_discount",
-                            description=f"TeoCoin discount for course: {course.title} ({discount_amount} TEO)",
+                    
+                    if not applied_snapshot:
+                        # Try to find by order_id or any applied snapshot for this user/course
+                        applied_snapshot = PaymentDiscountSnapshot.objects.filter(
+                            student=user,
                             course=course,
+                            status="applied",
+                            wallet_hold_id__isnull=False
+                        ).order_by('-created_at').first()
+                    
+                    if applied_snapshot and applied_snapshot.wallet_hold_id:
+                        # CAPTURE THE HOLD: Convert hold to actual deduction
+                        from services.wallet_hold_service import wallet_hold_service
+                        
+                        capture_success = wallet_hold_service.capture_hold(
+                            hold_id=applied_snapshot.wallet_hold_id,
+                            description=f"Payment confirmed for course: {course.title}",
+                            course=course
                         )
-
-                        post_balance = db_teo_service.get_available_balance(user)
-                        logger.info(
-                            f"💰 TeoCoin balance after deduction: {post_balance} TEO"
-                        )
-
-                        if success:
+                        
+                        if capture_success:
+                            # Update snapshot status to CONFIRMED
+                            applied_snapshot.status = "confirmed"
+                            applied_snapshot.confirmed_at = timezone.now()
+                            applied_snapshot.wallet_capture_id = f"capture_{applied_snapshot.wallet_hold_id}"
+                            applied_snapshot.save(update_fields=["status", "confirmed_at", "wallet_capture_id"])
+                            
                             logger.info(
-                                f"✅ SUCCESS: TeoCoin deducted after payment - {discount_amount} TEO"
-                            )
-                            logger.info(
-                                f"💰 Balance change: {pre_balance} → {post_balance} TEO"
+                                f"✅ SUCCESS: TEO hold captured - {discount_amount} TEO "
+                                f"(hold_id={applied_snapshot.wallet_hold_id}, snapshot_id={applied_snapshot.id})"
                             )
                         else:
                             logger.error(
-                                f"❌ FAILED: Could not deduct TeoCoin after payment - {discount_amount} TEO"
+                                f"❌ FAILED: Could not capture TEO hold {applied_snapshot.wallet_hold_id} "
+                                f"for payment {payment_intent_id}"
                             )
-                            logger.error(
-                                f"❌ This is a critical bug - discount applied but TeoCoin not deducted!"
-                            )
+                            # Mark snapshot as failed
+                            applied_snapshot.status = "failed"
+                            applied_snapshot.failed_at = timezone.now()
+                            applied_snapshot.save(update_fields=["status", "failed_at"])
+                    else:
+                        logger.warning(
+                            f"⚠️ No applied TEO discount snapshot found for user {user.id}, course {course_id}. "
+                            f"This might indicate the discount was not properly applied before payment."
+                        )
 
                 except Exception as e:
                     logger.error(f"❌ TeoCoin deduction error after payment: {e}")
@@ -673,6 +667,7 @@ class ConfirmPaymentView(APIView):
                     "teacher": course.teacher if getattr(course, "teacher", None) else None,
                     "price_eur": original_price,
                     "discount_percent": discount_percent,
+                    "discount_amount_eur": discount_amount,
                     "student_pay_eur": breakdown["student_pay_eur"],
                     "teacher_eur": breakdown["teacher_eur"],
                     "platform_eur": breakdown["platform_eur"],
@@ -775,6 +770,27 @@ class ConfirmPaymentView(APIView):
                             "snapshot_id": getattr(snap, "id", None),
                             "offered_teacher_teo": str(offered_teacher_preview),
                         })
+                    except Exception:
+                        pass
+
+                    # Ensure a single absorption opportunity exists for this snapshot
+                    try:
+                        from rewards.models import TeacherDiscountAbsorption
+
+                        if snap and snap.id:
+                            TeacherDiscountAbsorption.objects.update_or_create(
+                                teacher=snap.teacher,
+                                course=snap.course,
+                                student=snap.student,
+                                discount_amount_eur=snap.discount_amount_eur,
+                                defaults={
+                                    "course_price_eur": getattr(snap, "price_eur", 0),
+                                    "discount_percentage": int(getattr(snap, "discount_percent", 0) or 0),
+                                    "teo_used_by_student": getattr(snap, "teacher_teo", 0) or 0,
+                                    "teacher_commission_rate": getattr(snap, "tier_teacher_split_percent", 0) or 0,
+                                    "expires_at": expires_at,
+                                },
+                            )
                     except Exception:
                         pass
 

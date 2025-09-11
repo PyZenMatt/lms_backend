@@ -114,13 +114,26 @@ class TeoCoinDiscountNotificationService:
 
                             accept_ratio = max_ratio if max_ratio is not None else decimal.Decimal("1")
 
-                            breakdown = compute_discount_breakdown(
-                                price_eur=snap.price_eur,
-                                discount_percent=decimal.Decimal(str(getattr(snap, "discount_percent", 0))),
-                                tier=tier,
-                                accept_teo=True,
-                                accept_ratio=accept_ratio,
-                            )
+                            # Use flat discount amount if available, otherwise fall back to percentage
+                            discount_amount_eur = getattr(snap, "discount_amount_eur", None)
+                            if discount_amount_eur and discount_amount_eur > 0:
+                                # Use flat discount (preferred for opportunities)
+                                breakdown = compute_discount_breakdown(
+                                    price_eur=snap.price_eur,
+                                    discount_amount_eur=discount_amount_eur,
+                                    tier=tier,
+                                    accept_teo=True,
+                                    accept_ratio=accept_ratio,
+                                )
+                            else:
+                                # Fall back to percentage-based calculation
+                                breakdown = compute_discount_breakdown(
+                                    price_eur=snap.price_eur,
+                                    discount_percent=decimal.Decimal(str(getattr(snap, "discount_percent", 0))),
+                                    tier=tier,
+                                    accept_teo=True,
+                                    accept_ratio=accept_ratio,
+                                )
                             offered_teacher_val = breakdown.get("teacher_teo")
                             if offered_teacher_val is not None:
                                 # keep numeric value but ensure decimal for formatting later
@@ -163,30 +176,85 @@ class TeoCoinDiscountNotificationService:
             except Exception:
                 offered_teacher_dec = teo_cost_dec + teacher_bonus_dec
 
-            # Format strings: TEO 8 decimal places, EUR-like 2 decimals where needed
-            q = decimal.Decimal("0.00000001")
-            offered_teacher_str = f"{offered_teacher_dec.quantize(q):.8f}"
-            teo_cost_str = f"{teo_cost_dec.quantize(q):.8f}"
-            teacher_bonus_str = f"{teacher_bonus_dec.quantize(q):.8f}"
-
-            # Build message including offered TEO (8 d.p.)
+            # Build minimal message: no percentages or TEO amounts
             message = (
-                f"🎓 Student {student.get_full_name() or student.username} got a {discount_percent}% "
-                f"discount on '{course_title}' and is enrolled! \n\n"
-                f"💰 Choose your payment: \n"
-                f"🪙 Accept TEO: {offered_teacher_str} TEO total (student TEO: {teo_cost_str} TEO + bonus: {teacher_bonus_str} TEO)\n"
-                f"💰 Keep EUR: Full EUR commission (platform absorbs discount)\n\n"
-                f"⏰ Decide within {hours_remaining} hours or EUR will be chosen automatically."
+                f"🎓 Nuova opportunità di scelta sul corso '{course_title}'.\n"
+                f"⏰ Scade tra {hours_remaining} ore (poi verrà selezionato automaticamente EUR)."
             )
 
             # Prefer linking directly to the TeacherDiscountDecision when available.
-            # Fallback to the request/snapshot id for legacy flows.
-            notification = Notification.objects.create(
-                user=teacher,
-                message=message,
-                notification_type="teocoin_discount_pending",
-                related_object_id=(decision_id if decision_id is not None else request_id),
-            )
+            # For idempotency and consistency always use decision_id as related_object_id
+            # for the current flow. If decision_id is not available, try resolving it
+            # via the PaymentDiscountSnapshot (request_id) and use the decision id if found.
+            related_id = decision_id if decision_id is not None else request_id
+            if decision_id is None:
+                try:
+                    from rewards.models import PaymentDiscountSnapshot
+                    from courses.models import TeacherDiscountDecision
+
+                    snap = PaymentDiscountSnapshot.objects.filter(pk=request_id).first()
+                    if not snap:
+                        snap = PaymentDiscountSnapshot.objects.filter(order_id=str(request_id)).first()
+                    if snap:
+                        decision = (
+                            TeacherDiscountDecision.objects.filter(
+                                teacher=snap.teacher,
+                                student=snap.student,
+                                course=snap.course,
+                                decision="pending",
+                            )
+                            .order_by("-created_at")
+                            .first()
+                        )
+                        if decision:
+                            related_id = getattr(decision, "id", request_id)
+                except Exception:
+                    related_id = request_id
+
+            # Build minimal structured extra_data for UI
+            extra: dict = {}
+            # Map discount_percent -> discount_eur according to known mapping
+            discount_map = {5: 5, 10: 10, 15: 15}
+            discount_eur = discount_map.get(discount_percent, None)
+            if discount_eur is not None:
+                extra["discount_eur"] = discount_eur
+
+            # Do not include offered_teacher_teo in extra_data for pending notifications
+            extra["offered_teacher_teo"] = None
+
+            # Include decision_id when available for consistent linking
+            if decision_id is not None:
+                extra["decision_id"] = decision_id
+            elif related_id != request_id:
+                extra["decision_id"] = related_id
+
+            # Include expiration info when available
+            if expires_at:
+                extra["expires_at"] = expires_at.isoformat()
+
+            # Use update_or_create to ensure idempotency per (user, notification_type, related_object_id)
+            try:
+                # Persist structured extra_data when model supports it
+                defaults = {"message": message}
+                if hasattr(Notification, "extra_data"):
+                    import json
+                    defaults["extra_data"] = json.dumps(extra)
+
+                notification, created = Notification.objects.update_or_create(
+                    user=teacher,
+                    notification_type="teocoin_discount_pending",
+                    related_object_id=related_id,
+                    defaults=defaults,
+                )
+            except Exception:
+                # Fallback: if update_or_create fails (old Notification API), create if none exists
+                exists = Notification.objects.filter(user=teacher, notification_type="teocoin_discount_pending", related_object_id=related_id).first()
+                if exists:
+                    notification = exists
+                else:
+                    notification = Notification.objects.create(
+                        user=teacher, message=message, notification_type="teocoin_discount_pending", related_object_id=related_id
+                    )
 
             # Structured log indicating that notification was emitted
             try:
@@ -282,6 +350,9 @@ class TeoCoinDiscountNotificationService:
         course_title: str,
         request_id: int,
         minutes_remaining: int,
+        offered_teacher_teo: Optional[Union[float, str, decimal.Decimal]] = None,
+        discount_percent: Optional[int] = None,
+        decision_id: Optional[int] = None,
     ) -> bool:
         """
         Send timeout warning to teacher
@@ -297,26 +368,126 @@ class TeoCoinDiscountNotificationService:
             bool: Success status
         """
         try:
+            # Only send an URGENT notification when minutes_remaining is below a real threshold
+            URGENT_THRESHOLD_MINUTES = getattr(settings, "TEOCOIN_URGENT_THRESHOLD_MINUTES", 30)
+
+            if minutes_remaining is None:
+                return False
+
+            if minutes_remaining > URGENT_THRESHOLD_MINUTES:
+                # Do not spam with urgent notifications before the real threshold
+                self.logger.debug(
+                    "skip urgent notification: %s minutes remaining > threshold %s",
+                    minutes_remaining,
+                    URGENT_THRESHOLD_MINUTES,
+                )
+                return False
+
+            # Minimal urgent message: only urgency and remaining time
             message = (
-                f"⏰ URGENT: Only {minutes_remaining} minutes left to choose your payment method!\n\n"
-                f"Student: {student.get_full_name() or student.username}\n"
-                f"Course: '{course_title}'\n\n"
-                f"If you don't choose, you'll automatically receive full EUR commission."
+                f"⏰ URGENT: Solo {minutes_remaining} minuti rimasti per scegliere il metodo di pagamento!\n\n"
+                f"Corso: '{course_title}'\n"
+                f"Se non scegli, EUR verrà selezionato automaticamente."
             )
 
-            notification = Notification.objects.create(
-                user=teacher,
-                message=message,
-                notification_type="teocoin_discount_pending",
-                related_object_id=request_id,
-            )
+            # Prefer using the TeacherDiscountDecision id if possible to align with pending notif
+            related_id = request_id
+            try:
+                # Try to find a related TeacherDiscountDecision via PaymentDiscountSnapshot
+                from rewards.models import PaymentDiscountSnapshot
+                from courses.models import TeacherDiscountDecision
+
+                snap = PaymentDiscountSnapshot.objects.filter(pk=request_id).first()
+                if not snap:
+                    snap = PaymentDiscountSnapshot.objects.filter(order_id=str(request_id)).first()
+                if snap:
+                    # Find most recent pending decision that matches snapshot tuple
+                    decision = (
+                        TeacherDiscountDecision.objects.filter(
+                            teacher=snap.teacher,
+                            student=snap.student,
+                            course=snap.course,
+                            decision="pending",
+                        )
+                        .order_by("-created_at")
+                        .first()
+                    )
+                    if decision:
+                        related_id = getattr(decision, "id", request_id)
+            except Exception:
+                # If resolution fails, keep legacy request_id
+                related_id = request_id
+
+            # Use distinct notification type for urgent to avoid colliding with pending
+            urgent_type = "teocoin_discount_pending_urgent"
+
+            # Build minimal structured extra_data for urgent notifications
+            extra: dict = {"urgent": True}
+
+            # Populate discount_eur from discount_percent if available
+            if discount_percent is not None:
+                discount_map = {5: 5, 10: 10, 15: 15}
+                discount_eur = discount_map.get(discount_percent, None)
+                if discount_eur is not None:
+                    extra["discount_eur"] = discount_eur
+
+            # Do not include offered_teacher_teo in urgent notifications
+            extra["offered_teacher_teo"] = None
+
+            # Include decision_id when available
+            if decision_id is not None:
+                extra["decision_id"] = decision_id
+            elif related_id != request_id:
+                extra["decision_id"] = related_id
+
+            # Try to get additional info from snapshot
+            try:
+                from rewards.models import PaymentDiscountSnapshot
+                snap = PaymentDiscountSnapshot.objects.filter(pk=request_id).first()
+                if not snap:
+                    snap = PaymentDiscountSnapshot.objects.filter(order_id=str(request_id)).first()
+                if snap:
+                    # Get tier info
+                    tier_name = getattr(snap, "tier_name", None)
+                    if tier_name:
+                        extra["tier"] = tier_name
+                    
+                    # Get discount_percent if not provided
+                    if discount_percent is None:
+                        snap_discount = getattr(snap, "discount_percent", None)
+                        if snap_discount in (5, 10, 15):
+                            extra["discount_eur"] = int(snap_discount)
+                    
+                    # Do not populate offered_teacher_teo from snapshot for urgent/pending - leave None
+            except Exception:
+                pass
+
+            try:
+                defaults = {"message": message}
+                if hasattr(Notification, "extra_data"):
+                    import json
+                    defaults["extra_data"] = json.dumps(extra)
+
+                notif, created = Notification.objects.update_or_create(
+                    user=teacher,
+                    notification_type=urgent_type,
+                    related_object_id=related_id,
+                    defaults=defaults,
+                )
+            except Exception:
+                # fallback
+                notif_exists = Notification.objects.filter(user=teacher, notification_type=urgent_type, related_object_id=related_id).first()
+                if notif_exists:
+                    notif = notif_exists
+                else:
+                    notif = Notification.objects.create(user=teacher, message=message, notification_type=urgent_type, related_object_id=related_id)
 
             # Send urgent email
             if getattr(settings, "SEND_URGENT_EMAILS", True):
                 self._send_urgent_email(teacher, course_title, minutes_remaining)
 
             self.logger.info(
-                f"Timeout warning sent to {teacher.username} for request {request_id}"
+                f"Timeout warning (urgent) sent to {teacher.username} for request {request_id}"
             )
             return True
 

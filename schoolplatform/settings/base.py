@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     "rewards",
     "notifications",
     "blockchain",
+    "payments",
     "services.apps.ServicesConfig",
 ]
 
@@ -159,7 +160,7 @@ REWARD_POOL_ADDRESS = os.getenv("REWARD_POOL_ADDRESS", "0x17051AB7603B0F7263BC86
 REWARD_POOL_PRIVATE_KEY = os.getenv("REWARD_POOL_PRIVATE_KEY", os.getenv("ADMIN_PRIVATE_KEY"))
 
 # Payment configuration
-TEOCOIN_EUR_RATE = 10  # 1 EUR = 10 TEO (base rate before discounts)
+TEOCOIN_EUR_RATE = 1  # 1 EUR = 1 TEO (1:1 rate for opportunities)
 TEOCOIN_POOL_PERCENTAGE = 10  # 10% of fiat revenue goes to TeoCoin reward pool
 
 # File upload
@@ -175,6 +176,7 @@ DEFAULT_FROM_EMAIL = "no-reply@teocoin.io"
 # Stripe config (comune, ma la segreta è obbligatoria solo in prod — vedi prod.py)
 STRIPE_PUBLISHABLE_KEY = os.getenv("STRIPE_PUBLISHABLE_KEY")
 STRIPE_SECRET_KEY = os.getenv("STRIPE_SECRET_KEY")
+STRIPE_WEBHOOK_SECRET = os.getenv("STRIPE_WEBHOOK_SECRET")
 
 # Backend di autenticazione standard per admin Django
 AUTHENTICATION_BACKENDS = [

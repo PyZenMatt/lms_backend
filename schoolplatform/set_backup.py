@@ -353,7 +353,7 @@ PLATFORM_WALLET_ADDRESS = os.getenv(
 )
 
 # Payment configuration
-TEOCOIN_EUR_RATE = 10  # 1 EUR = 10 TEO (base rate before discounts)
+TEOCOIN_EUR_RATE = 1  # 1 EUR = 1 TEO (1:1 rate for opportunities)
 TEOCOIN_POOL_PERCENTAGE = 10  # 10% of fiat revenue goes to TeoCoin reward pool
 
 

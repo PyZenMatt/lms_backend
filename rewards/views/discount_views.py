@@ -122,6 +122,112 @@ def confirm_discount(request):
     course_id = data.get("course_id")
     student_id = data.get("student_id") or request.user.id
     teacher_id = data.get("teacher_id")
+    
+    # Extract or generate checkout_session_id for idempotency
+    checkout_session_id = data.get("checkout_session_id")
+    if not checkout_session_id:
+        # Extract from order_id if it follows our pattern, otherwise use order_id
+        if order_id.startswith("local_") or order_id.startswith("discount_"):
+            checkout_session_id = order_id
+        else:
+            checkout_session_id = f"session_{order_id}"
+    
+    # Generate idempotency key: user + course + session
+    student = User.objects.get(id=student_id) if student_id else request.user
+    course_obj = Course.objects.get(id=course_id) if course_id else None
+    idempotency_key = f"{student.id}_{course_id}_{checkout_session_id}"
+    
+    # IDEMPOTENCY CHECK: Look for existing active discount for this session
+    existing_discount = PaymentDiscountSnapshot.objects.filter(
+        student=student,
+        course=course_obj,
+        checkout_session_id=checkout_session_id,
+        status__in=["applied", "confirmed"]
+    ).first()
+    
+    if existing_discount:
+        # Check if this is a different discount amount (5→10→15 scenario)
+        requested_discount_percent = int(data.get("discount_percent", 0))
+        if existing_discount.discount_percent != requested_discount_percent:
+            # SUPERSEDE: Mark old discount as superseded and release its hold
+            try:
+                from services.wallet_hold_service import WalletHoldService
+                wallet_hold_service = WalletHoldService()
+                
+                with transaction.atomic():
+                    if existing_discount.wallet_hold_id:
+                        wallet_hold_service.release_hold(
+                            existing_discount.wallet_hold_id,
+                            f"Superseded by new {requested_discount_percent}% discount"
+                        )
+                    
+                    existing_discount.status = "superseded"
+                    existing_discount.save(update_fields=["status"])
+                
+                logger.info(
+                    f"Superseded existing discount: snapshot_id={existing_discount.id}, "
+                    f"old_percent={existing_discount.discount_percent}, "
+                    f"new_percent={requested_discount_percent}"
+                )
+                
+                # Continue to create new discount below
+                
+            except Exception as e:
+                logger.error(f"Failed to supersede existing discount: {e}")
+                return Response(
+                    {"ok": False, "error": "Failed to update discount"},
+                    status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                )
+        else:
+            # IDEMPOTENT: Same discount already applied, return existing
+            logger.info(
+                f"Idempotent discount request: returning existing snapshot_id={existing_discount.id}, "
+                f"idempotency_key={idempotency_key}"
+            )
+            
+            # Count duplicate prevention for telemetry
+            try:
+                logger.info("duplicate_prevented", extra={
+                    "event": "duplicate_prevented",
+                    "idempotency_key": idempotency_key,
+                    "order_id": order_id,
+                    "existing_snapshot_id": existing_discount.id,
+                    "user_id": student.id,
+                })
+            except Exception:
+                pass
+            
+            snapshot_data = PaymentDiscountSnapshotSerializer(existing_discount).data
+            breakdown = {
+                "student_pay_eur": existing_discount.student_pay_eur,
+                "teacher_eur": existing_discount.teacher_eur,
+                "platform_eur": existing_discount.platform_eur,
+                "teacher_teo": existing_discount.teacher_teo,
+                "platform_teo": existing_discount.platform_teo,
+            }
+            
+            return Response(
+                {"ok": True, "created": False, "snapshot": snapshot_data, "breakdown": breakdown},
+                status=status.HTTP_200_OK
+            )
+
+    # SERVER-SIDE DISCOUNT CALCULATION: Ignore client values, compute server-side
+    # Fixed discount amounts: 5, 10, 15 EUR (not percentages)
+    requested_tokens = data.get("tokens_to_spend", 0)
+    if requested_tokens in [5, 10, 15]:
+        discount_amount_eur = Decimal(str(requested_tokens))
+        discount_percent = int((discount_amount_eur / course_obj.price_eur * 100).to_integral_value()) if course_obj else 0
+    else:
+        # Fallback to percentage-based for backward compatibility
+        discount_percent = int(data.get("discount_percent", 0))
+        discount_amount_eur = course_obj.price_eur * Decimal(discount_percent) / Decimal("100") if course_obj else Decimal("0")
+    
+    # Validate discount amount
+    if discount_amount_eur <= 0:
+        return Response(
+            {"ok": False, "error": "Invalid discount amount"},
+            status=status.HTTP_400_BAD_REQUEST
+        )
 
     # Resolve tier
     tier = None
@@ -143,48 +249,63 @@ def confirm_discount(request):
             tier = None
 
     breakdown = compute_discount_breakdown(
-        price_eur=data["price_eur"],
-        discount_percent=data.get("discount_percent", 0),
+        price_eur=course_obj.price_eur if course_obj else data["price_eur"],
+        discount_percent=discount_percent,
         tier=tier,
         accept_teo=data.get("accept_teo", False),
         accept_ratio=data.get("accept_ratio", None),
     )
 
-    # Compute offered values (what teacher would receive if they accepted)
-    # Ensure offered_ratio has a default
-    offered_ratio = None
+    # CHECK TEO BALANCE AND CREATE HOLD
     try:
-        from decimal import Decimal as _D
-        # determine accept_ratio for offered calculation: use provided or tier max or 1
-        if data.get("accept_ratio") is not None:
-            offered_ratio = _D(str(data.get("accept_ratio")))
-        else:
-            offered_ratio = _D(str((tier.get("max_accept_discount_ratio") if tier and tier.get("max_accept_discount_ratio") is not None else _D("1"))))
-
-        offered_breakdown = compute_discount_breakdown(
-            price_eur=data["price_eur"],
-            discount_percent=data.get("discount_percent", 0),
-            tier=tier,
-            accept_teo=True,
-            accept_ratio=offered_ratio,
+        from services.wallet_hold_service import WalletHoldService
+        wallet_hold_service = WalletHoldService()
+        
+        # Check if user has sufficient TEO balance
+        user_balance = float(db_teocoin_service.get_balance(student))
+        if user_balance < float(discount_amount_eur):
+            logger.info("discount_rejected_insufficient_balance", extra={
+                "event": "discount_rejected_insufficient_balance",
+                "user_id": student.id,
+                "order_id": order_id,
+                "tokens_required": float(discount_amount_eur),
+                "balance": user_balance,
+            })
+            return Response(
+                {"ok": False, "error": "INSUFFICIENT_TOKENS"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        # Create TEO hold (reserve tokens without deducting)
+        hold_id = wallet_hold_service.create_hold(
+            user=student,
+            amount=discount_amount_eur,
+            description=f"Discount hold for course {course_obj.title if course_obj else course_id}",
+            course=course_obj,
+            hold_reference=order_id
         )
-    except Exception:
-        offered_breakdown = None
+        
+        if not hold_id:
+            logger.error(f"Failed to create TEO hold for user {student.id}, amount {discount_amount_eur}")
+            return Response(
+                {"ok": False, "error": "HOLD_CREATION_FAILED"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+            
+    except Exception as e:
+        logger.error(f"TEO hold creation error: {e}")
+        return Response(
+            {"ok": False, "error": str(e)},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
 
-    # Persist snapshot idempotently in a transaction. Catch IntegrityError to
-    # handle concurrent inserts and return the existing snapshot as idempotent.
-    # Persist snapshot idempotently in a transaction. Catch IntegrityError or
-    # OperationalError (SQLite table locked during concurrent tests) to
-    # handle concurrent inserts and return the existing snapshot as idempotent.
+    # CREATE DISCOUNT SNAPSHOT WITH APPLIED STATUS
     # Predefine for type-checkers
-    course_obj: Optional[Course] = None
     teacher_obj: Optional[User] = None
 
     with transaction.atomic():
         try:
-            # Preload course and teacher for defaults to ensure teacher fallback
-            course_obj = Course.objects.get(id=course_id) if course_id else None
-            # Prefer explicit teacher id; else fallback to course.teacher when available
+            # Preload teacher for defaults to ensure teacher fallback
             teacher_obj = None
             if teacher_id:
                 try:
@@ -197,13 +318,14 @@ def confirm_discount(request):
                 except Exception:
                     teacher_obj = None
 
-            # Idempotent snapshot creation using order_id as stable key
+            # Create snapshot with APPLIED status and hold reference
             defaults_payload = {
                 "course": course_obj,
-                "student": User.objects.get(id=student_id) if student_id else None,
+                "student": student,
                 "teacher": teacher_obj,
-                "price_eur": data["price_eur"],
-                "discount_percent": int(data.get("discount_percent", 0)),
+                "price_eur": course_obj.price_eur if course_obj else data["price_eur"],
+                "discount_percent": discount_percent,
+                "discount_amount_eur": discount_amount_eur,
                 "student_pay_eur": breakdown["student_pay_eur"],
                 "teacher_eur": breakdown["teacher_eur"],
                 "platform_eur": breakdown["platform_eur"],
@@ -216,339 +338,107 @@ def confirm_discount(request):
                 "tier_platform_split_percent": (tier.get("platform_split_percent") if tier else None),
                 "tier_max_accept_discount_ratio": (tier.get("max_accept_discount_ratio") if tier else None),
                 "tier_teo_bonus_multiplier": (tier.get("teo_bonus_multiplier") if tier else None),
+                
+                # NEW IDEMPOTENCY FIELDS
+                "status": "applied",
+                "checkout_session_id": checkout_session_id,
+                "idempotency_key": idempotency_key,
+                "wallet_hold_id": hold_id,
+                "applied_at": timezone.now(),
+                
+                # STRIPE CORRELATION FIELDS
+                "stripe_checkout_session_id": data.get("stripe_checkout_session_id"),
+                "stripe_payment_intent_id": data.get("stripe_payment_intent_id"),
             }
+            
+            # Create snapshot with unique constraint protection
             try:
-                snap, created = get_or_create_payment_snapshot(order_id=order_id, defaults=defaults_payload, source="local")
+                snap, created = get_or_create_payment_snapshot(
+                    order_id=order_id, 
+                    defaults=defaults_payload, 
+                    source="local"
+                )
             except Exception:
                 # Fallback to direct get_or_create for robustness
-                snap, created = PaymentDiscountSnapshot.objects.get_or_create(order_id=order_id, defaults=defaults_payload)
-        except IntegrityError:
-            # Another process created the snapshot at the same time. Fetch it.
-            snap = PaymentDiscountSnapshot.objects.get(order_id=order_id)
-            created = False
-        except OperationalError:
-            # SQLite (used in tests) can raise 'database table is locked' when
-            # two threads hit the DB concurrently. Try to fetch the existing
-            # snapshot a few times with a small backoff. If still missing,
-            # surface a 500 so the error is visible.
-            found = None
-            for _ in range(5):
-                try:
-                    found = PaymentDiscountSnapshot.objects.filter(order_id=order_id).first()
-                    if found:
-                        break
-                except Exception:
-                    pass
-                time.sleep(0.02)
-
-            if found:
-                snap = found
-                created = False
-            else:
-                logger.exception("confirm_discount db error")
-                return Response({"ok": False, "error": "database operational error"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-        except Exception as e:
-            logger.exception("confirm_discount db error")
-            return Response({"ok": False, "error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-    # If snapshot existed but lacked course/teacher, patch it now via queryset.update to avoid setter typing issues
-    try:
-        if not created and getattr(snap, "pk", None):
-            updated = False
-            if (not getattr(snap, "course", None)) and course_obj:
-                PaymentDiscountSnapshot.objects.filter(pk=snap.pk).update(course=course_obj)
-                updated = True
-            if (not getattr(snap, "teacher", None)) and teacher_obj:
-                PaymentDiscountSnapshot.objects.filter(pk=snap.pk).update(teacher=teacher_obj)
-                updated = True
-            if updated:
-                snap.refresh_from_db(fields=["course", "teacher"])
-    except Exception:
-        logger.debug("snapshot patch skip", exc_info=True)
-
-    # Ensure teacher_teo / teacher_accepted_teo are populated when possible.
-    try:
-        from decimal import Decimal as _D
-
-        need_update = False
-        try:
-            curr_teacher_teo = _D(str(getattr(snap, "teacher_teo", _D("0"))))
-        except Exception:
-            curr_teacher_teo = _D("0")
-
-        if curr_teacher_teo == _D("0"):
-            # Prefer offered_breakdown if available
-            val = None
-            try:
-                if offered_breakdown and offered_breakdown.get("teacher_teo") is not None:
-                    val = _D(str(offered_breakdown.get("teacher_teo")))
-            except Exception:
-                val = None
-
-            # Try a safe recompute if necessary
-            if val is None:
-                try:
-                    # build accept_ratio safely
-                    if data.get("accept_ratio") is not None:
-                        accept_ratio = _D(str(data.get("accept_ratio")))
-                    else:
-                        accept_ratio = _D(str(tier.get("max_accept_discount_ratio"))) if tier and tier.get("max_accept_discount_ratio") is not None else _D("1")
-
-                    recomputed = compute_discount_breakdown(
-                        price_eur=data["price_eur"],
-                        discount_percent=data.get("discount_percent", 0),
-                        tier=tier,
-                        accept_teo=True,
-                        accept_ratio=accept_ratio,
-                    )
-                    if recomputed and recomputed.get("teacher_teo") is not None:
-                        val = _D(str(recomputed.get("teacher_teo")))
-                except Exception:
-                    val = None
-
-            # Final fallback to breakdown if present
-            if val is None and breakdown and breakdown.get("teacher_teo") is not None:
-                try:
-                    val = _D(str(breakdown.get("teacher_teo")))
-                except Exception:
-                    val = None
-
-            if val is not None and val != _D("0"):
-                try:
-                    q = _D("0.00000001")
-                    val_q = val.quantize(q)
-                    PaymentDiscountSnapshot.objects.filter(pk=snap.pk).update(
-                        teacher_teo=val_q, teacher_accepted_teo=val_q
-                    )
-                    need_update = True
-                except Exception:
-                    logger.exception("failed to backfill snapshot teacher_teo")
-
-        if need_update:
-            try:
-                logger.info("snapshot_backfilled", extra={
-                    "order_id": order_id,
-                    "snapshot_id": getattr(snap, "pk", None),
-                    "offered_teacher_teo": str(getattr(snap, "teacher_teo", None)),
-                })
-            except Exception:
-                pass
-    except Exception:
-        logger.exception("ensure snapshot teacher_teo block failed")
-
-    # Attempt to create a pending TeacherDiscountDecision for this snapshot (idempotent)
-    try:
-        # Only if we have all actors
-        if snap and snap.teacher and snap.student and snap.course:
-            from courses.models import TeacherDiscountDecision as CourseTeacherDiscountDecision
-            now = timezone.now()
-
-            # Skip if a still-pending decision already exists for same trio
-            existing = CourseTeacherDiscountDecision.objects.filter(
-                teacher=snap.teacher,
-                student=snap.student,
-                course=snap.course,
-                decision="pending",
-                expires_at__gt=now,
-            ).first()
-
-            if not existing:
-                from decimal import Decimal
-
-                # Determine offered teacher TEO (includes bonus) as Decimal
-                offered_teacher_teo_dec = None
-                try:
-                    if offered_breakdown and offered_breakdown.get("teacher_teo") is not None:
-                        offered_teacher_teo_dec = Decimal(str(offered_breakdown.get("teacher_teo")))
-                except Exception:
-                    offered_teacher_teo_dec = None
-
-                if offered_teacher_teo_dec is None:
-                    # If the earlier offered_breakdown computation failed, try a
-                    # safe recompute using compute_discount_breakdown with
-                    # accept_teo=True and the offered_ratio we derived above.
-                    try:
-                        recomputed = None
-                        try:
-                            recomputed = compute_discount_breakdown(
-                                price_eur=data["price_eur"],
-                                discount_percent=data.get("discount_percent", 0),
-                                tier=tier,
-                                accept_teo=True,
-                                accept_ratio=offered_ratio,
-                            )
-                        except Exception:
-                            recomputed = None
-
-                        if recomputed and recomputed.get("teacher_teo") is not None:
-                            offered_teacher_teo_dec = Decimal(str(recomputed.get("teacher_teo")))
-                    except Exception:
-                        # Keep going to snapshot fallback below; log for diagnostics
-                        logger.exception("recompute offered_breakdown failed")
-
-                if offered_teacher_teo_dec is None:
-                    try:
-                        # Fallback to snapshot teacher_teo if present (may be 0 for pending)
-                        offered_teacher_teo_dec = Decimal(str(snap.teacher_teo or 0))
-                    except Exception:
-                        offered_teacher_teo_dec = Decimal("0")
-
-                # Split bonus portion if tier multiplier available
-                bonus_dec = Decimal("0")
-                try:
-                    mult = Decimal(str(getattr(snap, "tier_teo_bonus_multiplier", None) or 0))
-                    if mult and mult != Decimal("0"):
-                        original = offered_teacher_teo_dec / mult
-                        bonus_dec = offered_teacher_teo_dec - original
-                except Exception:
-                    bonus_dec = Decimal("0")
-
-                # Convert to wei (int) but cap to signed 64-bit max to avoid DB overflow
-                MAX_INT64 = 9223372036854775807
-                teo_cost_wei = int((offered_teacher_teo_dec * Decimal(10 ** 18)).to_integral_value()) if offered_teacher_teo_dec else 0
-                teacher_bonus_wei = int((bonus_dec * Decimal(10 ** 18)).to_integral_value()) if bonus_dec else 0
-                if teo_cost_wei > MAX_INT64:
-                    logger.warning("teo_cost wei truncated to MAX_INT64 for decision creation", extra={"original": teo_cost_wei, "order_id": order_id})
-                    teo_cost_wei = MAX_INT64
-                if teacher_bonus_wei > MAX_INT64:
-                    logger.warning("teacher_bonus wei truncated to MAX_INT64 for decision creation", extra={"original": teacher_bonus_wei, "order_id": order_id})
-                    teacher_bonus_wei = MAX_INT64
-
-                # Commission rate snapshot
-                commission_rate = snap.tier_teacher_split_percent if snap.tier_teacher_split_percent is not None else Decimal("50.00")
-                staking_tier = snap.tier_name or "Bronze"
-
-                decision = CourseTeacherDiscountDecision.objects.create(
-                    teacher=snap.teacher,
-                    student=snap.student,
-                    course=snap.course,
-                    course_price=snap.price_eur,
-                    discount_percentage=int(snap.discount_percent or 0),
-                    teo_cost=teo_cost_wei,
-                    teacher_bonus=teacher_bonus_wei,
-                    teacher_commission_rate=commission_rate,
-                    teacher_staking_tier=staking_tier,
-                    decision="pending",
-                    expires_at=(snap.created_at + timedelta(hours=24)) if snap.created_at else (now + timedelta(hours=24)),
+                snap, created = PaymentDiscountSnapshot.objects.get_or_create(
+                    order_id=order_id, 
+                    defaults=defaults_payload
                 )
+                
+        except IntegrityError as ie:
+            # Handle race condition - another process created snapshot at same time
+            logger.warning(f"IntegrityError creating snapshot: {ie}")
+            try:
+                # Try to find existing snapshot by checkout_session_id
+                snap = PaymentDiscountSnapshot.objects.get(
+                    student=student,
+                    course=course_obj,
+                    checkout_session_id=checkout_session_id,
+                    status__in=["applied", "confirmed"]
+                )
+                created = False
+                # Release our hold since we're using existing snapshot
+                if hold_id:
+                    wallet_hold_service.release_hold(hold_id, "Duplicate creation - using existing snapshot")
+            except PaymentDiscountSnapshot.DoesNotExist:
+                # Constraint violation but no matching snapshot found - return error
+                return Response(
+                    {"ok": False, "error": "Constraint violation creating discount"},
+                    status=status.HTTP_409_CONFLICT
+                )
+        except Exception as e:
+            logger.exception("confirm_discount snapshot creation error")
+            # Release hold on error
+            if hold_id:
+                wallet_hold_service.release_hold(hold_id, f"Creation error: {str(e)}")
+            return Response(
+                {"ok": False, "error": str(e)},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
 
-        # Send in-app notification to teacher (best-effort)
-                try:
-                    teocoin_notification_service.notify_teacher_discount_pending(
-                        teacher=snap.teacher,
-                        student=snap.student,
-                        course_title=snap.course.title if snap.course else "Corso",
-                        discount_percent=int(snap.discount_percent or 0),
-                        teo_cost=float((offered_teacher_teo_dec or Decimal("0")).quantize(Decimal("0.00000001"))),
-                        teacher_bonus=float((bonus_dec or Decimal("0")).quantize(Decimal("0.00000001"))),
-            request_id=int(getattr(snap, "id", 0)),
-                        expires_at=(snap.created_at + timedelta(hours=24)) if snap.created_at else (now + timedelta(hours=24)),
-                        offered_teacher_teo=offered_teacher_teo_dec,
-                        offered_platform_teo=None,
-            decision_id=int(getattr(decision, "id", 0)) if getattr(decision, "id", None) is not None else None,
-                    )
-                except Exception:
-                    logger.debug("teacher discount pending notification failed")
-    except Exception:
-        logger.debug("decision creation skipped/failed", exc_info=True)
-
-    # Structured logging (info) - minimal, uniform fields
+    # STRUCTURED LOGGING FOR TELEMETRY
     try:
         logger.info("discount_confirm", extra={
             "event": "discount_confirm",
             "order_id": order_id,
-            "user_id": request.user.id if request.user else None,
+            "user_id": student.id,
             "course_id": course_id,
             "teacher_id": teacher_id,
-            "student_id": student_id,
-            "discount_percent": int(data.get("discount_percent", 0)),
-            "accept_teo": data.get("accept_teo", False),
-            "accept_ratio": data.get("accept_ratio", None),
-            "tier_name": (tier.get("name") if tier else None),
+            "student_id": student.id,
+            "discount_percent": discount_percent,
+            "discount_amount_eur": str(discount_amount_eur),
+            "idempotency_key": idempotency_key,
+            "checkout_session_id": checkout_session_id,
+            "wallet_hold_id": hold_id,
             "created": created,
             "snapshot_id": getattr(snap, "id", None),
+            "status": "applied",
         })
     except Exception:
         logger.debug("discount_confirm logging failed")
 
+    # TODO: Create teacher notification (existing logic can be reused)
+    # This will be handled by post-payment confirmation in ConfirmPaymentView
+
     snapshot_data_raw = PaymentDiscountSnapshotSerializer(snap).data
-    # Build a plain dict to safely attach offered_* fields
     try:
-        snapshot_data: Dict[str, Any] = dict(snapshot_data_raw)  # type: ignore[arg-type]
+        snapshot_data: Dict[str, Any] = dict(snapshot_data_raw)
     except Exception:
         snapshot_data = {}
-    # Attach offered_* to the response payload when available (string with 8 d.p.)
-    try:
-        if offered_breakdown:
-            from decimal import Decimal as _D
-            snapshot_data["offered_teacher_teo"] = f"{_D(str(offered_breakdown.get('teacher_teo') or '0')).quantize(_D('0.00000001')):.8f}"
-            snapshot_data["offered_platform_teo"] = f"{_D(str(offered_breakdown.get('platform_teo') or '0')).quantize(_D('0.00000001')):.8f}"
-    except Exception:
-        pass
 
     status_code = status.HTTP_201_CREATED if created else status.HTTP_200_OK
-    # Structured enrichment log
-    try:
-        logger.info("discount_pending_notified_enrichment", extra={
-            "event": "discount_pending_notified_enrichment",
-            "order_id": order_id,
-            "snapshot_id": getattr(snap, "id", None),
-            "tier_name": (tier.get("name") if tier else None),
-            "offered_teacher_teo": snapshot_data.get("offered_teacher_teo"),
-        })
-    except Exception:
-        logger.debug("discount_pending_notified_enrichment logging failed")
-
-    # BEFORE returning success, enforce tokens availability if frontend requested TEO discount
-    try:
-        # compute tokens_required same as preview
-        rate = float(getattr(settings, "RATE_TEOCOIN_EUR", 1.0))
-        discount_percent = float(data.get("discount_percent", 0) or 0)
-        price = float(data.get("price_eur", 0) or 0)
-        tokens_required = int(ceil((price * (discount_percent / 100.0)) / (rate if rate > 0 else 1.0)))
-    except Exception:
-        tokens_required = 0
-
-    try:
-        user_balance = float(db_teocoin_service.get_balance(request.user))
-    except Exception:
-        user_balance = 0.0
-
-    # If tokens_required > 0 then confirm must ensure user has enough tokens. Otherwise no deduction needed.
-    if tokens_required > 0:
-        if user_balance < tokens_required:
-            try:
-                logger.info("discount_rejected_insufficient_balance", extra={
-                    "event": "discount_rejected_insufficient_balance",
-                    "user_id": request.user.id if request.user else None,
-                    "order_id": order_id,
-                    "tokens_required": tokens_required,
-                    "balance": user_balance,
-                })
-            except Exception:
-                pass
-            return Response({"ok": False, "error": "INSUFFICIENT_TOKENS"}, status=status.HTTP_400_BAD_REQUEST)
-
-        # Deduct tokens atomically and record a DB transaction (use db_teocoin_service.deduct_balance)
-        try:
-            from decimal import Decimal
-
-            success = db_teocoin_service.deduct_balance(
-                user=request.user,
-                amount=Decimal(str(tokens_required)),
-                transaction_type="discount",
-                description=f"Discount deduction for order {order_id}",
-                course=getattr(snap, 'course', None),
-            )
-            if not success:
-                # Log and return 500 since deduction failed unexpectedly
-                logger.error(f"discount_confirm deduction failed for order {order_id}")
-                return Response({"ok": False, "error": "DEDUCTION_FAILED"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-        except Exception as e:
-            logger.exception("discount_confirm deduction exception: %s", e)
-            return Response({"ok": False, "error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-    return Response({"ok": True, "created": created, "snapshot": snapshot_data, "breakdown": breakdown}, status=status_code)
+    
+    return Response(
+        {
+            "ok": True, 
+            "created": created, 
+            "snapshot": snapshot_data, 
+            "breakdown": breakdown,
+            "hold_id": hold_id,
+            "status": "applied"
+        }, 
+        status=status_code
+    )
 
 
 @api_view(["GET"])

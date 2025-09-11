@@ -66,6 +66,8 @@ class TeacherPendingAbsorptionsView(APIView):
                             "percentage": absorption.discount_percentage,
                             "teo_used": float(absorption.teo_used_by_student),
                             "eur_amount": float(absorption.discount_amount_eur),
+                            # New: align with notifications schema
+                            "discount_eur": absorption.discount_percentage,  # 5/10/15 mapping
                         },
                         "options": {
                             "option_a": {
@@ -79,6 +81,8 @@ class TeacherPendingAbsorptionsView(APIView):
                                 "teacher_eur": float(absorption.option_b_teacher_eur),
                                 "teacher_teo": float(absorption.option_b_teacher_teo),
                                 "platform_eur": float(absorption.option_b_platform_eur),
+                                # New: align with notifications schema
+                                "offered_teacher_teo": f"{float(absorption.option_b_teacher_teo):.8f}",
                             },
                         },
                         "timing": {
