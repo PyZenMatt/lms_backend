@@ -313,12 +313,20 @@ def teacher_make_decision(*, decision_id: int, accept: bool, actor=None) -> dict
         .first()
     )
 
-    # Amount source: snapshot.teacher_teo if present, else decision.teacher_bonus/teo_cost
-    if snapshot and snapshot.teacher_teo is not None:
+    # Amount source: FIXED - prefer decision amounts over snapshot when decision has non-zero amounts
+    # This fixes the bug where snapshot.teacher_teo=0 overrides decision.teacher_bonus with valid amounts
+    amount_wei = getattr(decision, "teacher_bonus", None) or getattr(decision, "teo_cost", 0)
+    decision_amount = q8(Decimal(amount_wei) / Decimal(10 ** 18)) if amount_wei else q8(Decimal("0"))
+    
+    if decision_amount > 0:
+        # Use decision amount when it's non-zero (most reliable source)
+        amount = decision_amount
+    elif snapshot and snapshot.teacher_teo is not None:
+        # Fallback to snapshot amount only when decision has no amount
         amount = q8(Decimal(snapshot.teacher_teo))
     else:
-        amount_wei = getattr(decision, "teacher_bonus", None) or getattr(decision, "teo_cost", 0)
-        amount = q8(Decimal(amount_wei) / Decimal(10 ** 18)) if amount_wei else q8(Decimal("0"))
+        # Both sources are zero or missing
+        amount = q8(Decimal("0"))
 
     platform_balance = get_platform_balance()
 
