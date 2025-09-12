@@ -7,6 +7,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('rewards', '0013_add_decision_link'),
+        ('rewards', '0014_add_idempotency_key'),
     ]
 
     operations = [
