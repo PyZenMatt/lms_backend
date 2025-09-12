@@ -197,7 +197,7 @@ def apply_discount_and_snapshot(*, student_user_id: int, teacher_id: int,
         if stripe_payment_intent_id:
             defaults["stripe_payment_intent_id"] = stripe_payment_intent_id
 
-        # Use idempotency_key for creation if available, otherwise fallback to synthetic order_id
+        # Use idempotency_key for creation if available, otherwise use payment_intent_id or synthetic order_id
         if idempotency_key:
             try:
                 snap = PaymentDiscountSnapshot.objects.create(**{**defaults, "source": "local"})
@@ -206,6 +206,15 @@ def apply_discount_and_snapshot(*, student_user_id: int, teacher_id: int,
                 # Idempotency key already exists, fetch existing
                 snap = PaymentDiscountSnapshot.objects.filter(idempotency_key=idempotency_key).first()
                 created = False
+        elif stripe_payment_intent_id:
+            # Use payment intent ID as order_id for proper identification
+            try:
+                snap, created = get_or_create_payment_snapshot(order_id=stripe_payment_intent_id, defaults=defaults, source="local")
+            except Exception:
+                # Fallback to direct create if helper fails for any reason
+                snapshot = PaymentDiscountSnapshot.objects.create(**{**defaults, "order_id": stripe_payment_intent_id, "source": "local"})
+                snap = snapshot
+                created = True
         else:
             # Legacy path: generate synthetic order_id
             synthetic_order_id = f"discount_synthetic_{student_user_id}_{course_id}"

@@ -689,7 +689,9 @@ class ConfirmPaymentView(APIView):
             try:
                 # Determine discount_percent and accept flags
                 discount_percent = int(metadata.get("discount_percent", 0))
-                accept_teo = bool(request.data.get("accept_teo", False))
+                # FIX: Auto-detect TEO discount from payment metadata instead of relying on request parameter
+                use_teocoin_discount = metadata.get("use_teocoin_discount") == "True"
+                accept_teo = use_teocoin_discount and discount_amount > 0
                 accept_ratio = request.data.get("accept_ratio", None)
                 if accept_ratio is not None:
                     try:
@@ -771,20 +773,30 @@ class ConfirmPaymentView(APIView):
                         created = False
                     else:
                         # R1.1 Fix: Use apply_discount_and_snapshot to create snapshot WITH decision atomically
+                        logger.info(f"🔍 R1.1 Fix evaluation: accept_teo={accept_teo}, teacher={course.teacher.username if course.teacher else None}, teacher_teo={breakdown.get('teacher_teo', 0)}")
+                        
                         if accept_teo and course.teacher and breakdown.get("teacher_teo", 0) > 0:
-                            # Create snapshot + decision atomically using R1.1 pattern
-                            result = apply_discount_and_snapshot(
-                                student_user_id=user.id,
-                                teacher_id=course.teacher.id,
-                                course_id=course.id,
-                                teo_cost=discount_amount,  # Total discount amount in TEO
-                                offered_teacher_teo=_Decimal(str(breakdown["teacher_teo"])),
-                                stripe_payment_intent_id=str(payment_intent_id)
-                            )
-                            # Get the created snapshot
-                            snap = PaymentDiscountSnapshot.objects.get(id=result["snapshot_id"])
-                            created = True
+                            logger.info(f"✅ Using R1.1 Fix - creating snapshot with decision atomically")
+                            try:
+                                # Create snapshot + decision atomically using R1.1 pattern
+                                result = apply_discount_and_snapshot(
+                                    student_user_id=user.id,
+                                    teacher_id=course.teacher.id,
+                                    course_id=course.id,
+                                    teo_cost=discount_amount,  # Total discount amount in TEO
+                                    offered_teacher_teo=_Decimal(str(breakdown["teacher_teo"])),
+                                    stripe_payment_intent_id=str(payment_intent_id)
+                                )
+                                # Get the created snapshot
+                                snap = PaymentDiscountSnapshot.objects.get(id=result["snapshot_id"])
+                                created = True
+                                logger.info(f"✅ R1.1 Fix success - created snapshot {snap.id} with decision {result['pending_decision_id']}")
+                            except Exception as e:
+                                logger.error(f"❌ R1.1 Fix failed with exception: {e} - falling back to non-R1.1")
+                                # Fallback to non-R1.1 on any error
+                                snap, created = get_or_create_payment_snapshot(order_id=str(payment_intent_id), defaults=defaults_payload, source="stripe")
                         else:
+                            logger.warning(f"❌ R1.1 Fix conditions not met - using fallback (accept_teo={accept_teo}, teacher={course.teacher.username if course.teacher else None}, teacher_teo={breakdown.get('teacher_teo', 0)})")
                             # Fallback to non-R1.1 for non-TEO transactions
                             snap, created = get_or_create_payment_snapshot(order_id=str(payment_intent_id), defaults=defaults_payload, source="stripe")
                 except Exception:

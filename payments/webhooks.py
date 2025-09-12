@@ -206,6 +206,27 @@ class StripeWebhookView(View):
                     snapshot.external_txn_id = event_idempotency_id
                     snapshot.save(update_fields=['external_txn_id'])
                     
+                    # R1.1: Trigger TEO discount completion notifications after successful settlement
+                    metadata = session.get('metadata', {})
+                    if metadata.get('teocoin_discount_applied') == 'true' or metadata.get('payment_type') == 'fiat_with_teocoin_discount':
+                        try:
+                            from courses.utils.payment_helpers import handle_teocoin_discount_completion
+                            completion_result = handle_teocoin_discount_completion(metadata)
+                            logger.info(f"TEO discount completion triggered: {completion_result.get('success', False)}", extra={
+                                "event_id": event_id,
+                                "snapshot_id": snapshot.id,
+                                "action": "teo_discount_completion",
+                                "teacher_notification_sent": completion_result.get('enrollment', {}).get('teacher_notification_sent', False)
+                            })
+                        except Exception as e:
+                            logger.warning(f"TEO discount completion failed: {e}", extra={
+                                "event_id": event_id,
+                                "snapshot_id": snapshot.id,
+                                "action": "teo_discount_completion_failed",
+                                "error": str(e)
+                            })
+                            # Don't fail webhook for notification issues
+                    
                     logger.info(
                         f"✅ Successfully settled TEO hold for checkout session: {checkout_session_id}",
                         extra={
@@ -319,6 +340,27 @@ class StripeWebhookView(View):
                     # Mark the snapshot with the event ID for idempotency
                     snapshot.external_txn_id = event_idempotency_id
                     snapshot.save(update_fields=['external_txn_id'])
+                    
+                    # R1.1: Trigger TEO discount completion notifications after successful settlement
+                    metadata = payment_intent.get('metadata', {})
+                    if metadata.get('teocoin_discount_applied') == 'true' or metadata.get('payment_type') == 'fiat_with_teocoin_discount':
+                        try:
+                            from courses.utils.payment_helpers import handle_teocoin_discount_completion
+                            completion_result = handle_teocoin_discount_completion(metadata)
+                            logger.info(f"TEO discount completion triggered: {completion_result.get('success', False)}", extra={
+                                "event_id": event_id,
+                                "snapshot_id": snapshot.id,
+                                "action": "teo_discount_completion",
+                                "teacher_notification_sent": completion_result.get('enrollment', {}).get('teacher_notification_sent', False)
+                            })
+                        except Exception as e:
+                            logger.warning(f"TEO discount completion failed: {e}", extra={
+                                "event_id": event_id,
+                                "snapshot_id": snapshot.id,
+                                "action": "teo_discount_completion_failed",
+                                "error": str(e)
+                            })
+                            # Don't fail webhook for notification issues
                     
                     logger.info(
                         f"✅ Successfully settled TEO hold for payment intent: {payment_intent_id}",

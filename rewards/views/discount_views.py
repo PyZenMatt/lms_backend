@@ -366,21 +366,35 @@ def confirm_discount(request):
             # Create snapshot with unique constraint protection
             try:
                 # R1.1 Fix: Use apply_discount_and_snapshot to create snapshot WITH decision atomically
+                logger.info(f"🔍 DISCOUNT_VIEWS R1.1 Fix evaluation: accept_teo={data.get('accept_teo', False)}, teacher={teacher_obj.username if teacher_obj else None}, teacher_teo={breakdown.get('teacher_teo', 0)}")
+                
                 if data.get("accept_teo", False) and teacher_obj and breakdown.get("teacher_teo", 0) > 0:
-                    # Create snapshot + decision atomically using R1.1 pattern
-                    from decimal import Decimal as _Decimal
-                    result = apply_discount_and_snapshot(
-                        student_user_id=student.id,
-                        teacher_id=teacher_obj.id,
-                        course_id=course_obj.id if course_obj else None,
-                        teo_cost=discount_amount_eur,  # Total discount amount in TEO
-                        offered_teacher_teo=_Decimal(str(breakdown["teacher_teo"])),
-                        idempotency_key=idempotency_key
-                    )
-                    # Get the created snapshot
-                    snap = PaymentDiscountSnapshot.objects.get(id=result["snapshot_id"])
-                    created = True
+                    logger.info(f"✅ DISCOUNT_VIEWS Using R1.1 Fix - creating snapshot with decision atomically")
+                    try:
+                        # Create snapshot + decision atomically using R1.1 pattern
+                        from decimal import Decimal as _Decimal
+                        result = apply_discount_and_snapshot(
+                            student_user_id=student.id,
+                            teacher_id=teacher_obj.id,
+                            course_id=course_obj.id if course_obj else None,
+                            teo_cost=discount_amount_eur,  # Total discount amount in TEO
+                            offered_teacher_teo=_Decimal(str(breakdown["teacher_teo"])),
+                            idempotency_key=idempotency_key
+                        )
+                        # Get the created snapshot
+                        snap = PaymentDiscountSnapshot.objects.get(id=result["snapshot_id"])
+                        created = True
+                        logger.info(f"✅ DISCOUNT_VIEWS R1.1 Fix success - created snapshot {snap.id} with decision {result['pending_decision_id']}")
+                    except Exception as e:
+                        logger.error(f"❌ DISCOUNT_VIEWS R1.1 Fix failed with exception: {e} - falling back to non-R1.1")
+                        # Fallback to non-R1.1 on any error
+                        snap, created = get_or_create_payment_snapshot(
+                            order_id=order_id, 
+                            defaults=defaults_payload, 
+                            source="local"
+                        )
                 else:
+                    logger.warning(f"❌ DISCOUNT_VIEWS R1.1 Fix conditions not met - using fallback (accept_teo={data.get('accept_teo', False)}, teacher={teacher_obj.username if teacher_obj else None}, teacher_teo={breakdown.get('teacher_teo', 0)})")
                     # Fallback to non-R1.1 for non-TEO transactions
                     snap, created = get_or_create_payment_snapshot(
                         order_id=order_id, 
