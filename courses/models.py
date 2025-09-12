@@ -750,9 +750,9 @@ class TeacherDiscountDecision(models.Model):
     # Financial details
     course_price = models.DecimalField(max_digits=10, decimal_places=2)
     discount_percentage = models.IntegerField()
-    teo_cost = models.BigIntegerField(help_text="TEO cost in wei (18 decimals)")
-    teacher_bonus = models.BigIntegerField(
-        help_text="Teacher bonus in wei (18 decimals)"
+    teo_cost = models.DecimalField(max_digits=30, decimal_places=0, help_text="TEO cost in wei (18 decimals)")
+    teacher_bonus = models.DecimalField(
+        max_digits=30, decimal_places=0, help_text="Teacher bonus in wei (18 decimals)"
     )
 
     # Commission calculation snapshot

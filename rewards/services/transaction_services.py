@@ -132,18 +132,59 @@ def apply_discount_and_snapshot(*, student_user_id: int, teacher_id: int,
         snap = existing_snap
         created = False
     else:
+        # R1.2: Calculate splits by tier policy before creating snapshot
+        try:
+            from .tier_calculation import calculate_splits_by_policy
+            
+            # Get course for price calculation
+            course_obj = None
+            course_price = Decimal("100.00")  # default fallback
+            if course_id:
+                try:
+                    from courses.models import Course
+                    course_obj = Course.objects.get(id=course_id)
+                    course_price = course_obj.price_eur if course_obj.price_eur else Decimal("100.00")
+                except Exception:
+                    pass
+            
+            # Calculate policy-based splits
+            teacher_obj = User.objects.get(id=teacher_id)
+            splits = calculate_splits_by_policy(course_price, teacher_obj, teo_cost)
+            
+            # Use option A as default (teacher refuses), store option B for decision
+            option_a = splits['option_a']
+            option_b = splits['option_b']
+            
+        except Exception as e:
+            # Fallback to safe defaults if splits calculation fails
+            import logging
+            logging.getLogger(__name__).warning(f"Splits calculation failed, using defaults: {e}")
+            option_a = {
+                'teacher_eur': Decimal("50.00"),
+                'platform_eur': Decimal("35.00"),
+                'teacher_teo': Decimal("0"),
+                'platform_teo': teo_cost,
+            }
+            option_b = {
+                'teacher_eur': Decimal("35.00"),
+                'teacher_teo': offered_teacher_teo,
+                'platform_eur': Decimal("50.00"),
+                'platform_teo': Decimal("0"),
+            }
+        
         # Create new snapshot only if none exists
         defaults = dict(
             course_id=course_id,
             student=student,
             teacher_id=teacher_id,
-            price_eur=0,
+            price_eur=course_price,
             discount_percent=0,
-            student_pay_eur=0,
-            teacher_eur=0,
-            platform_eur=0,
-            teacher_teo=offered_teacher_teo,
-            platform_teo=Decimal("0"),
+            student_pay_eur=course_price - teo_cost,  # Student pays reduced amount
+            # R1.2: Populate EUR splits from policy calculation
+            teacher_eur=option_a['teacher_eur'],
+            platform_eur=option_a['platform_eur'],
+            teacher_teo=option_b['teacher_teo'],  # Store option B TEO amount
+            platform_teo=option_a['platform_teo'],
             absorption_policy="teo",
             teacher_accepted_teo=Decimal("0"),
         )
@@ -156,7 +197,7 @@ def apply_discount_and_snapshot(*, student_user_id: int, teacher_id: int,
         if stripe_payment_intent_id:
             defaults["stripe_payment_intent_id"] = stripe_payment_intent_id
 
-        # Use idempotency_key for creation if available, otherwise fallback to synthetic order_id
+        # Use idempotency_key for creation if available, otherwise use payment_intent_id or synthetic order_id
         if idempotency_key:
             try:
                 snap = PaymentDiscountSnapshot.objects.create(**{**defaults, "source": "local"})
@@ -165,6 +206,15 @@ def apply_discount_and_snapshot(*, student_user_id: int, teacher_id: int,
                 # Idempotency key already exists, fetch existing
                 snap = PaymentDiscountSnapshot.objects.filter(idempotency_key=idempotency_key).first()
                 created = False
+        elif stripe_payment_intent_id:
+            # Use payment intent ID as order_id for proper identification
+            try:
+                snap, created = get_or_create_payment_snapshot(order_id=stripe_payment_intent_id, defaults=defaults, source="local")
+            except Exception:
+                # Fallback to direct create if helper fails for any reason
+                snapshot = PaymentDiscountSnapshot.objects.create(**{**defaults, "order_id": stripe_payment_intent_id, "source": "local"})
+                snap = snapshot
+                created = True
         else:
             # Legacy path: generate synthetic order_id
             synthetic_order_id = f"discount_synthetic_{student_user_id}_{course_id}"
@@ -202,7 +252,14 @@ def apply_discount_and_snapshot(*, student_user_id: int, teacher_id: int,
         expires_at=timezone.now() + timezone.timedelta(hours=24),
     )
 
-    # Do not assume snapshot has extra linking fields; best-effort: ignore
+    # R1.1: Link snapshot to decision atomically (P0 fix)
+    try:
+        snap.decision = decision
+        snap.save(update_fields=['decision'])
+    except Exception as e:
+        # Log but don't fail the flow - this is audit enhancement
+        import logging
+        logging.getLogger(__name__).warning(f"Failed to link snapshot {snap.id} to decision {decision.id}: {e}")
 
     return {"snapshot_id": snap.id, "pending_decision_id": decision.id}
 
@@ -256,12 +313,20 @@ def teacher_make_decision(*, decision_id: int, accept: bool, actor=None) -> dict
         .first()
     )
 
-    # Amount source: snapshot.teacher_teo if present, else decision.teacher_bonus/teo_cost
-    if snapshot and snapshot.teacher_teo is not None:
+    # Amount source: FIXED - prefer decision amounts over snapshot when decision has non-zero amounts
+    # This fixes the bug where snapshot.teacher_teo=0 overrides decision.teacher_bonus with valid amounts
+    amount_wei = getattr(decision, "teacher_bonus", None) or getattr(decision, "teo_cost", 0)
+    decision_amount = q8(Decimal(amount_wei) / Decimal(10 ** 18)) if amount_wei else q8(Decimal("0"))
+    
+    if decision_amount > 0:
+        # Use decision amount when it's non-zero (most reliable source)
+        amount = decision_amount
+    elif snapshot and snapshot.teacher_teo is not None:
+        # Fallback to snapshot amount only when decision has no amount
         amount = q8(Decimal(snapshot.teacher_teo))
     else:
-        amount_wei = getattr(decision, "teacher_bonus", None) or getattr(decision, "teo_cost", 0)
-        amount = q8(Decimal(amount_wei) / Decimal(10 ** 18)) if amount_wei else q8(Decimal("0"))
+        # Both sources are zero or missing
+        amount = q8(Decimal("0"))
 
     platform_balance = get_platform_balance()
 

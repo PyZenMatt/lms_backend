@@ -13,7 +13,7 @@ from datetime import timedelta
 from services.discount_calc import compute_discount_breakdown
 from typing import Any, Dict, Optional, cast
 from rewards.models import PaymentDiscountSnapshot, Tier
-from rewards.services.transaction_services import get_or_create_payment_snapshot
+from rewards.services.transaction_services import get_or_create_payment_snapshot, apply_discount_and_snapshot
 from rewards.services.transaction_services import teacher_make_decision
 from users.models import User
 from courses.models import Course
@@ -23,6 +23,7 @@ from rewards.serializers import (
     DiscountBreakdownSerializer,
     PaymentDiscountSnapshotSerializer,
 )
+from drf_spectacular.utils import extend_schema
 from services.db_teocoin_service import db_teocoin_service
 from math import ceil
 from django.conf import settings
@@ -33,6 +34,11 @@ logger = logging.getLogger(__name__)
 
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
+@extend_schema(
+    operation_id="rewards_discounts_preview_create",
+    request=DiscountPreviewInputSerializer,
+    responses={200: DiscountBreakdownSerializer},
+)
 def preview_discount(request):
     serializer = DiscountPreviewInputSerializer(data=request.data)
     if not serializer.is_valid():
@@ -111,6 +117,11 @@ def preview_discount(request):
 
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
+@extend_schema(
+    operation_id="rewards_discounts_confirm_create",
+    request=DiscountConfirmInputSerializer,
+    responses={200: PaymentDiscountSnapshotSerializer, 201: PaymentDiscountSnapshotSerializer},
+)
 def confirm_discount(request):
     serializer = DiscountConfirmInputSerializer(data=request.data)
     if not serializer.is_valid():
@@ -141,8 +152,8 @@ def confirm_discount(request):
     existing_discount = PaymentDiscountSnapshot.objects.filter(
         student=student,
         course=course_obj,
-        checkout_session_id=checkout_session_id,
-        status__in=["applied", "confirmed"]
+    checkout_session_id=checkout_session_id,
+    status__in=["applied", "confirmed", "pending"]
     ).first()
     
     if existing_discount:
@@ -340,6 +351,7 @@ def confirm_discount(request):
                 "tier_teo_bonus_multiplier": (tier.get("teo_bonus_multiplier") if tier else None),
                 
                 # NEW IDEMPOTENCY FIELDS
+                # Use 'applied' to indicate a hold with successful TEO reservation
                 "status": "applied",
                 "checkout_session_id": checkout_session_id,
                 "idempotency_key": idempotency_key,
@@ -353,11 +365,42 @@ def confirm_discount(request):
             
             # Create snapshot with unique constraint protection
             try:
-                snap, created = get_or_create_payment_snapshot(
-                    order_id=order_id, 
-                    defaults=defaults_payload, 
-                    source="local"
-                )
+                # R1.1 Fix: Use apply_discount_and_snapshot to create snapshot WITH decision atomically
+                logger.info(f"🔍 DISCOUNT_VIEWS R1.1 Fix evaluation: accept_teo={data.get('accept_teo', False)}, teacher={teacher_obj.username if teacher_obj else None}, teacher_teo={breakdown.get('teacher_teo', 0)}")
+                
+                if data.get("accept_teo", False) and teacher_obj and breakdown.get("teacher_teo", 0) > 0:
+                    logger.info(f"✅ DISCOUNT_VIEWS Using R1.1 Fix - creating snapshot with decision atomically")
+                    try:
+                        # Create snapshot + decision atomically using R1.1 pattern
+                        from decimal import Decimal as _Decimal
+                        result = apply_discount_and_snapshot(
+                            student_user_id=student.id,
+                            teacher_id=teacher_obj.id,
+                            course_id=course_obj.id if course_obj else None,
+                            teo_cost=discount_amount_eur,  # Total discount amount in TEO
+                            offered_teacher_teo=_Decimal(str(breakdown["teacher_teo"])),
+                            idempotency_key=idempotency_key
+                        )
+                        # Get the created snapshot
+                        snap = PaymentDiscountSnapshot.objects.get(id=result["snapshot_id"])
+                        created = True
+                        logger.info(f"✅ DISCOUNT_VIEWS R1.1 Fix success - created snapshot {snap.id} with decision {result['pending_decision_id']}")
+                    except Exception as e:
+                        logger.error(f"❌ DISCOUNT_VIEWS R1.1 Fix failed with exception: {e} - falling back to non-R1.1")
+                        # Fallback to non-R1.1 on any error
+                        snap, created = get_or_create_payment_snapshot(
+                            order_id=order_id, 
+                            defaults=defaults_payload, 
+                            source="local"
+                        )
+                else:
+                    logger.warning(f"❌ DISCOUNT_VIEWS R1.1 Fix conditions not met - using fallback (accept_teo={data.get('accept_teo', False)}, teacher={teacher_obj.username if teacher_obj else None}, teacher_teo={breakdown.get('teacher_teo', 0)})")
+                    # Fallback to non-R1.1 for non-TEO transactions
+                    snap, created = get_or_create_payment_snapshot(
+                        order_id=order_id, 
+                        defaults=defaults_payload, 
+                        source="local"
+                    )
             except Exception:
                 # Fallback to direct get_or_create for robustness
                 snap, created = PaymentDiscountSnapshot.objects.get_or_create(
@@ -374,7 +417,7 @@ def confirm_discount(request):
                     student=student,
                     course=course_obj,
                     checkout_session_id=checkout_session_id,
-                    status__in=["applied", "confirmed"]
+                    status__in=["applied", "confirmed", "pending"]
                 )
                 created = False
                 # Release our hold since we're using existing snapshot
@@ -411,8 +454,8 @@ def confirm_discount(request):
             "checkout_session_id": checkout_session_id,
             "wallet_hold_id": hold_id,
             "created": created,
-            "snapshot_id": getattr(snap, "id", None),
-            "status": "applied",
+                    "snapshot_id": getattr(snap, "id", None),
+                    "status": "pending",
         })
     except Exception:
         logger.debug("discount_confirm logging failed")
@@ -430,14 +473,14 @@ def confirm_discount(request):
     
     return Response(
         {
-            "ok": True, 
-            "created": created, 
-            "snapshot": snapshot_data, 
+            "ok": True,
+            "created": created,
+            "snapshot": snapshot_data,
             "breakdown": breakdown,
             "hold_id": hold_id,
-            "status": "applied"
-        }, 
-        status=status_code
+            "status": "pending",
+        },
+        status=status_code,
     )
 
 
@@ -646,11 +689,13 @@ def pending_discount_snapshots(request):
     try:
         teacher = request.user
 
-        # Get snapshots where teacher is set and likely pending (status pending)
-        # Note: PaymentDiscountSnapshot.teacher_accepted_teo has default 0, not NULL,
-        # so filtering by isnull=True excludes all rows; use status='pending' instead.
+        # Get snapshots where teacher owns the course and needs to make a decision
+        # Use course__teacher relation since snapshot.teacher field may not be populated
+        # CRITICAL: Only include snapshots that have a linked decision (can be accepted/declined)
         qs = PaymentDiscountSnapshot.objects.filter(
-            teacher=teacher, status="pending"
+            course__teacher=teacher,  # Filter by course teacher instead of direct teacher field
+            status__in=["pending", "applied", "confirmed"],  # Actionable statuses
+            decision__isnull=False  # ONLY snapshots with decisions can be acted upon
         ).order_by("created_at")
 
         items = []
@@ -664,8 +709,8 @@ def pending_discount_snapshots(request):
             # Normalize fields for FE: include course_title, student_name, deadline if available
             item = {
                 "id": getattr(s, "id", None),
-                # If a pending TeacherDiscountDecision exists for this trio, expose its id
-                "pending_decision_id": None,
+                # Use the linked decision if available, otherwise look for compatible decision
+                "pending_decision_id": s.decision.id if s.decision else None,
                 "order_id": getattr(s, "order_id", None),
                 "course_title": s.course.title if s.course else None,
                 "student_name": s.student.username if s.student else None,
@@ -678,24 +723,8 @@ def pending_discount_snapshots(request):
                 "status": "pending",
                 "raw": data,
             }
-            try:
-                from courses.models import TeacherDiscountDecision
-
-                dec = (
-                    TeacherDiscountDecision.objects.filter(
-                        teacher=s.teacher,
-                        student=s.student,
-                        course=s.course,
-                        decision="pending",
-                    )
-                    .order_by("-created_at")
-                    .first()
-                )
-                if dec:
-                    item["pending_decision_id"] = getattr(dec, "pk", None)
-            except Exception:
-                # best-effort: skip if models import fails
-                pass
+            # Since we filter by decision__isnull=False, every snapshot has a valid decision
+            # No need for fallback decision lookup
             items.append(item)
 
         # Sort by offered deadline if present in raw (expires_at) else by created_at

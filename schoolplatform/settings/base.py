@@ -190,3 +190,7 @@ TEOCOIN_SYSTEM = os.getenv("TEOCOIN_SYSTEM", "database")
 
 # Reward System Configuration
 REWARD_SYSTEM_BACKEND = "services.db_teocoin_service.DBTeoCoinService"
+
+# HOTFIX: Purchase bonus feature flag
+# Set to False to disable purchase bonus on all orders (avoids TEO credits post-discount)
+PURCHASE_BONUS_ENABLED = os.getenv("PURCHASE_BONUS_ENABLED", "False").lower() == "true"

@@ -332,6 +332,50 @@ def handle_teocoin_discount_completion(payment_intent_metadata):
             except Exception:
                 pass
 
+            # Find or CREATE the correct TeacherDiscountDecision to link notification
+            decision_id = None
+            try:
+                from courses.models import TeacherDiscountDecision
+                from django.utils import timezone
+                from decimal import Decimal
+                
+                decision = TeacherDiscountDecision.objects.filter(
+                    teacher=course.teacher,
+                    student=user,
+                    course=course,
+                    decision="pending"
+                ).order_by("-created_at").first()
+                
+                if decision:
+                    decision_id = decision.id
+                    logger.info(f"Found existing TeacherDiscountDecision {decision_id} for notification")
+                else:
+                    # CREATE decision retroactively for webhook-triggered notifications
+                    logger.info(f"Creating TeacherDiscountDecision retroactively for webhook notification")
+                    
+                    # Convert teo_tokens and bonus_tokens to wei
+                    teo_cost_wei = int((teo_tokens * Decimal(10**18)).to_integral_value())
+                    teacher_bonus_wei = int((bonus_tokens * Decimal(10**18)).to_integral_value())
+                    
+                    decision = TeacherDiscountDecision.objects.create(
+                        teacher=course.teacher,
+                        student=user,
+                        course=course,
+                        course_price=course.price_eur or Decimal("100.00"),
+                        discount_percentage=discount_percent or 0,
+                        teo_cost=teo_cost_wei,
+                        teacher_bonus=teacher_bonus_wei,
+                        teacher_commission_rate=Decimal("50.00"),  # Default
+                        teacher_staking_tier="Bronze",  # Default
+                        decision="pending",
+                        expires_at=expires_at,
+                    )
+                    decision_id = decision.id
+                    logger.info(f"Created TeacherDiscountDecision {decision_id} retroactively")
+                    
+            except Exception as e:
+                logger.warning(f"Failed to find/create TeacherDiscountDecision: {e}")
+
             teocoin_notification_service.notify_teacher_discount_pending(
                 teacher=course.teacher,
                 student=user,
@@ -343,6 +387,7 @@ def handle_teocoin_discount_completion(payment_intent_metadata):
                 expires_at=expires_at,
                 offered_teacher_teo=offered_teacher,
                 offered_platform_teo=offered_platform,
+                decision_id=decision_id,  # 🆕 Pass the decision_id so notification points to decision
             )
 
             logger.info(

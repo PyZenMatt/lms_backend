@@ -19,7 +19,7 @@ from notifications.services import teocoin_notification_service
 from django.db import transaction, IntegrityError
 from services.discount_calc import compute_discount_breakdown
 from rewards.models import PaymentDiscountSnapshot, Tier
-from rewards.services.transaction_services import get_or_create_payment_snapshot
+from rewards.services.transaction_services import get_or_create_payment_snapshot, apply_discount_and_snapshot
 
 # LEGACY IMPORTS REMOVED - using clean database services now
 # from services.gas_free_v2_service import GasFreeV2Service
@@ -258,16 +258,45 @@ class CreatePaymentIntentView(APIView):
                     discount_request_id
                 )
 
+            # ISSUE-04A: Add correlation metadata for webhook lookup
+            # Look for existing applied discount snapshot for this user + course
+            existing_snapshot = None
+            if use_teocoin_discount and discount_amount > 0:
+                existing_snapshot = PaymentDiscountSnapshot.objects.filter(
+                    student=user,
+                    course=course,
+                    status__in=["applied", "pending"],
+                    wallet_hold_id__isnull=False
+                ).order_by('-created_at').first()
+                
+                if existing_snapshot:
+                    # Add critical metadata for webhook correlation
+                    intent_data["metadata"]["discount_snapshot_id"] = str(existing_snapshot.id)
+                    intent_data["metadata"]["hold_id"] = str(existing_snapshot.wallet_hold_id)
+                    intent_data["metadata"]["order_id"] = str(existing_snapshot.order_id) if existing_snapshot.order_id else ""
+                    logger.info(f"🔗 Added correlation metadata: snapshot_id={existing_snapshot.id}, hold_id={existing_snapshot.wallet_hold_id}")
+
             logger.info(f"💳 Stripe intent data: {intent_data}")
 
             try:
                 payment_intent = stripe.PaymentIntent.create(**intent_data)
                 logger.info(f"✅ Stripe payment intent created: {payment_intent.id}")
+                
+                # ISSUE-04A: Immediately persist stripe_payment_intent_id in existing snapshot  
+                snapshot_updated = False
+                if existing_snapshot:
+                    existing_snapshot.stripe_payment_intent_id = payment_intent.id
+                    existing_snapshot.external_txn_id = payment_intent.id
+                    existing_snapshot.save(update_fields=['stripe_payment_intent_id', 'external_txn_id'])
+                    logger.info(f"🔗 Updated snapshot {existing_snapshot.id} with stripe_payment_intent_id: {payment_intent.id}")
+                    snapshot_updated = True
+                
                 # Persist a PaymentDiscountSnapshot now (idempotent). This ensures
                 # a snapshot exists as soon as the payment intent is created so
                 # teacher notifications and frontend can rely on it.
+                # SKIP if we already updated an existing snapshot to prevent duplicates
                 try:
-                    if use_teocoin_discount and discount_amount > 0:
+                    if use_teocoin_discount and discount_amount > 0 and not snapshot_updated:
                         # Resolve tier from teacher profile if available
                         tier = None
                         tp = getattr(course.teacher, "teacher_profile", None)
@@ -333,7 +362,8 @@ class CreatePaymentIntentView(APIView):
                                     .filter(
                                         Q(order_id__startswith='local_') |
                                         Q(order_id__startswith='discount_synthetic_') |
-                                        Q(order_id__startswith='discount_')
+                                        Q(order_id__startswith='discount_') |
+                                        Q(order_id__startswith='checkout_session_')  # FIX: Include checkout session snapshots
                                     )
                                     .order_by('-created_at')
                                     .first()
@@ -350,7 +380,12 @@ class CreatePaymentIntentView(APIView):
                             else:
                                 snap, created = get_or_create_payment_snapshot(order_id=str(payment_intent.id), defaults=defaults_payload, source="stripe")
                         except Exception:
-                            snap, created = PaymentDiscountSnapshot.objects.get_or_create(order_id=str(payment_intent.id), defaults=defaults_payload)
+                            # ALSO respect snapshot_updated flag in fallback to prevent duplicates
+                            if not snapshot_updated:
+                                snap, created = PaymentDiscountSnapshot.objects.get_or_create(order_id=str(payment_intent.id), defaults=defaults_payload)
+                            else:
+                                snap = existing_snapshot
+                                created = False
                 except Exception:
                     logger.exception("Failed to persist PaymentDiscountSnapshot at intent creation")
             except Exception as stripe_err:
@@ -530,54 +565,66 @@ class ConfirmPaymentView(APIView):
                         f"💰 Payment confirmed, now capturing TEO hold: {discount_amount} TEO"
                     )
                     
-                    # Find existing applied discount snapshot with hold
+                    # FIRST: Find and update existing applied snapshot with stripe_payment_intent_id
+                    # This is critical for webhook correlation and settlement service
                     applied_snapshot = PaymentDiscountSnapshot.objects.filter(
                         student=user,
                         course=course,
                         status="applied",
-                        wallet_hold_id__isnull=False,
-                        external_txn_id=payment_intent_id
-                    ).first()
+                        wallet_hold_id__isnull=False
+                    ).order_by('-created_at').first()
                     
+                    if applied_snapshot:
+                        # Update snapshot with stripe_payment_intent_id for webhook correlation
+                        applied_snapshot.stripe_payment_intent_id = payment_intent_id
+                        applied_snapshot.external_txn_id = payment_intent_id
+                        applied_snapshot.save(update_fields=['stripe_payment_intent_id', 'external_txn_id'])
+                        logger.info(f"🔗 Updated snapshot {applied_snapshot.id} with stripe_payment_intent_id: {payment_intent_id}")
+                    
+                    # SECOND: Find the snapshot with updated stripe_payment_intent_id for capturing hold
                     if not applied_snapshot:
-                        # Try to find by order_id or any applied snapshot for this user/course
                         applied_snapshot = PaymentDiscountSnapshot.objects.filter(
                             student=user,
                             course=course,
                             status="applied",
-                            wallet_hold_id__isnull=False
-                        ).order_by('-created_at').first()
+                            wallet_hold_id__isnull=False,
+                            external_txn_id=payment_intent_id
+                        ).first()
                     
                     if applied_snapshot and applied_snapshot.wallet_hold_id:
-                        # CAPTURE THE HOLD: Convert hold to actual deduction
-                        from services.wallet_hold_service import wallet_hold_service
-                        
-                        capture_success = wallet_hold_service.capture_hold(
-                            hold_id=applied_snapshot.wallet_hold_id,
-                            description=f"Payment confirmed for course: {course.title}",
-                            course=course
-                        )
-                        
-                        if capture_success:
-                            # Update snapshot status to CONFIRMED
-                            applied_snapshot.status = "confirmed"
-                            applied_snapshot.confirmed_at = timezone.now()
-                            applied_snapshot.wallet_capture_id = f"capture_{applied_snapshot.wallet_hold_id}"
-                            applied_snapshot.save(update_fields=["status", "confirmed_at", "wallet_capture_id"])
-                            
-                            logger.info(
-                                f"✅ SUCCESS: TEO hold captured - {discount_amount} TEO "
-                                f"(hold_id={applied_snapshot.wallet_hold_id}, snapshot_id={applied_snapshot.id})"
-                            )
+                        # Skip capture for R1.1 snapshots (those with decisions) - they handle TEO later
+                        if applied_snapshot.decision is not None:
+                            logger.info(f"🔗 Skipping immediate capture for R1.1 snapshot {applied_snapshot.id} - waiting for teacher decision")
                         else:
-                            logger.error(
-                                f"❌ FAILED: Could not capture TEO hold {applied_snapshot.wallet_hold_id} "
-                                f"for payment {payment_intent_id}"
+                            # CAPTURE THE HOLD: Convert hold to actual deduction (only for non-R1.1 snapshots)
+                            from services.wallet_hold_service import wallet_hold_service
+                            
+                            capture_success = wallet_hold_service.capture_hold(
+                                hold_id=applied_snapshot.wallet_hold_id,
+                                description=f"Payment confirmed for course: {course.title}",
+                                course=course
                             )
-                            # Mark snapshot as failed
-                            applied_snapshot.status = "failed"
-                            applied_snapshot.failed_at = timezone.now()
-                            applied_snapshot.save(update_fields=["status", "failed_at"])
+                            
+                            if capture_success:
+                                # Update snapshot status to CONFIRMED
+                                applied_snapshot.status = "confirmed"
+                                applied_snapshot.confirmed_at = timezone.now()
+                                applied_snapshot.wallet_capture_id = f"capture_{applied_snapshot.wallet_hold_id}"
+                                applied_snapshot.save(update_fields=["status", "confirmed_at", "wallet_capture_id"])
+                                
+                                logger.info(
+                                    f"✅ SUCCESS: TEO hold captured - {discount_amount} TEO "
+                                    f"(hold_id={applied_snapshot.wallet_hold_id}, snapshot_id={applied_snapshot.id})"
+                                )
+                            else:
+                                logger.error(
+                                    f"❌ FAILED: Could not capture TEO hold {applied_snapshot.wallet_hold_id} "
+                                    f"for payment {payment_intent_id}"
+                                )
+                                # Mark snapshot as failed
+                                applied_snapshot.status = "failed"
+                                applied_snapshot.failed_at = timezone.now()
+                                applied_snapshot.save(update_fields=["status", "failed_at"])
                     else:
                         logger.warning(
                             f"⚠️ No applied TEO discount snapshot found for user {user.id}, course {course_id}. "
@@ -606,23 +653,35 @@ class ConfirmPaymentView(APIView):
 
             # Award purchase bonus TEO to student using clean database system
             try:
-                from decimal import Decimal
-
-                # 5 TEO bonus for course purchase
-                purchase_bonus = Decimal("5.0")
-                success = hybrid_teocoin_service.add_balance(
-                    user=user,
-                    amount=purchase_bonus,
-                    transaction_type="course_purchase_bonus",
-                    description=f"Purchase bonus for course: {course.title}",
-                    course=course,
-                )
-                if success:
+                # HOTFIX: Check if purchase bonus is enabled
+                if not getattr(settings, 'PURCHASE_BONUS_ENABLED', False):
                     logger.info(
-                        f"🪙 {purchase_bonus} TEO purchase bonus awarded to {user.email}"
+                        f"🚫 Purchase bonus skipped (flag OFF) for order {metadata.get('order_id', 'unknown')}",
+                        extra={
+                            "reason": "bonus_skipped_flag_off",
+                            "user_id": user.id,
+                            "course_id": course.id,
+                            "flag_value": False,
+                        }
                     )
                 else:
-                    logger.error(f"Failed to award purchase bonus to {user.email}")
+                    from decimal import Decimal
+
+                    # 5 TEO bonus for course purchase
+                    purchase_bonus = Decimal("5.0")
+                    success = hybrid_teocoin_service.add_balance(
+                        user=user,
+                        amount=purchase_bonus,
+                        transaction_type="course_bonus",
+                        description=f"Purchase bonus for course: {course.title}",
+                        course=course,
+                    )
+                    if success:
+                        logger.info(
+                            f"🪙 {purchase_bonus} TEO purchase bonus awarded to {user.email}"
+                        )
+                    else:
+                        logger.error(f"Failed to award purchase bonus to {user.email}")
             except Exception as e:
                 logger.error(f"TEO purchase bonus error: {e}")
 
@@ -630,7 +689,9 @@ class ConfirmPaymentView(APIView):
             try:
                 # Determine discount_percent and accept flags
                 discount_percent = int(metadata.get("discount_percent", 0))
-                accept_teo = bool(request.data.get("accept_teo", False))
+                # FIX: Auto-detect TEO discount from payment metadata instead of relying on request parameter
+                use_teocoin_discount = metadata.get("use_teocoin_discount") == "True"
+                accept_teo = use_teocoin_discount and discount_amount > 0
                 accept_ratio = request.data.get("accept_ratio", None)
                 if accept_ratio is not None:
                     try:
@@ -697,7 +758,8 @@ class ConfirmPaymentView(APIView):
                             .filter(
                                 Q(order_id__startswith='local_') |
                                 Q(order_id__startswith='discount_synthetic_') |
-                                Q(order_id__startswith='discount_')
+                                Q(order_id__startswith='discount_') |
+                                Q(order_id__startswith='checkout_session_')  # FIX: Include checkout session snapshots
                             )
                             .order_by('-created_at')
                             .first()
@@ -710,7 +772,33 @@ class ConfirmPaymentView(APIView):
                         snap = attached
                         created = False
                     else:
-                        snap, created = get_or_create_payment_snapshot(order_id=str(payment_intent_id), defaults=defaults_payload, source="stripe")
+                        # R1.1 Fix: Use apply_discount_and_snapshot to create snapshot WITH decision atomically
+                        logger.info(f"🔍 R1.1 Fix evaluation: accept_teo={accept_teo}, teacher={course.teacher.username if course.teacher else None}, teacher_teo={breakdown.get('teacher_teo', 0)}")
+                        
+                        if accept_teo and course.teacher and breakdown.get("teacher_teo", 0) > 0:
+                            logger.info(f"✅ Using R1.1 Fix - creating snapshot with decision atomically")
+                            try:
+                                # Create snapshot + decision atomically using R1.1 pattern
+                                result = apply_discount_and_snapshot(
+                                    student_user_id=user.id,
+                                    teacher_id=course.teacher.id,
+                                    course_id=course.id,
+                                    teo_cost=discount_amount,  # Total discount amount in TEO
+                                    offered_teacher_teo=_Decimal(str(breakdown["teacher_teo"])),
+                                    stripe_payment_intent_id=str(payment_intent_id)
+                                )
+                                # Get the created snapshot
+                                snap = PaymentDiscountSnapshot.objects.get(id=result["snapshot_id"])
+                                created = True
+                                logger.info(f"✅ R1.1 Fix success - created snapshot {snap.id} with decision {result['pending_decision_id']}")
+                            except Exception as e:
+                                logger.error(f"❌ R1.1 Fix failed with exception: {e} - falling back to non-R1.1")
+                                # Fallback to non-R1.1 on any error
+                                snap, created = get_or_create_payment_snapshot(order_id=str(payment_intent_id), defaults=defaults_payload, source="stripe")
+                        else:
+                            logger.warning(f"❌ R1.1 Fix conditions not met - using fallback (accept_teo={accept_teo}, teacher={course.teacher.username if course.teacher else None}, teacher_teo={breakdown.get('teacher_teo', 0)})")
+                            # Fallback to non-R1.1 for non-TEO transactions
+                            snap, created = get_or_create_payment_snapshot(order_id=str(payment_intent_id), defaults=defaults_payload, source="stripe")
                 except Exception:
                     snap, created = PaymentDiscountSnapshot.objects.get_or_create(order_id=str(payment_intent_id), defaults=defaults_payload)
 
