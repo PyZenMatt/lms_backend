@@ -2,7 +2,24 @@
 Stripe Webhook Handlers for TEO Discount Hold Capture
 
 This module handles Stripe webhooks to capture TEO holds when payment succeeds
-and release holds when payment fails, implementing the complete flow for
+and release holds when payment fails, implementin                    # R1.3: Mark this specific event as processed for idempotency  
+                    snapshot.external_txn_id = event_idempotency_id
+                    snapshot.save(update_fields=['external_txn_id'])
+                    
+                    logger.info(
+                        "Webhook settlement completed", 
+                        extra={
+                            "event_id": event_id,
+                            "event_type": "checkout.session.completed",
+                            "snapshot_id": snapshot.id,
+                            "correlation_method": correlation_method,
+                            "correlation_value": correlation_value,
+                            "external_txn_id": payment_intent_id or checkout_session_id,
+                            "idempotency_id": event_idempotency_id,
+                            "action": "settle_completed",
+                            "teo_result": "captured"
+                        }
+                    ) flow for
 "ISSUE A - Capture dell'hold TEO a pagamento riuscito"
 """
 
@@ -99,21 +116,28 @@ class StripeWebhookView(View):
             return HttpResponseBadRequest("Missing checkout session ID")
 
         try:
-            # IDEMPOTENCY: Check if this event was already processed by looking for external_txn_id
-            # Instead of PaymentEvent table, use the external_txn_id in snapshot as idempotency guard
+            # R1.3: Enhanced idempotency guard with SELECT FOR UPDATE and structured logging
             event_idempotency_id = f"stripe_event:{event_id}"
             
-            # Try to find existing snapshot that was already processed for this exact event
-            already_processed = PaymentDiscountSnapshot.objects.filter(
-                external_txn_id=event_idempotency_id,
-                status='confirmed'
-            ).exists()
-            
-            if already_processed:
-                logger.info(f"Event {event_id} already processed - idempotent no-op")
-                return HttpResponse(status=200)
-
             with transaction.atomic():
+                # Check if this exact event was already processed
+                already_processed = PaymentDiscountSnapshot.objects.select_for_update().filter(
+                    external_txn_id=event_idempotency_id,
+                    status__in=['confirmed', 'failed']
+                ).exists()
+                
+                if already_processed:
+                    logger.info(
+                        "Webhook idempotent skip",
+                        extra={
+                            "event_id": event_id,
+                            "event_type": "checkout.session.completed", 
+                            "action": "noop_already_processed",
+                            "idempotency_id": event_idempotency_id
+                        }
+                    )
+                    return HttpResponse(status=200)
+
                 # Correlation strategy: prefer explicit metadata.discount_snapshot_id, then checkout session, then payment intent
                 snapshot = None
                 correlation_method = "none"
@@ -195,11 +219,15 @@ class StripeWebhookView(View):
                     return HttpResponse(status=200)
                 else:
                     logger.error(
-                        f"❌ Failed to settle TEO hold for checkout session: {checkout_session_id}",
+                        "Webhook settlement failed",
                         extra={
+                            "event_id": event_id,
+                            "event_type": "checkout.session.completed",
                             "snapshot_id": snapshot.id,
                             "correlation_method": correlation_method,
-                            "provider_event_id": provider_event_id,
+                            "correlation_value": correlation_value,
+                            "action": "settle_failed",
+                            "teo_result": "not_captured"
                         }
                     )
                     return HttpResponse(status=500)

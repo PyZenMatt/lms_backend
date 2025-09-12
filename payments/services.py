@@ -47,7 +47,21 @@ def settle_discount_snapshot(snapshot: PaymentDiscountSnapshot, provider_event_i
             snapshot.confirmed_at = timezone.now()
             if external_txn_id:
                 snapshot.external_txn_id = external_txn_id
-            snapshot.save(update_fields=['status', 'confirmed_at', 'external_txn_id'])
+            
+            # R1.1: Safety-net - ensure decision link if missing (post-webhook)
+            if not snapshot.decision:
+                from courses.models import TeacherDiscountDecision
+                matching_decision = TeacherDiscountDecision.objects.filter(
+                    teacher=snapshot.teacher,
+                    student=snapshot.student,
+                    course=snapshot.course,
+                    decision='pending'
+                ).order_by('-created_at').first()
+                if matching_decision:
+                    snapshot.decision = matching_decision
+                    logger.info(f"Linked orphan snapshot {snapshot.id} to decision {matching_decision.id} in settle")
+            
+            snapshot.save(update_fields=['status', 'confirmed_at', 'external_txn_id', 'decision'])
 
             logger.info(f"✅ Successfully settled snapshot {snapshot.id} with hold {snapshot.wallet_hold_id}")
             return True

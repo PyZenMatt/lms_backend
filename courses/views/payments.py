@@ -19,7 +19,7 @@ from notifications.services import teocoin_notification_service
 from django.db import transaction, IntegrityError
 from services.discount_calc import compute_discount_breakdown
 from rewards.models import PaymentDiscountSnapshot, Tier
-from rewards.services.transaction_services import get_or_create_payment_snapshot
+from rewards.services.transaction_services import get_or_create_payment_snapshot, apply_discount_and_snapshot
 
 # LEGACY IMPORTS REMOVED - using clean database services now
 # from services.gas_free_v2_service import GasFreeV2Service
@@ -592,35 +592,39 @@ class ConfirmPaymentView(APIView):
                         ).first()
                     
                     if applied_snapshot and applied_snapshot.wallet_hold_id:
-                        # CAPTURE THE HOLD: Convert hold to actual deduction
-                        from services.wallet_hold_service import wallet_hold_service
-                        
-                        capture_success = wallet_hold_service.capture_hold(
-                            hold_id=applied_snapshot.wallet_hold_id,
-                            description=f"Payment confirmed for course: {course.title}",
-                            course=course
-                        )
-                        
-                        if capture_success:
-                            # Update snapshot status to CONFIRMED
-                            applied_snapshot.status = "confirmed"
-                            applied_snapshot.confirmed_at = timezone.now()
-                            applied_snapshot.wallet_capture_id = f"capture_{applied_snapshot.wallet_hold_id}"
-                            applied_snapshot.save(update_fields=["status", "confirmed_at", "wallet_capture_id"])
-                            
-                            logger.info(
-                                f"✅ SUCCESS: TEO hold captured - {discount_amount} TEO "
-                                f"(hold_id={applied_snapshot.wallet_hold_id}, snapshot_id={applied_snapshot.id})"
-                            )
+                        # Skip capture for R1.1 snapshots (those with decisions) - they handle TEO later
+                        if applied_snapshot.decision is not None:
+                            logger.info(f"🔗 Skipping immediate capture for R1.1 snapshot {applied_snapshot.id} - waiting for teacher decision")
                         else:
-                            logger.error(
-                                f"❌ FAILED: Could not capture TEO hold {applied_snapshot.wallet_hold_id} "
-                                f"for payment {payment_intent_id}"
+                            # CAPTURE THE HOLD: Convert hold to actual deduction (only for non-R1.1 snapshots)
+                            from services.wallet_hold_service import wallet_hold_service
+                            
+                            capture_success = wallet_hold_service.capture_hold(
+                                hold_id=applied_snapshot.wallet_hold_id,
+                                description=f"Payment confirmed for course: {course.title}",
+                                course=course
                             )
-                            # Mark snapshot as failed
-                            applied_snapshot.status = "failed"
-                            applied_snapshot.failed_at = timezone.now()
-                            applied_snapshot.save(update_fields=["status", "failed_at"])
+                            
+                            if capture_success:
+                                # Update snapshot status to CONFIRMED
+                                applied_snapshot.status = "confirmed"
+                                applied_snapshot.confirmed_at = timezone.now()
+                                applied_snapshot.wallet_capture_id = f"capture_{applied_snapshot.wallet_hold_id}"
+                                applied_snapshot.save(update_fields=["status", "confirmed_at", "wallet_capture_id"])
+                                
+                                logger.info(
+                                    f"✅ SUCCESS: TEO hold captured - {discount_amount} TEO "
+                                    f"(hold_id={applied_snapshot.wallet_hold_id}, snapshot_id={applied_snapshot.id})"
+                                )
+                            else:
+                                logger.error(
+                                    f"❌ FAILED: Could not capture TEO hold {applied_snapshot.wallet_hold_id} "
+                                    f"for payment {payment_intent_id}"
+                                )
+                                # Mark snapshot as failed
+                                applied_snapshot.status = "failed"
+                                applied_snapshot.failed_at = timezone.now()
+                                applied_snapshot.save(update_fields=["status", "failed_at"])
                     else:
                         logger.warning(
                             f"⚠️ No applied TEO discount snapshot found for user {user.id}, course {course_id}. "
@@ -649,23 +653,35 @@ class ConfirmPaymentView(APIView):
 
             # Award purchase bonus TEO to student using clean database system
             try:
-                from decimal import Decimal
-
-                # 5 TEO bonus for course purchase
-                purchase_bonus = Decimal("5.0")
-                success = hybrid_teocoin_service.add_balance(
-                    user=user,
-                    amount=purchase_bonus,
-                    transaction_type="course_purchase_bonus",
-                    description=f"Purchase bonus for course: {course.title}",
-                    course=course,
-                )
-                if success:
+                # HOTFIX: Check if purchase bonus is enabled
+                if not getattr(settings, 'PURCHASE_BONUS_ENABLED', False):
                     logger.info(
-                        f"🪙 {purchase_bonus} TEO purchase bonus awarded to {user.email}"
+                        f"🚫 Purchase bonus skipped (flag OFF) for order {metadata.get('order_id', 'unknown')}",
+                        extra={
+                            "reason": "bonus_skipped_flag_off",
+                            "user_id": user.id,
+                            "course_id": course.id,
+                            "flag_value": False,
+                        }
                     )
                 else:
-                    logger.error(f"Failed to award purchase bonus to {user.email}")
+                    from decimal import Decimal
+
+                    # 5 TEO bonus for course purchase
+                    purchase_bonus = Decimal("5.0")
+                    success = hybrid_teocoin_service.add_balance(
+                        user=user,
+                        amount=purchase_bonus,
+                        transaction_type="course_bonus",
+                        description=f"Purchase bonus for course: {course.title}",
+                        course=course,
+                    )
+                    if success:
+                        logger.info(
+                            f"🪙 {purchase_bonus} TEO purchase bonus awarded to {user.email}"
+                        )
+                    else:
+                        logger.error(f"Failed to award purchase bonus to {user.email}")
             except Exception as e:
                 logger.error(f"TEO purchase bonus error: {e}")
 
@@ -754,7 +770,23 @@ class ConfirmPaymentView(APIView):
                         snap = attached
                         created = False
                     else:
-                        snap, created = get_or_create_payment_snapshot(order_id=str(payment_intent_id), defaults=defaults_payload, source="stripe")
+                        # R1.1 Fix: Use apply_discount_and_snapshot to create snapshot WITH decision atomically
+                        if accept_teo and course.teacher and breakdown.get("teacher_teo", 0) > 0:
+                            # Create snapshot + decision atomically using R1.1 pattern
+                            result = apply_discount_and_snapshot(
+                                student_user_id=user.id,
+                                teacher_id=course.teacher.id,
+                                course_id=course.id,
+                                teo_cost=discount_amount,  # Total discount amount in TEO
+                                offered_teacher_teo=_Decimal(str(breakdown["teacher_teo"])),
+                                stripe_payment_intent_id=str(payment_intent_id)
+                            )
+                            # Get the created snapshot
+                            snap = PaymentDiscountSnapshot.objects.get(id=result["snapshot_id"])
+                            created = True
+                        else:
+                            # Fallback to non-R1.1 for non-TEO transactions
+                            snap, created = get_or_create_payment_snapshot(order_id=str(payment_intent_id), defaults=defaults_payload, source="stripe")
                 except Exception:
                     snap, created = PaymentDiscountSnapshot.objects.get_or_create(order_id=str(payment_intent_id), defaults=defaults_payload)
 

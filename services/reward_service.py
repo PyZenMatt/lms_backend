@@ -211,7 +211,7 @@ class RewardService(TransactionalService):
             # Check if bonus already processed
             existing_bonus = BlockchainTransaction.objects.filter(
                 user=user,
-                transaction_type="course_completion_bonus",
+                transaction_type="completion_bonus",
                 related_object_id=str(course_id),
                 status="completed",
             ).first()
@@ -228,7 +228,7 @@ class RewardService(TransactionalService):
             bonus_tx = self._create_reward_transaction(
                 user=user,
                 amount=bonus_amount,
-                transaction_type="course_completion_bonus",
+                transaction_type="completion_bonus",
                 related_object_id=str(course_id),
                 notes=f"Course completion bonus: {course.title}",
             )
@@ -292,7 +292,7 @@ class RewardService(TransactionalService):
             reward_transactions = (
                 BlockchainTransaction.objects.filter(
                     user=user,
-                    transaction_type__in=["lesson_reward", "course_completion_bonus"],
+                    transaction_type__in=["lesson_reward", "completion_bonus"],
                     status="completed",
                 )
                 .filter(date_filter)
@@ -309,7 +309,7 @@ class RewardService(TransactionalService):
             ).aggregate(total=Sum("amount"))["total"] or Decimal("0")
 
             course_bonuses = reward_transactions.filter(
-                transaction_type="course_completion_bonus"
+                transaction_type="completion_bonus"
             ).aggregate(total=Sum("amount"))["total"] or Decimal("0")
 
             # Get completed lessons count
@@ -378,7 +378,7 @@ class RewardService(TransactionalService):
             # Get users with their total rewards
             user_rewards = (
                 BlockchainTransaction.objects.filter(
-                    transaction_type__in=["lesson_reward", "course_completion_bonus"],
+                    transaction_type__in=["lesson_reward", "completion_bonus"],
                     status="completed",
                 )
                 .values("user")
