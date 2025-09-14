@@ -20,6 +20,7 @@ from rest_framework.response import Response
 
 from blockchain.models import DBTeoCoinBalance
 from users.models import TeacherProfile
+from core.economics import PlatformEconomics as PE
 from blockchain.models import DBTeoCoinTransaction
 from django.db import transaction
 
@@ -64,11 +65,14 @@ def staking_overview(request):
 			},
 		)
 
+		# Create or get teacher profile using SOT defaults when creating
+		default_tier = PE.get_teacher_tier(Decimal("0"))
+		default_commission_pct = Decimal(str(default_tier["commission_rate"])) * Decimal("100")
 		teacher_profile, _ = TeacherProfile.objects.get_or_create(
 			user=user,
 			defaults={
-				"commission_rate": Decimal("50.00"),
-				"staking_tier": "Bronze",
+				"commission_rate": default_commission_pct,
+				"staking_tier": default_tier["tier_name"].title(),
 				"staked_teo_amount": Decimal("0.00"),
 			},
 		)
@@ -79,23 +83,25 @@ def staking_overview(request):
 			teacher_profile.update_tier_and_commission()
 			teacher_profile.save()
 
-		# Determine next tier and threshold
-		tier_order = ["Bronze", "Silver", "Gold", "Platinum", "Diamond"]
-		current_index = tier_order.index(teacher_profile.staking_tier)
+		# Determine current tier & next tier using canonical staking tiers
+		staked = teo_balance.staked_balance or Decimal("0")
+		tier_info = PE.get_teacher_tier(staked)
+		# build ordered tiers ascending by teo_required
+		ordered = sorted([(k, v["teo_required"]) for k, v in PE.STAKING_TIERS.items()], key=lambda x: x[1])
 		next_tier = None
 		next_threshold = None
-		if current_index < len(tier_order) - 1:
-			next_tier = tier_order[current_index + 1]
-			# thresholds same as TeacherProfile.can_stake_more mapping
-			thresholds = {"Bronze": Decimal("100.00"), "Silver": Decimal("300.00"), "Gold": Decimal("600.00"), "Platinum": Decimal("1000.00"), "Diamond": None}
-			next_threshold = thresholds.get(teacher_profile.staking_tier)
+		for name, req in ordered:
+			if Decimal(str(req)) > staked:
+				next_tier = name.title()
+				next_threshold = req
+				break
 
-		# Bonus multiplier expressed as percent saved for teacher vs bronze baseline
-		# commission_rate is platform commission; teacher bonus = bronze_commission - current_commission
-		bronze_commission = Decimal("50.00")
-		bonus_percent = (bronze_commission - teacher_profile.commission_rate)
-		# Convert percent to multiplier (e.g. 25% -> 0.25)
-		bonus_multiplier = float(bonus_percent / Decimal("100.00"))
+		# Bonus multiplier: difference vs bronze tier (use canonical bronze)
+		bronze_cfg = PE.STAKING_TIERS.get("bronze", {})
+		bronze_commission_pct = Decimal(str(bronze_cfg.get("commission_rate", Decimal("0.50")))) * Decimal("100")
+		current_commission_pct = Decimal(str(tier_info.get("commission_rate", Decimal("0")))) * Decimal("100")
+		bonus_percent = bronze_commission_pct - current_commission_pct
+		bonus_multiplier = float(bonus_percent / Decimal("100"))
 
 		# Debug: log balances returned
 		logger.info(
@@ -111,8 +117,9 @@ def staking_overview(request):
 				"balance_teo": float(teo_balance.available_balance + teo_balance.staked_balance),
 				"available_teo": float(teo_balance.available_balance),
 				"staked_teo": float(teo_balance.staked_balance),
-				"tier_name": teacher_profile.staking_tier,
-				"commission_rate": float(teacher_profile.commission_rate),
+				"tier_name": tier_info["tier_name"].title(),
+				"commission_rate": float(current_commission_pct),
+				"teacher_earnings": float(100.0 - current_commission_pct),
 				"bonus_multiplier": bonus_multiplier,
 				"next_tier": next_tier,
 				"next_tier_threshold_teo": float(next_threshold)

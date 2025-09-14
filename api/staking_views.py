@@ -16,6 +16,7 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from users.models import TeacherProfile
+from core.economics import PlatformEconomics as PE
 
 User = get_user_model()
 logger = logging.getLogger(__name__)
@@ -58,37 +59,24 @@ def get_staking_info(request):
             },
         )
 
-        # Get or create teacher profile (for commission rates)
-        teacher_profile, created = TeacherProfile.objects.get_or_create(
-            user=user,
-            defaults={
-                "commission_rate": Decimal("50.00"),
-                "staking_tier": "Bronze",
-                "staked_teo_amount": Decimal("0.00"),
-            },
+        # Use the canonical PlatformEconomics as source-of-truth for tiers
+        staked = teo_balance.staked_balance or Decimal("0")
+        tier_info = PE.get_teacher_tier(staked)
+
+        # Build next tier info by scanning canonical tiers
+        tiers = PE.STAKING_TIERS
+        # Create sorted list of (name, teo_required) ascending
+        ordered = sorted(
+            [(k, v["teo_required"]) for k, v in tiers.items()], key=lambda x: x[1]
         )
 
-        # Sync staked amount between models
-        if teacher_profile.staked_teo_amount != teo_balance.staked_balance:
-            teacher_profile.staked_teo_amount = teo_balance.staked_balance
-            teacher_profile.update_tier_and_commission()
-            teacher_profile.save()
-
-        # Calculate next tier requirement
-        tier_requirements = {
-            "Bronze": Decimal("100.00"),
-            "Silver": Decimal("300.00"),
-            "Gold": Decimal("600.00"),
-            "Platinum": Decimal("1000.00"),
-            "Diamond": None,  # Max tier
-        }
-
-        next_tier_requirement = tier_requirements.get(teacher_profile.staking_tier)
-        next_tier_needed = None
-        if next_tier_requirement:
-            next_tier_needed = max(
-                0, next_tier_requirement - teo_balance.staked_balance
-            )
+        next_tier = None
+        next_tier_requirement = None
+        for name, req in ordered:
+            if Decimal(str(req)) > staked:
+                next_tier = name.title()
+                next_tier_requirement = float(req)
+                break
 
         return Response(
             {
@@ -96,18 +84,20 @@ def get_staking_info(request):
                 "current_balance": float(teo_balance.available_balance),
                 "staked_amount": float(teo_balance.staked_balance),
                 "total_balance": float(teo_balance.total_balance),
-                "tier": teacher_profile.staking_tier,
-                "commission_rate": float(teacher_profile.commission_rate),
+                # Provide human-friendly tier name
+                "tier": tier_info["tier_name"].title(),
+                # commission_rate exposed as percentage (e.g. 40.0)
+                "commission_rate": float(Decimal(str(tier_info["commission_rate"])) * 100),
                 "teacher_earnings_percentage": float(
-                    teacher_profile.teacher_earnings_percentage
+                    100.0 - (Decimal(str(tier_info["commission_rate"])) * 100)
                 ),
-                "next_tier_requirement": (
-                    float(next_tier_requirement) if next_tier_requirement else None
-                ),
-                "next_tier_needed": float(next_tier_needed) if next_tier_needed else 0,
-                "can_upgrade": (
-                    next_tier_needed == 0 if next_tier_needed is not None else False
-                ),
+                "next_tier_requirement": next_tier_requirement,
+                "next_tier": next_tier,
+                "next_tier_needed": float(next_tier_requirement - float(staked))
+                if next_tier_requirement
+                else 0,
+                "can_upgrade": next_tier_requirement is not None
+                and Decimal(str(staked)) >= Decimal(str(next_tier_requirement)),
             }
         )
 
@@ -338,50 +328,23 @@ def get_staking_tiers(request):
     No authentication required - public information
     """
     try:
-        tiers = {
-            "Bronze": {
-                "min_stake": 0,
-                "commission_rate": 50.0,
-                "teacher_earnings": 50.0,
-                "color": "secondary",
-                "benefits": ["Basic platform access", "Standard support"],
-                "description": "Starting tier for all teachers",
-            },
-            "Silver": {
-                "min_stake": 100.0,
-                "commission_rate": 45.0,
-                "teacher_earnings": 55.0,
-                "color": "default",
-                "benefits": ["5% higher earnings", "Priority support"],
-                "description": "Enhanced earnings and support",
-            },
-            "Gold": {
-                "min_stake": 300.0,
-                "commission_rate": 40.0,
-                "teacher_earnings": 60.0,
-                "color": "warning",
-                "benefits": ["10% higher earnings", "Advanced analytics"],
-                "description": "Premium features and analytics",
-            },
-            "Platinum": {
-                "min_stake": 600.0,
-                "commission_rate": 35.0,
-                "teacher_earnings": 65.0,
-                "color": "primary",
-                "benefits": ["15% higher earnings", "Premium features"],
-                "description": "All premium features unlocked",
-            },
-            "Diamond": {
-                "min_stake": 1000.0,
-                "commission_rate": 25.0,
-                "teacher_earnings": 75.0,
-                "color": "success",
-                "benefits": ["25% higher earnings", "VIP support", "All features"],
-                "description": "Maximum tier with VIP treatment",
-            },
-        }
+        # Build tiers dict from canonical PlatformEconomics.STAKING_TIERS
+        canonical = PE.STAKING_TIERS
+        out = {}
+        # Keep a simple ordering by teo_required ascending
+        for name, cfg in sorted(canonical.items(), key=lambda x: x[1]["teo_required"]):
+            commission_pct = float(cfg["commission_rate"] * 100)
+            teacher_pct = float(cfg["teacher_rate"] * 100)
+            out[name.title()] = {
+                "min_stake": float(cfg["teo_required"]),
+                "commission_rate": commission_pct,
+                "teacher_earnings": teacher_pct,
+                "description": "",
+                # keep compatibility placeholders
+                "benefits": [],
+            }
 
-        return Response({"success": True, "tiers": tiers})
+        return Response({"success": True, "tiers": out})
 
     except Exception as e:
         logger.error(f"Error getting staking tiers: {str(e)}")
@@ -402,54 +365,45 @@ def calculate_commission(request):
     try:
         current_stake = Decimal(str(request.GET.get("current_stake", 0)))
 
-        # Define tier thresholds
-        tiers = [
-            ("Bronze", 0, 50.0),
-            ("Silver", 100, 45.0),
-            ("Gold", 300, 40.0),
-            ("Platinum", 600, 35.0),
-            ("Diamond", 1000, 25.0),
-        ]
+        # Use canonical tiers
+        canonical = PE.STAKING_TIERS
+        # Determine current tier using PlatformEconomics helper
+        current = PE.get_teacher_tier(current_stake)
+        current_commission_pct = Decimal(str(current["commission_rate"])) * 100
+        current_teacher_pct = Decimal("100.0") - current_commission_pct
 
-        # Find current tier
-        current_tier = "Bronze"
-        current_commission = 50.0
-
-        for tier_name, min_stake, commission_rate in reversed(tiers):
-            if current_stake >= min_stake:
-                current_tier = tier_name
-                current_commission = commission_rate
-                break
-
-        # Calculate next tier
+        # Find next tier by scanning ordered teo_required
+        ordered = sorted(
+            [(k, v["teo_required"]) for k, v in canonical.items()], key=lambda x: x[1]
+        )
         next_tier = None
         next_tier_requirement = None
-        next_tier_commission = None
-
-        for tier_name, min_stake, commission_rate in tiers:
-            if min_stake > current_stake:
-                next_tier = tier_name
-                next_tier_requirement = min_stake
-                next_tier_commission = commission_rate
+        next_tier_commission_pct = None
+        for name, req in ordered:
+            if Decimal(str(req)) > current_stake:
+                next_tier = name.title()
+                next_tier_requirement = float(req)
+                next_cfg = canonical[name]
+                next_tier_commission_pct = float(next_cfg["commission_rate"] * 100)
                 break
 
         return Response(
             {
                 "success": True,
                 "current_stake": float(current_stake),
-                "current_tier": current_tier,
-                "current_commission_rate": current_commission,
-                "current_teacher_earnings": 100.0 - current_commission,
+                "current_tier": current["tier_name"].title(),
+                "current_commission_rate": float(current_commission_pct),
+                "current_teacher_earnings": float(current_teacher_pct),
                 "next_tier": next_tier,
-                "next_tier_requirement": (
-                    float(next_tier_requirement) if next_tier_requirement else None
-                ),
-                "next_tier_commission": next_tier_commission,
+                "next_tier_requirement": next_tier_requirement,
+                "next_tier_commission": next_tier_commission_pct,
                 "next_tier_teacher_earnings": (
-                    100.0 - next_tier_commission if next_tier_commission else None
+                    float(100.0 - next_tier_commission_pct)
+                    if next_tier_commission_pct is not None
+                    else None
                 ),
                 "additional_stake_needed": (
-                    float(next_tier_requirement - current_stake)
+                    float(next_tier_requirement - float(current_stake))
                     if next_tier_requirement
                     else 0
                 ),

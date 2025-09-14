@@ -42,31 +42,32 @@ class PlatformEconomics:
     OUR_ADVANTAGE_VS_COURSERA = TEACHER_PAYOUT_RATE - COURSERA_INSTRUCTOR_SHARE
 
     # TEOCOIN STAKING SYSTEM
+    # Updated staking tiers (12 Sep 2025) - Wood is the new base tier
     STAKING_TIERS = {
-        "bronze": {
+        "wood": {
             "teo_required": Decimal("0"),
-            "commission_rate": Decimal("0.25"),
-            "teacher_rate": Decimal("0.75"),
+            "commission_rate": Decimal("0.60"),  # platform
+            "teacher_rate": Decimal("0.40"),
+        },
+        "bronze": {
+            "teo_required": Decimal("125"),
+            "commission_rate": Decimal("0.50"),
+            "teacher_rate": Decimal("0.50"),
         },
         "silver": {
-            "teo_required": Decimal("500"),
-            "commission_rate": Decimal("0.22"),
-            "teacher_rate": Decimal("0.78"),
+            "teo_required": Decimal("250"),
+            "commission_rate": Decimal("0.45"),
+            "teacher_rate": Decimal("0.55"),
         },
         "gold": {
-            "teo_required": Decimal("1500"),
-            "commission_rate": Decimal("0.19"),
-            "teacher_rate": Decimal("0.81"),
-        },
-        "platinum": {
-            "teo_required": Decimal("3000"),
-            "commission_rate": Decimal("0.16"),
-            "teacher_rate": Decimal("0.84"),
+            "teo_required": Decimal("500"),
+            "commission_rate": Decimal("0.35"),
+            "teacher_rate": Decimal("0.65"),
         },
         "diamond": {
-            "teo_required": Decimal("5000"),
-            "commission_rate": Decimal("0.15"),
-            "teacher_rate": Decimal("0.85"),
+            "teo_required": Decimal("1000"),
+            "commission_rate": Decimal("0.30"),
+            "teacher_rate": Decimal("0.70"),
         },
     }
 
@@ -213,7 +214,8 @@ class PlatformEconomics:
         Returns:
             dict: Tier information including commission rates
         """
-        for tier_name in ["diamond", "platinum", "gold", "silver", "bronze"]:
+        # iterate from highest to lowest
+        for tier_name in ["diamond", "gold", "silver", "bronze", "wood"]:
             tier_info = cls.STAKING_TIERS[tier_name]
             if teo_staked >= tier_info["teo_required"]:
                 return {
@@ -224,12 +226,13 @@ class PlatformEconomics:
                     "teo_staked": float(teo_staked),
                 }
 
-        # Fallback to bronze
+        # Fallback to wood (base)
+        base = cls.STAKING_TIERS.get("wood", {})
         return {
-            "tier_name": "bronze",
-            "teo_required": 0,
-            "commission_rate": 0.25,
-            "teacher_rate": 0.75,
+            "tier_name": "wood",
+            "teo_required": float(base.get("teo_required", 0)),
+            "commission_rate": float(base.get("commission_rate", Decimal("0.60"))),
+            "teacher_rate": float(base.get("teacher_rate", Decimal("0.40"))),
             "teo_staked": float(teo_staked),
         }
 
@@ -261,12 +264,12 @@ class PlatformEconomics:
         teocoin_reward_pool = platform_commission * cls.TEOCOIN_REWARD_POOL_RATE
         platform_net = platform_commission - payment_fee - teocoin_reward_pool
 
-        # Calculate benefits vs bronze tier
-        bronze_commission = (
-            course_price_eur * cls.STAKING_TIERS["bronze"]["commission_rate"]
+        # Calculate benefits vs Wood (base) tier
+        wood_commission = (
+            course_price_eur * cls.STAKING_TIERS["wood"]["commission_rate"]
         )
-        bronze_teacher = course_price_eur * cls.STAKING_TIERS["bronze"]["teacher_rate"]
-        staking_benefit = teacher_payout - bronze_teacher
+        wood_teacher = course_price_eur * cls.STAKING_TIERS["wood"]["teacher_rate"]
+        staking_benefit = teacher_payout - wood_teacher
 
         return {
             "course_price_eur": float(course_price_eur),
@@ -283,11 +286,11 @@ class PlatformEconomics:
             "monthly_staking_benefit_eur": float(staking_benefit),
             "annual_staking_benefit_eur": float(staking_benefit * 12),
             # Comparison to bronze
-            "bronze_teacher_payout_eur": float(bronze_teacher),
+            "wood_teacher_payout_eur": float(wood_teacher),
             "staking_advantage_eur": float(staking_benefit),
             "staking_advantage_percent": (
-                float((staking_benefit / bronze_teacher) * 100)
-                if bronze_teacher > 0
+                float((staking_benefit / wood_teacher) * 100)
+                if wood_teacher > 0
                 else 0
             ),
         }

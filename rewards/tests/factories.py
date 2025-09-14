@@ -45,7 +45,7 @@ def make_snapshot(
     course: Course,
     price_eur: Decimal = Decimal("100.00"),
     discount_percent: Decimal = Decimal("10.0"),
-    split_teacher_ratio: Decimal = Decimal("0.50"),
+    split_teacher_ratio: Decimal | None = None,
     teacher_teo: Decimal = Decimal("0"),
     status: str = "pending",
 ):
@@ -59,6 +59,17 @@ def make_snapshot(
     disc_pct = int(discount_percent) if isinstance(discount_percent, Decimal) and discount_percent == discount_percent.to_integral_value() else int(discount_percent)
     # compute student_pay
     student_pay = q2(price * (Decimal("1") - Decimal(disc_pct) / Decimal("100")))
+    # If not provided, derive default split from canonical PlatformEconomics
+    if split_teacher_ratio is None:
+        try:
+            from core.economics import PlatformEconomics as PE
+
+            tier = PE.get_teacher_tier(0)
+            # platform uses 'commission_rate', teacher gets 1 - commission
+            split_teacher_ratio = Decimal(str(tier.get("teacher_rate", 0)))
+        except Exception:
+            split_teacher_ratio = Decimal("0.50")
+
     teacher_eur_amt = q2(student_pay * Decimal(str(split_teacher_ratio)))
     platform_eur_amt = q2(student_pay - teacher_eur_amt)
 
