@@ -1,5 +1,5 @@
 T-003.G - Web3 gate coverage check
-Generated: 2025-09-15T12:58:26.581684Z
+Generated: 2025-09-15T13:04:53.206960Z
 
 | Path | Status | Matched files count | Files with decorator count |
 | ---- | ------ | ------------------- | -------------------------- |
@@ -59,19 +59,18 @@ Generated: 2025-09-15T12:58:26.581684Z
 
 | `/api/v1/rewards/discounts/preview/` | SKIP (KEEP) | 0 | 0 |
 
-| `/api/v1/rewards/discounts/confirm/` | OK_COMPOSED (matched by hint: rewards/views/discount_views.py) | 12 | 2 |
+| `/api/v1/rewards/discounts/confirm/` | OK | 11 | 2 |
 - /home/teo/Project/school/schoolplatform/lms_backend/docs/T-003-GATE-COVERAGE.txt
 - /home/teo/Project/school/schoolplatform/lms_backend/docs/EVIDENCE_LOG.md (has gate)
 - /home/teo/Project/school/schoolplatform/lms_backend/docs/ENDPOINTS_MATRIX.updated.md
 - /home/teo/Project/school/schoolplatform/lms_backend/docs/ENDPOINTS_MATRIX.md
-- /home/teo/Project/school/schoolplatform/lms_backend/core/tests/test_web3_gate_discount_confirm.py
+- /home/teo/Project/school/schoolplatform/lms_backend/core/tests/test_web3_gate_discount_confirm.py (has gate)
 - /home/teo/Project/school/schoolplatform/lms_backend/core/tests/_template_test_discount_confirm.py
 - /home/teo/Project/school/schoolplatform/lms_backend/courses/tests/test_payments_snapshot.py
 - /home/teo/Project/school/schoolplatform/lms_backend/rewards/tests/test_discount_views.py
 - /home/teo/Project/school/schoolplatform/lms_backend/rewards/tests/test_confirm_insufficient_balance.py
 - /home/teo/Project/school/schoolplatform/lms_backend/rewards/tests/test_confirm_hold_and_idempotency.py
 - /home/teo/Project/school/schoolplatform/lms_backend/scripts/t003g_hints.py
-- /home/teo/Project/school/schoolplatform/lms_backend/rewards/views/discount_views.py (has gate)
 
 | `/api/v1/rewards/discounts/pending/` | SKIP (KEEP) | 0 | 0 |
 
