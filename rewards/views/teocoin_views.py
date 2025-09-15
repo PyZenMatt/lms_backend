@@ -23,6 +23,7 @@ from users.models import TeacherProfile
 from core.economics import PlatformEconomics as PE
 from blockchain.models import DBTeoCoinTransaction
 from django.db import transaction
+from core.decorators.web3_gate import require_web3_enabled
 
 logger = logging.getLogger(__name__)
 User = get_user_model()
@@ -190,6 +191,7 @@ def get_staking_tiers_rewards(request):
 
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
+@require_web3_enabled
 def stake_from_rewards(request):
 	"""Stake TEO via rewards path (compat)"""
 	try:
