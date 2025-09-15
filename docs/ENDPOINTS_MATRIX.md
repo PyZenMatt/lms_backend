@@ -8,7 +8,7 @@
 | Wallet   | POST   | `/api/v1/rewards/wallet/burn/` | ✅ | GATE/OFF | FE | Auth | 410/501 + feature_disabled | count 410/501 | [EVID-rewards-burn] |
 | Wallet   | GET    | `/api/v1/rewards/wallet/health/` | ✅ | KEEP | FE | Auth | 200 (ok) or 401 if not auth | availability, auth failure rate | [EVID-rewards-health] |
 | Rewards  | POST   | `/api/v1/rewards/wallet/transactions/` | ✅ | KEEP | FE | Auth | 200 / DB-only behavior | p95, errors | [EVID-rewards-transactions] |
-| NFT      | POST   | `/api/v1/nft/mint/` | ✅ | GATE/OFF | FE | Auth | 410/501 + {"code":"feature_disabled"} | trace NFT services | [EVID-nft-mint] |
+| NFT      | POST   | `/api/v1/nft/mint/` | ✅ | N/A | FE | Auth | N/A (BE assente) | trace NFT services | BE assente (frontend-only). Vedi T-003.F in EVIDENCE_LOG. |
 | TeoCoin | GET | `/api/v1/teocoin/balance/` | ✅ | KEEP | FE | Auth | 200 + DB fallback when Web3 off | request rate, p95, 401 | [EVID-teocoin-balance] |
 | TeoCoin | GET | `/api/v1/teocoin/transactions/` | ✅ | KEEP | FE | Auth | 200 (DB-only if Web3 off) | errors, latency | [EVID-teocoin-transactions] |
 | TeoCoin | POST | `/api/v1/teocoin/withdraw/` | ✅ | GATE/OFF | FE | Auth | 410/501 + {"code":"feature_disabled"} | count 410/501, withdraw failures | [EVID-teocoin-withdraw] |
