@@ -443,3 +443,376 @@ Generated: 2025-09-15T11:41:13.198885Z
 - /home/teo/Project/school/schoolplatform/lms_backend/docs/ENDPOINTS_MATRIX.updated.md
 - /home/teo/Project/school/schoolplatform/lms_backend/docs/ENDPOINTS_MATRIX.md
 - /home/teo/Project/school/schoolplatform/lms_backend/notifications/tests/test_notification_flow.py
+T-003.G - Web3 gate coverage check
+Generated: 2025-09-15T12:16:52.994773Z
+
+| Path | Status | Matched files count | Files with decorator count |
+| ---- | ------ | ------------------- | -------------------------- |
+| `/api/v1/rewards/wallet/mint/` | OK | 5 | 1 |
+- /home/teo/Project/school/schoolplatform/lms_backend/docs/T-003-GATE-COVERAGE.txt
+- /home/teo/Project/school/schoolplatform/lms_backend/docs/EVIDENCE_LOG.md (has gate)
+- /home/teo/Project/school/schoolplatform/lms_backend/docs/ENDPOINTS_MATRIX.updated.md
+- /home/teo/Project/school/schoolplatform/lms_backend/docs/ENDPOINTS_MATRIX.md
+- /home/teo/Project/school/schoolplatform/lms_backend/docs/EVIDENCE_LOG.updated.md
+
+| `/api/v1/rewards/wallet/burn/` | OK | 4 | 1 |
+- /home/teo/Project/school/schoolplatform/lms_backend/docs/T-003-GATE-COVERAGE.txt
+- /home/teo/Project/school/schoolplatform/lms_backend/docs/EVIDENCE_LOG.md (has gate)
+- /home/teo/Project/school/schoolplatform/lms_backend/docs/ENDPOINTS_MATRIX.updated.md
+- /home/teo/Project/school/schoolplatform/lms_backend/docs/ENDPOINTS_MATRIX.md
+
+| `/api/v1/rewards/wallet/health/` | OK | 7 | 1 |
+- /home/teo/Project/school/schoolplatform/lms_backend/docs/T-003-GATE-COVERAGE.txt
+- /home/teo/Project/school/schoolplatform/lms_backend/docs/EVIDENCE_LOG.md (has gate)
+- /home/teo/Project/school/schoolplatform/lms_backend/docs/ENDPOINTS_MATRIX.updated.md
+- /home/teo/Project/school/schoolplatform/lms_backend/docs/ENDPOINTS_MATRIX.md
+- /home/teo/Project/school/schoolplatform/lms_backend/docs/FLAGS_MATRIX.md
+- /home/teo/Project/school/schoolplatform/lms_backend/docs/EVIDENCE_LOG.updated.md
+- /home/teo/Project/school/schoolplatform/lms_backend/docs/PLAYBOOK_WEB3_OFF.md
+
+| `/api/v1/rewards/wallet/transactions/` | OK | 4 | 1 |
+- /home/teo/Project/school/schoolplatform/lms_backend/docs/T-003-GATE-COVERAGE.txt
+- /home/teo/Project/school/schoolplatform/lms_backend/docs/EVIDENCE_LOG.md (has gate)
+- /home/teo/Project/school/schoolplatform/lms_backend/docs/ENDPOINTS_MATRIX.updated.md
+- /home/teo/Project/school/schoolplatform/lms_backend/docs/ENDPOINTS_MATRIX.md
+
+| `/api/v1/nft/mint/` | NO_ACTION (N/A) | 0 | 0 |
+
+| `/api/v1/teocoin/balance/` | OK | 6 | 1 |
+- /home/teo/Project/school/schoolplatform/lms_backend/api/tests/test_balance_apis.py
+- /home/teo/Project/school/schoolplatform/lms_backend/docs/T-003-GATE-COVERAGE.txt
+- /home/teo/Project/school/schoolplatform/lms_backend/docs/EVIDENCE_LOG.md (has gate)
+- /home/teo/Project/school/schoolplatform/lms_backend/docs/ENDPOINTS_MATRIX.updated.md
+- /home/teo/Project/school/schoolplatform/lms_backend/docs/ENDPOINTS_MATRIX.md
+- /home/teo/Project/school/schoolplatform/lms_backend/notifications/tests/test_notification_flow.py
+
+| `/api/v1/teocoin/transactions/` | OK | 5 | 1 |
+- /home/teo/Project/school/schoolplatform/lms_backend/docs/T-003-GATE-COVERAGE.txt
+- /home/teo/Project/school/schoolplatform/lms_backend/docs/EVIDENCE_LOG.md (has gate)
+- /home/teo/Project/school/schoolplatform/lms_backend/docs/ENDPOINTS_MATRIX.updated.md
+- /home/teo/Project/school/schoolplatform/lms_backend/docs/ENDPOINTS_MATRIX.md
+- /home/teo/Project/school/schoolplatform/lms_backend/notifications/tests/test_notification_flow.py
+
+| `/api/v1/teocoin/withdraw/` | OK | 5 | 1 |
+- /home/teo/Project/school/schoolplatform/lms_backend/docs/T-003-GATE-COVERAGE.txt
+- /home/teo/Project/school/schoolplatform/lms_backend/docs/EVIDENCE_LOG.md (has gate)
+- /home/teo/Project/school/schoolplatform/lms_backend/docs/ENDPOINTS_MATRIX.updated.md
+- /home/teo/Project/school/schoolplatform/lms_backend/docs/ENDPOINTS_MATRIX.md
+- /home/teo/Project/school/schoolplatform/lms_backend/docs/EVIDENCE_LOG.updated.md
+
+| `/api/v1/teocoin/withdrawals/admin/process-pending/` | OK | 5 | 1 |
+- /home/teo/Project/school/schoolplatform/lms_backend/docs/T-003-GATE-COVERAGE.txt
+- /home/teo/Project/school/schoolplatform/lms_backend/docs/EVIDENCE_LOG.md (has gate)
+- /home/teo/Project/school/schoolplatform/lms_backend/docs/ENDPOINTS_MATRIX.updated.md
+- /home/teo/Project/school/schoolplatform/lms_backend/docs/ENDPOINTS_MATRIX.md
+- /home/teo/Project/school/schoolplatform/lms_backend/docs/EVIDENCE_LOG.updated.md
+
+| `/api/v1/teocoin/withdrawals/admin/mint/` | OK | 5 | 1 |
+- /home/teo/Project/school/schoolplatform/lms_backend/docs/T-003-GATE-COVERAGE.txt
+- /home/teo/Project/school/schoolplatform/lms_backend/docs/EVIDENCE_LOG.md (has gate)
+- /home/teo/Project/school/schoolplatform/lms_backend/docs/ENDPOINTS_MATRIX.updated.md
+- /home/teo/Project/school/schoolplatform/lms_backend/docs/ENDPOINTS_MATRIX.md
+- /home/teo/Project/school/schoolplatform/lms_backend/docs/EVIDENCE_LOG.updated.md
+
+| `/api/v1/rewards/discounts/preview/` | OK | 5 | 1 |
+- /home/teo/Project/school/schoolplatform/lms_backend/docs/T-003-GATE-COVERAGE.txt
+- /home/teo/Project/school/schoolplatform/lms_backend/docs/EVIDENCE_LOG.md (has gate)
+- /home/teo/Project/school/schoolplatform/lms_backend/docs/ENDPOINTS_MATRIX.updated.md
+- /home/teo/Project/school/schoolplatform/lms_backend/docs/ENDPOINTS_MATRIX.md
+- /home/teo/Project/school/schoolplatform/lms_backend/rewards/tests/test_discount_views.py
+
+| `/api/v1/rewards/discounts/confirm/` | OK | 8 | 1 |
+- /home/teo/Project/school/schoolplatform/lms_backend/docs/T-003-GATE-COVERAGE.txt
+- /home/teo/Project/school/schoolplatform/lms_backend/docs/EVIDENCE_LOG.md (has gate)
+- /home/teo/Project/school/schoolplatform/lms_backend/docs/ENDPOINTS_MATRIX.updated.md
+- /home/teo/Project/school/schoolplatform/lms_backend/docs/ENDPOINTS_MATRIX.md
+- /home/teo/Project/school/schoolplatform/lms_backend/courses/tests/test_payments_snapshot.py
+- /home/teo/Project/school/schoolplatform/lms_backend/rewards/tests/test_discount_views.py
+- /home/teo/Project/school/schoolplatform/lms_backend/rewards/tests/test_confirm_insufficient_balance.py
+- /home/teo/Project/school/schoolplatform/lms_backend/rewards/tests/test_confirm_hold_and_idempotency.py
+
+| `/api/v1/rewards/discounts/pending/` | OK | 5 | 1 |
+- /home/teo/Project/school/schoolplatform/lms_backend/docs/T-003-GATE-COVERAGE.txt
+- /home/teo/Project/school/schoolplatform/lms_backend/docs/EVIDENCE_LOG.md (has gate)
+- /home/teo/Project/school/schoolplatform/lms_backend/docs/ENDPOINTS_MATRIX.updated.md
+- /home/teo/Project/school/schoolplatform/lms_backend/docs/ENDPOINTS_MATRIX.md
+- /home/teo/Project/school/schoolplatform/lms_backend/rewards/tests/test_discount_views.py
+
+| `/api/v1/services/discount/calculate/` | MISSING | 2 | 0 |
+- /home/teo/Project/school/schoolplatform/lms_backend/docs/ENDPOINTS_MATRIX.updated.md
+- /home/teo/Project/school/schoolplatform/lms_backend/docs/ENDPOINTS_MATRIX.md
+
+| `/api/v1/services/staking/info/` | OK | 6 | 1 |
+- /home/teo/Project/school/schoolplatform/lms_backend/api/tests/test_staking_api.py
+- /home/teo/Project/school/schoolplatform/lms_backend/docs/T-003-GATE-COVERAGE.txt
+- /home/teo/Project/school/schoolplatform/lms_backend/docs/EVIDENCE_LOG.md (has gate)
+- /home/teo/Project/school/schoolplatform/lms_backend/docs/ENDPOINTS_MATRIX.updated.md
+- /home/teo/Project/school/schoolplatform/lms_backend/docs/ENDPOINTS_MATRIX.md
+- /home/teo/Project/school/schoolplatform/lms_backend/services/management/commands/quick_staking_test.py
+
+| `/api/v1/services/staking/stake/` | OK | 5 | 2 |
+- /home/teo/Project/school/schoolplatform/lms_backend/docs/T-003-GATE-COVERAGE.txt
+- /home/teo/Project/school/schoolplatform/lms_backend/docs/EVIDENCE_LOG.md (has gate)
+- /home/teo/Project/school/schoolplatform/lms_backend/docs/ENDPOINTS_MATRIX.updated.md
+- /home/teo/Project/school/schoolplatform/lms_backend/docs/ENDPOINTS_MATRIX.md
+- /home/teo/Project/school/schoolplatform/lms_backend/core/tests/test_web3_gate_staking.py (has gate)
+
+| `/api/v1/users/me/wallet/link/` | OK | 5 | 1 |
+- /home/teo/Project/school/schoolplatform/lms_backend/docs/T-003-GATE-COVERAGE.txt
+- /home/teo/Project/school/schoolplatform/lms_backend/docs/EVIDENCE_LOG.md (has gate)
+- /home/teo/Project/school/schoolplatform/lms_backend/docs/ENDPOINTS_MATRIX.updated.md
+- /home/teo/Project/school/schoolplatform/lms_backend/docs/ENDPOINTS_MATRIX.md
+- /home/teo/Project/school/schoolplatform/lms_backend/docs/EVIDENCE_LOG.updated.md
+
+| `/api/v1/users/me/wallet/` | OK | 5 | 1 |
+- /home/teo/Project/school/schoolplatform/lms_backend/docs/T-003-GATE-COVERAGE.txt
+- /home/teo/Project/school/schoolplatform/lms_backend/docs/EVIDENCE_LOG.md (has gate)
+- /home/teo/Project/school/schoolplatform/lms_backend/docs/ENDPOINTS_MATRIX.updated.md
+- /home/teo/Project/school/schoolplatform/lms_backend/docs/ENDPOINTS_MATRIX.md
+- /home/teo/Project/school/schoolplatform/lms_backend/docs/EVIDENCE_LOG.updated.md
+
+| `/api/v1/rewards/wallet/mint/` | OK | 5 | 1 |
+- /home/teo/Project/school/schoolplatform/lms_backend/docs/T-003-GATE-COVERAGE.txt
+- /home/teo/Project/school/schoolplatform/lms_backend/docs/EVIDENCE_LOG.md (has gate)
+- /home/teo/Project/school/schoolplatform/lms_backend/docs/ENDPOINTS_MATRIX.updated.md
+- /home/teo/Project/school/schoolplatform/lms_backend/docs/ENDPOINTS_MATRIX.md
+- /home/teo/Project/school/schoolplatform/lms_backend/docs/EVIDENCE_LOG.updated.md
+
+| `/api/v1/rewards/wallet/burn/` | OK | 4 | 1 |
+- /home/teo/Project/school/schoolplatform/lms_backend/docs/T-003-GATE-COVERAGE.txt
+- /home/teo/Project/school/schoolplatform/lms_backend/docs/EVIDENCE_LOG.md (has gate)
+- /home/teo/Project/school/schoolplatform/lms_backend/docs/ENDPOINTS_MATRIX.updated.md
+- /home/teo/Project/school/schoolplatform/lms_backend/docs/ENDPOINTS_MATRIX.md
+
+| `/api/v1/rewards/wallet/health/` | OK | 7 | 1 |
+- /home/teo/Project/school/schoolplatform/lms_backend/docs/T-003-GATE-COVERAGE.txt
+- /home/teo/Project/school/schoolplatform/lms_backend/docs/EVIDENCE_LOG.md (has gate)
+- /home/teo/Project/school/schoolplatform/lms_backend/docs/ENDPOINTS_MATRIX.updated.md
+- /home/teo/Project/school/schoolplatform/lms_backend/docs/ENDPOINTS_MATRIX.md
+- /home/teo/Project/school/schoolplatform/lms_backend/docs/FLAGS_MATRIX.md
+- /home/teo/Project/school/schoolplatform/lms_backend/docs/EVIDENCE_LOG.updated.md
+- /home/teo/Project/school/schoolplatform/lms_backend/docs/PLAYBOOK_WEB3_OFF.md
+
+| `/api/v1/rewards/wallet/transactions/` | OK | 4 | 1 |
+- /home/teo/Project/school/schoolplatform/lms_backend/docs/T-003-GATE-COVERAGE.txt
+- /home/teo/Project/school/schoolplatform/lms_backend/docs/EVIDENCE_LOG.md (has gate)
+- /home/teo/Project/school/schoolplatform/lms_backend/docs/ENDPOINTS_MATRIX.updated.md
+- /home/teo/Project/school/schoolplatform/lms_backend/docs/ENDPOINTS_MATRIX.md
+
+| `/api/v1/nft/mint/` | NO_ACTION (N/A) | 0 | 0 |
+
+| `/api/v1/teocoin/balance/` | OK | 6 | 1 |
+- /home/teo/Project/school/schoolplatform/lms_backend/api/tests/test_balance_apis.py
+- /home/teo/Project/school/schoolplatform/lms_backend/docs/T-003-GATE-COVERAGE.txt
+- /home/teo/Project/school/schoolplatform/lms_backend/docs/EVIDENCE_LOG.md (has gate)
+- /home/teo/Project/school/schoolplatform/lms_backend/docs/ENDPOINTS_MATRIX.updated.md
+- /home/teo/Project/school/schoolplatform/lms_backend/docs/ENDPOINTS_MATRIX.md
+- /home/teo/Project/school/schoolplatform/lms_backend/notifications/tests/test_notification_flow.py
+
+| `/api/v1/teocoin/transactions/` | OK | 5 | 1 |
+- /home/teo/Project/school/schoolplatform/lms_backend/docs/T-003-GATE-COVERAGE.txt
+- /home/teo/Project/school/schoolplatform/lms_backend/docs/EVIDENCE_LOG.md (has gate)
+- /home/teo/Project/school/schoolplatform/lms_backend/docs/ENDPOINTS_MATRIX.updated.md
+- /home/teo/Project/school/schoolplatform/lms_backend/docs/ENDPOINTS_MATRIX.md
+- /home/teo/Project/school/schoolplatform/lms_backend/notifications/tests/test_notification_flow.py
+
+| `/api/v1/teocoin/withdraw/` | OK | 5 | 1 |
+- /home/teo/Project/school/schoolplatform/lms_backend/docs/T-003-GATE-COVERAGE.txt
+- /home/teo/Project/school/schoolplatform/lms_backend/docs/EVIDENCE_LOG.md (has gate)
+- /home/teo/Project/school/schoolplatform/lms_backend/docs/ENDPOINTS_MATRIX.updated.md
+- /home/teo/Project/school/schoolplatform/lms_backend/docs/ENDPOINTS_MATRIX.md
+- /home/teo/Project/school/schoolplatform/lms_backend/docs/EVIDENCE_LOG.updated.md
+
+| `/api/v1/teocoin/withdrawals/admin/process-pending/` | OK | 5 | 1 |
+- /home/teo/Project/school/schoolplatform/lms_backend/docs/T-003-GATE-COVERAGE.txt
+- /home/teo/Project/school/schoolplatform/lms_backend/docs/EVIDENCE_LOG.md (has gate)
+- /home/teo/Project/school/schoolplatform/lms_backend/docs/ENDPOINTS_MATRIX.updated.md
+- /home/teo/Project/school/schoolplatform/lms_backend/docs/ENDPOINTS_MATRIX.md
+- /home/teo/Project/school/schoolplatform/lms_backend/docs/EVIDENCE_LOG.updated.md
+
+| `/api/v1/teocoin/withdrawals/admin/mint/` | OK | 5 | 1 |
+- /home/teo/Project/school/schoolplatform/lms_backend/docs/T-003-GATE-COVERAGE.txt
+- /home/teo/Project/school/schoolplatform/lms_backend/docs/EVIDENCE_LOG.md (has gate)
+- /home/teo/Project/school/schoolplatform/lms_backend/docs/ENDPOINTS_MATRIX.updated.md
+- /home/teo/Project/school/schoolplatform/lms_backend/docs/ENDPOINTS_MATRIX.md
+- /home/teo/Project/school/schoolplatform/lms_backend/docs/EVIDENCE_LOG.updated.md
+
+| `/api/v1/rewards/discounts/preview/` | OK | 5 | 1 |
+- /home/teo/Project/school/schoolplatform/lms_backend/docs/T-003-GATE-COVERAGE.txt
+- /home/teo/Project/school/schoolplatform/lms_backend/docs/EVIDENCE_LOG.md (has gate)
+- /home/teo/Project/school/schoolplatform/lms_backend/docs/ENDPOINTS_MATRIX.updated.md
+- /home/teo/Project/school/schoolplatform/lms_backend/docs/ENDPOINTS_MATRIX.md
+- /home/teo/Project/school/schoolplatform/lms_backend/rewards/tests/test_discount_views.py
+
+| `/api/v1/rewards/discounts/confirm/` | OK | 8 | 1 |
+- /home/teo/Project/school/schoolplatform/lms_backend/docs/T-003-GATE-COVERAGE.txt
+- /home/teo/Project/school/schoolplatform/lms_backend/docs/EVIDENCE_LOG.md (has gate)
+- /home/teo/Project/school/schoolplatform/lms_backend/docs/ENDPOINTS_MATRIX.updated.md
+- /home/teo/Project/school/schoolplatform/lms_backend/docs/ENDPOINTS_MATRIX.md
+- /home/teo/Project/school/schoolplatform/lms_backend/courses/tests/test_payments_snapshot.py
+- /home/teo/Project/school/schoolplatform/lms_backend/rewards/tests/test_discount_views.py
+- /home/teo/Project/school/schoolplatform/lms_backend/rewards/tests/test_confirm_insufficient_balance.py
+- /home/teo/Project/school/schoolplatform/lms_backend/rewards/tests/test_confirm_hold_and_idempotency.py
+
+| `/api/v1/rewards/discounts/pending/` | OK | 5 | 1 |
+- /home/teo/Project/school/schoolplatform/lms_backend/docs/T-003-GATE-COVERAGE.txt
+- /home/teo/Project/school/schoolplatform/lms_backend/docs/EVIDENCE_LOG.md (has gate)
+- /home/teo/Project/school/schoolplatform/lms_backend/docs/ENDPOINTS_MATRIX.updated.md
+- /home/teo/Project/school/schoolplatform/lms_backend/docs/ENDPOINTS_MATRIX.md
+- /home/teo/Project/school/schoolplatform/lms_backend/rewards/tests/test_discount_views.py
+
+| `/api/v1/services/discount/calculate/` | MISSING | 2 | 0 |
+- /home/teo/Project/school/schoolplatform/lms_backend/docs/ENDPOINTS_MATRIX.updated.md
+- /home/teo/Project/school/schoolplatform/lms_backend/docs/ENDPOINTS_MATRIX.md
+
+| `/api/v1/services/staking/info/` | OK | 6 | 1 |
+- /home/teo/Project/school/schoolplatform/lms_backend/api/tests/test_staking_api.py
+- /home/teo/Project/school/schoolplatform/lms_backend/docs/T-003-GATE-COVERAGE.txt
+- /home/teo/Project/school/schoolplatform/lms_backend/docs/EVIDENCE_LOG.md (has gate)
+- /home/teo/Project/school/schoolplatform/lms_backend/docs/ENDPOINTS_MATRIX.updated.md
+- /home/teo/Project/school/schoolplatform/lms_backend/docs/ENDPOINTS_MATRIX.md
+- /home/teo/Project/school/schoolplatform/lms_backend/services/management/commands/quick_staking_test.py
+
+| `/api/v1/services/staking/stake/` | OK | 5 | 2 |
+- /home/teo/Project/school/schoolplatform/lms_backend/docs/T-003-GATE-COVERAGE.txt
+- /home/teo/Project/school/schoolplatform/lms_backend/docs/EVIDENCE_LOG.md (has gate)
+- /home/teo/Project/school/schoolplatform/lms_backend/docs/ENDPOINTS_MATRIX.updated.md
+- /home/teo/Project/school/schoolplatform/lms_backend/docs/ENDPOINTS_MATRIX.md
+- /home/teo/Project/school/schoolplatform/lms_backend/core/tests/test_web3_gate_staking.py (has gate)
+
+| `/api/v1/users/me/wallet/link/` | OK | 5 | 1 |
+- /home/teo/Project/school/schoolplatform/lms_backend/docs/T-003-GATE-COVERAGE.txt
+- /home/teo/Project/school/schoolplatform/lms_backend/docs/EVIDENCE_LOG.md (has gate)
+- /home/teo/Project/school/schoolplatform/lms_backend/docs/ENDPOINTS_MATRIX.updated.md
+- /home/teo/Project/school/schoolplatform/lms_backend/docs/ENDPOINTS_MATRIX.md
+- /home/teo/Project/school/schoolplatform/lms_backend/docs/EVIDENCE_LOG.updated.md
+
+| `/api/v1/users/me/wallet/` | OK | 5 | 1 |
+- /home/teo/Project/school/schoolplatform/lms_backend/docs/T-003-GATE-COVERAGE.txt
+- /home/teo/Project/school/schoolplatform/lms_backend/docs/EVIDENCE_LOG.md (has gate)
+- /home/teo/Project/school/schoolplatform/lms_backend/docs/ENDPOINTS_MATRIX.updated.md
+- /home/teo/Project/school/schoolplatform/lms_backend/docs/ENDPOINTS_MATRIX.md
+- /home/teo/Project/school/schoolplatform/lms_backend/docs/EVIDENCE_LOG.updated.md
+
+| `/api/v1/rewards/wallet/mint/` | OK | 5 | 1 |
+- /home/teo/Project/school/schoolplatform/lms_backend/docs/T-003-GATE-COVERAGE.txt
+- /home/teo/Project/school/schoolplatform/lms_backend/docs/EVIDENCE_LOG.md (has gate)
+- /home/teo/Project/school/schoolplatform/lms_backend/docs/ENDPOINTS_MATRIX.updated.md
+- /home/teo/Project/school/schoolplatform/lms_backend/docs/ENDPOINTS_MATRIX.md
+- /home/teo/Project/school/schoolplatform/lms_backend/docs/EVIDENCE_LOG.updated.md
+
+| `/api/v1/rewards/wallet/burn/` | OK | 4 | 1 |
+- /home/teo/Project/school/schoolplatform/lms_backend/docs/T-003-GATE-COVERAGE.txt
+- /home/teo/Project/school/schoolplatform/lms_backend/docs/EVIDENCE_LOG.md (has gate)
+- /home/teo/Project/school/schoolplatform/lms_backend/docs/ENDPOINTS_MATRIX.updated.md
+- /home/teo/Project/school/schoolplatform/lms_backend/docs/ENDPOINTS_MATRIX.md
+
+| `/api/v1/rewards/wallet/health/` | OK | 7 | 1 |
+- /home/teo/Project/school/schoolplatform/lms_backend/docs/T-003-GATE-COVERAGE.txt
+- /home/teo/Project/school/schoolplatform/lms_backend/docs/EVIDENCE_LOG.md (has gate)
+- /home/teo/Project/school/schoolplatform/lms_backend/docs/ENDPOINTS_MATRIX.updated.md
+- /home/teo/Project/school/schoolplatform/lms_backend/docs/ENDPOINTS_MATRIX.md
+- /home/teo/Project/school/schoolplatform/lms_backend/docs/FLAGS_MATRIX.md
+- /home/teo/Project/school/schoolplatform/lms_backend/docs/EVIDENCE_LOG.updated.md
+- /home/teo/Project/school/schoolplatform/lms_backend/docs/PLAYBOOK_WEB3_OFF.md
+
+| `/api/v1/rewards/wallet/transactions/` | OK | 4 | 1 |
+- /home/teo/Project/school/schoolplatform/lms_backend/docs/T-003-GATE-COVERAGE.txt
+- /home/teo/Project/school/schoolplatform/lms_backend/docs/EVIDENCE_LOG.md (has gate)
+- /home/teo/Project/school/schoolplatform/lms_backend/docs/ENDPOINTS_MATRIX.updated.md
+- /home/teo/Project/school/schoolplatform/lms_backend/docs/ENDPOINTS_MATRIX.md
+
+| `/api/v1/nft/mint/` | NO_ACTION (N/A) | 0 | 0 |
+
+| `/api/v1/teocoin/balance/` | OK | 6 | 1 |
+- /home/teo/Project/school/schoolplatform/lms_backend/api/tests/test_balance_apis.py
+- /home/teo/Project/school/schoolplatform/lms_backend/docs/T-003-GATE-COVERAGE.txt
+- /home/teo/Project/school/schoolplatform/lms_backend/docs/EVIDENCE_LOG.md (has gate)
+- /home/teo/Project/school/schoolplatform/lms_backend/docs/ENDPOINTS_MATRIX.updated.md
+- /home/teo/Project/school/schoolplatform/lms_backend/docs/ENDPOINTS_MATRIX.md
+- /home/teo/Project/school/schoolplatform/lms_backend/notifications/tests/test_notification_flow.py
+
+| `/api/v1/teocoin/transactions/` | OK | 5 | 1 |
+- /home/teo/Project/school/schoolplatform/lms_backend/docs/T-003-GATE-COVERAGE.txt
+- /home/teo/Project/school/schoolplatform/lms_backend/docs/EVIDENCE_LOG.md (has gate)
+- /home/teo/Project/school/schoolplatform/lms_backend/docs/ENDPOINTS_MATRIX.updated.md
+- /home/teo/Project/school/schoolplatform/lms_backend/docs/ENDPOINTS_MATRIX.md
+- /home/teo/Project/school/schoolplatform/lms_backend/notifications/tests/test_notification_flow.py
+
+| `/api/v1/teocoin/withdraw/` | OK | 5 | 1 |
+- /home/teo/Project/school/schoolplatform/lms_backend/docs/T-003-GATE-COVERAGE.txt
+- /home/teo/Project/school/schoolplatform/lms_backend/docs/EVIDENCE_LOG.md (has gate)
+- /home/teo/Project/school/schoolplatform/lms_backend/docs/ENDPOINTS_MATRIX.updated.md
+- /home/teo/Project/school/schoolplatform/lms_backend/docs/ENDPOINTS_MATRIX.md
+- /home/teo/Project/school/schoolplatform/lms_backend/docs/EVIDENCE_LOG.updated.md
+
+| `/api/v1/teocoin/withdrawals/admin/process-pending/` | OK | 5 | 1 |
+- /home/teo/Project/school/schoolplatform/lms_backend/docs/T-003-GATE-COVERAGE.txt
+- /home/teo/Project/school/schoolplatform/lms_backend/docs/EVIDENCE_LOG.md (has gate)
+- /home/teo/Project/school/schoolplatform/lms_backend/docs/ENDPOINTS_MATRIX.updated.md
+- /home/teo/Project/school/schoolplatform/lms_backend/docs/ENDPOINTS_MATRIX.md
+- /home/teo/Project/school/schoolplatform/lms_backend/docs/EVIDENCE_LOG.updated.md
+
+| `/api/v1/teocoin/withdrawals/admin/mint/` | OK | 5 | 1 |
+- /home/teo/Project/school/schoolplatform/lms_backend/docs/T-003-GATE-COVERAGE.txt
+- /home/teo/Project/school/schoolplatform/lms_backend/docs/EVIDENCE_LOG.md (has gate)
+- /home/teo/Project/school/schoolplatform/lms_backend/docs/ENDPOINTS_MATRIX.updated.md
+- /home/teo/Project/school/schoolplatform/lms_backend/docs/ENDPOINTS_MATRIX.md
+- /home/teo/Project/school/schoolplatform/lms_backend/docs/EVIDENCE_LOG.updated.md
+
+| `/api/v1/rewards/discounts/preview/` | OK | 5 | 1 |
+- /home/teo/Project/school/schoolplatform/lms_backend/docs/T-003-GATE-COVERAGE.txt
+- /home/teo/Project/school/schoolplatform/lms_backend/docs/EVIDENCE_LOG.md (has gate)
+- /home/teo/Project/school/schoolplatform/lms_backend/docs/ENDPOINTS_MATRIX.updated.md
+- /home/teo/Project/school/schoolplatform/lms_backend/docs/ENDPOINTS_MATRIX.md
+- /home/teo/Project/school/schoolplatform/lms_backend/rewards/tests/test_discount_views.py
+
+| `/api/v1/rewards/discounts/confirm/` | OK | 8 | 1 |
+- /home/teo/Project/school/schoolplatform/lms_backend/docs/T-003-GATE-COVERAGE.txt
+- /home/teo/Project/school/schoolplatform/lms_backend/docs/EVIDENCE_LOG.md (has gate)
+- /home/teo/Project/school/schoolplatform/lms_backend/docs/ENDPOINTS_MATRIX.updated.md
+- /home/teo/Project/school/schoolplatform/lms_backend/docs/ENDPOINTS_MATRIX.md
+- /home/teo/Project/school/schoolplatform/lms_backend/courses/tests/test_payments_snapshot.py
+- /home/teo/Project/school/schoolplatform/lms_backend/rewards/tests/test_discount_views.py
+- /home/teo/Project/school/schoolplatform/lms_backend/rewards/tests/test_confirm_insufficient_balance.py
+- /home/teo/Project/school/schoolplatform/lms_backend/rewards/tests/test_confirm_hold_and_idempotency.py
+
+| `/api/v1/rewards/discounts/pending/` | OK | 5 | 1 |
+- /home/teo/Project/school/schoolplatform/lms_backend/docs/T-003-GATE-COVERAGE.txt
+- /home/teo/Project/school/schoolplatform/lms_backend/docs/EVIDENCE_LOG.md (has gate)
+- /home/teo/Project/school/schoolplatform/lms_backend/docs/ENDPOINTS_MATRIX.updated.md
+- /home/teo/Project/school/schoolplatform/lms_backend/docs/ENDPOINTS_MATRIX.md
+- /home/teo/Project/school/schoolplatform/lms_backend/rewards/tests/test_discount_views.py
+
+| `/api/v1/services/discount/calculate/` | MISSING | 2 | 0 |
+- /home/teo/Project/school/schoolplatform/lms_backend/docs/ENDPOINTS_MATRIX.updated.md
+- /home/teo/Project/school/schoolplatform/lms_backend/docs/ENDPOINTS_MATRIX.md
+
+| `/api/v1/services/staking/info/` | OK | 6 | 1 |
+- /home/teo/Project/school/schoolplatform/lms_backend/api/tests/test_staking_api.py
+- /home/teo/Project/school/schoolplatform/lms_backend/docs/T-003-GATE-COVERAGE.txt
+- /home/teo/Project/school/schoolplatform/lms_backend/docs/EVIDENCE_LOG.md (has gate)
+- /home/teo/Project/school/schoolplatform/lms_backend/docs/ENDPOINTS_MATRIX.updated.md
+- /home/teo/Project/school/schoolplatform/lms_backend/docs/ENDPOINTS_MATRIX.md
+- /home/teo/Project/school/schoolplatform/lms_backend/services/management/commands/quick_staking_test.py
+
+| `/api/v1/services/staking/stake/` | OK | 5 | 2 |
+- /home/teo/Project/school/schoolplatform/lms_backend/docs/T-003-GATE-COVERAGE.txt
+- /home/teo/Project/school/schoolplatform/lms_backend/docs/EVIDENCE_LOG.md (has gate)
+- /home/teo/Project/school/schoolplatform/lms_backend/docs/ENDPOINTS_MATRIX.updated.md
+- /home/teo/Project/school/schoolplatform/lms_backend/docs/ENDPOINTS_MATRIX.md
+- /home/teo/Project/school/schoolplatform/lms_backend/core/tests/test_web3_gate_staking.py (has gate)
+
+| `/api/v1/users/me/wallet/link/` | OK | 5 | 1 |
+- /home/teo/Project/school/schoolplatform/lms_backend/docs/T-003-GATE-COVERAGE.txt
+- /home/teo/Project/school/schoolplatform/lms_backend/docs/EVIDENCE_LOG.md (has gate)
+- /home/teo/Project/school/schoolplatform/lms_backend/docs/ENDPOINTS_MATRIX.updated.md
+- /home/teo/Project/school/schoolplatform/lms_backend/docs/ENDPOINTS_MATRIX.md
+- /home/teo/Project/school/schoolplatform/lms_backend/docs/EVIDENCE_LOG.updated.md
+
+| `/api/v1/users/me/wallet/` | OK | 5 | 1 |
+- /home/teo/Project/school/schoolplatform/lms_backend/docs/T-003-GATE-COVERAGE.txt
+- /home/teo/Project/school/schoolplatform/lms_backend/docs/EVIDENCE_LOG.md (has gate)
+- /home/teo/Project/school/schoolplatform/lms_backend/docs/ENDPOINTS_MATRIX.updated.md
+- /home/teo/Project/school/schoolplatform/lms_backend/docs/ENDPOINTS_MATRIX.md
+- /home/teo/Project/school/schoolplatform/lms_backend/docs/EVIDENCE_LOG.updated.md
