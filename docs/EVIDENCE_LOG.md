@@ -907,3 +907,5 @@ Generated: 2025-09-15T12:58:26.581684Z
 | `/api/v1/users/me/wallet/link/` | SKIP (KEEP) | 0 | 0 |
 
 | `/api/v1/users/me/wallet/` | SKIP (KEEP) | 0 | 0 |
+...                                                                      [100%]
+3 passed in 0.03s
