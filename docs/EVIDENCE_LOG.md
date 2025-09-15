@@ -322,4 +322,26 @@ PYTHONPATH=. pytest -q \
 * `py_compile` → **SYNTAX_OK**
 * `pytest (gate suite)` → **PASS** (tutti verdi; eventuali DeprecationWarning non-bloccanti)
 
+---
+
+## [2025-09-15T18:10:00+02:00] T-003.F — NFT mint: discovery
+
+**Diagnosi**
+- `POST /api/v1/nft/mint/` è presente nella `ENDPOINTS_MATRIX.md` come `GATE/OFF`.
+- Ricerca nel repo `lms_backend` non ha trovato un handler backend: la funzionalità appare implementata lato frontend (`lms-frontend/src/web3/ethersWeb3.ts`) o nei servizi `blockchain/*`.
+
+**Comandi eseguiti**
+```
+rg -n --hidden -S "/api/v1/nft/mint" lms_backend || true
+rg -n --hidden -S "nft.*mint|mint.*nft" lms_backend || true
+```
+
+**Risultato**
+- Nessuna view `POST /api/v1/nft/mint/` trovata in `lms_backend`.
+- Azione raccomandata: marcare `NFT mint` come **N/A (frontend-only / servizi blockchain)** nella `ENDPOINTS_MATRIX.md` e mantenere la voce `EVID-nft-mint` per riferimento FE/servizi.
+
+**DoD**
+- Matrix aggiornata quando opportuno.
+- Nessun test aggiuntivo richiesto per il BE in questo lotto.
+
 
