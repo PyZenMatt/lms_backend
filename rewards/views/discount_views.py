@@ -28,6 +28,7 @@ from services.db_teocoin_service import db_teocoin_service
 from math import ceil
 from django.conf import settings
 from notifications.services import teocoin_notification_service
+from core.decorators.web3_gate import require_web3_enabled
 
 logger = logging.getLogger(__name__)
 
@@ -117,6 +118,7 @@ def preview_discount(request):
 
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
+@require_web3_enabled
 @extend_schema(
     operation_id="rewards_discounts_confirm_create",
     request=DiscountConfirmInputSerializer,

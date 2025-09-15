@@ -7,6 +7,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from rewards.services.wallet_services import mint_teo, burn_teo
+from core.decorators.web3_gate import require_web3_enabled
 from rewards import constants
 import logging
 
@@ -17,6 +18,7 @@ logger = logging.getLogger(__name__)
 
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
+@require_web3_enabled
 def mint(request):
     try:
         user = request.user
@@ -45,6 +47,7 @@ def mint(request):
 
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
+@require_web3_enabled
 def burn(request):
     try:
         user = request.user

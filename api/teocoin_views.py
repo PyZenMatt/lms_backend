@@ -14,6 +14,8 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from services.hybrid_teocoin_service import hybrid_teocoin_service
 from services.teocoin_withdrawal_service import teocoin_withdrawal_service
+from core.decorators.web3_gate import require_web3_enabled
+from django.utils.decorators import method_decorator
 
 logger = logging.getLogger(__name__)
 
@@ -74,6 +76,7 @@ class CreateWithdrawalView(APIView):
 
     permission_classes = [IsAuthenticated]
 
+    @method_decorator(require_web3_enabled)
     def post(self, request):
         """
         Create withdrawal request
