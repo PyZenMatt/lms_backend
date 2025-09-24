@@ -138,14 +138,21 @@ class RegisterSerializer(serializers.ModelSerializer):
         logger = logging.getLogger(__name__)
 
         try:
-            # Create new user with provided data
+            # Ensure role cannot be set to 'teacher' via API — enforce 'student'
+            incoming_role = validated_data.get("role", "student")
+            if incoming_role == "teacher":
+                # Log warning and coerce to student to keep behavior explicit and safe
+                logger.warning("Attempt to register as teacher via public API — coercing to 'student'")
+                incoming_role = "student"
+
+            # Create new user with provided data (role coerced to 'student' if needed)
             user = User.objects.create_user(
                 username=validated_data["username"],
                 email=validated_data["email"],
                 password=validated_data["password"],
                 first_name=validated_data.get("first_name", ""),
                 last_name=validated_data.get("last_name", ""),
-                role=validated_data["role"],
+                role=incoming_role,
                 is_active=True,  # User is active but email not verified
             )
             logger.info(f"✅ User created successfully: {user.username}")
