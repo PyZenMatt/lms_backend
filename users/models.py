@@ -108,6 +108,32 @@ class User(AbstractUser):
     artistic_aspirations = models.TextField(
         blank=True, null=True, help_text="Aspirazioni e specializzazioni artistiche"
     )
+    # Additional profile fields (address parts and social links)
+    city = models.CharField(
+        max_length=100,
+        blank=True,
+        null=True,
+        help_text="Città dell'utente (opzionale)",
+    )
+    via = models.CharField(
+        max_length=255,
+        blank=True,
+        null=True,
+        help_text="Via / indirizzo (opzionale)",
+    )
+    cap = models.CharField(
+        max_length=20,
+        blank=True,
+        null=True,
+        help_text="CAP / codice postale (opzionale)",
+    )
+    # Social links
+    linkedin = models.URLField(max_length=255, blank=True, null=True)
+    github = models.URLField(max_length=255, blank=True, null=True)
+    instagram = models.URLField(max_length=255, blank=True, null=True)
+    facebook = models.URLField(max_length=255, blank=True, null=True)
+    # Skills stored as comma separated string
+    skills = models.TextField(blank=True, null=True, help_text="Comma-separated skills")
 
     def __str__(self):
         return self.email

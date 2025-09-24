@@ -15,6 +15,7 @@ class UserAdmin(BaseUserAdmin):
     fieldsets = (
         (None, {"fields": ("username", "password")}),
         ("Informazioni Personali", {"fields": ("first_name", "last_name", "email")}),
+        ("Contatto & Indirizzo", {"fields": ("phone", "address", "via", "cap", "city")}),
         (
             "Permessi",
             {
@@ -28,6 +29,7 @@ class UserAdmin(BaseUserAdmin):
             },
         ),
         ("Ruolo & Blockchain", {"fields": ("role", "wallet_address")}),
+        ("Profilo Social & Competenze", {"fields": ("linkedin", "github", "instagram", "facebook", "skills")}),
         ("Date importanti", {"fields": ("last_login", "date_joined")}),
     )
 
@@ -43,13 +45,15 @@ class UserAdmin(BaseUserAdmin):
         "username",
         "email_link",
         "role",
+        "city",
+        "get_skills",
         "wallet_address",
         "is_staff",
         "is_approved",
         "is_active",
     )
     list_filter = ("role", "is_approved", "is_staff", "is_superuser", "is_active")
-    search_fields = ("username", "email", "first_name", "last_name")
+    search_fields = ("username", "email", "first_name", "last_name", "city")
     actions = [make_teachers_approved]
 
     def get_search_results(self, request, queryset, search_term):
@@ -77,3 +81,9 @@ class UserAdmin(BaseUserAdmin):
     get_courses.short_description = "Corsi Iscritti"
 
     readonly_fields = ["get_courses"]
+
+    def get_skills(self, obj):
+        return obj.skills or ""
+
+    get_skills.short_description = "Skills"
+    get_skills.admin_order_field = "skills"
