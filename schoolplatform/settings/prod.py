@@ -26,6 +26,13 @@ for origin in _raw_csrf:
         )
     CSRF_TRUSTED_ORIGINS.append(origin)
 
+# If no CSRF_TRUSTED_ORIGINS in env, add default ones for admin and frontend
+if not CSRF_TRUSTED_ORIGINS:
+    CSRF_TRUSTED_ORIGINS = [
+        "https://corsi.openpython.it",       # Frontend
+        "https://lms-api-9tns.onrender.com", # Backend (for admin panel)
+    ]
+
 # Allow disabling SSL requirement locally by setting DB_SSL_REQUIRE=0
 ssl_require = os.getenv("DB_SSL_REQUIRE", "1") not in ("0", "false", "False", "no", "No")
 DATABASES = {
@@ -47,7 +54,7 @@ if _cors_env:
 else:
     CORS_ALLOWED_ORIGINS = [
         "https://corsi.openpython.it",       # Frontend principale
-        "https://lms-api.onrender.com",      # Backend API
+        "https://lms-api-9tns.onrender.com", # Backend API
     ]
 
 CORS_ALLOW_CREDENTIALS = True
@@ -56,13 +63,24 @@ CORS_ALLOW_CREDENTIALS = True
 # Allow overriding secure flags in local prod-like runs via env vars (0/1)
 SESSION_COOKIE_SECURE = os.getenv("SESSION_COOKIE_SECURE", "1") == "1"
 CSRF_COOKIE_SECURE = os.getenv("CSRF_COOKIE_SECURE", "1") == "1"
-# When the frontend is hosted on a different origin (eg. Render), the browser
-# will only send session/csrf cookies on cross-site requests if SameSite=None
-# and Secure is enabled. Explicitly set to None here to allow credentialed
-# fetch() calls from the frontend domain (CORS_ALLOW_CREDENTIALS=True).
-# Note: some local/prod-like variants may override this via env if needed.
+
+# Cross-origin cookie settings for frontend on different domain
+# When the frontend is hosted on a different origin (eg. corsi.openpython.it), 
+# the browser will only send session/csrf cookies on cross-site requests if 
+# SameSite=None and Secure is enabled.
 SESSION_COOKIE_SAMESITE = os.getenv("SESSION_COOKIE_SAMESITE", "None")
 CSRF_COOKIE_SAMESITE = os.getenv("CSRF_COOKIE_SAMESITE", "None")
+
+# CSRF Cookie domain and path settings for cross-origin
+CSRF_COOKIE_HTTPONLY = False  # Must be False so frontend JS can read csrftoken
+CSRF_COOKIE_NAME = 'csrftoken'
+CSRF_HEADER_NAME = 'HTTP_X_CSRFTOKEN'
+CSRF_COOKIE_AGE = 31449600  # 1 year
+
+# Session cookie settings
+SESSION_COOKIE_HTTPONLY = True  # Can stay True for security
+SESSION_COOKIE_AGE = 1209600  # 2 weeks
+SESSION_COOKIE_NAME = 'sessionid'
 
 # WhiteNoise: strict manifest can cause 500s if manifest is missing.
 # Keep cache-busting benefits but avoid hard failures at runtime.
