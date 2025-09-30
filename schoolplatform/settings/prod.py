@@ -17,6 +17,13 @@ DEBUG = False
 # Parse ALLOWED_HOSTS e CSRF_TRUSTED_ORIGINS
 ALLOWED_HOSTS = [h.strip() for h in os.getenv("ALLOWED_HOSTS", "").split(",") if h.strip()]
 
+# If no ALLOWED_HOSTS in env, add default ones
+if not ALLOWED_HOSTS:
+    ALLOWED_HOSTS = [
+        "lms-api-9tns.onrender.com",  # Backend domain
+        "corsi.openpython.it",        # Frontend domain (se necessario)
+    ]
+
 _raw_csrf = [h.strip() for h in os.getenv("CSRF_TRUSTED_ORIGINS", "").split(",") if h.strip()]
 CSRF_TRUSTED_ORIGINS = []
 for origin in _raw_csrf:
