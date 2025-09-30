@@ -15,3 +15,4 @@ staticfiles/
 .idea/
 backend/.env.parity
 .docker-compose.yml.env*
+.env.production
