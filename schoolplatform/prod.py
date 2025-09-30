@@ -73,26 +73,12 @@ CORS_ALLOW_CREDENTIALS = True
 SESSION_COOKIE_SECURE = os.getenv("SESSION_COOKIE_SECURE", "1") == "1"
 CSRF_COOKIE_SECURE = os.getenv("CSRF_COOKIE_SECURE", "1") == "1"
 
-# Debug logging per CSRF
-print(f"DEBUG: CSRF_COOKIE_SECURE env var = {os.getenv('CSRF_COOKIE_SECURE', 'NOT_SET')}")
-print(f"DEBUG: CSRF_COOKIE_SECURE setting = {CSRF_COOKIE_SECURE}")
-print(f"DEBUG: CSRF_TRUSTED_ORIGINS = {CSRF_TRUSTED_ORIGINS}")
-print(f"DEBUG: ALLOWED_HOSTS = {ALLOWED_HOSTS}")
-
-# Enhanced logging for authentication debugging
-import logging
-logging.basicConfig(level=logging.DEBUG)
-auth_logger = logging.getLogger('django.contrib.auth')
-auth_logger.setLevel(logging.DEBUG)
-auth_logger.addHandler(logging.StreamHandler())
-
 # Cross-origin cookie settings for frontend on different domain
 # When the frontend is hosted on a different origin (eg. corsi.openpython.it), 
 # the browser will only send session/csrf cookies on cross-site requests if 
 # SameSite=None and Secure is enabled.
-# For admin panel on same domain, we need Lax
-SESSION_COOKIE_SAMESITE = "Lax"  # Changed from None to Lax for admin
-CSRF_COOKIE_SAMESITE = os.getenv("CSRF_COOKIE_SAMESITE", "Lax")  # Changed default
+SESSION_COOKIE_SAMESITE = os.getenv("SESSION_COOKIE_SAMESITE", "None")
+CSRF_COOKIE_SAMESITE = os.getenv("CSRF_COOKIE_SAMESITE", "None")
 
 # CSRF Cookie domain and path settings for cross-origin
 CSRF_COOKIE_HTTPONLY = False  # Must be False so frontend JS can read csrftoken
@@ -100,24 +86,10 @@ CSRF_COOKIE_NAME = 'csrftoken'
 CSRF_HEADER_NAME = 'HTTP_X_CSRFTOKEN'
 CSRF_COOKIE_AGE = 31449600  # 1 year
 
-# Force CSRF cookie for admin panel (temporary debug)
-CSRF_COOKIE_DOMAIN = None  # Let Django handle automatically
-CSRF_USE_SESSIONS = False  # Ensure we use cookies, not sessions
-CSRF_FAILURE_VIEW = 'django.views.csrf.csrf_failure'  # Default failure view
-
 # Session cookie settings
 SESSION_COOKIE_HTTPONLY = True  # Can stay True for security
 SESSION_COOKIE_AGE = 1209600  # 2 weeks
 SESSION_COOKIE_NAME = 'sessionid'
-
-# Debug logging per Session
-print(f"DEBUG: SESSION_COOKIE_SECURE env var = {os.getenv('SESSION_COOKIE_SECURE', 'NOT_SET')}")
-print(f"DEBUG: SESSION_COOKIE_SECURE setting = {SESSION_COOKIE_SECURE}")
-print(f"DEBUG: SESSION_COOKIE_SAMESITE = {SESSION_COOKIE_SAMESITE}")
-
-# Force session settings for admin panel
-SESSION_COOKIE_DOMAIN = None  # Let Django auto-detect
-SESSION_SAVE_EVERY_REQUEST = True  # Save session on every request
 
 # WhiteNoise: strict manifest can cause 500s if manifest is missing.
 # Keep cache-busting benefits but avoid hard failures at runtime.
@@ -177,22 +149,6 @@ LOGGING = {
         "api_performance": {
             "handlers": ["file", "console"],
             "level": "INFO",
-            "propagate": False,
-        },
-        # Add specific loggers for debugging
-        "django.contrib.auth": {
-            "handlers": ["console"],
-            "level": "DEBUG",
-            "propagate": False,
-        },
-        "django.contrib.sessions": {
-            "handlers": ["console"],
-            "level": "DEBUG",
-            "propagate": False,
-        },
-        "django.security.csrf": {
-            "handlers": ["console"],
-            "level": "DEBUG",
             "propagate": False,
         },
         # root logger should also print to console for container stdout parity
