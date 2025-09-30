@@ -33,12 +33,14 @@ for origin in _raw_csrf:
         )
     CSRF_TRUSTED_ORIGINS.append(origin)
 
-# If no CSRF_TRUSTED_ORIGINS in env, add default ones for admin and frontend
-if not CSRF_TRUSTED_ORIGINS:
-    CSRF_TRUSTED_ORIGINS = [
-        "https://corsi.openpython.it",       # Frontend
-        "https://lms-api-9tns.onrender.com", # Backend (for admin panel)
-    ]
+# Always ensure our required domains are included
+required_origins = [
+    "https://corsi.openpython.it",       # Frontend
+    "https://lms-api-9tns.onrender.com", # Backend (for admin panel)
+]
+for origin in required_origins:
+    if origin not in CSRF_TRUSTED_ORIGINS:
+        CSRF_TRUSTED_ORIGINS.append(origin)
 
 # Allow disabling SSL requirement locally by setting DB_SSL_REQUIRE=0
 ssl_require = os.getenv("DB_SSL_REQUIRE", "1") not in ("0", "false", "False", "no", "No")
