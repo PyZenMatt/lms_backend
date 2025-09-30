@@ -46,10 +46,8 @@ if _cors_env:
     CORS_ALLOWED_ORIGINS = _cors_env
 else:
     CORS_ALLOWED_ORIGINS = [
-        "https://schoolplatform-frontend.onrender.com",  # FE
-        "https://schoolplatform.onrender.com",           # BE (admin)
-        # Nota: Render in genere non usa 'www.' per i subdomain; tienilo solo se realmente attivo.
-        # "https://www.schoolplatform.onrender.com",
+        "https://corsi.openpython.it",       # Frontend principale
+        "https://lms-api.onrender.com",      # Backend API
     ]
 
 CORS_ALLOW_CREDENTIALS = True
