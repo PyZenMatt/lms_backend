@@ -22,7 +22,9 @@ Expected: test passes and returns a dot.
    - Run migrations, collectstatic, restart app server.
 
 Example (Render / Docker hosts):
-- Render: push commit and redeploy `lms-api` service. `render.yaml` already sets `VITE_API_BASE_URL` for the static site.
+-- Render: push commit and redeploy `lms-api` service. `render.yaml` already sets `VITE_API_BASE_URL` for the static site.
+Note: modern CI should set `VITE_API_URL` (preferred) as a repository variable for the static frontend build so the compiled bundle points to the correct backend origin.
+Example: set repository variable `VITE_API_URL=https://lms-api-9tns.onrender.com`
 - Docker Compose (local parity):
 
 ```bash

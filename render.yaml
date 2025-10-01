@@ -50,3 +50,6 @@ services:
     envVars:
       - key: VITE_API_BASE_URL
         value: "https://schoolplatform.onrender.com"
+      - key: VITE_API_URL
+        value: "https://schoolplatform.onrender.com"
+      # Note: prefer VITE_API_URL as a CI/repo variable; VITE_API_BASE_URL is kept for backward compatibility.
