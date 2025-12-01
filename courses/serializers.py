@@ -497,9 +497,42 @@ class CourseEnrollmentSerializer(serializers.ModelSerializer):
 
 
 class StudentCourseSerializer(serializers.ModelSerializer):
+    cover_url = serializers.SerializerMethodField()
+    lessons_count = serializers.SerializerMethodField()
+    completed_lessons = serializers.SerializerMethodField()
+    progress = serializers.SerializerMethodField()
+
     class Meta:
         model = Course
-        fields = ["id", "title", "description", "price_eur"]
+        fields = ["id", "title", "description", "price_eur", "cover_url", "lessons_count", "completed_lessons", "progress"]
+
+    def get_cover_url(self, obj):
+        if obj.cover_image:
+            request = self.context.get('request')
+            if request:
+                return request.build_absolute_uri(obj.cover_image.url)
+            return obj.cover_image.url
+        return None
+
+    def get_lessons_count(self, obj):
+        return obj.lessons.count()
+
+    def get_completed_lessons(self, obj):
+        request = self.context.get('request')
+        if not request or not request.user.is_authenticated:
+            return 0
+        from courses.models import LessonCompletion
+        return LessonCompletion.objects.filter(
+            student=request.user,
+            lesson__in=obj.lessons.all()
+        ).count()
+
+    def get_progress(self, obj):
+        total = self.get_lessons_count(obj)
+        if total == 0:
+            return 0
+        completed = self.get_completed_lessons(obj)
+        return round((completed / total) * 100)
 
 
 class TeacherDiscountDecisionSerializer(serializers.ModelSerializer):

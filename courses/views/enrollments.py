@@ -290,7 +290,7 @@ class StudentEnrolledCoursesView(APIView):
     def get(self, request):
         student = request.user
         enrolled_courses = Course.objects.filter(students=student, is_approved=True)
-        serializer = StudentCourseSerializer(enrolled_courses, many=True)
+        serializer = StudentCourseSerializer(enrolled_courses, many=True, context={'request': request})
         return Response(serializer.data)
 
 
