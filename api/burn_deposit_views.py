@@ -42,18 +42,32 @@ class BurnDepositView(APIView):
 
             tx_hash = request.data.get("transaction_hash")
             amount = request.data.get("amount")
-            metamask_address = request.data.get("metamask_address")
+            # SECURITY FIX: Use linked wallet address from user profile, not from request body
+            # This prevents spoofing attacks where user claims deposit from another wallet
+            linked_wallet_address = getattr(request.user, "wallet_address", None)
 
             logger.info(
-                f"📊 Parsed: tx_hash={tx_hash}, amount={amount}, address={metamask_address}"
+                f"📊 Parsed: tx_hash={tx_hash}, amount={amount}, linked_wallet={linked_wallet_address}"
             )
 
-            # Validation
-            if not tx_hash or not amount or not metamask_address:
+            # Validation: User must have a linked wallet
+            if not linked_wallet_address:
+                logger.warning(f"❌ User {request.user.email} has no linked wallet")
                 return Response(
                     {
                         "success": False,
-                        "error": "Transaction hash, amount, and MetaMask address are required",
+                        "error": "No wallet linked to your account. Please link your wallet first.",
+                        "error_code": "NO_LINKED_WALLET",
+                    },
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
+            # Validation: tx_hash and amount required
+            if not tx_hash or not amount:
+                return Response(
+                    {
+                        "success": False,
+                        "error": "Transaction hash and amount are required",
                     },
                     status=status.HTTP_400_BAD_REQUEST,
                 )
@@ -119,7 +133,7 @@ class BurnDepositView(APIView):
             # Verify transaction on blockchain
             logger.info(f"🔍 Starting blockchain verification...")
             verification_result = self.verify_burn_transaction(
-                tx_hash, amount_decimal, metamask_address
+                tx_hash, amount_decimal, linked_wallet_address
             )
 
             logger.info(f"📊 Verification result: {verification_result}")
@@ -145,7 +159,7 @@ class BurnDepositView(APIView):
                 description=f"Burn deposit: {tx_hash[:10]}...",
                 metadata={
                     "transaction_hash": tx_hash,
-                    "metamask_address": metamask_address,
+                    "wallet_address": linked_wallet_address,  # Use verified linked wallet
                     "block_number": verification_result.get("block_number"),
                     "gas_used": verification_result.get("gas_used"),
                 },
