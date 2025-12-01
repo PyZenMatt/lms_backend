@@ -101,12 +101,20 @@ class WalletLinkView(APIView):
             return err("SERVER_MISCONFIG", f"Server cannot verify signature: {str(e)}", 500)
 
         try:
+            logger.info("wallet_link: saving address=%s for user=%s (pk=%s)", address, request.user.email if hasattr(request.user, 'email') else '?', request.user.pk)
             request.user.wallet_address = address
             try:
                 request.user.wallet_nonce = ""
             except Exception:
                 pass
-            request.user.save(update_fields=["wallet_address"]) if hasattr(request.user, "wallet_address") else request.user.save()
+            request.user.save(update_fields=["wallet_address"])
+            # Verify save worked
+            request.user.refresh_from_db()
+            saved_address = getattr(request.user, 'wallet_address', None)
+            logger.info("wallet_link: after save, wallet_address=%s", saved_address)
+            if saved_address != address:
+                logger.error("wallet_link: SAVE FAILED - address not persisted! expected=%s got=%s", address, saved_address)
+                return err("DB_SAVE_FAILED", "Wallet address not persisted to database", 500)
         except Exception as e:
             logger.error("wallet_link_save_failed user=%s err=%s", request.user.pk, str(e))
             return err("DB_SAVE_FAILED", f"Could not save wallet address: {str(e)}", 500)

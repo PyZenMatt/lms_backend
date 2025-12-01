@@ -77,6 +77,16 @@ LOGGING = {
             "level": "DEBUG",
             "propagate": False,
         },
+        "users.views.wallet_link": {
+            "handlers": ["console"],
+            "level": "DEBUG",
+            "propagate": False,
+        },
+        "api.burn_deposit_views": {
+            "handlers": ["console"],
+            "level": "DEBUG",
+            "propagate": False,
+        },
     },
 }
 
