@@ -26,8 +26,15 @@ class TeoCoinBalanceView(APIView):
         try:
             db_service = DBTeoCoinService()
             balance_data = db_service.get_user_balance(request.user)
+            
+            # Include wallet_address from user profile for frontend convenience
+            wallet_address = getattr(request.user, "wallet_address", None)
 
-            return Response({"success": True, "balance": balance_data})
+            return Response({
+                "success": True, 
+                "balance": balance_data,
+                "wallet_address": wallet_address,
+            })
 
         except Exception as e:
             # Log full exception with traceback for debugging
