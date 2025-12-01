@@ -106,6 +106,10 @@ REST_FRAMEWORK = {
         "rest_framework_simplejwt.authentication.JWTAuthentication",
     ),
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
+    "DEFAULT_THROTTLE_RATES": {
+        "wallet_challenge": "10/minute",
+        "wallet_link": "5/minute",
+    },
 }
 
 AUTH_USER_MODEL = "users.User"
