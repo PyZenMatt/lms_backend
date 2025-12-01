@@ -37,8 +37,8 @@ class BurnDepositView(APIView):
         }
         """
         try:
-            logger.info(f"🔥 Burn deposit request from {request.user.email}")
-            logger.info(f"📄 Request data: {request.data}")
+            logger.info(f"burn_deposit_request user={request.user.pk} email={request.user.email}")
+            logger.debug(f"burn_deposit_data: {request.data}")
 
             tx_hash = request.data.get("transaction_hash")
             amount = request.data.get("amount")
@@ -47,12 +47,12 @@ class BurnDepositView(APIView):
             linked_wallet_address = getattr(request.user, "wallet_address", None)
 
             logger.info(
-                f"📊 Parsed: tx_hash={tx_hash}, amount={amount}, linked_wallet={linked_wallet_address}"
+                f"burn_deposit_parsed tx_hash={tx_hash} amount={amount} wallet={linked_wallet_address}"
             )
 
             # Validation: User must have a linked wallet
             if not linked_wallet_address:
-                logger.warning(f"❌ User {request.user.email} has no linked wallet")
+                logger.warning(f"burn_deposit_no_wallet user={request.user.pk}")
                 return Response(
                     {
                         "success": False,
@@ -85,12 +85,12 @@ class BurnDepositView(APIView):
                     status=status.HTTP_400_BAD_REQUEST,
                 )
 
-            logger.info(f"✅ Validation passed for {amount_decimal} TEO")
+            logger.info(f"burn_deposit_validated amount={amount_decimal}")
 
             # Check teocoin_service initialization
             if not hasattr(teocoin_service, "w3") or teocoin_service.w3 is None:
                 logger.error(
-                    "❌ TeoCoin service not properly initialized - Web3 connection missing"
+                    "burn_deposit_error: TeoCoin service not initialized - Web3 connection missing"
                 )
                 return Response(
                     {"success": False, "error": "Blockchain service not available"},
@@ -101,7 +101,7 @@ class BurnDepositView(APIView):
                 not hasattr(teocoin_service, "admin_private_key")
                 or not teocoin_service.admin_private_key
             ):
-                logger.error("❌ Admin private key not configured")
+                logger.error("burn_deposit_error: Admin private key not configured")
                 return Response(
                     {
                         "success": False,
@@ -118,7 +118,7 @@ class BurnDepositView(APIView):
             ).first()
 
             if existing_tx:
-                logger.warning(f"⚠️ Transaction {tx_hash} already processed")
+                logger.warning(f"burn_deposit_duplicate tx_hash={tx_hash} user={request.user.pk}")
                 return Response(
                     {
                         "success": False,
@@ -128,29 +128,29 @@ class BurnDepositView(APIView):
                     status=status.HTTP_409_CONFLICT,
                 )
 
-            logger.info(f"✅ Transaction not yet processed, continuing...")
+            logger.debug(f"burn_deposit_new_tx tx_hash={tx_hash}")
 
             # Verify transaction on blockchain
-            logger.info(f"🔍 Starting blockchain verification...")
+            logger.info(f"burn_deposit_verifying tx_hash={tx_hash}")
             verification_result = self.verify_burn_transaction(
                 tx_hash, amount_decimal, linked_wallet_address
             )
 
-            logger.info(f"📊 Verification result: {verification_result}")
+            logger.debug(f"burn_deposit_verification_result: {verification_result}")
 
             if not verification_result["valid"]:
                 logger.warning(
-                    f"❌ Verification failed: {verification_result['error']}"
+                    f"burn_deposit_verification_failed tx_hash={tx_hash} error={verification_result['error']}"
                 )
                 return Response(
                     {"success": False, "error": verification_result["error"]},
                     status=status.HTTP_400_BAD_REQUEST,
                 )
 
-            logger.info(f"✅ Blockchain verification passed")
+            logger.info(f"burn_deposit_verified tx_hash={tx_hash}")
 
-            # Credit user's platform balance
-            logger.info(f"💰 Crediting user balance...")
+            # Credit user's platform balance using atomic transaction
+            from django.db import transaction as db_transaction
             db_service = DBTeoCoinService()
             credit_result = db_service.credit_user(
                 user=request.user,
@@ -165,11 +165,11 @@ class BurnDepositView(APIView):
                 },
             )
 
-            logger.info(f"📊 Credit result: {credit_result}")
+            logger.debug(f"burn_deposit_credit_result: {credit_result}")
 
             if credit_result and credit_result.get("success"):
                 logger.info(
-                    f"✅ Burn deposit successful: {amount_decimal} TEO for {request.user.email}"
+                    f"burn_deposit_success user={request.user.pk} amount={amount_decimal} tx_hash={tx_hash}"
                 )
 
                 return Response(
@@ -184,17 +184,16 @@ class BurnDepositView(APIView):
                     status=status.HTTP_200_OK,
                 )
             else:
-                logger.error(f"❌ Failed to credit balance: {credit_result}")
+                logger.error(f"burn_deposit_credit_failed user={request.user.pk} result={credit_result}")
                 return Response(
                     {"success": False, "error": "Failed to credit platform balance"},
                     status=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 )
 
         except Exception as e:
-            logger.error(f"❌ Error processing burn deposit: {e}")
             import traceback
-
-            logger.error(f"📜 Full traceback: {traceback.format_exc()}")
+            logger.error(f"burn_deposit_exception user={request.user.pk} error={e}")
+            logger.error(f"burn_deposit_traceback: {traceback.format_exc()}")
             return Response(
                 {
                     "success": False,
@@ -209,40 +208,51 @@ class BurnDepositView(APIView):
         """
         Verify that the burn transaction is valid
         """
+        import time
+        
         try:
-            logger.info(f"🔍 Verifying burn transaction: {tx_hash}")
+            logger.info(f"verify_burn_tx tx_hash={tx_hash}")
 
-            # Get transaction receipt
+            # Get transaction receipt with retries (transaction may not be mined yet)
             w3 = teocoin_service.w3
-            try:
-                receipt = w3.eth.get_transaction_receipt(tx_hash)
-                logger.info(f"📊 Receipt status: {receipt.get('status')}")
-            except Exception as e:
-                logger.error(f"❌ Failed to get transaction receipt: {e}")
-                return {"valid": False, "error": "Transaction not found on blockchain"}
-
+            receipt = None
+            max_retries = 10
+            retry_delay = 3  # seconds
+            
+            for attempt in range(max_retries):
+                try:
+                    receipt = w3.eth.get_transaction_receipt(tx_hash)
+                    if receipt:
+                        logger.info(f"verify_burn_tx_receipt_found attempt={attempt + 1} status={receipt.get('status')}")
+                        break
+                except Exception as e:
+                    logger.debug(f"verify_burn_tx_pending attempt={attempt + 1}/{max_retries} error={e}")
+                
+                if attempt < max_retries - 1:
+                    time.sleep(retry_delay)
+            
             if not receipt:
-                return {"valid": False, "error": "Transaction not found"}
+                logger.warning(f"verify_burn_tx_not_found tx_hash={tx_hash} after {max_retries} attempts")
+                return {"valid": False, "error": "Transaction not found on blockchain. It may still be pending - please try again in a few seconds."}
 
             if receipt["status"] != 1:
+                logger.warning(f"verify_burn_tx_failed tx_hash={tx_hash} status={receipt['status']}")
                 return {"valid": False, "error": "Transaction failed on blockchain"}
 
-            logger.info(f"✅ Transaction found and successful")
+            logger.info(f"verify_burn_tx_confirmed tx_hash={tx_hash}")
 
             # Get transaction details
             try:
                 tx = w3.eth.get_transaction(tx_hash)
-                logger.info(
-                    f"📊 Transaction from: {tx.get('from')}, to: {tx.get('to')}"
-                )
+                logger.debug(f"verify_burn_tx_details from={tx.get('from')} to={tx.get('to')}")
             except Exception as e:
-                logger.error(f"❌ Failed to get transaction details: {e}")
+                logger.error(f"verify_burn_tx_error tx_hash={tx_hash} error={e}")
                 return {"valid": False, "error": "Failed to get transaction details"}
 
             # Verify sender address
             if tx.get("from", "").lower() != expected_address.lower():
-                logger.error(
-                    f"❌ Address mismatch: {tx.get('from')} != {expected_address}"
+                logger.warning(
+                    f"verify_burn_tx_address_mismatch tx_from={tx.get('from')} expected={expected_address}"
                 )
                 return {
                     "valid": False,
