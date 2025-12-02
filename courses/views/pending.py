@@ -60,6 +60,7 @@ class ApproveCourseView(APIView):
         from django.utils import timezone
 
         course.is_approved = True
+        # Note: status is derived from is_approved in serializer, no need to set it
         if hasattr(course, "approved_at"):
             course.approved_at = timezone.now()
         if hasattr(course, "approved_by"):

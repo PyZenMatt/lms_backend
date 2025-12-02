@@ -235,6 +235,9 @@ class TeacherCourseSerializer(serializers.ModelSerializer):
     cover_image_url = serializers.SerializerMethodField()
     cover_url = serializers.SerializerMethodField()  # Alias for frontend compatibility
     lessons = serializers.SerializerMethodField()
+    # Compatibility fields for frontend status
+    published = serializers.BooleanField(source="is_approved", read_only=True)
+    status = serializers.SerializerMethodField()
 
     class Meta:
         model = Course
@@ -281,6 +284,9 @@ class TeacherCourseSerializer(serializers.ModelSerializer):
     def get_cover_url(self, obj):
         # Alias for frontend compatibility
         return self.get_cover_image_url(obj)
+
+    def get_status(self, obj):
+        return "published" if getattr(obj, "is_approved", False) else "draft"
 
     def get_lessons(self, obj):
         # Restituisce le lezioni del corso con informazioni di base
