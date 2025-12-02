@@ -233,6 +233,7 @@ class TeacherCourseSerializer(serializers.ModelSerializer):
         source="get_category_display", read_only=True
     )
     cover_image_url = serializers.SerializerMethodField()
+    cover_url = serializers.SerializerMethodField()  # Alias for frontend compatibility
     lessons = serializers.SerializerMethodField()
 
     class Meta:
@@ -246,6 +247,7 @@ class TeacherCourseSerializer(serializers.ModelSerializer):
             "category_display",
             "cover_image",
             "cover_image_url",
+            "cover_url",
             "is_approved",
             # Compatibility fields for frontend status
             "published",
@@ -275,6 +277,10 @@ class TeacherCourseSerializer(serializers.ModelSerializer):
             if request:
                 return request.build_absolute_uri(obj.cover_image.url)
         return None
+
+    def get_cover_url(self, obj):
+        # Alias for frontend compatibility
+        return self.get_cover_image_url(obj)
 
     def get_lessons(self, obj):
         # Restituisce le lezioni del corso con informazioni di base
