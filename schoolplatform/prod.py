@@ -21,7 +21,7 @@ ALLOWED_HOSTS = [h.strip() for h in os.getenv("ALLOWED_HOSTS", "").split(",") if
 if not ALLOWED_HOSTS:
     ALLOWED_HOSTS = [
         "lms-api-9tns.onrender.com",  # Backend domain
-        "corsi.openpython.it",        # Frontend domain (se necessario)
+        "school.matteoricci.net",        # Frontend domain (se necessario)
     ]
 
 _raw_csrf = [h.strip() for h in os.getenv("CSRF_TRUSTED_ORIGINS", "").split(",") if h.strip()]
